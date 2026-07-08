@@ -1,0 +1,18 @@
+/* src/app/globals.css */
+@import "tailwindcss";
+
+@theme {
+  --color-background: #0a0a0a;
+  --color-surface: #141414;
+  --color-surface-border: #242424;
+  --color-accent: #10b981;
+  --color-foreground: #f5f5f5;
+  --color-muted: #8a8a8a;
+
+  /* globals.css, inside @theme (v4) or tailwind.config.ts extend.colors (v3) */
+  --color-surface-0: #0a0a0a;
+  --color-surface-1: #121212;
+  --color-surface-2: #1a1a1a;
+  --color-surface-border: #262626;
+  --color-surface-border-strong: #333333;
+}
