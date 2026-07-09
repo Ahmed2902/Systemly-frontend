@@ -35,7 +35,7 @@ export function Services({
                 </span>
               )}
               <h3 className="font-display text-xl text-[#2B2420]">
-                {service.name}
+                {service.name}, {service.durationMin} min
               </h3>
             </div>
             <span className="text-sm text-[#5C5349]">

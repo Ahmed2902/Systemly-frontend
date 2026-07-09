@@ -6,8 +6,65 @@ import { useWizard } from "../wizard.context";
 import { StepProps, WizardService, WizardStaffMember } from "../wizard.types";
 import { Button } from "@/shared/components/ui/button";
 
+const STAFF_ROLE_OPTIONS = ["Staff", "Receptionist"];
+
 function uid() {
   return Math.random().toString(36).slice(2, 10);
+}
+
+function clampNumber(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function StepperInput({
+  label,
+  value,
+  onChange,
+  min,
+  step,
+}: {
+  label: string;
+  value: number;
+  onChange: (value: number) => void;
+  min: number;
+  step: number;
+}) {
+  return (
+    <div className="flex w-26 flex-col gap-1">
+      <span className="text-xs uppercase tracking-wide text-muted">
+        {label}
+      </span>
+      <div className="flex items-center overflow-hidden rounded-xl border border-surfaceBorder bg-background">
+        <button
+          type="button"
+          onClick={() =>
+            onChange(clampNumber(value - step, min, Number.MAX_SAFE_INTEGER))
+          }
+          className="flex h-10 w-10 items-center justify-center border-r border-surfaceBorder text-lg text-muted transition-colors hover:bg-surface hover:text-foreground"
+          aria-label={`Decrease ${label.toLowerCase()}`}
+        >
+          −
+        </button>
+        <input
+          value={Number.isFinite(value) ? value : min}
+          onChange={(e) => {
+            const nextValue = Number(e.target.value);
+            onChange(Number.isFinite(nextValue) ? nextValue : min);
+          }}
+          inputMode="numeric"
+          className="h-10 w-full border-0 bg-transparent px-3 text-center text-sm text-foreground outline-none"
+        />
+        <button
+          type="button"
+          onClick={() => onChange(value + step)}
+          className="flex h-10 w-10 items-center justify-center border-l border-surfaceBorder text-lg text-muted transition-colors hover:bg-surface hover:text-foreground"
+          aria-label={`Increase ${label.toLowerCase()}`}
+        >
+          +
+        </button>
+      </div>
+    </div>
+  );
 }
 
 export function StepServicesStaff({ onNext, onBack }: StepProps) {
@@ -44,9 +101,10 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
 
   function addStaff() {
     const newStaff: WizardStaffMember = {
+      id: uid(),
       clientId: uid(),
       name: "",
-      role: "Staff",
+      role: STAFF_ROLE_OPTIONS[0],
       serviceIds: [],
       availability: [],
     };
@@ -106,7 +164,7 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
           {state.services.map((service) => (
             <div
               key={service.clientId}
-              className="flex gap-3 rounded-md border border-surfaceBorder bg-surface p-3"
+              className="flex flex-col gap-3 rounded-xl border border-surfaceBorder bg-surface p-4 lg:flex-row lg:items-end"
             >
               <input
                 value={service.name}
@@ -114,36 +172,39 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
                   updateService(service.clientId, { name: e.target.value })
                 }
                 placeholder="Service name"
-                className="flex-1 rounded-md border border-surfaceBorder bg-background px-3 py-2 text-sm text-foreground"
+                className="min-w-0 flex-1 rounded-xl border border-surfaceBorder bg-background px-3 py-2 text-sm text-foreground"
               />
-              <input
-                type="number"
-                value={service.durationMin}
-                onChange={(e) =>
-                  updateService(service.clientId, {
-                    durationMin: Number(e.target.value),
-                  })
-                }
-                placeholder="Minutes"
-                className="w-24 rounded-md border border-surfaceBorder bg-background px-3 py-2 text-sm text-foreground"
-              />
-              <input
-                type="number"
-                value={service.priceEgp}
-                onChange={(e) =>
-                  updateService(service.clientId, {
-                    priceEgp: Number(e.target.value),
-                  })
-                }
-                placeholder="EGP"
-                className="w-24 rounded-md border border-surfaceBorder bg-background px-3 py-2 text-sm text-foreground"
-              />
-              <button
-                onClick={() => removeService(service.clientId)}
-                className="text-sm text-red-400"
-              >
-                Remove
-              </button>
+              <div className="flex flex-wrap items-end gap-3">
+                <StepperInput
+                  label="Minutes"
+                  value={service.durationMin}
+                  min={5}
+                  step={5}
+                  onChange={(nextValue) =>
+                    updateService(service.clientId, {
+                      durationMin: clampNumber(nextValue, 5, 24 * 60),
+                    })
+                  }
+                />
+                <StepperInput
+                  label="Price"
+                  value={service.priceEgp}
+                  min={0}
+                  step={10}
+                  onChange={(nextValue) =>
+                    updateService(service.clientId, {
+                      priceEgp: clampNumber(nextValue, 0, 1_000_000),
+                    })
+                  }
+                />
+                <button
+                  type="button"
+                  onClick={() => removeService(service.clientId)}
+                  className="rounded-xl border border-red-500/30 px-3 py-2 text-sm text-red-300 transition-colors hover:bg-red-500/10 hover:text-red-200"
+                >
+                  Remove
+                </button>
+              </div>
             </div>
           ))}
           {state.services.length === 0 && (
@@ -169,7 +230,7 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
           {state.staff.map((member) => (
             <div
               key={member.clientId}
-              className="flex gap-3 rounded-md border border-surfaceBorder bg-surface p-3"
+              className="flex flex-col gap-3 rounded-xl border border-surfaceBorder bg-surface p-4 lg:flex-row lg:items-start"
             >
               <input
                 value={member.name}
@@ -177,19 +238,30 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
                   updateStaff(member.clientId, { name: e.target.value })
                 }
                 placeholder="Full name"
-                className="flex-1 rounded-md border border-surfaceBorder bg-background px-3 py-2 text-sm text-foreground"
+                className="min-w-0 flex-1 rounded-xl border border-surfaceBorder bg-background px-3 py-2 text-sm text-foreground"
               />
-              <input
-                value={member.role}
-                onChange={(e) =>
-                  updateStaff(member.clientId, { role: e.target.value })
-                }
-                placeholder="Role (e.g. Stylist)"
-                className="w-40 rounded-md border border-surfaceBorder bg-background px-3 py-2 text-sm text-foreground"
-              />
+              <div className="flex flex-1 flex-wrap gap-2">
+                {STAFF_ROLE_OPTIONS.map((roleOption) => (
+                  <button
+                    key={roleOption}
+                    type="button"
+                    onClick={() =>
+                      updateStaff(member.clientId, { role: roleOption })
+                    }
+                    className={`rounded-full border px-3 py-2 text-xs font-medium transition-colors ${
+                      member.role === roleOption
+                        ? "border-accent bg-accent text-black"
+                        : "border-surfaceBorder bg-background text-muted hover:text-foreground"
+                    }`}
+                  >
+                    {roleOption}
+                  </button>
+                ))}
+              </div>
               <button
+                type="button"
                 onClick={() => removeStaff(member.clientId)}
-                className="text-sm text-red-400"
+                className="rounded-xl border border-red-500/30 px-3 py-2 text-sm text-red-300 transition-colors hover:bg-red-500/10 hover:text-red-200"
               >
                 Remove
               </button>

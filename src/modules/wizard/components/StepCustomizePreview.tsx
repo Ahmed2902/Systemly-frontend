@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Upload, Check } from "lucide-react";
+import { Upload, Check, User } from "lucide-react";
 import { useWizard } from "../wizard.context";
 import { StepProps } from "../wizard.types";
 import { LivePreviewPane } from "./LivePreviewPane";
@@ -13,12 +13,12 @@ import { submitOnboarding, uploadImage } from "../wizard.api";
 import { FaqEditor } from "./FaqEditor";
 
 const COLOR_SWATCHES = [
-  "#10b981",
-  "#f97316",
-  "#3b82f6",
-  "#ec4899",
-  "#8b5cf6",
-  "#64748b",
+  "#2B2420", // Deep Espresso/Charcoal (Matches your current headers)
+  "#8A7F73", // Warm Taupe/Muted Earth (Matches your subtitle/role colors)
+  "#A3947F", // Luxury Soft Gold / Champagne
+  "#4A5343", // Sage / Muted Olive Green
+  "#6B5B52", // Rich Cocoa / Walnut
+  "#1A2E26", // Deep Premium Emerald Night
 ];
 
 export function StepCustomizePreview({ onBack }: StepProps) {
@@ -27,6 +27,12 @@ export function StepCustomizePreview({ onBack }: StepProps) {
   const [publishing, setPublishing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [device, setDevice] = useState<"desktop" | "mobile">("desktop");
+
+  // Track using clientId since that's what the wizard state populates
+  const [selectedStaffId, setSelectedStaffId] = useState<string>(
+    state.staff?.[0]?.clientId || "",
+  );
+  const [uploadingStaff, setUploadingStaff] = useState(false);
 
   async function handleHeroUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -50,6 +56,32 @@ export function StepCustomizePreview({ onBack }: StepProps) {
     }
   }
 
+  // Handle uploading a specific image to a chosen staff member
+  async function handleStaffPhotoUpload(
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) {
+    const file = e.target.files?.[0];
+    if (!file || !selectedStaffId) return;
+
+    setUploadingStaff(true);
+    try {
+      const { url } = await uploadImage(file);
+
+      // CRITICAL FIX: Update BOTH id and clientId to stay fully synchronized with your layout components
+      const updatedStaff = state.staff.map((member) =>
+        member.clientId === selectedStaffId
+          ? { ...member, photoUrl: url, id: member.id || member.clientId }
+          : member,
+      );
+
+      patch({ staff: updatedStaff });
+    } catch (err) {
+      console.error("Staff photo upload failed:", err);
+    } finally {
+      setUploadingStaff(false);
+    }
+  }
+
   async function handlePublish() {
     setPublishing(true);
     setError(null);
@@ -61,6 +93,11 @@ export function StepCustomizePreview({ onBack }: StepProps) {
       setPublishing(false);
     }
   }
+
+  // Find the currently selected staff member to display their preview in the sidebar
+  const selectedMember = state.staff?.find(
+    (m) => m.clientId === selectedStaffId,
+  );
 
   return (
     <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 lg:grid-cols-[2fr_3fr]">
@@ -135,6 +172,65 @@ export function StepCustomizePreview({ onBack }: StepProps) {
             />
           </label>
         </div>
+
+        {/* Artist Photos Controller Section */}
+        {state.staff && state.staff.length > 0 && (
+          <div>
+            <label className="text-sm text-muted">Artist photos</label>
+            <div className="mt-1.5 flex flex-col gap-3 rounded-lg border border-surface-border bg-surface-1 p-4">
+              <div className="flex items-center gap-3">
+                {/* Artist Selector Dropdown */}
+                <select
+                  value={selectedStaffId}
+                  onChange={(e) => setSelectedStaffId(e.target.value)}
+                  className="flex-1 rounded-lg border border-surface-border bg-surface-2 px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-surface-border-strong"
+                >
+                  {!selectedStaffId && (
+                    <option value="">Select an artist...</option>
+                  )}
+                  {state.staff.map((member) => (
+                    <option key={member.clientId} value={member.clientId}>
+                      {member.name || "Unnamed"} ({member.role || "Staff"})
+                    </option>
+                  ))}
+                </select>
+
+                {/* Micro Thumbnail of selected member */}
+                <div className="h-9 w-9 overflow-hidden rounded-full border border-surface-border bg-surface-2 flex items-center justify-center flex-shrink-0">
+                  {selectedMember?.photoUrl ? (
+                    <img
+                      src={selectedMember.photoUrl}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <User size={16} className="text-muted" />
+                  )}
+                </div>
+              </div>
+
+              {/* Dynamic Upload Trigger Button */}
+              <label
+                className={`flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-surface-border bg-surface-2 py-2 text-xs font-medium text-foreground transition-colors hover:bg-surface-3 ${!selectedStaffId ? "opacity-50 pointer-events-none" : ""}`}
+              >
+                <Upload size={14} className="text-muted" />
+                <span>
+                  {uploadingStaff
+                    ? "Uploading..."
+                    : selectedMember?.photoUrl
+                      ? "Replace Photo"
+                      : "Upload Photo"}
+                </span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleStaffPhotoUpload}
+                  disabled={uploadingStaff || !selectedStaffId}
+                  className="hidden"
+                />
+              </label>
+            </div>
+          </div>
+        )}
 
         <div>
           <label className="text-sm text-muted">Primary color</label>

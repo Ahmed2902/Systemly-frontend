@@ -16,10 +16,12 @@ export type WizardService = {
 };
 
 export type WizardStaffMember = {
+  id: string;
   clientId: string;
   name: string;
   role: string;
   serviceIds: string[]; // WizardService.clientId references
+  photoUrl?: string | null;
   availability: {
     dayOfWeek: number;
     startTime: string;

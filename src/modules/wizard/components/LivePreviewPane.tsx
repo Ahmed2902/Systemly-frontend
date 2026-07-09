@@ -41,6 +41,7 @@ export function LivePreviewPane() {
               id: s.clientId,
               name: s.name,
               role: s.role,
+              photoUrl: s.photoUrl,
             }))}
             phone={state.phone}
             address={state.address}

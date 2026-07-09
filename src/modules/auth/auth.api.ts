@@ -44,7 +44,11 @@ export async function refreshAccessToken() {
   const res = await fetch(apiUrl("/auth/refresh"), {
     method: "POST",
     credentials: "include",
-    headers: { "CSRF-Token": csrfToken },
+    headers: {
+      "Content-Type": "application/json",
+      "CSRF-Token": csrfToken,
+    },
+    body: JSON.stringify({}),
   });
   const json = await res.json();
   if (!res.ok || json.success === false) throw json;
