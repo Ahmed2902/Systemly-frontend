@@ -9,21 +9,57 @@ export async function checkSlugAvailability(slug: string): Promise<boolean> {
   return json.available;
 }
 
-// TODO: confirm real endpoint path + payload shape once the backend onboarding module exists
+/**
+ * High-performance Direct-to-Cloud Upload
+ * 1. Requests a secure presigned upload ticket from Express backend
+ * 2. Uploads binary data straight to Supabase Storage CDN
+ */
 export async function uploadImage(
   file: File,
 ): Promise<{ url: string; publicId: string }> {
-  const formData = new FormData();
-  formData.append("file", file);
+  // Generate a clean target file path reference
+  const fileExt = file.name.split(".").pop() || "jpg";
+  const uniqueId =
+    typeof crypto.randomUUID === "function"
+      ? crypto.randomUUID()
+      : Math.random().toString(36).slice(2);
+  const storagePath = `gallery/${uniqueId}.${fileExt}`;
 
-  const res = await fetch(apiUrl("/photos/gallery"), {
+  // Step 1: Request the secure signed upload token from your Express backend
+  const presignRes = await fetch(apiUrl("photos/gallery/presign"), {
     method: "POST",
-    credentials: "include", // cookie carries auth now
-    body: formData,
+    headers: { "Content-Type": "application/json" },
+    credentials: "include", // Cookie carries auth to authorize the signature generation
+    body: JSON.stringify({
+      filePath: storagePath,
+      contentType: file.type,
+    }),
   });
-  const json = await res.json();
-  if (!res.ok || json.success === false) throw json;
-  return { url: json.data.photo.url, publicId: json.data.photo.publicId };
+
+  const presignJson = await presignRes.json();
+  if (!presignRes.ok || presignJson.success === false) {
+    throw presignJson;
+  }
+
+  // Expecting backend to return { uploadUrl, publicUrl } inside data wrapper
+  const { uploadUrl, publicUrl } = presignJson.data;
+
+  // Step 2: Upload the compressed file BINARY directly to Supabase Storage
+  const cloudRes = await fetch(uploadUrl, {
+    method: "PUT", // Supabase requires a binary HTTP PUT method for signed upload targets
+    headers: { "Content-Type": file.type },
+    body: file, // Direct binary file buffer payload
+  });
+
+  if (!cloudRes.ok) {
+    throw new Error("Direct cloud storage delivery transaction failed.");
+  }
+
+  // Return the data object expected by your frontend modules
+  return {
+    url: publicUrl,
+    publicId: storagePath, // Storing the inner path lets deleteFile work effortlessly later
+  };
 }
 
 export async function submitOnboarding(state: WizardState) {

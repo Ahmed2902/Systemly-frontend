@@ -1,9 +1,16 @@
 // src/modules/wizard/components/ImageUploader.tsx
 "use client";
-
+import imageCompression from "browser-image-compression";
 import { useRef, useState } from "react";
 
-export function ImageUploader({
+const options = {
+  maxSizeMB: 1, // Max size you want the image to be (e.g., 1MB)
+  maxWidthOrHeight: 1920, // Resizes down if it's a massive 4K image
+  useWebWorker: true, // Runs in background thread so UI doesn't freeze
+  fileType: "image/jpeg", // Forces PNGs to convert to highly compressed JPEGs!
+};
+
+export async function ImageUploader({
   label,
   currentUrl,
   onUpload,
@@ -18,7 +25,20 @@ export function ImageUploader({
   async function handleFile(file: File) {
     setUploading(true);
     try {
-      await onUpload(file);
+      const compressedBlob = await imageCompression(file, options);
+
+      // 1. Strip out old extension and append .jpg to match the converted file type
+      const safeName = file.name.replace(/\.[^/.]+$/, "") + ".jpg";
+
+      // 2. Cast back into a pristine File object with correct naming metadata
+      const compressedFile = new File([compressedBlob], safeName, {
+        type: "image/jpeg",
+        lastModified: Date.now(),
+      });
+
+      await onUpload(compressedFile);
+    } catch (error) {
+      console.error("Compression failed:", error);
     } finally {
       setUploading(false);
     }
