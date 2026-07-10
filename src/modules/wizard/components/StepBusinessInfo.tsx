@@ -7,6 +7,7 @@ import { StepProps } from "../wizard.types";
 import { VerticalSelector } from "@/modules/onboarding/components/VerticalSelector";
 import { SlugInput } from "@/modules/onboarding/components/SlugInput";
 import { Button } from "@/shared/components/ui/button";
+import { getDefaultTemplateId } from "@/modules/templates/template-registry";
 
 export function StepBusinessInfo({ onNext }: StepProps) {
   const { state, patch } = useWizard();
@@ -38,7 +39,9 @@ export function StepBusinessInfo({ onNext }: StepProps) {
         <div className="mt-2">
           <VerticalSelector
             value={state.vertical ?? undefined}
-            onChange={(v) => patch({ vertical: v })}
+            onChange={(v) =>
+              patch({ vertical: v, template: getDefaultTemplateId(v) })
+            }
           />
         </div>
         {errors.vertical && (

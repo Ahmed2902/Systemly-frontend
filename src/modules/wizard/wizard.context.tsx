@@ -6,6 +6,7 @@ import { WizardState } from "./wizard.types";
 
 const initialState: WizardState = {
   vertical: null,
+  template: "aura-wellness",
   name: "",
   slug: "",
   phone: "",
@@ -17,10 +18,20 @@ const initialState: WizardState = {
   aboutText: "",
   heroPhotoUrl: null,
   galleryPhotoUrls: [],
-  primaryColor: "#10b981",
-  sectionOrder: ["hero", "about", "services", "gallery", "team", "faq"],
+  primaryColor: "#2B2420",
+  sectionOrder: [
+    "hero",
+    "about",
+    "services",
+    "gallery",
+    "team",
+    "contact",
+    "faq",
+  ],
   showTeam: true,
   showFaq: true,
+  instagram: "",
+  whatsapp: "",
 
   faqs: [],
 };

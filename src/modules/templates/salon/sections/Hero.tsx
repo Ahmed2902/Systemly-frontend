@@ -34,7 +34,7 @@ export function Hero({
           A sanctuary of style
         </p>
         <h1 className="font-display mt-4 max-w-xl text-5xl leading-[1.1] text-[#2B2420] md:text-6xl">
-          {leadWords}{" "}
+          {leadWords} {" "}
           <span
             className="italic font-medium"
             style={{ color: "var(--accent)" }}

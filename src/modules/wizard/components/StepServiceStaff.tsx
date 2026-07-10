@@ -137,7 +137,7 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
   }
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-10 ">
       <div>
         <h1 className="text-2xl font-semibold text-foreground">
           Services & Staff

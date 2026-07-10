@@ -71,10 +71,10 @@ export function WizardShell() {
       <div
         key={stepIndex}
         className={`relative animate-in fade-in slide-in-from-bottom-2 duration-300 ${
-          isPreviewStep ? "px-6 py-10" : "mx-auto max-w-xl px-6 py-14"
+          isPreviewStep ? "px-6 py-10" : "mx-auto max-w-2xl px-6 py-14"
         }`}
       >
-        <div className="rounded-2xl border border-surface-border bg-surface-1 p-8 shadow-[0_8px_40px_rgba(0,0,0,0.4)]">
+        <div className="rounded-3xl border border-surface-border bg-surface-1 p-8 shadow-[0_8px_40px_rgba(0,0,0,0.4)] ">
           <StepComponent
             onNext={() =>
               setStepIndex((i) => Math.min(i + 1, steps.length - 1))

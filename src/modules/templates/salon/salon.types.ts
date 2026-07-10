@@ -3,6 +3,8 @@
 export type SalonTemplateData = {
   businessName: string;
   tagline: string;
+  vertical: "salon" | "clinic" | null;
+  template: string;
   aboutText: string;
   heroPhotoUrl: string | null;
   galleryPhotoUrls: string[];
@@ -21,4 +23,6 @@ export type SalonTemplateData = {
   faqs?: { question: string; answer: string }[];
   phone?: string;
   address?: string;
+  instagram?: string;
+  whatsapp?: string;
 };

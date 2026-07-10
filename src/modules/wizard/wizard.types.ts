@@ -50,6 +50,10 @@ export type WizardState = {
   sectionOrder: string[];
   showTeam: boolean;
   showFaq: boolean;
+  instagram?: string;
+  whatsapp?: string;
 
   faqs: WizardFaq[];
+
+  template: string;
 };

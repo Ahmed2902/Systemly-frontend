@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Upload, Check, User } from "lucide-react";
+import { Upload, Check, User, X } from "lucide-react";
 import { useWizard } from "../wizard.context";
 import { StepProps } from "../wizard.types";
 import { LivePreviewPane } from "./LivePreviewPane";
@@ -11,6 +11,10 @@ import { SectionOrderList } from "./SectionOrderList";
 import { Button } from "@/shared/components/ui/button";
 import { submitOnboarding, uploadImage } from "../wizard.api";
 import { FaqEditor } from "./FaqEditor";
+import {
+  getDefaultTemplateId,
+  getTemplatesForVertical,
+} from "@/modules/templates/template-registry";
 
 const COLOR_SWATCHES = [
   "#2B2420", // Deep Espresso/Charcoal (Matches your current headers)
@@ -45,6 +49,12 @@ export function StepCustomizePreview({ onBack }: StepProps) {
     }
   }
 
+  function handleRemoveHero(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    patch({ heroPhotoUrl: "" });
+  }
+
   async function handleGalleryUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -54,6 +64,13 @@ export function StepCustomizePreview({ onBack }: StepProps) {
     } catch (err) {
       console.error("Gallery upload failed:", err);
     }
+  }
+
+  function handleRemoveGalleryImage(indexToRemove: number) {
+    const updatedGallery = state.galleryPhotoUrls.filter(
+      (_, idx) => idx !== indexToRemove,
+    );
+    patch({ galleryPhotoUrls: updatedGallery });
   }
 
   // Handle uploading a specific image to a chosen staff member
@@ -80,6 +97,16 @@ export function StepCustomizePreview({ onBack }: StepProps) {
     } finally {
       setUploadingStaff(false);
     }
+  }
+
+  function handleRemoveStaffPhoto() {
+    if (!selectedStaffId) return;
+    const updatedStaff = state.staff.map((member) =>
+      member.clientId === selectedStaffId
+        ? { ...member, photoUrl: "" }
+        : member,
+    );
+    patch({ staff: updatedStaff });
   }
 
   async function handlePublish() {
@@ -132,27 +159,39 @@ export function StepCustomizePreview({ onBack }: StepProps) {
 
         <div>
           <label className="text-sm text-muted">Hero photo</label>
-          <label className="mt-1.5 flex cursor-pointer items-center gap-3 rounded-lg border border-dashed border-surface-border bg-surface-1 p-3 transition-colors hover:border-surface-border-strong">
-            {state.heroPhotoUrl ? (
-              <img
-                src={state.heroPhotoUrl}
-                className="h-12 w-12 rounded object-cover"
+          <div className="relative mt-1.5">
+            <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-dashed border-surface-border bg-surface-1 p-3 transition-colors hover:border-surface-border-strong">
+              {state.heroPhotoUrl ? (
+                <img
+                  src={state.heroPhotoUrl}
+                  className="h-12 w-12 rounded object-cover"
+                />
+              ) : (
+                <div className="flex h-12 w-12 items-center justify-center rounded bg-surface-2">
+                  <Upload size={16} className="text-muted" />
+                </div>
+              )}
+              <span className="text-sm text-muted">
+                {state.heroPhotoUrl ? "Click to replace" : "Click to upload"}
+              </span>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleHeroUpload}
+                className="hidden"
               />
-            ) : (
-              <div className="flex h-12 w-12 items-center justify-center rounded bg-surface-2">
-                <Upload size={16} className="text-muted" />
-              </div>
+            </label>
+            {state.heroPhotoUrl && (
+              <button
+                type="button"
+                onClick={handleRemoveHero}
+                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-surface-3 p-1.5 text-muted transition-colors hover:bg-red-950 hover:text-red-400"
+                title="Remove hero image"
+              >
+                <X size={14} />
+              </button>
             )}
-            <span className="text-sm text-muted">
-              {state.heroPhotoUrl ? "Click to replace" : "Click to upload"}
-            </span>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleHeroUpload}
-              className="hidden"
-            />
-          </label>
+          </div>
         </div>
 
         <div>
@@ -171,6 +210,27 @@ export function StepCustomizePreview({ onBack }: StepProps) {
               className="hidden"
             />
           </label>
+
+          {/* Gallery Previews Container with Remove Badges */}
+          {state.galleryPhotoUrls.length > 0 && (
+            <div className="mt-3 grid grid-cols-4 gap-3 rounded-lg border border-surface-border bg-surface-1 p-3">
+              {state.galleryPhotoUrls.map((url, idx) => (
+                <div
+                  key={idx}
+                  className="group relative aspect-square overflow-hidden rounded-md border border-surface-border bg-surface-2"
+                >
+                  <img src={url} className="h-full w-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveGalleryImage(idx)}
+                    className="absolute right-1 top-1 rounded-full bg-black/70 p-1 text-white transition-opacity hover:bg-red-600"
+                  >
+                    <X size={12} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Artist Photos Controller Section */}
@@ -208,29 +268,65 @@ export function StepCustomizePreview({ onBack }: StepProps) {
                 </div>
               </div>
 
-              {/* Dynamic Upload Trigger Button */}
-              <label
-                className={`flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-surface-border bg-surface-2 py-2 text-xs font-medium text-foreground transition-colors hover:bg-surface-3 ${!selectedStaffId ? "opacity-50 pointer-events-none" : ""}`}
-              >
-                <Upload size={14} className="text-muted" />
-                <span>
-                  {uploadingStaff
-                    ? "Uploading..."
-                    : selectedMember?.photoUrl
-                      ? "Replace Photo"
-                      : "Upload Photo"}
-                </span>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleStaffPhotoUpload}
-                  disabled={uploadingStaff || !selectedStaffId}
-                  className="hidden"
-                />
-              </label>
+              {/* Dynamic Upload / Remove Buttons Layout */}
+              <div className="flex gap-2">
+                <label
+                  className={`flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border border-surface-border bg-surface-2 py-2 text-xs font-medium text-foreground transition-colors hover:bg-surface-3 ${!selectedStaffId ? "opacity-50 pointer-events-none" : ""}`}
+                >
+                  <Upload size={14} className="text-muted" />
+                  <span>
+                    {uploadingStaff
+                      ? "Uploading..."
+                      : selectedMember?.photoUrl
+                        ? "Replace Photo"
+                        : "Upload Photo"}
+                  </span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleStaffPhotoUpload}
+                    disabled={uploadingStaff || !selectedStaffId}
+                    className="hidden"
+                  />
+                </label>
+
+                {selectedMember?.photoUrl && (
+                  <button
+                    type="button"
+                    onClick={handleRemoveStaffPhoto}
+                    className="flex items-center justify-center gap-1 rounded-lg border border-surface-border bg-surface-2 px-3 text-xs font-medium text-red-400 transition-colors hover:bg-red-950/40"
+                  >
+                    <X size={14} />
+                    <span>Clear</span>
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         )}
+
+        <div>
+          <label className="text-sm text-muted">Template</label>
+          <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+            {(getTemplatesForVertical(state.vertical) || []).map((template) => (
+              <button
+                key={template.id}
+                type="button"
+                onClick={() => patch({ template: template.id })}
+                className={`rounded-lg border px-4 py-3 text-left transition-colors ${
+                  state.template === template.id
+                    ? "border-accent bg-accent/10"
+                    : "border-surface-border bg-surface-1 hover:border-surface-border-strong"
+                }`}
+              >
+                <div className="text-sm font-medium text-foreground">
+                  {template.label}
+                </div>
+                <div className="text-xs text-muted">{template.vertical}</div>
+              </button>
+            ))}
+          </div>
+        </div>
 
         <div>
           <label className="text-sm text-muted">Primary color</label>
@@ -252,6 +348,26 @@ export function StepCustomizePreview({ onBack }: StepProps) {
               </button>
             ))}
           </div>
+        </div>
+
+        <div>
+          <label className="text-sm text-muted">Instagram URL</label>
+          <input
+            value={state.instagram || ""}
+            onChange={(e) => patch({ instagram: e.target.value })}
+            placeholder="https://instagram.com/yourpage"
+            className="mt-1.5 w-full rounded-lg border border-surface-border bg-surface-1 px-3 py-2.5 text-sm text-foreground outline-none transition-colors focus:border-surface-border-strong"
+          />
+        </div>
+
+        <div>
+          <label className="text-sm text-muted">WhatsApp number</label>
+          <input
+            value={state.whatsapp || ""}
+            onChange={(e) => patch({ whatsapp: e.target.value })}
+            placeholder="+20 100 000 0000"
+            className="mt-1.5 w-full rounded-lg border border-surface-border bg-surface-1 px-3 py-2.5 text-sm text-foreground outline-none transition-colors focus:border-surface-border-strong"
+          />
         </div>
 
         <div>
