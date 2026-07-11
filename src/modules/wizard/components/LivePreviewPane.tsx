@@ -81,7 +81,7 @@ export function LivePreviewPane() {
         </span>
       </div>
 
-      <div className="max-h-[900px] w-full  overflow-y-auto">
+      <div className="max-h-[800px] w-full  overflow-y-auto">
         <ScaledPreview baseWidth={800}>
           {activeTemplate?.component(templateData)}
         </ScaledPreview>

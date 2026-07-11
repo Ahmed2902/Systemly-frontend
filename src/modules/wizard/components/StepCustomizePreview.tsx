@@ -11,14 +11,11 @@ import { SectionOrderList } from "./SectionOrderList";
 import { Button } from "@/shared/components/ui/button";
 import { submitOnboarding, uploadImage } from "../wizard.api";
 import { FaqEditor } from "./FaqEditor";
-import {
-  getDefaultTemplateId,
-  getTemplatesForVertical,
-} from "@/modules/templates/template-registry";
+import { getTemplatesForVertical } from "@/modules/templates/template-registry";
 
 const COLOR_SWATCHES = [
-  "#2B2420", // Deep Espresso/Charcoal (Matches your current headers)
-  "#8A7F73", // Warm Taupe/Muted Earth (Matches your subtitle/role colors)
+  "#2B2420", // Deep Espresso/Charcoal
+  "#8A7F73", // Warm Taupe/Muted Earth
   "#A3947F", // Luxury Soft Gold / Champagne
   "#4A5343", // Sage / Muted Olive Green
   "#6B5B52", // Rich Cocoa / Walnut
@@ -84,7 +81,6 @@ export function StepCustomizePreview({ onBack }: StepProps) {
     try {
       const { url } = await uploadImage(file);
 
-      // CRITICAL FIX: Update BOTH id and clientId to stay fully synchronized with your layout components
       const updatedStaff = state.staff.map((member) =>
         member.clientId === selectedStaffId
           ? { ...member, photoUrl: url, id: member.id || member.clientId }
@@ -125,6 +121,7 @@ export function StepCustomizePreview({ onBack }: StepProps) {
     e.stopPropagation();
     patch({ logoUrl: null });
   }
+
   async function handlePublish() {
     setPublishing(true);
     setError(null);
@@ -137,13 +134,12 @@ export function StepCustomizePreview({ onBack }: StepProps) {
     }
   }
 
-  // Find the currently selected staff member to display their preview in the sidebar
   const selectedMember = state.staff?.find(
     (m) => m.clientId === selectedStaffId,
   );
 
   return (
-    <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 lg:grid-cols-[2fr_3fr]">
+    <div className="mx-auto grid max-w-[1500px] w-full grid-cols-1 gap-20 lg:grid-cols-[500px_1fr]">
       <div className="space-y-7">
         <div>
           <h1 className="text-2xl font-semibold text-foreground">
@@ -264,7 +260,6 @@ export function StepCustomizePreview({ onBack }: StepProps) {
             />
           </label>
 
-          {/* Gallery Previews Container with Remove Badges */}
           {state.galleryPhotoUrls.length > 0 && (
             <div className="mt-3 grid grid-cols-4 gap-3 rounded-lg border border-surface-border bg-surface-1 p-3">
               {state.galleryPhotoUrls.map((url, idx) => (
@@ -286,13 +281,11 @@ export function StepCustomizePreview({ onBack }: StepProps) {
           )}
         </div>
 
-        {/* Artist Photos Controller Section */}
         {state.staff && state.staff.length > 0 && (
           <div>
             <label className="text-sm text-muted">Artist photos</label>
             <div className="mt-1.5 flex flex-col gap-3 rounded-lg border border-surface-border bg-surface-1 p-4">
               <div className="flex items-center gap-3">
-                {/* Artist Selector Dropdown */}
                 <select
                   value={selectedStaffId}
                   onChange={(e) => setSelectedStaffId(e.target.value)}
@@ -308,7 +301,6 @@ export function StepCustomizePreview({ onBack }: StepProps) {
                   ))}
                 </select>
 
-                {/* Micro Thumbnail of selected member */}
                 <div className="h-9 w-9 overflow-hidden rounded-full border border-surface-border bg-surface-2 flex items-center justify-center flex-shrink-0">
                   {selectedMember?.photoUrl ? (
                     <img
@@ -321,7 +313,6 @@ export function StepCustomizePreview({ onBack }: StepProps) {
                 </div>
               </div>
 
-              {/* Dynamic Upload / Remove Buttons Layout */}
               <div className="flex gap-2">
                 <label
                   className={`flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border border-surface-border bg-surface-2 py-2 text-xs font-medium text-foreground transition-colors hover:bg-surface-3 ${!selectedStaffId ? "opacity-50 pointer-events-none" : ""}`}
@@ -481,7 +472,7 @@ export function StepCustomizePreview({ onBack }: StepProps) {
         </div>
       </div>
 
-      <div className="sticky top-8 h-fit">
+      <div className="sticky top-8 h-fit w-full">
         <div className="mb-3 flex justify-center gap-1 rounded-full border border-surface-border bg-surface-1 p-1 w-fit mx-auto">
           {(["desktop", "mobile"] as const).map((d) => (
             <button
@@ -496,7 +487,7 @@ export function StepCustomizePreview({ onBack }: StepProps) {
           ))}
         </div>
 
-        <div className={device === "mobile" ? "mx-auto max-w-sm" : ""}>
+        <div className={device === "mobile" ? "mx-auto max-w-sm" : "w-full"}>
           <LivePreviewPane />
         </div>
       </div>
