@@ -52,7 +52,7 @@ export function StepCustomizePreview({ onBack }: StepProps) {
   function handleRemoveHero(e: React.MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
-    patch({ heroPhotoUrl: "" });
+    patch({ heroPhotoUrl: null });
   }
 
   async function handleGalleryUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -308,7 +308,10 @@ export function StepCustomizePreview({ onBack }: StepProps) {
         <div>
           <label className="text-sm text-muted">Template</label>
           <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
-            {(getTemplatesForVertical(state.vertical) || []).map((template) => (
+            {(
+              getTemplatesForVertical(state.vertical as "salon" | "clinic") ||
+              []
+            ).map((template) => (
               <button
                 key={template.id}
                 type="button"

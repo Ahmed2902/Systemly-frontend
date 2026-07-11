@@ -26,7 +26,7 @@ export async function uploadImage(
   const storagePath = `gallery/${uniqueId}.${fileExt}`;
 
   // Step 1: Request the secure signed upload token from your Express backend
-  const presignRes = await fetch(apiUrl("photos/gallery/presign"), {
+  const presignRes = await fetch(apiUrl("/photos/gallery/presign"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include", // Cookie carries auth to authorize the signature generation
@@ -63,11 +63,50 @@ export async function uploadImage(
 }
 
 export async function submitOnboarding(state: WizardState) {
+  const payload = {
+    vertical: state.vertical,
+    templateId: state.template,
+    name: state.name,
+    slug: state.slug,
+    phone: state.phone,
+    city: state.city,
+    address: state.address,
+    tagline: state.tagline,
+    aboutText: state.aboutText,
+    heroPhotoUrl: state.heroPhotoUrl || undefined,
+    galleryPhotoUrls: state.galleryPhotoUrls,
+    primaryColor: state.primaryColor,
+    sectionOrder: state.sectionOrder,
+    showTeam: state.showTeam,
+    showFaq: state.showFaq,
+    instagram: state.instagram || undefined,
+    whatsapp: state.whatsapp || undefined,
+    services: state.services.map((s) => ({
+      clientId: s.clientId,
+      name: s.name,
+      category: s.category,
+      priceEgp: s.priceEgp,
+      durationMin: s.durationMin,
+    })),
+    staff: state.staff.map((s) => ({
+      clientId: s.clientId,
+      name: s.name,
+      role: s.role,
+      photoUrl: s.photoUrl || undefined,
+      serviceClientIds: s.serviceIds,
+      availability: s.availability,
+    })),
+    faqs: state.faqs.map((f) => ({
+      question: f.question,
+      answer: f.answer,
+    })),
+  };
+
   const res = await fetch(apiUrl("/onboarding/complete"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
-    body: JSON.stringify(state),
+    body: JSON.stringify(payload),
   });
   const json = await res.json();
   if (!res.ok || json.success === false) throw json;

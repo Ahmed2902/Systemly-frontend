@@ -1,3 +1,4 @@
+import { JSX } from "react";
 import { SalonTemplate } from "./salon/SalonTemplate";
 import type { SalonTemplateData } from "./salon/salon.types";
 
@@ -30,7 +31,9 @@ export function getTemplatesForVertical(vertical: TemplateVertical | null) {
 }
 
 export function getDefaultTemplateId(vertical: TemplateVertical | null) {
-  return getTemplatesForVertical(vertical)[0]?.id ?? TEMPLATE_REGISTRY[0]?.id ?? "";
+  return (
+    getTemplatesForVertical(vertical)[0]?.id ?? TEMPLATE_REGISTRY[0]?.id ?? ""
+  );
 }
 
 export function getTemplateById(templateId: string) {

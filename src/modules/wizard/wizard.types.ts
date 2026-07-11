@@ -10,9 +10,15 @@ export type StepProps = {
 export type WizardService = {
   clientId: string;
   name: string;
+  category?: string;
   durationMin: number;
   priceEgp: number;
-  category?: string;
+};
+
+export type AvailabilityEntry = {
+  dayOfWeek: number;
+  startTime: string; // "HH:mm"
+  endTime: string;
 };
 
 export type WizardStaffMember = {
@@ -20,28 +26,27 @@ export type WizardStaffMember = {
   clientId: string;
   name: string;
   role: string;
-  serviceIds: string[]; // WizardService.clientId references
-  photoUrl?: string | null;
-  availability: {
-    dayOfWeek: number;
-    startTime: string;
-    endTime: string;
-  }[];
+  photoUrl?: string;
+  serviceIds: string[];
+  availability: AvailabilityEntry[];
 };
 
-export type WizardFaq = { clientId: string; question: string; answer: string };
+export type WizardFaq = {
+  clientId: string;
+  question: string;
+  answer: string;
+};
 
 export type WizardState = {
-  vertical: "salon" | "clinic" | null;
+  vertical: string | null;
+  template: string;
   name: string;
   slug: string;
   phone: string;
   city: string;
   address: string;
-
   services: WizardService[];
   staff: WizardStaffMember[];
-
   tagline: string;
   aboutText: string;
   heroPhotoUrl: string | null;
@@ -50,10 +55,7 @@ export type WizardState = {
   sectionOrder: string[];
   showTeam: boolean;
   showFaq: boolean;
-  instagram?: string;
-  whatsapp?: string;
-
+  instagram: string;
+  whatsapp: string;
   faqs: WizardFaq[];
-
-  template: string;
 };
