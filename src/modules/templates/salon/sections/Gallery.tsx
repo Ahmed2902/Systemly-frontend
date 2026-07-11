@@ -44,9 +44,8 @@ export function Gallery({ photos }: { photos: string[] }) {
       </div>
 
       {/* Carousel Wrapper with Arrows */}
-      <div className="relative w-full px-8 md:px-16 group/carousel">
+      <div className="relative mx-auto w-full max-w-7xl px-8 md:px-16 group/carousel">
         <div className="relative overflow-hidden">
-          {/* Track Container with standard gap layout */}
           <div
             className="flex gap-6 transition-transform duration-700 ease-out"
             style={{
@@ -56,14 +55,14 @@ export function Gallery({ photos }: { photos: string[] }) {
             {photos.map((url, index) => (
               <div
                 key={`${index}-${url}`}
-                className="relative h-[450px] w-full flex-shrink-0 overflow-hidden rounded-2xl md:h-[550px]"
+                className="relative h-[550px] w-full flex-shrink-0 overflow-hidden rounded-2xl md:h-[700px]"
               >
                 <Image
                   src={url}
                   alt={`Gallery image ${index + 1}`}
                   fill
                   priority={index === 0}
-                  sizes="100vw"
+                  sizes="(max-width: 768px) 100vw, 672px"
                   className="object-cover"
                 />
                 <div className="absolute inset-0 bg-black/5" />
@@ -72,6 +71,7 @@ export function Gallery({ photos }: { photos: string[] }) {
           </div>
         </div>
 
+        {/* arrows/dots unchanged below */}
         {/* Navigation Arrows (Visible on hover) */}
         {photos.length > 1 && (
           <>

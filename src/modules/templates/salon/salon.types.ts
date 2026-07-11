@@ -7,6 +7,7 @@ export type SalonTemplateData = {
   template: string;
   aboutText: string;
   heroPhotoUrl: string | null;
+  logoUrl: string | null;
   galleryPhotoUrls: string[];
   primaryColor: string;
   sectionOrder: string[];

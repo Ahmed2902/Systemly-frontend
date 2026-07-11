@@ -22,6 +22,7 @@ export function LivePreviewPane() {
     template: state.template,
     aboutText: state.aboutText,
     heroPhotoUrl: state.heroPhotoUrl ?? hero.src,
+    logoUrl: state.logoUrl ?? null,
     galleryPhotoUrls: state.galleryPhotoUrls,
     primaryColor: state.primaryColor,
     sectionOrder: state.sectionOrder,
@@ -51,7 +52,7 @@ export function LivePreviewPane() {
   };
 
   return (
-    <div className="overflow-hidden rounded-lg border border-surfaceBorder bg-surface">
+    <div className="overflow-hidden rounded-lg border border-surfaceBorder bg-surface ">
       {options.length > 1 && (
         <div className="flex gap-2 border-b border-surfaceBorder px-3 py-2">
           {options.map((t) => (
@@ -80,7 +81,7 @@ export function LivePreviewPane() {
         </span>
       </div>
 
-      <div className="max-h-[800px] w-full overflow-y-auto">
+      <div className="max-h-[900px] w-full  overflow-y-auto">
         <ScaledPreview baseWidth={800}>
           {activeTemplate?.component(templateData)}
         </ScaledPreview>

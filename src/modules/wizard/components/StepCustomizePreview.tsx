@@ -109,6 +109,22 @@ export function StepCustomizePreview({ onBack }: StepProps) {
     patch({ staff: updatedStaff });
   }
 
+  async function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const { url } = await uploadImage(file);
+      patch({ logoUrl: url });
+    } catch (err) {
+      console.error("Logo upload failed:", err);
+    }
+  }
+
+  function handleRemoveLogo(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    patch({ logoUrl: null });
+  }
   async function handlePublish() {
     setPublishing(true);
     setError(null);
@@ -187,6 +203,43 @@ export function StepCustomizePreview({ onBack }: StepProps) {
                 onClick={handleRemoveHero}
                 className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-surface-3 p-1.5 text-muted transition-colors hover:bg-red-950 hover:text-red-400"
                 title="Remove hero image"
+              >
+                <X size={14} />
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div>
+          <label className="text-sm text-muted">Logo</label>
+          <div className="relative mt-1.5">
+            <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-dashed border-surface-border bg-surface-1 p-3 transition-colors hover:border-surface-border-strong">
+              {state.logoUrl ? (
+                <img
+                  src={state.logoUrl}
+                  className="h-12 w-12 rounded object-cover"
+                />
+              ) : (
+                <div className="flex h-12 w-12 items-center justify-center rounded bg-surface-2">
+                  <Upload size={16} className="text-muted" />
+                </div>
+              )}
+              <span className="text-sm text-muted">
+                {state.logoUrl ? "Click to replace" : "Click to upload"}
+              </span>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleLogoUpload}
+                className="hidden"
+              />
+            </label>
+            {state.logoUrl && (
+              <button
+                type="button"
+                onClick={handleRemoveLogo}
+                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-surface-3 p-1.5 text-muted transition-colors hover:bg-red-950 hover:text-red-400"
+                title="Remove logo"
               >
                 <X size={14} />
               </button>

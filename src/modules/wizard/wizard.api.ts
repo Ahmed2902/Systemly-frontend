@@ -73,6 +73,7 @@ export async function submitOnboarding(state: WizardState) {
     address: state.address,
     tagline: state.tagline,
     aboutText: state.aboutText,
+    logoUrl: state.logoUrl || undefined,
     heroPhotoUrl: state.heroPhotoUrl || undefined,
     galleryPhotoUrls: state.galleryPhotoUrls,
     primaryColor: state.primaryColor,

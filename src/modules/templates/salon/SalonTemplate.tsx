@@ -41,7 +41,7 @@ export function SalonTemplate(data: SalonTemplateData) {
       className="font-body bg-[#F7F3EE]"
       style={{ ["--accent" as any]: data.primaryColor || "#8C5A3C" }}
     >
-      <Nav businessName={data.businessName} />
+      <Nav businessName={data.businessName} logoUrl={data.logoUrl} />
       {data.sectionOrder.map((key) => (
         <div key={key}>{sectionMap[key]}</div>
       ))}

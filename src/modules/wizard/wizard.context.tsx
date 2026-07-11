@@ -17,6 +17,7 @@ const initialState: WizardState = {
   tagline: "",
   aboutText: "",
   heroPhotoUrl: null,
+  logoUrl: null,
   galleryPhotoUrls: [],
   primaryColor: "#2B2420",
   sectionOrder: [

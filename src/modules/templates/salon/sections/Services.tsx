@@ -77,7 +77,7 @@ export function Services({
         Curated Services
       </p>
       <h2 className="font-display mt-2 text-3xl text-[#2B2420] md:text-4xl">
-        Our Rituals
+        Our Services & Treatments
       </h2>
 
       <div className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">

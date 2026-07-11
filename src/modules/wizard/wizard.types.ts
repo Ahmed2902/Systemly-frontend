@@ -50,6 +50,7 @@ export type WizardState = {
   tagline: string;
   aboutText: string;
   heroPhotoUrl: string | null;
+  logoUrl: string | null;
   galleryPhotoUrls: string[];
   primaryColor: string;
   sectionOrder: string[];

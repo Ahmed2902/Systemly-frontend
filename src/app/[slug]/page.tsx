@@ -46,6 +46,7 @@ export default async function PublicBusinessPage({
     vertical: business.vertical,
     template: content?.template ?? "",
     aboutText: content?.aboutText ?? "",
+    logoUrl: business.logoUrl ?? null,
     heroPhotoUrl:
       business.photos.find((p: any) => p.kind === "hero")?.url ?? null,
     galleryPhotoUrls: business.photos
