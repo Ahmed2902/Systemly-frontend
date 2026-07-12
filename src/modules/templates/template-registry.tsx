@@ -1,6 +1,8 @@
 import { JSX } from "react";
 import { SalonTemplate } from "./salon/SalonTemplate";
 import type { SalonTemplateData } from "./salon/salon.types";
+import type { TemplateTheme } from "./theme.types";
+import { auraWellnessTheme } from "./salon/salon.theme";
 
 export type TemplateVertical = "salon" | "clinic";
 
@@ -9,6 +11,7 @@ export type TemplateDefinition = {
   label: string;
   vertical: TemplateVertical;
   component: (data: SalonTemplateData) => JSX.Element;
+  theme: TemplateTheme;
 };
 
 const TEMPLATE_REGISTRY: TemplateDefinition[] = [
@@ -17,12 +20,14 @@ const TEMPLATE_REGISTRY: TemplateDefinition[] = [
     label: "Aura Wellness",
     vertical: "salon",
     component: SalonTemplate,
+    theme: auraWellnessTheme,
   },
   {
     id: "aura-clinic",
     label: "Aura Clinic",
     vertical: "clinic",
     component: SalonTemplate,
+    theme: auraWellnessTheme, // swap once a distinct clinic theme exists
   },
 ];
 
