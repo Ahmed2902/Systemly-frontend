@@ -58,6 +58,8 @@ export function Hero({
             href={`/${slug}/book`}
             className="rounded-sm px-6 py-3 text-xs font-medium uppercase tracking-wider text-white text-center transition-opacity hover:opacity-90"
             style={{ backgroundColor: "var(--accent)" }}
+              scroll={false}
+
           >
             Reserve Your Moment
           </Link>

@@ -41,6 +41,7 @@ export function Nav({
         href={`/${slug}/book`}
         className="rounded-sm px-5 py-2.5 text-xs font-medium uppercase tracking-wider text-white inline-block text-center transition-opacity hover:opacity-90"
         style={{ backgroundColor: "var(--accent)" }}
+        scroll={false}
       >
         Book Appointment
       </Link>
