@@ -25,6 +25,8 @@ interface Props {
   onCancelAppointment: (appointmentId: string, reason: string) => Promise<void>;
   onCollectPayment: (appointmentId: string) => Promise<void>;
   onRevert: (appointmentId: string) => Promise<void>;
+  onUncancel: (appointmentId: string) => Promise<void>;
+  onMarkNoShow: (appointmentId: string) => Promise<void>;
 }
 
 export function AppointmentEditPanel({
@@ -38,6 +40,8 @@ export function AppointmentEditPanel({
   onCancelAppointment,
   onCollectPayment,
   onRevert,
+  onUncancel,
+  onMarkNoShow,
 }: Props) {
   const [draft, setDraft] = useState<AppointmentSummary>(appointment);
   const [saving, setSaving] = useState(false);
@@ -172,6 +176,15 @@ export function AppointmentEditPanel({
   async function handleRevert() {
     if (!confirm("Reopen this appointment for editing?")) return;
     await onRevert(draft.id);
+  }
+  async function handleUncancel() {
+    if (!confirm("Restore this appointment to confirmed?")) return;
+    await onUncancel(draft.id);
+  }
+
+  async function handleMarkNoShow() {
+    if (!confirm("Mark this appointment as a no-show?")) return;
+    await onMarkNoShow(draft.id);
   }
 
   return (
@@ -432,7 +445,6 @@ export function AppointmentEditPanel({
         </div>
       </div>
 
-      {/* Actions */}
       <div className="space-y-2 border-t border-slate-200 p-4">
         {!locked && (
           <button
@@ -443,26 +455,31 @@ export function AppointmentEditPanel({
             {saving ? "Saving…" : "Save Changes"}
           </button>
         )}
-        <div className="flex gap-2">
+
+        <button
+          disabled={locked || draft.status === "cancelled_by_business"}
+          onClick={handleCancel}
+          className="w-full rounded-md border border-red-300 py-2 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-40"
+        >
+          Cancel Appt
+        </button>
+        {draft.status === "cancelled_by_business" && (
           <button
-            disabled={
-              locked ||
-              draft.status === "cancelled_by_business" ||
-              draft.status === "cancelled_by_customer"
-            }
-            onClick={handleCancel}
-            className="flex-1 rounded-md border border-red-300 py-2 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-40"
+            onClick={handleUncancel}
+            className="w-full rounded-md border border-blue-300 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50"
           >
-            Cancel Appt
+            Uncancel
           </button>
+        )}
+
+        {draft.status === "confirmed" && (
           <button
-            disabled={locked}
-            onClick={handleComplete}
-            className="flex-1 rounded-md border border-slate-300 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-40"
+            onClick={handleMarkNoShow}
+            className="w-full rounded-md border border-amber-300 py-2 text-sm font-medium text-amber-600 hover:bg-amber-50"
           >
-            Complete
+            Mark No-show
           </button>
-        </div>
+        )}
         <button
           disabled={locked || draft.isPaid}
           onClick={handleCollectPayment}
@@ -470,6 +487,15 @@ export function AppointmentEditPanel({
         >
           {draft.isPaid ? "Paid ✓" : `Collect Payment (${formatMoney(total)})`}
         </button>
+
+        {!locked && (
+          <button
+            onClick={handleComplete}
+            className="w-full text-center text-xs text-slate-400 hover:text-slate-600 hover:underline"
+          >
+            Mark complete without payment
+          </button>
+        )}
       </div>
     </div>
   );

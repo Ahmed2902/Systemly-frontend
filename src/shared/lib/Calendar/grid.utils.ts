@@ -66,7 +66,7 @@ export function toTimeValue(iso: string): string {
 
 /** Rebuilds an ISO string from a YYYY-MM-DD date + "HH:mm" */
 export function fromTimeValue(date: string, hhmm: string): string {
-  return `${date}T${hhmm}:00`;
+  return new Date(`${date}T${hhmm}:00`).toISOString();
 }
 
 export function getStatusClasses(

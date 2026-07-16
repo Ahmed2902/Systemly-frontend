@@ -77,24 +77,26 @@ export async function saveAppointment(
   appointment: AppointmentSummary,
   accessToken: string,
 ): Promise<AppointmentSummary> {
+  const body = {
+    segments: appointment.segments.map((s) => ({
+      id: s.id.startsWith("seg-new") ? undefined : s.id,
+      serviceId: s.serviceId,
+      staffId: s.staffId,
+      startsAt: s.startsAt,
+      endsAt: s.endsAt,
+    })),
+    customItems: appointment.customItems.map((c) => ({
+      id: c.id.startsWith("custom-") ? undefined : c.id,
+      description: c.description,
+      priceCents: c.price,
+    })),
+    discountCents: appointment.discount,
+    notes: appointment.notes,
+  };
+  console.log("PATCH payload:", JSON.stringify(body, null, 2)); // TEMP
   const raw = await api<any>(`/appointments/${appointment.id}`, accessToken, {
     method: "PATCH",
-    body: JSON.stringify({
-      segments: appointment.segments.map((s) => ({
-        id: s.id.startsWith("seg-new") ? undefined : s.id,
-        serviceId: s.serviceId,
-        staffId: s.staffId,
-        startsAt: s.startsAt,
-        endsAt: s.endsAt,
-      })),
-      customItems: appointment.customItems.map((c) => ({
-        id: c.id.startsWith("custom-") ? undefined : c.id,
-        description: c.description,
-        priceCents: c.price,
-      })),
-      discountCents: appointment.discount,
-      notes: appointment.notes,
-    }),
+    body: JSON.stringify(body),
   });
   return mapBackendAppointment(raw);
 }
@@ -104,7 +106,7 @@ export async function completeAppointment(
   accessToken: string,
 ): Promise<AppointmentSummary> {
   const raw = await api<any>(
-    `/appointments/${appointmentId}/complete`,
+    `/appointments/${appointmentId}/finish`,
     accessToken,
     {
       method: "POST",
@@ -134,23 +136,53 @@ export async function collectPayment(
   discountCents: number,
   accessToken: string,
 ): Promise<AppointmentSummary> {
-  const raw = await api<any>(
-    `/appointments/${appointmentId}/collect-payment`,
-    accessToken,
-    {
-      method: "POST",
-      body: JSON.stringify({ discountCents }),
-    },
-  );
+  const raw = await api<any>(`/invoices/collect-payment`, accessToken, {
+    method: "POST",
+    body: JSON.stringify({ appointmentId, discountCents }),
+  });
   return mapBackendAppointment(raw);
 }
 
 export async function revertAppointment(
   appointmentId: string,
   accessToken: string,
+  businessId: string,
 ): Promise<AppointmentSummary> {
+  console.log(appointmentId, accessToken, businessId);
   const raw = await api<any>(
     `/appointments/${appointmentId}/revert`,
+    accessToken,
+    {
+      method: "POST",
+      body: JSON.stringify({ businessId }),
+    },
+  );
+
+  return mapBackendAppointment(raw);
+}
+
+export async function uncancelAppointment(
+  appointmentId: string,
+  accessToken: string,
+  businessId: string,
+): Promise<AppointmentSummary> {
+  const raw = await api<any>(
+    `/appointments/${appointmentId}/uncancel`,
+    accessToken,
+    {
+      method: "POST",
+      body: JSON.stringify({ businessId }),
+    },
+  );
+  return mapBackendAppointment(raw);
+}
+
+export async function markNoShow(
+  appointmentId: string,
+  accessToken: string,
+): Promise<AppointmentSummary> {
+  const raw = await api<any>(
+    `/appointments/${appointmentId}/mark-no-show`,
     accessToken,
     {
       method: "POST",

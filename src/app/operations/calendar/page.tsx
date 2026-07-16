@@ -15,6 +15,8 @@ import {
   cancelAppointment,
   collectPayment,
   revertAppointment,
+  markNoShow,
+  uncancelAppointment,
 } from "../../../modules/operations/Calendar.api";
 import type {
   CalendarDayData,
@@ -155,14 +157,22 @@ export default function CalendarPage() {
               }}
               onCollectPayment={async (id) => {
                 await collectPayment(
-                  id,
+                  selected.id,
                   selected.discount,
                   String(accessToken),
                 );
                 await reload();
               }}
               onRevert={async (id) => {
-                await revertAppointment(id, String(accessToken));
+                await revertAppointment(id, String(accessToken), businessId);
+                await reload();
+              }}
+              onUncancel={async (id) => {
+                await uncancelAppointment(id, String(accessToken), businessId);
+                await reload();
+              }}
+              onMarkNoShow={async (id) => {
+                await markNoShow(id, String(accessToken));
                 await reload();
               }}
             />
