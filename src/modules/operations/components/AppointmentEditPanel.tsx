@@ -87,13 +87,15 @@ export function AppointmentEditPanel({
     const end = new Date(
       start.getTime() + service.defaultDurationMinutes * 60000,
     );
-
+    const eligibleStaff = staff.filter((s) =>
+      s.serviceIds?.includes(service.id),
+    );
     const newSegment: AppointmentSegment = {
       id: `seg-new-${Date.now()}`,
       appointmentId: draft.id,
       serviceId: service.id,
       serviceName: service.name,
-      staffId: staff[0]?.id ?? "",
+      staffId: eligibleStaff[0]?.id ?? "",
       startsAt: start.toISOString(),
       endsAt: end.toISOString(),
       price: service.defaultPrice,
@@ -278,11 +280,13 @@ export function AppointmentEditPanel({
                       }
                       className="flex-1 rounded border border-slate-300 px-2 py-1 text-xs disabled:bg-slate-100"
                     >
-                      {staff.map((s) => (
-                        <option key={s.id} value={s.id}>
-                          {s.name}
-                        </option>
-                      ))}
+                      {staff
+                        .filter((s) => s.serviceIds?.includes(seg.serviceId))
+                        .map((s) => (
+                          <option key={s.id} value={s.id}>
+                            {s.name}
+                          </option>
+                        ))}
                     </select>
                     <input
                       type="time"

@@ -41,12 +41,13 @@ export async function getCalendarDay(
   date: string,
   accessToken: string,
 ): Promise<CalendarDayData> {
-  const [appointmentsRes, staffRes] = await Promise.all([
+  const [appointmentsRes, staffRes, breaksRes] = await Promise.all([
     api<any>(
       `/appointments?businessId=${businessId}&date=${date}`,
       accessToken,
     ),
     api<any>(`/staff?businessId=${businessId}`, accessToken),
+    api<any>(`staff/breaks?date=${date}`, accessToken),
   ]);
 
   // listAppointments / listByBusiness return { items, total, page, perPage }
@@ -54,8 +55,9 @@ export async function getCalendarDay(
   // the lines below for: const appointments = appointmentsRes;
   const appointments = appointmentsRes?.items ?? appointmentsRes ?? [];
   const staff = staffRes?.items ?? staffRes ?? [];
+  const breaks = breaksRes?.items ?? breaksRes ?? [];
 
-  return mapBackendCalendarDay(date, appointments, staff);
+  return mapBackendCalendarDay(date, appointments, staff, breaks);
 }
 
 export async function getServiceCatalog(

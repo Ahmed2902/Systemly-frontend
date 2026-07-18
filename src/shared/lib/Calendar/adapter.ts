@@ -54,6 +54,7 @@ export function mapBackendCalendarDay(
   date: string,
   rawAppointments: any[],
   rawStaff: any[],
+  rawBreaks: any[] = [],
 ): CalendarDayData {
   return {
     date,
@@ -62,9 +63,16 @@ export function mapBackendCalendarDay(
         id: s.id,
         name: s.name,
         role: s.role ?? "",
+        serviceIds: (s.serviceStaff ?? []).map((ss: any) => ss.serviceId),
       }),
     ),
     appointments: rawAppointments.map(mapBackendAppointment),
-    breaks: [], // TODO: wire in once GET /staff-breaks exists
+    breaks: rawBreaks.map((b) => ({
+      id: b.id,
+      staffId: b.staffId,
+      startsAt: `${date}T${new Date(b.startTime).toISOString().slice(11, 19)}`,
+      endsAt: `${date}T${new Date(b.endTime).toISOString().slice(11, 19)}`,
+      label: b.label,
+    })),
   };
 }

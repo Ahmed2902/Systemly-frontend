@@ -10,6 +10,7 @@ export interface StaffMember {
   name: string;
   role: string;
   avatarUrl?: string | null;
+  serviceIds?: string[]; // optional array of service IDs that this staff member can perform
 }
 
 export interface ServiceCatalogItem {
