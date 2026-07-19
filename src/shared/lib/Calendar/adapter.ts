@@ -55,17 +55,42 @@ export function mapBackendCalendarDay(
   rawAppointments: any[],
   rawStaff: any[],
   rawBreaks: any[] = [],
+  rawSchedules: Array<{
+    staffId: string;
+    availability?: any[];
+    availabilityOverrides?: any[];
+  }> = [],
 ): CalendarDayData {
+  const scheduleByStaffId = new Map(
+    rawSchedules.map((row) => [row.staffId, row]),
+  );
+
   return {
     date,
-    staff: rawStaff.map(
-      (s): StaffMember => ({
+    staff: rawStaff.map((s): StaffMember => {
+      const schedule = scheduleByStaffId.get(s.id);
+      return {
         id: s.id,
         name: s.name,
         role: s.role ?? "",
         serviceIds: (s.serviceStaff ?? []).map((ss: any) => ss.serviceId),
-      }),
-    ),
+        availability: (schedule?.availability ?? []).map((a: any) => ({
+          dayOfWeek: a.dayOfWeek,
+          startTime: a.startTime,
+          endTime: a.endTime,
+          breakAfterMin: a.breakAfterMin ?? null,
+        })),
+        availabilityOverrides: (schedule?.availabilityOverrides ?? []).map(
+          (o: any) => ({
+            id: o.id,
+            overrideDate: o.overrideDate,
+            isDayOff: o.isDayOff,
+            startTime: o.startTime ?? null,
+            endTime: o.endTime ?? null,
+          }),
+        ),
+      };
+    }),
     appointments: rawAppointments.map(mapBackendAppointment),
     breaks: rawBreaks.map((b) => ({
       id: b.id,

@@ -11,6 +11,23 @@ export interface StaffMember {
   role: string;
   avatarUrl?: string | null;
   serviceIds?: string[]; // optional array of service IDs that this staff member can perform
+  availability?: AvailabilityEntry[];
+  availabilityOverrides?: AvailabilityOverride[];
+}
+
+export interface AvailabilityEntry {
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
+  breakAfterMin?: number | null;
+}
+
+export interface AvailabilityOverride {
+  id: string;
+  overrideDate: string;
+  isDayOff: boolean;
+  startTime?: string | null;
+  endTime?: string | null;
 }
 
 export interface ServiceCatalogItem {

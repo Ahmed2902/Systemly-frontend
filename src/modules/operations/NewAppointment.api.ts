@@ -76,7 +76,10 @@ export async function getStaffRoster(
     name: s.name,
     role: s.role,
     avatarUrl: s.avatarUrl ?? null,
-    serviceIds: s.serviceIds ?? undefined,
+    serviceIds:
+      s.serviceIds ??
+      s.serviceStaff?.map((rel: any) => rel.serviceId) ??
+      undefined,
   }));
 }
 

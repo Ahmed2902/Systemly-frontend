@@ -13,11 +13,22 @@ import {
   fromTimeValue,
 } from "../../../shared/lib/Calendar/grid.utils";
 import { hasStaffConflict } from "../../../shared/lib/Calendar/conflicts";
+import {
+  getAvailableStaffForSegment,
+  isStaffEligibleForSegment,
+} from "../../../shared/lib/Calendar/staff-eligibility";
 
 interface Props {
   appointment: AppointmentSummary;
   allAppointments: AppointmentSummary[]; // for conflict checks
   staff: StaffMember[];
+  breaks: {
+    id: string;
+    staffId: string;
+    startsAt: string;
+    endsAt: string;
+    label?: string;
+  }[];
   serviceCatalog: ServiceCatalogItem[];
   onClose: () => void;
   onSave: (updated: AppointmentSummary) => Promise<void>;
@@ -33,6 +44,7 @@ export function AppointmentEditPanel({
   appointment,
   allAppointments,
   staff,
+  breaks,
   serviceCatalog,
   onClose,
   onSave,
@@ -45,6 +57,7 @@ export function AppointmentEditPanel({
 }: Props) {
   const [draft, setDraft] = useState<AppointmentSummary>(appointment);
   const [saving, setSaving] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   // Reset local draft whenever a different appointment is selected
   useEffect(() => {
@@ -87,9 +100,23 @@ export function AppointmentEditPanel({
     const end = new Date(
       start.getTime() + service.defaultDurationMinutes * 60000,
     );
-    const eligibleStaff = staff.filter((s) =>
-      s.serviceIds?.includes(service.id),
-    );
+    const eligibleStaff = getAvailableStaffForSegment({
+      staff,
+      serviceId: service.id,
+      startsAt: start.toISOString(),
+      endsAt: end.toISOString(),
+      breaks,
+      appointments: allAppointments,
+      appointmentId: draft.id,
+    });
+
+    if (eligibleStaff.length === 0) {
+      setValidationError(
+        `No staff are eligible and available for ${service.name} at that time.`,
+      );
+      return;
+    }
+
     const newSegment: AppointmentSegment = {
       id: `seg-new-${Date.now()}`,
       appointmentId: draft.id,
@@ -103,6 +130,8 @@ export function AppointmentEditPanel({
       segmentCount: draft.segments.length + 1,
     };
 
+    setValidationError(null);
+
     setDraft((d) => ({
       ...d,
       segments: [...d.segments, newSegment].map((s, i) => ({
@@ -111,6 +140,20 @@ export function AppointmentEditPanel({
         segmentCount: d.segments.length + 1,
       })),
     }));
+  }
+
+  function staffOptionsForSegment(seg: AppointmentSegment) {
+    return staff.filter((s) =>
+      isStaffEligibleForSegment({
+        staff: s,
+        serviceId: seg.serviceId,
+        startsAt: seg.startsAt,
+        endsAt: seg.endsAt,
+        breaks,
+        appointments: allAppointments,
+        appointmentId: draft.id,
+      }),
+    );
   }
 
   function addCustomItem() {
@@ -227,6 +270,12 @@ export function AppointmentEditPanel({
       )}
 
       <div className="flex-1 space-y-4 p-4">
+        {validationError && (
+          <div className="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-800">
+            {validationError}
+          </div>
+        )}
+
         {/* Customer stats */}
         <div className="flex gap-4 rounded-md bg-slate-50 p-3 text-sm">
           <div>
@@ -280,13 +329,11 @@ export function AppointmentEditPanel({
                       }
                       className="flex-1 rounded border border-slate-300 px-2 py-1 text-xs disabled:bg-slate-100"
                     >
-                      {staff
-                        .filter((s) => s.serviceIds?.includes(seg.serviceId))
-                        .map((s) => (
-                          <option key={s.id} value={s.id}>
-                            {s.name}
-                          </option>
-                        ))}
+                      {staffOptionsForSegment(seg).map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.name}
+                        </option>
+                      ))}
                     </select>
                     <input
                       type="time"
@@ -314,6 +361,11 @@ export function AppointmentEditPanel({
                   {conflict && (
                     <div className="mt-1 text-xs font-medium text-red-600">
                       ⚠ Staff double-booked at this time
+                    </div>
+                  )}
+                  {!staffOptionsForSegment(seg).length && (
+                    <div className="mt-1 text-xs font-medium text-amber-700">
+                      No eligible staff are available for this time.
                     </div>
                   )}
                 </div>

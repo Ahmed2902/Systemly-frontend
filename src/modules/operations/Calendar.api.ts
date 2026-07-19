@@ -57,7 +57,25 @@ export async function getCalendarDay(
   const staff = staffRes?.items ?? staffRes ?? [];
   const breaks = breaksRes?.items ?? breaksRes ?? [];
 
-  return mapBackendCalendarDay(date, appointments, staff, breaks);
+  const schedules = await Promise.all(
+    staff.map(async (member: any) => {
+      const [availabilityRes, overridesRes] = await Promise.all([
+        api<any>(`/staff/${member.id}/availability`, accessToken),
+        api<any>(
+          `/staff/${member.id}/availability/overrides?date=${date}`,
+          accessToken,
+        ),
+      ]);
+
+      return {
+        staffId: member.id,
+        availability: availabilityRes?.items ?? availabilityRes ?? [],
+        availabilityOverrides: overridesRes?.items ?? overridesRes ?? [],
+      };
+    }),
+  );
+
+  return mapBackendCalendarDay(date, appointments, staff, breaks, schedules);
 }
 
 export async function getServiceCatalog(

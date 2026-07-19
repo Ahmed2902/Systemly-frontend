@@ -144,6 +144,7 @@ export default function CalendarPage() {
               appointment={selected}
               allAppointments={data.appointments}
               staff={data.staff}
+              breaks={data.breaks}
               serviceCatalog={catalog}
               onClose={() => setSelectedId(null)}
               onSave={async (updated) => {
