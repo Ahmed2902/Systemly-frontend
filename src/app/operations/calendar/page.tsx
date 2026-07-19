@@ -6,6 +6,7 @@ import { CalendarGrid } from "../../../modules/operations/components/CalendarGri
 import { StatusLegend } from "../../../modules/operations/components/StatusLegend";
 import { AppointmentEditPanel } from "../../../modules/operations/components/AppointmentEditPanel";
 import { useAuth } from "@/modules/auth/useAuth";
+import { useOnAppointmentCreated } from "../../../modules/operations/operations.context";
 
 import {
   getCalendarDay,
@@ -48,6 +49,8 @@ export default function CalendarPage() {
       setError(e.message ?? "Failed to load calendar");
     }
   }, [date, businessId, accessToken]);
+
+  useOnAppointmentCreated(reload);
 
   useEffect(() => {
     if (authLoading) return;

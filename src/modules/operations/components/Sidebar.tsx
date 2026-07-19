@@ -13,6 +13,7 @@ import {
   Settings,
   Plus,
 } from "lucide-react";
+import { useOperations } from "../operations.context";
 
 const NAV_ITEMS = [
   { href: "/operations/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -31,17 +32,18 @@ const NAV_ITEMS = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { openNewAppointment } = useOperations();
 
   return (
     <aside className="flex w-60 flex-shrink-0 flex-col border-r border-slate-200 bg-white">
       <div className="p-4">
         <div className="text-lg font-bold text-slate-900">Hgezli</div>
-        <Link
-          href="/operations/appointments/new"
-          className="mt-3 flex items-center justify-center gap-1.5 rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"
+        <button
+          onClick={openNewAppointment}
+          className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"
         >
           <Plus size={16} /> New Appointment
-        </Link>
+        </button>
       </div>
 
       <nav className="flex-1 space-y-0.5 px-2">

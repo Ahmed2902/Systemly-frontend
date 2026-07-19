@@ -211,7 +211,7 @@ export function AppointmentEditPanel({
         </button>
       </div>
 
-      {locked && (
+      {(locked || draft.status === "no_show") && (
         <div className="flex items-center justify-between bg-slate-100 px-4 py-2 text-sm text-slate-600">
           <span>
             Locked —{" "}
