@@ -86,6 +86,25 @@ export async function getCalendarDay(
   );
 }
 
+export async function getAppointmentsForDay(
+  businessId: string,
+  date: string,
+  accessToken: string,
+): Promise<any[]> {
+  const raw = await api<any>(
+    `/appointments?businessId=${encodeURIComponent(businessId)}&date=${encodeURIComponent(date)}&perPage=100`,
+    accessToken,
+  );
+  return raw?.items ?? raw ?? [];
+}
+
+export async function getAppointmentDetail(
+  appointmentId: string,
+  accessToken: string,
+): Promise<any> {
+  return api<any>(`/appointments/${encodeURIComponent(appointmentId)}`, accessToken);
+}
+
 export async function getServiceCatalog(
   businessId: string,
   accessToken: string,

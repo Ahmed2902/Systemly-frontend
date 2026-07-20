@@ -149,6 +149,8 @@ export function getStatusClasses(
   switch (status) {
     case "confirmed":
       return { bg: "bg-blue-50", border: "border-blue-400", text: "text-blue-900" };
+    case "in_progress":
+      return { bg: "bg-violet-50", border: "border-violet-400", text: "text-violet-900" };
     case "cancelled_by_business":
     case "cancelled_by_customer":
       return { bg: "bg-red-50", border: "border-red-400", text: "text-red-800 line-through decoration-red-400" };

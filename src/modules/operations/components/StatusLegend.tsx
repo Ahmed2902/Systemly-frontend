@@ -2,6 +2,7 @@
 
 const ITEMS: Array<{ label: string; dotClass: string }> = [
   { label: "Confirmed", dotClass: "bg-blue-500" },
+  { label: "In progress", dotClass: "bg-violet-500" },
   { label: "Cancelled", dotClass: "bg-red-500" },
   { label: "No-show", dotClass: "bg-amber-500" },
   { label: "Completed / Paid (locked)", dotClass: "bg-slate-400" },

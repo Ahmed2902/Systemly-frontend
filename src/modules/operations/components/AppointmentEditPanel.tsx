@@ -551,6 +551,7 @@ export function AppointmentEditPanel({
                 options={[
                   { value: "pending", label: "Pending" },
                   { value: "confirmed", label: "Confirmed" },
+                  { value: "in_progress", label: "In progress" },
                   { value: "no_show", label: "No-show" },
                 ]}
                 onChange={(value) => {
