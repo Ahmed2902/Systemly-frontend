@@ -49,6 +49,42 @@ export function NewAppointmentModal() {
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [activeStep, setActiveStep] = useState(1);
+
+  const selectedServices = useMemo(
+    () => catalog.filter((service) => selectedServiceIds.includes(service.id)),
+    [catalog, selectedServiceIds],
+  );
+
+  const selectedStaffByServiceId = useMemo(() => {
+    const map = new Map<string, StaffMember | null>();
+    for (const serviceId of selectedServiceIds) {
+      const choice = staffChoices[serviceId];
+      if (!choice || choice === "any") {
+        map.set(serviceId, null);
+        continue;
+      }
+      map.set(serviceId, staff.find((member) => member.id === choice) ?? null);
+    }
+    return map;
+  }, [selectedServiceIds, staffChoices, staff]);
+
+  const canContinueFromCustomer =
+    customerName.trim().length > 0 && customerPhone.trim().length > 0;
+  const canContinueFromServices = selectedServiceIds.length > 0;
+  const canContinueFromStaff =
+    selectedServiceIds.length > 0 &&
+    selectedServiceIds.every((serviceId) => {
+      const service = catalog.find((item) => item.id === serviceId);
+      if (!service) return false;
+      return eligibleStaffFor(serviceId).length > 0;
+    });
+  const canContinueFromTime = Boolean(selectedSlot);
+  const readyToSubmit =
+    canContinueFromCustomer &&
+    canContinueFromServices &&
+    canContinueFromStaff &&
+    canContinueFromTime;
 
   const selections: ServiceSelection[] = useMemo(
     () =>
@@ -65,6 +101,7 @@ export function NewAppointmentModal() {
   // Reset everything when the modal closes
   useEffect(() => {
     if (!isNewAppointmentOpen) {
+      setActiveStep(1);
       setSelectedServiceIds([]);
       setStaffChoices({});
       setSlots([]);
@@ -76,6 +113,13 @@ export function NewAppointmentModal() {
       setError(null);
     }
   }, [isNewAppointmentOpen]);
+
+  useEffect(() => {
+    if (!isNewAppointmentOpen) return;
+    if (selectedServiceIds.length === 0 && activeStep > 2) {
+      setActiveStep(2);
+    }
+  }, [isNewAppointmentOpen, activeStep, selectedServiceIds.length]);
 
   // Load catalog + staff once when opened
   useEffect(() => {
@@ -132,10 +176,49 @@ export function NewAppointmentModal() {
         ? prev.filter((id) => id !== serviceId)
         : [...prev, serviceId],
     );
+    setStaffChoices((prev) => {
+      if (selectedServiceIds.includes(serviceId)) {
+        const next = { ...prev };
+        delete next[serviceId];
+        return next;
+      }
+      return prev;
+    });
   }
 
   function eligibleStaffFor(serviceId: string): StaffMember[] {
     return staff.filter((s) => s.serviceIds?.includes(serviceId));
+  }
+
+  function validateStep(step: number): boolean {
+    if (step === 1 && !canContinueFromCustomer) {
+      setError("Customer name and phone are required.");
+      return false;
+    }
+    if (step === 2 && !canContinueFromServices) {
+      setError("Please select at least one service.");
+      return false;
+    }
+    if (step === 3 && !canContinueFromStaff) {
+      setError("Each selected service needs an eligible staff member.");
+      return false;
+    }
+    if (step === 4 && !canContinueFromTime) {
+      setError("Please pick an available time slot.");
+      return false;
+    }
+    setError(null);
+    return true;
+  }
+
+  function goNext() {
+    if (!validateStep(activeStep)) return;
+    setActiveStep((step) => Math.min(5, step + 1));
+  }
+
+  function goBack() {
+    setError(null);
+    setActiveStep((step) => Math.max(1, step - 1));
   }
 
   async function handleSubmit() {
@@ -169,135 +252,425 @@ export function NewAppointmentModal() {
 
   if (!isNewAppointmentOpen) return null;
 
+  const stepItems = [
+    { id: 1, label: "Customer" },
+    { id: 2, label: "Services" },
+    { id: 3, label: "Staff" },
+    { id: 4, label: "Time" },
+    { id: 5, label: "Review" },
+  ] as const;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-      <div className="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-xl">
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
-          <h2 className="text-lg font-bold text-slate-900">New Appointment</h2>
-          <button
-            onClick={closeNewAppointment}
-            className="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-          >
-            <X size={20} />
-          </button>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 p-4 backdrop-blur-sm">
+      <div className="flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-[28px] bg-slate-50 shadow-2xl ring-1 ring-black/5">
+        <div className="flex items-center justify-between border-b border-slate-200 bg-white px-6 py-4">
+          <div className="flex items-start gap-3">
+            <button
+              onClick={closeNewAppointment}
+              className="mt-0.5 rounded-full p-1.5 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
+              aria-label="Close"
+            >
+              <X size={18} />
+            </button>
+            <div>
+              <div className="text-sm font-semibold uppercase tracking-[0.18em] text-blue-700">
+                <h2 className="text-2xl font-semibold ">New Appointment</h2>
+              </div>
+
+              <p className="text-sm text-slate-500">
+                Keep everything in the modal while you build the booking step by
+                step.
+              </p>
+            </div>
+          </div>
+
+          <div className="text-sm font-medium text-slate-500">
+            Step {activeStep} of 5
+          </div>
         </div>
 
-        {/* Body */}
-        <div className="flex-1 space-y-5 overflow-y-auto px-5 py-4">
+        <div className="border-b border-slate-200 bg-white px-6 py-5">
+          <div className="flex flex-wrap items-center gap-3">
+            {stepItems.map((step, index) => {
+              const isActive = activeStep === step.id;
+              const isComplete = activeStep > step.id;
+              return (
+                <button
+                  key={step.id}
+                  type="button"
+                  onClick={() => {
+                    if (step.id === 1 || step.id < activeStep) {
+                      setActiveStep(step.id);
+                    }
+                  }}
+                  className="flex items-center gap-3"
+                >
+                  <div
+                    className={`flex h-8 w-8 items-center justify-center rounded-full border text-xs font-semibold transition ${
+                      isComplete || isActive
+                        ? "border-blue-600 bg-blue-600 text-white"
+                        : "border-slate-300 bg-slate-100 text-slate-500"
+                    }`}
+                  >
+                    {step.id}
+                  </div>
+                  <span
+                    className={`text-sm font-medium ${
+                      isActive || isComplete
+                        ? "text-slate-900"
+                        : "text-slate-400"
+                    }`}
+                  >
+                    {step.label}
+                  </span>
+                  {index < stepItems.length - 1 && (
+                    <div className="hidden h-px w-16 bg-slate-200 sm:block" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-6 py-6">
           {error && (
-            <div className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+            <div className="mb-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
               {error}
             </div>
           )}
 
-          {/* Services */}
-          <div>
-            <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Services
+          {loadingCatalog && activeStep <= 2 && (
+            <div className="mb-4 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-500">
+              Loading services and staff…
             </div>
-            {loadingCatalog ? (
-              <div className="text-sm text-slate-400">Loading services…</div>
-            ) : (
-              <div className="space-y-2">
+          )}
+
+          {activeStep === 1 && (
+            <div className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
+              <section className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
+                <div className="mb-5">
+                  <h3 className="text-xl font-semibold text-slate-950">
+                    Select or Add Customer
+                  </h3>
+                  <p className="mt-1 text-sm text-slate-500">
+                    Search an existing customer or create a fresh profile.
+                  </p>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                      Search existing
+                    </div>
+                    <div className="relative">
+                      <Search
+                        size={16}
+                        className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                      />
+                      <input
+                        type="tel"
+                        value={customerPhone}
+                        onChange={(e) => setCustomerPhone(e.target.value)}
+                        placeholder="Search by name or phone…"
+                        className="w-full rounded-2xl border border-slate-300 bg-white py-3 pl-10 pr-4 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      />
+                    </div>
+                    {searchingPhone && (
+                      <div className="mt-2 text-xs text-slate-400">
+                        Searching…
+                      </div>
+                    )}
+                    {phoneMatches.length > 0 && (
+                      <div className="mt-3 space-y-2">
+                        {phoneMatches.map((customer) => (
+                          <button
+                            key={customer.id}
+                            type="button"
+                            onClick={() => {
+                              setCustomerPhone(customer.phone);
+                              setCustomerName(customer.name);
+                              setPhoneMatches([]);
+                              setError(null);
+                            }}
+                            className="flex w-full items-center justify-between rounded-2xl border border-slate-200 px-4 py-3 text-left transition hover:border-blue-300 hover:bg-blue-50/60"
+                          >
+                            <div>
+                              <div className="font-medium text-slate-950">
+                                {customer.name || "Unnamed customer"}
+                              </div>
+                              <div className="text-xs text-slate-500">
+                                {customer.phone} · {customer.visitCount} visits
+                              </div>
+                            </div>
+                            <div className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
+                              Use
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </section>
+
+              <section className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
+                <div className="mb-5">
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                    Or add new customer
+                  </div>
+                  <h3 className="mt-1 text-xl font-semibold text-slate-950">
+                    Customer details
+                  </h3>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-slate-700">
+                      Full name
+                    </label>
+                    <input
+                      type="text"
+                      value={customerName}
+                      onChange={(e) => setCustomerName(e.target.value)}
+                      placeholder="e.g. Sarah Jenkins"
+                      className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-slate-700">
+                      Phone number
+                    </label>
+                    <input
+                      type="tel"
+                      value={customerPhone}
+                      onChange={(e) => setCustomerPhone(e.target.value)}
+                      placeholder="+1..."
+                      className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-slate-700">
+                      Notes
+                    </label>
+                    <textarea
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                      placeholder="Optional booking notes"
+                      rows={4}
+                      className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    />
+                  </div>
+
+                  {(customerName.trim() || customerPhone.trim()) && (
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+                      {customerName.trim() || "Unnamed customer"} ·{" "}
+                      {customerPhone.trim() || "No phone"}
+                    </div>
+                  )}
+                </div>
+              </section>
+            </div>
+          )}
+
+          {activeStep === 2 && (
+            <section className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="mb-5 flex items-start justify-between gap-4">
+                <div>
+                  <h3 className="text-xl font-semibold text-slate-950">
+                    Choose services
+                  </h3>
+                  <p className="mt-1 text-sm text-slate-500">
+                    Select the services this appointment should include.
+                  </p>
+                </div>
+                <div className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-600">
+                  {selectedServiceIds.length} selected
+                </div>
+              </div>
+
+              <div className="grid gap-3 md:grid-cols-2">
                 {catalog.map((svc) => {
                   const eligible = eligibleStaffFor(svc.id);
                   const hasEligibleStaff = eligible.length > 0;
                   const checked = selectedServiceIds.includes(svc.id);
                   return (
-                    <div
+                    <button
                       key={svc.id}
-                      className={`rounded-md border px-3 py-2 ${
+                      type="button"
+                      onClick={() => hasEligibleStaff && toggleService(svc.id)}
+                      className={`rounded-2xl border p-4 text-left transition ${
                         !hasEligibleStaff
-                          ? "border-slate-200 opacity-50"
+                          ? "cursor-not-allowed border-slate-200 bg-slate-50 opacity-60"
                           : checked
-                            ? "border-blue-400 bg-blue-50"
-                            : "border-slate-200"
+                            ? "border-blue-500 bg-blue-50 shadow-sm"
+                            : "border-slate-200 bg-white hover:border-blue-300 hover:bg-slate-50"
                       }`}
                     >
-                      <label
-                        className={`flex items-center gap-2 ${
-                          hasEligibleStaff
-                            ? "cursor-pointer"
-                            : "cursor-not-allowed"
-                        }`}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={checked}
-                          disabled={!hasEligibleStaff}
-                          onChange={() => toggleService(svc.id)}
-                        />
-                        <span className="flex-1 text-sm font-medium text-slate-900">
-                          {svc.name}
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <div className="text-sm font-semibold text-slate-950">
+                            {svc.name}
+                          </div>
+                          <div className="mt-1 text-xs text-slate-500">
+                            {svc.defaultDurationMinutes} min ·{" "}
+                            {(svc.defaultPrice / 100).toFixed(0)} EGP
+                          </div>
+                        </div>
+                        <div
+                          className={`mt-0.5 flex h-5 w-5 items-center justify-center rounded-full border text-[11px] font-semibold ${
+                            checked
+                              ? "border-blue-600 bg-blue-600 text-white"
+                              : "border-slate-300 bg-white text-slate-400"
+                          }`}
+                        >
+                          {checked ? "✓" : ""}
+                        </div>
+                      </div>
+
+                      <div className="mt-4 flex items-center justify-between text-xs text-slate-500">
+                        <span>
+                          {hasEligibleStaff
+                            ? `${eligible.length} eligible staff`
+                            : "No staff assigned to this service"}
                         </span>
-                        <span className="text-xs text-slate-500">
-                          {svc.defaultDurationMinutes}min ·{" "}
-                          {(svc.defaultPrice / 100).toFixed(0)} EGP
-                        </span>
-                      </label>
-                      {!hasEligibleStaff && (
-                        <div className="mt-1 text-xs text-amber-600">
+                        <span>{checked ? "Selected" : "Tap to add"}</span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+          )}
+
+          {activeStep === 3 && (
+            <section className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="mb-5">
+                <h3 className="text-xl font-semibold text-slate-950">
+                  Assign staff
+                </h3>
+                <p className="mt-1 text-sm text-slate-500">
+                  Pick an eligible staff member for each selected service.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                {selectedServices.map((service) => {
+                  const eligible = eligibleStaffFor(service.id);
+                  const current = staffChoices[service.id] ?? "any";
+                  return (
+                    <div
+                      key={service.id}
+                      className="rounded-2xl border border-slate-200 p-4"
+                    >
+                      <div className="mb-3 flex items-center justify-between gap-3">
+                        <div>
+                          <div className="text-sm font-semibold text-slate-950">
+                            {service.name}
+                          </div>
+                          <div className="text-xs text-slate-500">
+                            {service.defaultDurationMinutes} min ·{" "}
+                            {(service.defaultPrice / 100).toFixed(0)} EGP
+                          </div>
+                        </div>
+                        <div className="text-xs text-slate-500">
+                          {eligible.length} available
+                        </div>
+                      </div>
+
+                      {eligible.length === 0 ? (
+                        <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
                           No staff assigned to this service
                         </div>
-                      )}
-                      {checked && hasEligibleStaff && (
-                        <select
-                          className="mt-2 w-full rounded-md border border-slate-300 px-2 py-1 text-sm"
-                          value={staffChoices[svc.id] ?? "any"}
-                          onChange={(e) =>
-                            setStaffChoices((prev) => ({
-                              ...prev,
-                              [svc.id]: e.target.value,
-                            }))
-                          }
-                        >
-                          <option value="any">Any eligible staff</option>
-                          {eligible.map((s) => (
-                            <option key={s.id} value={s.id}>
-                              {s.name}
-                            </option>
+                      ) : (
+                        <div className="flex flex-wrap gap-2">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setStaffChoices((prev) => ({
+                                ...prev,
+                                [service.id]: "any",
+                              }))
+                            }
+                            className={`rounded-full border px-4 py-2 text-xs font-medium transition ${
+                              current === "any"
+                                ? "border-blue-600 bg-blue-600 text-white"
+                                : "border-slate-300 bg-white text-slate-600 hover:border-blue-300"
+                            }`}
+                          >
+                            Any available
+                          </button>
+                          {eligible.map((member) => (
+                            <button
+                              key={member.id}
+                              type="button"
+                              onClick={() =>
+                                setStaffChoices((prev) => ({
+                                  ...prev,
+                                  [service.id]: member.id,
+                                }))
+                              }
+                              className={`rounded-full border px-4 py-2 text-xs font-medium transition ${
+                                current === member.id
+                                  ? "border-blue-600 bg-blue-600 text-white"
+                                  : "border-slate-300 bg-white text-slate-600 hover:border-blue-300"
+                              }`}
+                            >
+                              {member.name}
+                            </button>
                           ))}
-                        </select>
+                        </div>
                       )}
                     </div>
                   );
                 })}
               </div>
-            )}
-          </div>
+            </section>
+          )}
 
-          {/* Date + slots */}
-          {selectedServiceIds.length > 0 && (
-            <div>
-              <div className="mb-2 flex items-center justify-between">
-                <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  Date &amp; time
+          {activeStep === 4 && (
+            <section className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="mb-5 flex items-center justify-between gap-4">
+                <div>
+                  <h3 className="text-xl font-semibold text-slate-950">
+                    Pick a time
+                  </h3>
+                  <p className="mt-1 text-sm text-slate-500">
+                    Available slots for the selected services.
+                  </p>
                 </div>
                 <input
                   type="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  className="rounded-md border border-slate-300 px-2 py-1 text-sm"
+                  className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                 />
               </div>
 
-              {loadingSlots ? (
-                <div className="text-sm text-slate-400">Loading slots…</div>
+              {selectedServiceIds.length === 0 ? (
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-500">
+                  Select at least one service first.
+                </div>
+              ) : loadingSlots ? (
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-500">
+                  Loading slots…
+                </div>
               ) : slots.length === 0 ? (
-                <div className="text-sm text-slate-400">
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-500">
                   No available slots for this date.
                 </div>
               ) : (
-                <div className="flex flex-wrap gap-2">
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
                   {slots.map((slot) => (
                     <button
                       key={slot.time}
+                      type="button"
                       onClick={() => setSelectedSlot(slot)}
-                      className={`rounded-md border px-3 py-1.5 text-sm font-medium ${
+                      className={`rounded-2xl border px-4 py-3 text-sm font-medium transition ${
                         selectedSlot?.time === slot.time
                           ? "border-blue-600 bg-blue-600 text-white"
-                          : "border-slate-300 text-slate-700 hover:bg-slate-50"
+                          : "border-slate-300 bg-white text-slate-700 hover:border-blue-300 hover:bg-slate-50"
                       }`}
                     >
                       {slot.display}
@@ -305,93 +678,134 @@ export function NewAppointmentModal() {
                   ))}
                 </div>
               )}
-            </div>
+            </section>
           )}
 
-          {/* Customer */}
-          {selectedSlot && (
-            <div className="space-y-3">
-              <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                Customer
-              </div>
+          {activeStep === 5 && (
+            <section className="grid gap-5 lg:grid-cols-[1fr_0.9fr]">
+              <div className="space-y-5">
+                <div className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
+                  <h3 className="text-xl font-semibold text-slate-950">
+                    Review appointment
+                  </h3>
+                  <p className="mt-1 text-sm text-slate-500">
+                    Check the summary before creating the booking.
+                  </p>
 
-              <div className="relative">
-                <div className="relative">
-                  <Search
-                    size={15}
-                    className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400"
-                  />
-                  <input
-                    type="tel"
-                    value={customerPhone}
-                    onChange={(e) => setCustomerPhone(e.target.value)}
-                    placeholder="Phone number"
-                    className="w-full rounded-md border border-slate-300 py-1.5 pl-8 pr-3 text-sm"
-                  />
+                  <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                    <div className="rounded-2xl bg-slate-50 px-4 py-3">
+                      <div className="text-xs uppercase tracking-wide text-slate-500">
+                        Customer
+                      </div>
+                      <div className="mt-1 font-medium text-slate-950">
+                        {customerName.trim() || "Unnamed customer"}
+                      </div>
+                      <div className="text-sm text-slate-500">
+                        {customerPhone.trim() || "No phone"}
+                      </div>
+                    </div>
+                    <div className="rounded-2xl bg-slate-50 px-4 py-3">
+                      <div className="text-xs uppercase tracking-wide text-slate-500">
+                        Date & time
+                      </div>
+                      <div className="mt-1 font-medium text-slate-950">
+                        {date}
+                      </div>
+                      <div className="text-sm text-slate-500">
+                        {selectedSlot?.display ?? "No slot selected"}
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
-                {phoneMatches.length > 0 && (
-                  <div className="mt-1 space-y-1 rounded-md border border-slate-200 bg-white p-1 shadow-sm">
-                    {phoneMatches.map((c) => (
-                      <button
-                        key={c.id}
-                        onClick={() => {
-                          setCustomerPhone(c.phone);
-                          setCustomerName(c.name);
-                          setPhoneMatches([]);
-                        }}
-                        className="flex w-full items-center justify-between rounded px-2 py-1.5 text-left text-sm hover:bg-slate-50"
+                <div className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
+                  <div className="mb-4 flex items-center justify-between">
+                    <h4 className="text-lg font-semibold text-slate-950">
+                      Booked services
+                    </h4>
+                    <button
+                      type="button"
+                      onClick={() => setActiveStep(2)}
+                      className="text-sm font-medium text-blue-700 hover:underline"
+                    >
+                      Edit
+                    </button>
+                  </div>
+
+                  <div className="space-y-3">
+                    {selectedServices.map((service) => (
+                      <div
+                        key={service.id}
+                        className="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-3"
                       >
-                        <span className="font-medium text-slate-900">
-                          {c.name || "Unnamed"}
-                        </span>
-                        <span className="text-xs text-slate-500">
-                          {c.phone} · {c.visitCount} visits
-                        </span>
-                      </button>
+                        <div>
+                          <div className="font-medium text-slate-950">
+                            {service.name}
+                          </div>
+                          <div className="text-xs text-slate-500">
+                            {service.defaultDurationMinutes} mins ·{" "}
+                            {(service.defaultPrice / 100).toFixed(0)} EGP
+                          </div>
+                        </div>
+                        <div className="text-right text-xs text-slate-500">
+                          {selectedStaffByServiceId.get(service.id)?.name ??
+                            "Any available staff"}
+                        </div>
+                      </div>
                     ))}
                   </div>
-                )}
-                {searchingPhone && (
-                  <div className="mt-1 text-xs text-slate-400">Searching…</div>
-                )}
+                </div>
               </div>
 
-              <input
-                type="text"
-                value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
-                placeholder="Customer name"
-                className="w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm"
-              />
+              <div className="space-y-5">
+                <div className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
+                  <h4 className="text-lg font-semibold text-slate-950">
+                    Notes
+                  </h4>
+                  <div className="mt-3 rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-600">
+                    {notes.trim() || "No additional notes"}
+                  </div>
+                </div>
 
-              <textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Notes (optional)"
-                rows={2}
-                className="w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm"
-              />
-            </div>
+                <div className="rounded-[24px] border border-blue-200 bg-blue-50 p-5">
+                  <div className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-700">
+                    Ready to book
+                  </div>
+                  <div className="mt-2 text-sm text-blue-900/80">
+                    You can submit the appointment now or go back and change any
+                    step.
+                  </div>
+                </div>
+              </div>
+            </section>
           )}
         </div>
 
-        {/* Footer */}
-        <div className="flex items-center justify-end gap-2 border-t border-slate-200 px-5 py-3">
+        <div className="flex items-center justify-between border-t border-slate-200 bg-white px-6 py-4">
           <button
-            onClick={closeNewAppointment}
-            className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            onClick={activeStep === 1 ? closeNewAppointment : goBack}
+            className="rounded-2xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
           >
-            Cancel
+            {activeStep === 1 ? "Cancel" : "Back"}
           </button>
+
           <button
-            onClick={handleSubmit}
-            disabled={
-              !selectedSlot || submitting || !customerPhone || !customerName
+            onClick={
+              activeStep === 5
+                ? handleSubmit
+                : () => {
+                    if (!validateStep(activeStep)) return;
+                    setActiveStep((step) => Math.min(5, step + 1));
+                  }
             }
-            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={submitting || (activeStep === 5 && !readyToSubmit)}
+            className="rounded-2xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {submitting ? "Booking…" : "Book appointment"}
+            {activeStep === 5
+              ? submitting
+                ? "Booking…"
+                : "Book appointment"
+              : "Next step"}
           </button>
         </div>
       </div>
