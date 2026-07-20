@@ -16,6 +16,7 @@ interface Props {
   customerName: string;
   status: AppointmentStatus;
   isLocked: boolean;
+  timezone: string;
   onClick: (appointmentId: string) => void;
 }
 
@@ -24,9 +25,14 @@ export function AppointmentSegmentBlock({
   customerName,
   status,
   isLocked,
+  timezone,
   onClick,
 }: Props) {
-  const { left, width } = getSegmentPosition(segment.startsAt, segment.endsAt);
+  const { left, width } = getSegmentPosition(
+    segment.startsAt,
+    segment.endsAt,
+    timezone,
+  );
   const { bg, border, text } = getStatusClasses(status, isLocked);
   const isLinked = segment.segmentCount > 1;
   const chipColor = getAppointmentChipColor(segment.appointmentId);
@@ -53,7 +59,7 @@ export function AppointmentSegmentBlock({
         </span>
       )}
       <div className="font-semibold leading-tight pr-4">
-        {formatTimeRange(segment.startsAt, segment.endsAt)}
+        {formatTimeRange(segment.startsAt, segment.endsAt, timezone)}
       </div>
       <div className="truncate font-medium leading-tight">{customerName}</div>
       <div className="truncate opacity-80 leading-tight">

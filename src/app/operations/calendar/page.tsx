@@ -18,16 +18,20 @@ import {
   revertAppointment,
   markNoShow,
   uncancelAppointment,
+  deleteAppointment,
+  updateAppointmentStatus,
 } from "../../../modules/operations/Calendar.api";
 import type {
   CalendarDayData,
   ServiceCatalogItem,
 } from "../../../modules/operations/appointment.types";
+import { dateKeyInTimezone } from "../../../shared/lib/Calendar/grid.utils";
 
 export default function CalendarPage() {
   const { user, accessToken, loading: authLoading } = useAuth();
 
-  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const timezone = user?.timezone || "Africa/Cairo";
+  const [date, setDate] = useState(() => dateKeyInTimezone(new Date(), "Africa/Cairo"));
   const [data, setData] = useState<CalendarDayData | null>(null);
   const [catalog, setCatalog] = useState<ServiceCatalogItem[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -40,7 +44,7 @@ export default function CalendarPage() {
     try {
       setError(null);
       const [day, services] = await Promise.all([
-        getCalendarDay(businessId, date, accessToken),
+        getCalendarDay(businessId, date, accessToken, timezone),
         getServiceCatalog(businessId, accessToken),
       ]);
       setData(day);
@@ -48,7 +52,7 @@ export default function CalendarPage() {
     } catch (e: any) {
       setError(e.message ?? "Failed to load calendar");
     }
-  }, [date, businessId, accessToken]);
+  }, [date, businessId, accessToken, timezone]);
 
   useOnAppointmentCreated(reload);
 
@@ -100,7 +104,7 @@ export default function CalendarPage() {
           ‹
         </button>
         <button
-          onClick={() => setDate(new Date().toISOString().slice(0, 10))}
+          onClick={() => setDate(dateKeyInTimezone(new Date(), timezone))}
           className="rounded-md border px-3 py-1 text-sm font-medium"
         >
           Today
@@ -112,7 +116,7 @@ export default function CalendarPage() {
           ›
         </button>
         <h1 className="ml-2 text-xl font-bold">
-          {new Date(date).toLocaleDateString(undefined, {
+          {new Date(`${date}T12:00:00Z`).toLocaleDateString(undefined, {
             month: "long",
             day: "numeric",
             year: "numeric",
@@ -146,6 +150,8 @@ export default function CalendarPage() {
               staff={data.staff}
               breaks={data.breaks}
               serviceCatalog={catalog}
+              isClinic={user.vertical === "clinic"}
+              businessTimezone={timezone}
               onClose={() => setSelectedId(null)}
               onSave={async (updated) => {
                 await saveAppointment(updated, String(accessToken));
@@ -157,14 +163,24 @@ export default function CalendarPage() {
               }}
               onCancelAppointment={async (id, reason) => {
                 await cancelAppointment(id, reason, String(accessToken));
+                setSelectedId(null);
                 await reload();
               }}
-              onCollectPayment={async (id) => {
-                await collectPayment(
+              onDelete={async (id) => {
+                await deleteAppointment(id, String(accessToken));
+                setSelectedId(null);
+                await reload();
+              }}
+              onStatusChange={async (status) => {
+                await updateAppointmentStatus(
                   selected.id,
-                  selected.discount,
+                  status,
                   String(accessToken),
                 );
+                await reload();
+              }}
+              onCollectPayment={async (id, discountCents) => {
+                await collectPayment(id, discountCents, String(accessToken));
                 await reload();
               }}
               onRevert={async (id) => {
@@ -188,7 +204,7 @@ export default function CalendarPage() {
 }
 
 function shift(date: string, deltaDays: number): string {
-  const d = new Date(date);
-  d.setDate(d.getDate() + deltaDays);
+  const d = new Date(`${date}T12:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + deltaDays);
   return d.toISOString().slice(0, 10);
 }

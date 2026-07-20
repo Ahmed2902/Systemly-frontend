@@ -17,6 +17,8 @@ type User = {
   email: string;
   businessId: string | null;
   role: string;
+  vertical?: string | null;
+  timezone?: string | null;
 };
 
 type AuthContextType = {

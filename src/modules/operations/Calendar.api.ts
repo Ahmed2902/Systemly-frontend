@@ -40,6 +40,7 @@ export async function getCalendarDay(
   businessId: string,
   date: string,
   accessToken: string,
+  timezone = "UTC",
 ): Promise<CalendarDayData> {
   const [appointmentsRes, staffRes, breaksRes] = await Promise.all([
     api<any>(
@@ -47,7 +48,7 @@ export async function getCalendarDay(
       accessToken,
     ),
     api<any>(`/staff?businessId=${businessId}`, accessToken),
-    api<any>(`staff/breaks?date=${date}`, accessToken),
+    api<any>(`/staff/breaks?date=${date}`, accessToken),
   ]);
 
   // listAppointments / listByBusiness return { items, total, page, perPage }
@@ -75,7 +76,14 @@ export async function getCalendarDay(
     }),
   );
 
-  return mapBackendCalendarDay(date, appointments, staff, breaks, schedules);
+  return mapBackendCalendarDay(
+    date,
+    appointments,
+    staff,
+    breaks,
+    schedules,
+    timezone,
+  );
 }
 
 export async function getServiceCatalog(
@@ -112,6 +120,14 @@ export async function saveAppointment(
     })),
     discountCents: appointment.discount,
     notes: appointment.notes,
+    clinical: appointment.clinicVisitRecord
+      ? {
+          notes: appointment.clinicVisitRecord.notes ?? undefined,
+          diagnosis: appointment.clinicVisitRecord.diagnosis ?? undefined,
+          prescriptionJson:
+            appointment.clinicVisitRecord.prescriptionJson ?? undefined,
+        }
+      : undefined,
   };
   console.log("PATCH payload:", JSON.stringify(body, null, 2)); // TEMP
   const raw = await api<any>(`/appointments/${appointment.id}`, accessToken, {
@@ -149,6 +165,29 @@ export async function cancelAppointment(
     },
   );
   return mapBackendAppointment(raw);
+}
+
+export async function updateAppointmentStatus(
+  appointmentId: string,
+  status: AppointmentSummary["status"],
+  accessToken: string,
+): Promise<AppointmentSummary> {
+  const raw = await api<any>(`/appointments/${appointmentId}/status`, accessToken, {
+    method: "PATCH",
+    body: JSON.stringify({ status }),
+  });
+  return mapBackendAppointment(raw);
+}
+
+export async function deleteAppointment(
+  appointmentId: string,
+  accessToken: string,
+) {
+  return api<{ id: string; deleted: boolean }>(
+    `/appointments/${appointmentId}`,
+    accessToken,
+    { method: "DELETE" },
+  );
 }
 
 export async function collectPayment(

@@ -4,9 +4,10 @@ import type {
   StaffMember,
 } from "../../../modules/operations/appointment.types";
 import { hasStaffConflict } from "./conflicts";
+import { dateKeyInTimezone, toTimeValue, weekdayInTimezone } from "./grid.utils";
 
 function toMinutes(value: string): number {
-  const match = value.match(/T(\d{2}):(\d{2})/);
+  const match = value.match(/(?:T|^)(\d{2}):(\d{2})/);
   if (match) {
     return Number(match[1]) * 60 + Number(match[2]);
   }
@@ -62,6 +63,7 @@ export function isStaffEligibleForSegment(opts: {
   breaks: StaffBreak[];
   appointments: AppointmentSummary[];
   appointmentId: string;
+  timezone?: string;
 }): boolean {
   const {
     staff,
@@ -71,18 +73,27 @@ export function isStaffEligibleForSegment(opts: {
     breaks,
     appointments,
     appointmentId,
+    timezone = "UTC",
   } = opts;
 
   if (!staff.serviceIds?.includes(serviceId)) return false;
 
   const segmentStart = new Date(startsAt);
   const segmentEnd = new Date(endsAt);
-  const workWindow = getEffectiveWorkWindow(staff, segmentStart.getDay());
+  const workWindow = getEffectiveWorkWindow(
+    staff,
+    weekdayInTimezone(dateKeyInTimezone(segmentStart, timezone), timezone),
+  );
   if (!workWindow) return false;
 
-  const segmentStartMin =
-    segmentStart.getHours() * 60 + segmentStart.getMinutes();
-  const segmentEndMin = segmentEnd.getHours() * 60 + segmentEnd.getMinutes();
+  const [startHour, startMinute] = toTimeValue(startsAt, timezone)
+    .split(":")
+    .map(Number);
+  const [endHour, endMinute] = toTimeValue(endsAt, timezone)
+    .split(":")
+    .map(Number);
+  const segmentStartMin = startHour * 60 + startMinute;
+  const segmentEndMin = endHour * 60 + endMinute;
   if (
     segmentStartMin < workWindow.startMin ||
     segmentEndMin > workWindow.endMin
@@ -116,6 +127,7 @@ export function getAvailableStaffForSegment(opts: {
   breaks: StaffBreak[];
   appointments: AppointmentSummary[];
   appointmentId: string;
+  timezone?: string;
 }): StaffMember[] {
   return opts.staff.filter((member) =>
     isStaffEligibleForSegment({
@@ -126,6 +138,7 @@ export function getAvailableStaffForSegment(opts: {
       breaks: opts.breaks,
       appointments: opts.appointments,
       appointmentId: opts.appointmentId,
+      timezone: opts.timezone,
     }),
   );
 }

@@ -51,6 +51,7 @@ export const mockServiceCatalog: ServiceCatalogItem[] = [
 ];
 
 export const mockCalendarDay: CalendarDayData = {
+  timezone: "Africa/Cairo",
   date: DATE,
   staff: [
     { id: "staff-1", name: "Dr. Alaric Smith", role: "Physician" },

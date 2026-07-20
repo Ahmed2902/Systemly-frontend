@@ -1,4 +1,5 @@
 export type AppointmentStatus =
+  | "pending"
   | "confirmed"
   | "completed"
   | "cancelled_by_business"
@@ -76,6 +77,13 @@ export interface AppointmentSummary {
   customItems: CustomLineItem[];
   discount: number; // cents, flat
   notes?: string;
+  clinicVisitRecord?: ClinicVisitRecord | null;
+}
+
+export interface ClinicVisitRecord {
+  notes?: string | null;
+  diagnosis?: string | null;
+  prescriptionJson?: Record<string, unknown> | null;
 }
 
 export interface StaffBreak {
@@ -88,6 +96,7 @@ export interface StaffBreak {
 
 export interface CalendarDayData {
   date: string;
+  timezone: string;
   staff: StaffMember[];
   appointments: AppointmentSummary[];
   breaks: StaffBreak[];

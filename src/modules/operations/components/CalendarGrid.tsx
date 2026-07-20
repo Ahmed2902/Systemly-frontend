@@ -32,7 +32,7 @@ export function CalendarGrid({ data, onSelectAppointment }: Props) {
     return list;
   }, []);
 
-  const nowOffset = getNowLineOffset(data.date);
+  const nowOffset = getNowLineOffset(data.date, data.timezone);
 
   // Flatten segments grouped by staffId for row rendering.
   const segmentsByStaff = useMemo(() => {
@@ -212,6 +212,7 @@ export function CalendarGrid({ data, onSelectAppointment }: Props) {
                       const { left, width } = getSegmentPosition(
                         b.startsAt,
                         b.endsAt,
+                        data.timezone,
                       );
                       return (
                         <div
@@ -220,6 +221,7 @@ export function CalendarGrid({ data, onSelectAppointment }: Props) {
                             justify-center rounded-md bg-slate-100 text-xs
                             font-medium text-slate-400"
                           style={{ left, width }}
+                          title={`${b.label ?? "Staff break"} (${formatBreakTime(b.startsAt, data.timezone)} – ${formatBreakTime(b.endsAt, data.timezone)})`}
                         >
                           {b.label ?? "Break"}
                         </div>
@@ -235,6 +237,7 @@ export function CalendarGrid({ data, onSelectAppointment }: Props) {
                           customerName={customerName}
                           status={status}
                           isLocked={isLocked}
+                          timezone={data.timezone}
                           onClick={onSelectAppointment}
                         />
                       ),
@@ -248,4 +251,12 @@ export function CalendarGrid({ data, onSelectAppointment }: Props) {
       </div>
     </div>
   );
+}
+
+function formatBreakTime(value: string, timezone: string) {
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone: timezone,
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date(value));
 }

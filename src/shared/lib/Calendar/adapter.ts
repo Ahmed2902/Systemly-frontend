@@ -4,15 +4,16 @@ import type {
   CalendarDayData,
   StaffMember,
 } from "../../../modules/operations/appointment.types";
+import { dateKeyInTimezone, toTimeValue } from "./grid.utils";
 
-export function mapBackendAppointment(raw: any): AppointmentSummary {
+export function mapBackendAppointment(raw: any, timezone = "UTC"): AppointmentSummary {
   const segments = raw.appointmentServices ?? [];
   const segmentCount = segments.length;
   const isLocked = raw.status === "completed" || raw.invoice?.status === "paid";
 
   return {
     id: raw.id,
-    date: (raw.startsAt ?? "").slice(0, 10),
+    date: raw.startsAt ? dateKeyInTimezone(raw.startsAt, timezone) : "",
     customer: {
       id: raw.customer?.id ?? raw.customerId,
       name: raw.customer?.name ?? "Unknown",
@@ -25,6 +26,13 @@ export function mapBackendAppointment(raw: any): AppointmentSummary {
     isPaid: raw.invoice?.status === "paid",
     discount: raw.discountCents ?? 0,
     notes: raw.notes ?? "",
+    clinicVisitRecord: raw.clinicVisitRecord
+      ? {
+          notes: raw.clinicVisitRecord.notes ?? null,
+          diagnosis: raw.clinicVisitRecord.diagnosis ?? null,
+          prescriptionJson: raw.clinicVisitRecord.prescriptionJson ?? null,
+        }
+      : null,
     customItems: (raw.customItems ?? []).map((c: any) => ({
       id: c.id,
       description: c.description,
@@ -60,6 +68,7 @@ export function mapBackendCalendarDay(
     availability?: any[];
     availabilityOverrides?: any[];
   }> = [],
+  timezone = "UTC",
 ): CalendarDayData {
   const scheduleByStaffId = new Map(
     rawSchedules.map((row) => [row.staffId, row]),
@@ -67,6 +76,7 @@ export function mapBackendCalendarDay(
 
   return {
     date,
+    timezone,
     staff: rawStaff.map((s): StaffMember => {
       const schedule = scheduleByStaffId.get(s.id);
       return {
@@ -91,13 +101,42 @@ export function mapBackendCalendarDay(
         ),
       };
     }),
-    appointments: rawAppointments.map(mapBackendAppointment),
+    // Cancelled records remain available from the API, but must not remain
+    // as active blocks in the calendar or participate in its visual layout.
+    appointments: rawAppointments
+      .filter(
+        (appointment: any) =>
+          appointment.status !== "cancelled_by_business" &&
+          appointment.status !== "cancelled_by_customer",
+      )
+      .map((appointment) => mapBackendAppointment(appointment, timezone)),
     breaks: rawBreaks.map((b) => ({
       id: b.id,
       staffId: b.staffId,
-      startsAt: `${date}T${new Date(b.startTime).toISOString().slice(11, 19)}`,
-      endsAt: `${date}T${new Date(b.endTime).toISOString().slice(11, 19)}`,
+      startsAt: fromBusinessTimeOnly(date, toTimeValue(b.startTime, "UTC"), timezone),
+      endsAt: fromBusinessTimeOnly(date, toTimeValue(b.endTime, "UTC"), timezone),
       label: b.label,
     })),
   };
+}
+
+function fromBusinessTimeOnly(date: string, time: string, timezone: string) {
+  const [year, month, day] = date.split("-").map(Number);
+  const [hour, minute] = time.split(":").map(Number);
+  let guess = new Date(Date.UTC(year, month - 1, day, hour, minute));
+  for (let i = 0; i < 2; i++) {
+    const parts = new Intl.DateTimeFormat("en-GB", {
+      timeZone: timezone,
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
+    }).formatToParts(guess);
+    const actual = Number(parts.find((p) => p.type === "hour")?.value ?? 0) * 60 +
+      Number(parts.find((p) => p.type === "minute")?.value ?? 0);
+    let delta = hour * 60 + minute - actual;
+    if (delta > 720) delta -= 1440;
+    if (delta < -720) delta += 1440;
+    guess = new Date(guess.getTime() + delta * 60000);
+  }
+  return guess.toISOString();
 }
