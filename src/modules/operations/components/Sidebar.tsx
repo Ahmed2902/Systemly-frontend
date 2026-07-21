@@ -110,8 +110,8 @@ export function Sidebar() {
               }`}
             >
               <span
-                className={`flex h-8 w-8 items-center justify-center rounded-lg transition ${
-                  active ? accent : "bg-slate-100 text-slate-500 group-hover:" + accent
+                className={`flex h-8 w-8 items-center justify-center rounded-lg transition ${accent} ${
+                  active ? "shadow-sm" : "opacity-75 group-hover:opacity-100"
                 }`}
               >
                 <Icon size={16} />
