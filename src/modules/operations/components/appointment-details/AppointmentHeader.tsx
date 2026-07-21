@@ -11,71 +11,90 @@ const labels: Record<AppointmentStatus, string> = {
   cancelled_by_customer: "Cancelled",
   no_show: "No-show",
 };
+
 const styles: Record<AppointmentStatus, string> = {
   pending: "bg-slate-100 text-slate-600",
-  confirmed: "bg-emerald-100 text-emerald-700",
+  confirmed: "bg-blue-100 text-blue-700",
   in_progress: "bg-violet-100 text-violet-700",
-  completed: "bg-blue-100 text-blue-700",
+  completed: "bg-emerald-100 text-emerald-700",
   cancelled_by_business: "bg-red-100 text-red-700",
   cancelled_by_customer: "bg-red-100 text-red-700",
   no_show: "bg-amber-100 text-amber-700",
 };
+
+interface Props {
+  id: string;
+  status: AppointmentStatus;
+  saving: boolean;
+  canSave: boolean;
+  canCancel: boolean;
+  showComplete: boolean;
+  onSave: () => void;
+  onCancel: () => void;
+  onComplete: () => void;
+}
 
 export function AppointmentHeader({
   id,
   status,
   saving,
   canSave,
-  onSave,
+  canCancel,
   showComplete,
+  onSave,
+  onCancel,
   onComplete,
-}: {
-  id: string;
-  status: AppointmentStatus;
-  saving: boolean;
-  canSave: boolean;
-  onSave: () => void;
-  showComplete: boolean;
-  onComplete: () => void;
-}) {
+}: Props) {
   return (
-    <header className="mb-6 flex flex-wrap items-start justify-between gap-4">
+    <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
       <div>
         <Link
-          href="/operations/appointments"
-          className="flex w-fit items-center gap-1 rounded-lg px-1 py-1 text-sm text-slate-500 transition-colors hover:bg-white hover:text-blue-600"
+          href="/operations/calendar"
+          className="flex w-fit items-center gap-1.5 text-sm text-slate-500 transition hover:text-blue-700"
         >
           <ArrowLeft size={15} />
-          Back to appointments
+          Back to calendar
         </Link>
-        <div className="mt-2 flex flex-wrap items-center gap-3">
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900">
-            Appointment Details
-          </h1>
-          <span
-            className={`rounded-full px-3 py-1 text-xs font-semibold ${styles[status]}`}
-          >
+
+        <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">
+          Appointment Details
+        </h1>
+
+        <div className="mt-1.5 flex flex-wrap items-center gap-2 text-sm text-slate-500">
+          <span>ID: #{id}</span>
+          <span aria-hidden="true">•</span>
+          <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${styles[status]}`}>
             {labels[status]}
           </span>
         </div>
-        <p className="mt-1 text-sm text-slate-500">Appointment #{id}</p>
       </div>
-      <div className="flex gap-2">
+
+      <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
           onClick={onSave}
           disabled={!canSave || saving}
-          className="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-200 transition-colors duration-150 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-45"
+          className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-blue-200 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-45"
         >
-          <Save size={16} />
-          {saving ? "Saving…" : "Save"}
+          <Save size={15} />
+          {saving ? "Saving…" : "Save changes"}
         </button>
+
+        <button
+          type="button"
+          onClick={onCancel}
+          disabled={!canCancel || saving}
+          className="min-h-10 rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-45"
+        >
+          Cancel
+        </button>
+
         {showComplete ? (
           <button
             type="button"
             onClick={onComplete}
             disabled={saving}
-            className="rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:opacity-45"
+            className="min-h-10 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-blue-200 transition hover:bg-blue-700 disabled:opacity-45"
           >
             Complete
           </button>

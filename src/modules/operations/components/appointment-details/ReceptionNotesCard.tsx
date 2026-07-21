@@ -1,3 +1,27 @@
-import { Quote } from "lucide-react";
-interface Props { notes: string; }
-export function ReceptionNotesCard({ notes }: Props) { return <section className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200/60"><h2 className="font-semibold text-slate-900">Reception notes</h2><div className="mt-4 rounded-xl bg-amber-50/60 p-3.5 text-sm text-slate-600"><Quote size={16} className="mb-1 text-amber-500" />{notes || "No reception notes yet."}</div><p className="mt-3 text-xs text-slate-400">Edit notes in the appointment section.</p></section>; }
+import { Info } from "lucide-react";
+
+interface Props {
+  notes: string;
+  disabled: boolean;
+  onChange: (notes: string) => void;
+}
+
+export function ReceptionNotesCard({ notes, disabled, onChange }: Props) {
+  return (
+    <section className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
+      <div className="flex items-center gap-2">
+        <Info size={17} className="text-blue-600" />
+        <h2 className="font-semibold text-slate-950">Reception Notes</h2>
+      </div>
+
+      <textarea
+        value={notes}
+        disabled={disabled}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder="Add notes for reception and the operations team…"
+        rows={6}
+        className="mt-4 w-full resize-y rounded-xl border border-slate-200 bg-slate-50/70 p-3.5 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 hover:bg-slate-50 focus:border-blue-300 focus:bg-white focus:ring-4 focus:ring-blue-100/60 disabled:cursor-not-allowed disabled:opacity-60"
+      />
+    </section>
+  );
+}
