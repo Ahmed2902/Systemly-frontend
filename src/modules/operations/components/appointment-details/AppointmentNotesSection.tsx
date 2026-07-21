@@ -1,0 +1,3 @@
+import { FileText } from "lucide-react";
+interface Props { notes: string; disabled: boolean; onChange: (notes: string) => void; }
+export function AppointmentNotesSection({ notes, disabled, onChange }: Props) { return <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"><h2 className="flex items-center gap-2 font-semibold text-slate-900"><FileText size={17} className="text-blue-600" />Appointment Notes</h2><textarea value={notes} disabled={disabled} onChange={(e) => onChange(e.target.value)} placeholder="Add reception or appointment notes…" className="mt-4 min-h-28 w-full rounded-xl border border-slate-200 p-3 text-sm text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-slate-50" /></section>; }

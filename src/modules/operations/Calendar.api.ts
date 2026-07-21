@@ -105,6 +105,28 @@ export async function getAppointmentDetail(
   return api<any>(`/appointments/${encodeURIComponent(appointmentId)}`, accessToken);
 }
 
+export async function uploadAppointmentPhoto(
+  appointmentId: string,
+  file: File,
+  accessToken: string,
+): Promise<any> {
+  const path = `/appointments/${encodeURIComponent(appointmentId)}/photos`;
+  const ticket = await api<any>(`${path}/presign`, accessToken, {
+    method: "POST",
+    body: JSON.stringify({ contentType: file.type, type: "progress" }),
+  });
+  const upload = await fetch(ticket.uploadUrl, {
+    method: "PUT",
+    headers: { "Content-Type": file.type },
+    body: file,
+  });
+  if (!upload.ok) throw new Error(`Direct image upload failed: ${upload.status}`);
+  return api<any>(`${path}/confirm`, accessToken, {
+    method: "POST",
+    body: JSON.stringify({ publicId: ticket.publicId, type: "progress" }),
+  });
+}
+
 export async function getServiceCatalog(
   businessId: string,
   accessToken: string,
