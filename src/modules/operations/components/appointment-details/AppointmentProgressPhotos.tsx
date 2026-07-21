@@ -1,7 +1,7 @@
 "use client";
 
-import { ImagePlus, Loader2, X } from "lucide-react";
-import { useRef, useState } from "react";
+import { ImagePlus, Loader2, Trash2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import {
   deleteAppointmentPhoto,
   uploadAppointmentPhoto,
@@ -21,19 +21,28 @@ export function AppointmentProgressPhotos({
   accessToken,
   photos,
   disabled,
-  onUploaded,
 }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [visiblePhotos, setVisiblePhotos] = useState(photos);
   const [uploading, setUploading] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    setVisiblePhotos(photos);
+  }, [photos]);
+
   async function upload(file: File) {
     setUploading(true);
     setError(null);
+
     try {
-      await uploadAppointmentPhoto(appointmentId, file, accessToken);
-      await onUploaded();
+      const created = await uploadAppointmentPhoto(
+        appointmentId,
+        file,
+        accessToken,
+      );
+      setVisiblePhotos((current) => [...current, created]);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Unable to upload photo");
     } finally {
@@ -41,18 +50,30 @@ export function AppointmentProgressPhotos({
       if (inputRef.current) inputRef.current.value = "";
     }
   }
+
   async function remove(photoId: string) {
+    const confirmed = window.confirm(
+      "Delete this appointment photo permanently?",
+    );
+    if (!confirmed) return;
+
+    const previousPhotos = visiblePhotos;
     setDeletingId(photoId);
     setError(null);
+    setVisiblePhotos((current) =>
+      current.filter((photo) => photo.id !== photoId),
+    );
+
     try {
       await deleteAppointmentPhoto(appointmentId, photoId, accessToken);
-      await onUploaded();
     } catch (err: unknown) {
+      setVisiblePhotos(previousPhotos);
       setError(err instanceof Error ? err.message : "Unable to remove photo");
     } finally {
       setDeletingId(null);
     }
   }
+
   return (
     <section className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200/60">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -86,14 +107,16 @@ export function AppointmentProgressPhotos({
           {uploading ? "Uploading…" : "Add photo"}
         </button>
       </div>
+
       {error ? (
         <p className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">
           {error}
         </p>
       ) : null}
-      {photos.length ? (
+
+      {visiblePhotos.length ? (
         <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {photos.map((item) =>
+          {visiblePhotos.map((item) =>
             item.photo?.url ? (
               <figure
                 key={item.id}
@@ -106,7 +129,7 @@ export function AppointmentProgressPhotos({
                 />
                 <button
                   type="button"
-                  aria-label="Remove photo"
+                  aria-label="Delete photo"
                   disabled={disabled || deletingId === item.id}
                   onClick={() => void remove(item.id)}
                   className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-slate-600 opacity-0 shadow-sm transition-all duration-150 hover:bg-red-50 hover:text-red-600 focus:opacity-100 disabled:cursor-not-allowed disabled:opacity-50 group-hover:opacity-100"
@@ -114,7 +137,7 @@ export function AppointmentProgressPhotos({
                   {deletingId === item.id ? (
                     <Loader2 size={15} className="animate-spin" />
                   ) : (
-                    <X size={16} />
+                    <Trash2 size={15} />
                   )}
                 </button>
                 <figcaption className="absolute inset-x-0 bottom-0 translate-y-full bg-slate-900/60 px-2.5 py-2 text-xs font-medium capitalize text-white transition-transform duration-150 group-hover:translate-y-0">
