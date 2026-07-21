@@ -342,6 +342,7 @@ export default function AppointmentDetailsScreen() {
               phone: raw.customer?.phone,
               visits: raw.customer?.visitCount ?? 0,
               noShows: raw.customer?.noShowCount ?? 0,
+              lastVisitAt: raw.customer?.lastVisitAt ?? null,
             }}
           />
           <AppointmentQuickActions

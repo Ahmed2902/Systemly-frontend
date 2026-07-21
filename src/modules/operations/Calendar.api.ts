@@ -102,7 +102,10 @@ export async function getAppointmentDetail(
   appointmentId: string,
   accessToken: string,
 ): Promise<any> {
-  return api<any>(`/appointments/${encodeURIComponent(appointmentId)}`, accessToken);
+  return api<any>(
+    `/appointments/${encodeURIComponent(appointmentId)}`,
+    accessToken,
+  );
 }
 
 export async function uploadAppointmentPhoto(
@@ -120,7 +123,8 @@ export async function uploadAppointmentPhoto(
     headers: { "Content-Type": file.type },
     body: file,
   });
-  if (!upload.ok) throw new Error(`Direct image upload failed: ${upload.status}`);
+  if (!upload.ok)
+    throw new Error(`Direct image upload failed: ${upload.status}`);
   return api<any>(`${path}/confirm`, accessToken, {
     method: "POST",
     body: JSON.stringify({ publicId: ticket.publicId, type: "progress" }),
@@ -225,10 +229,14 @@ export async function updateAppointmentStatus(
   status: AppointmentSummary["status"],
   accessToken: string,
 ): Promise<AppointmentSummary> {
-  const raw = await api<any>(`/appointments/${appointmentId}/status`, accessToken, {
-    method: "PATCH",
-    body: JSON.stringify({ status }),
-  });
+  const raw = await api<any>(
+    `/appointments/${appointmentId}/status`,
+    accessToken,
+    {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    },
+  );
   return mapBackendAppointment(raw);
 }
 
