@@ -127,6 +127,18 @@ export async function uploadAppointmentPhoto(
   });
 }
 
+export async function deleteAppointmentPhoto(
+  appointmentId: string,
+  photoId: string,
+  accessToken: string,
+): Promise<void> {
+  await api<void>(
+    `/appointments/${encodeURIComponent(appointmentId)}/photos/${encodeURIComponent(photoId)}`,
+    accessToken,
+    { method: "DELETE" },
+  );
+}
+
 export async function getServiceCatalog(
   businessId: string,
   accessToken: string,

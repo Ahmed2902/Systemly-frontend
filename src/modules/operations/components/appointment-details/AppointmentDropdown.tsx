@@ -1,28 +1,35 @@
 "use client";
 
 import { Check, ChevronDown } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-export function AppointmentDropdown({
-  value,
-  options,
-  disabled,
-  onChange,
-}: {
+interface Props {
   value: string;
   options: Array<{ value: string; label: string }>;
   disabled?: boolean;
   onChange: (value: string) => void;
-}) {
+}
+
+export function AppointmentDropdown({ value, options, disabled, onChange }: Props) {
   const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
   const selected = options.find((option) => option.value === value);
+  useEffect(() => {
+    const closeOnOutsideClick = (event: MouseEvent) => {
+      if (!containerRef.current?.contains(event.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", closeOnOutsideClick);
+    return () => document.removeEventListener("mousedown", closeOnOutsideClick);
+  }, []);
   return (
-    <div className="relative min-w-0">
+    <div ref={containerRef} className="relative min-w-0">
       <button
         type="button"
         disabled={disabled}
         onClick={() => setOpen((current) => !current)}
-        className="flex w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-left text-sm font-semibold text-slate-700 shadow-sm outline-none transition hover:border-blue-300 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
+        aria-expanded={open}
+        aria-haspopup="listbox"
+        className="flex min-h-11 w-full items-center justify-between rounded-xl border border-transparent bg-slate-50 px-3.5 py-2.5 text-left text-sm font-medium text-slate-800 outline-none transition-colors duration-150 hover:bg-slate-100/80 focus:border-blue-300 focus:bg-white focus:ring-4 focus:ring-blue-100/60 disabled:cursor-not-allowed disabled:bg-slate-50/60 disabled:text-slate-400"
       >
         <span className="truncate">{selected?.label ?? "Select…"}</span>
         <ChevronDown
@@ -31,16 +38,18 @@ export function AppointmentDropdown({
         />
       </button>
       {open && !disabled ? (
-        <div className="absolute left-0 right-0 top-[calc(100%+6px)] z-50 max-h-60 overflow-y-auto rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl">
+        <div role="listbox" className="absolute left-0 right-0 top-[calc(100%+8px)] z-50 max-h-60 overflow-y-auto rounded-2xl bg-white p-2 shadow-lg ring-1 ring-slate-200/60">
           {options.map((option) => (
             <button
               key={option.value}
               type="button"
+              role="option"
+              aria-selected={option.value === value}
               onClick={() => {
                 onChange(option.value);
                 setOpen(false);
               }}
-              className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm ${option.value === value ? "bg-blue-600 font-semibold text-white" : "text-slate-700 hover:bg-blue-50 hover:text-blue-700"}`}
+              className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm transition-colors ${option.value === value ? "bg-blue-50 font-medium text-blue-700" : "text-slate-700 hover:bg-slate-50 hover:text-blue-700"}`}
             >
               {option.label}
               {option.value === value ? <Check size={14} /> : null}

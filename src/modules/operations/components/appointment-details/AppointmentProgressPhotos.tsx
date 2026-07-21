@@ -1,10 +1,20 @@
 "use client";
 
-import { ImagePlus, Loader2 } from "lucide-react";
+import { ImagePlus, Loader2, X } from "lucide-react";
 import { useRef, useState } from "react";
-import { uploadAppointmentPhoto } from "../../Calendar.api";
+import {
+  deleteAppointmentPhoto,
+  uploadAppointmentPhoto,
+} from "../../Calendar.api";
 
 type Photo = { id: string; type: string; photo?: { url?: string } };
+interface Props {
+  appointmentId: string;
+  accessToken: string;
+  photos: Photo[];
+  disabled?: boolean;
+  onUploaded: () => Promise<void> | void;
+}
 
 export function AppointmentProgressPhotos({
   appointmentId,
@@ -12,39 +22,39 @@ export function AppointmentProgressPhotos({
   photos,
   disabled,
   onUploaded,
-}: {
-  appointmentId: string;
-  accessToken: string;
-  photos: Photo[];
-  disabled?: boolean;
-  onUploaded: () => Promise<void> | void;
-}) {
+}: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
   async function upload(file: File) {
     setUploading(true);
     setError(null);
-
     try {
-      await uploadAppointmentPhoto(
-        appointmentId,
-        file,
-        accessToken,
-      );
+      await uploadAppointmentPhoto(appointmentId, file, accessToken);
       await onUploaded();
-    } catch (err: any) {
-      setError(err.message ?? "Unable to upload photo");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Unable to upload photo");
     } finally {
       setUploading(false);
-
-      if (inputRef.current) {
-        inputRef.current.value = "";
-      }
+      if (inputRef.current) inputRef.current.value = "";
+    }
+  }
+  async function remove(photoId: string) {
+    setDeletingId(photoId);
+    setError(null);
+    try {
+      await deleteAppointmentPhoto(appointmentId, photoId, accessToken);
+      await onUploaded();
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Unable to remove photo");
+    } finally {
+      setDeletingId(null);
     }
   }
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <section className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200/60">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="font-semibold text-slate-900">Progress photos</h2>
@@ -66,7 +76,7 @@ export function AppointmentProgressPhotos({
           type="button"
           disabled={disabled || uploading}
           onClick={() => inputRef.current?.click()}
-          className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-3.5 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-blue-50 px-3.5 py-2 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {uploading ? (
             <Loader2 size={16} className="animate-spin" />
@@ -77,7 +87,7 @@ export function AppointmentProgressPhotos({
         </button>
       </div>
       {error ? (
-        <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+        <p className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">
           {error}
         </p>
       ) : null}
@@ -87,14 +97,27 @@ export function AppointmentProgressPhotos({
             item.photo?.url ? (
               <figure
                 key={item.id}
-                className="overflow-hidden rounded-xl border border-slate-100 bg-slate-50"
+                className="group relative overflow-hidden rounded-xl bg-slate-50"
               >
                 <img
                   src={item.photo.url}
                   alt={`${item.type} appointment photo`}
                   className="aspect-square w-full object-cover"
                 />
-                <figcaption className="px-2.5 py-2 text-xs font-medium capitalize text-slate-500">
+                <button
+                  type="button"
+                  aria-label="Remove photo"
+                  disabled={disabled || deletingId === item.id}
+                  onClick={() => void remove(item.id)}
+                  className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-slate-600 opacity-0 shadow-sm transition-all duration-150 hover:bg-red-50 hover:text-red-600 focus:opacity-100 disabled:cursor-not-allowed disabled:opacity-50 group-hover:opacity-100"
+                >
+                  {deletingId === item.id ? (
+                    <Loader2 size={15} className="animate-spin" />
+                  ) : (
+                    <X size={16} />
+                  )}
+                </button>
+                <figcaption className="absolute inset-x-0 bottom-0 translate-y-full bg-slate-900/60 px-2.5 py-2 text-xs font-medium capitalize text-white transition-transform duration-150 group-hover:translate-y-0">
                   {item.type}
                 </figcaption>
               </figure>
@@ -106,7 +129,7 @@ export function AppointmentProgressPhotos({
           type="button"
           disabled={disabled || uploading}
           onClick={() => inputRef.current?.click()}
-          className="mt-4 flex w-full flex-col items-center rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-center transition hover:border-blue-300 hover:bg-blue-50 disabled:cursor-not-allowed"
+          className="mt-4 flex w-full flex-col items-center rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 px-4 py-9 text-center transition-colors hover:border-blue-200 hover:bg-blue-50/50 disabled:cursor-not-allowed"
         >
           <ImagePlus size={22} className="text-blue-600" />
           <span className="mt-2 text-sm font-semibold text-slate-700">

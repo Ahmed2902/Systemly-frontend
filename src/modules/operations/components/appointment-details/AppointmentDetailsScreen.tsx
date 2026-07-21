@@ -301,8 +301,8 @@ export default function AppointmentDetailsScreen() {
     });
   };
   return (
-    <div className="h-full overflow-y-auto bg-slate-50 p-5 lg:p-8">
-      <div className="mx-auto max-w-6xl">
+    <div className="h-full overflow-y-auto bg-slate-50 p-4 sm:p-5 lg:p-8">
+      <div className="mx-auto max-w-7xl">
         <AppointmentHeader
           id={raw.id}
           status={draft.status}
@@ -319,11 +319,11 @@ export default function AppointmentDetailsScreen() {
           }
         />
         {error ? (
-          <div className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
             {error}
           </div>
         ) : null}
-        <div className="grid gap-4 lg:grid-cols-[1.15fr_1fr_1fr]">
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)_minmax(18rem,.8fr)]">
           <AppointmentOverviewCard
             status={draft.status}
             startsAt={firstStart}
@@ -377,7 +377,7 @@ export default function AppointmentDetailsScreen() {
             }
           />
         </div>
-        <div className="mt-4 grid gap-4 lg:grid-cols-[1.55fr_1fr]">
+        <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1.55fr)_minmax(18rem,1fr)]">
           <main className="space-y-4">
             <BookedServicesSection
               segments={draft.segments}

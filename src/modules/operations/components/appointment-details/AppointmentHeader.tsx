@@ -43,13 +43,13 @@ export function AppointmentHeader({
       <div>
         <Link
           href="/operations/appointments"
-          className="flex items-center gap-1 text-sm text-slate-500 hover:text-blue-600"
+          className="flex w-fit items-center gap-1 rounded-lg px-1 py-1 text-sm text-slate-500 transition-colors hover:bg-white hover:text-blue-600"
         >
           <ArrowLeft size={15} />
           Back to appointments
         </Link>
         <div className="mt-2 flex flex-wrap items-center gap-3">
-          <h1 className="text-3xl font-bold text-slate-900">
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900">
             Appointment Details
           </h1>
           <span
@@ -58,14 +58,14 @@ export function AppointmentHeader({
             {labels[status]}
           </span>
         </div>
-        <p className="mt-1 text-sm text-slate-500">ID: {id}</p>
+        <p className="mt-1 text-sm text-slate-500">Appointment #{id}</p>
       </div>
       <div className="flex gap-2">
         <button
           type="button"
           onClick={onSave}
           disabled={!canSave || saving}
-          className="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-45"
+          className="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-200 transition-colors duration-150 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-45"
         >
           <Save size={16} />
           {saving ? "Saving…" : "Save"}
