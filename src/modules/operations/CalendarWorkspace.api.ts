@@ -10,6 +10,19 @@ type WorkspaceResult = {
   services: ServiceCatalogItem[];
 };
 
+type WorkspaceStaff = {
+  id: string;
+  availability?: unknown[];
+  availabilityOverrides?: unknown[];
+};
+
+type WorkspaceService = {
+  id: string;
+  name: string;
+  durationMin: number;
+  priceEgp: number;
+};
+
 export async function getCalendarWorkspace(
   date: string,
   accessToken: string,
@@ -31,7 +44,7 @@ export async function getCalendarWorkspace(
 
   const workspace = body?.data ?? body;
   const staff = workspace.staff ?? [];
-  const schedules = staff.map((member: any) => ({
+  const schedules = staff.map((member: WorkspaceStaff) => ({
     staffId: member.id,
     availability: member.availability ?? [],
     availabilityOverrides: member.availabilityOverrides ?? [],
@@ -46,7 +59,7 @@ export async function getCalendarWorkspace(
       schedules,
       workspace.timezone ?? "UTC",
     ),
-    services: (workspace.services ?? []).map((service: any) => ({
+    services: (workspace.services ?? []).map((service: WorkspaceService) => ({
       id: service.id,
       name: service.name,
       defaultDurationMinutes: service.durationMin,

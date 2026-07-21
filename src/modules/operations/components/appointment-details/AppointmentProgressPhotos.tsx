@@ -7,7 +7,7 @@ import {
   uploadAppointmentPhoto,
 } from "../../Calendar.api";
 
-type Photo = { id: string; type: string; photo?: { url?: string } };
+export type Photo = { id: string; type: string; photo?: { url?: string } };
 interface Props {
   appointmentId: string;
   accessToken: string;
@@ -42,7 +42,7 @@ export function AppointmentProgressPhotos({
         file,
         accessToken,
       );
-      setVisiblePhotos((current) => [...current, created]);
+      setVisiblePhotos((current) => [...current, created as Photo]);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Unable to upload photo");
     } finally {

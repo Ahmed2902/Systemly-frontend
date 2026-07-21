@@ -128,8 +128,12 @@ export function StepCustomizePreview({ onBack }: StepProps) {
     try {
       await submitOnboarding(state);
       router.push(`/${state.slug}`);
-    } catch (err: any) {
-      setError(err?.error ?? "Something went wrong while publishing.");
+    } catch (err: unknown) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Something went wrong while publishing.",
+      );
       setPublishing(false);
     }
   }

@@ -39,7 +39,9 @@ export function SalonTemplate(data: SalonTemplateData) {
   return (
     <div
       className="font-body bg-[#F7F3EE]"
-      style={{ ["--accent" as any]: data.primaryColor || "#8C5A3C" }}
+      style={
+        { "--accent": data.primaryColor || "#8C5A3C" } as React.CSSProperties
+      }
     >
       <Nav businessName={data.businessName} logoUrl={data.logoUrl} />
       {data.sectionOrder.map((key) => (

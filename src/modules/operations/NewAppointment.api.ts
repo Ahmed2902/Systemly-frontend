@@ -6,6 +6,7 @@ import type {
   StaffMember,
 } from "./appointment.types";
 import { mapBackendAppointment } from "../../shared/lib/Calendar/adapter";
+import type { BackendAppointment } from "../../shared/lib/Calendar/adapter";
 
 async function api<T>(
   path: string,
@@ -29,6 +30,24 @@ async function api<T>(
   }
 
   return (body?.data !== undefined ? body.data : body) as T;
+}
+
+function records(value: unknown): Array<Record<string, unknown>> {
+  if (Array.isArray(value)) {
+    return value.filter(
+      (item): item is Record<string, unknown> =>
+        typeof item === "object" && item !== null,
+    );
+  }
+  if (
+    typeof value === "object" &&
+    value !== null &&
+    "items" in value &&
+    Array.isArray(value.items)
+  ) {
+    return records(value.items);
+  }
+  return [];
 }
 
 export async function getAvailability(
@@ -55,12 +74,12 @@ export async function getServiceCatalog(
   businessId: string,
   accessToken: string,
 ): Promise<ServiceCatalogItem[]> {
-  const raw = await api<any>(`/services?businessId=${businessId}`, accessToken);
-  const services = Array.isArray(raw) ? raw : (raw?.items ?? []);
-  return services.map((s: any) => ({
-    id: s.id,
-    name: s.name,
-    defaultDurationMinutes: s.durationMin,
+  const raw = await api<unknown>(`/services?businessId=${businessId}`, accessToken);
+  const services = records(raw);
+  return services.map((s: Record<string, unknown>) => ({
+    id: String(s.id),
+    name: String(s.name),
+    defaultDurationMinutes: Number(s.durationMin),
     defaultPrice: Math.round(Number(s.priceEgp) * 100),
   }));
 }
@@ -69,17 +88,18 @@ export async function getStaffRoster(
   businessId: string,
   accessToken: string,
 ): Promise<StaffMember[]> {
-  const raw = await api<any>(`/staff?businessId=${businessId}`, accessToken);
-  const staff = Array.isArray(raw) ? raw : (raw?.items ?? []);
-  return staff.map((s: any) => ({
-    id: s.id,
-    name: s.name,
-    role: s.role,
-    avatarUrl: s.avatarUrl ?? null,
-    serviceIds:
-      s.serviceIds ??
-      s.serviceStaff?.map((rel: any) => rel.serviceId) ??
-      undefined,
+  const raw = await api<unknown>(`/staff?businessId=${businessId}`, accessToken);
+  const staff = records(raw);
+  return staff.map((s: Record<string, unknown>) => ({
+    id: String(s.id),
+    name: String(s.name),
+    role: String(s.role ?? ""),
+    avatarUrl: typeof s.avatarUrl === "string" ? s.avatarUrl : null,
+    serviceIds: Array.isArray(s.serviceIds)
+      ? s.serviceIds.map(String)
+      : (s.serviceStaff as Array<{ serviceId: string }> | undefined)?.map(
+          (rel) => rel.serviceId,
+        ),
   }));
 }
 
@@ -118,9 +138,9 @@ export async function createManualAppointment(
   payload: CreateManualAppointmentPayload,
   accessToken: string,
 ): Promise<AppointmentSummary> {
-  const raw = await api<any>(`/appointments`, accessToken, {
+  const raw = await api<unknown>(`/appointments`, accessToken, {
     method: "POST",
     body: JSON.stringify(payload),
   });
-  return mapBackendAppointment(raw);
+  return mapBackendAppointment(raw as BackendAppointment);
 }

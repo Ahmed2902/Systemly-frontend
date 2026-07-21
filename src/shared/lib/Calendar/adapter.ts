@@ -6,7 +6,77 @@ import type {
 } from "../../../modules/operations/appointment.types";
 import { dateKeyInTimezone, toTimeValue } from "./grid.utils";
 
-export function mapBackendAppointment(raw: any, timezone = "UTC"): AppointmentSummary {
+export interface BackendCustomItem {
+  id: string;
+  description: string;
+  priceCents: number;
+}
+export interface BackendSegment {
+  id: string;
+  serviceId: string;
+  staffId: string;
+  startsAt: string;
+  endsAt: string;
+  priceEgpSnapshot?: number;
+  service?: { name?: string };
+}
+export interface BackendAppointment {
+  id: string;
+  startsAt?: string;
+  status: string;
+  invoice?: { status?: string };
+  customer?: {
+    id?: string;
+    name?: string;
+    phone?: string;
+    visitCount?: number;
+    noShowCount?: number;
+  };
+  customerId?: string;
+  discountCents?: number;
+  notes?: string;
+  clinicVisitRecord?: {
+    notes?: string;
+    diagnosis?: string;
+    prescriptionJson?: Record<string, unknown>;
+  } | null;
+  customItems?: BackendCustomItem[];
+  appointmentServices?: BackendSegment[];
+}
+export interface BackendStaff {
+  id: string;
+  name: string;
+  role?: string;
+  serviceStaff?: Array<{ serviceId: string }>;
+}
+export interface BackendSchedule {
+  staffId: string;
+  availability?: Array<{
+    dayOfWeek: number;
+    startTime: string;
+    endTime: string;
+    breakAfterMin?: number | null;
+  }>;
+  availabilityOverrides?: Array<{
+    id: string;
+    overrideDate: string;
+    isDayOff: boolean;
+    startTime?: string | null;
+    endTime?: string | null;
+  }>;
+}
+export interface BackendBreak {
+  id: string;
+  staffId: string;
+  startTime: string;
+  endTime: string;
+  label?: string;
+}
+
+export function mapBackendAppointment(
+  raw: BackendAppointment,
+  timezone = "UTC",
+): AppointmentSummary {
   const segments = raw.appointmentServices ?? [];
   const segmentCount = segments.length;
   const isLocked = raw.status === "completed" || raw.invoice?.status === "paid";
@@ -15,7 +85,7 @@ export function mapBackendAppointment(raw: any, timezone = "UTC"): AppointmentSu
     id: raw.id,
     date: raw.startsAt ? dateKeyInTimezone(raw.startsAt, timezone) : "",
     customer: {
-      id: raw.customer?.id ?? raw.customerId,
+      id: raw.customer?.id ?? raw.customerId ?? "",
       name: raw.customer?.name ?? "Unknown",
       phone: raw.customer?.phone ?? "",
       visits: raw.customer?.visitCount ?? 0,
@@ -33,17 +103,17 @@ export function mapBackendAppointment(raw: any, timezone = "UTC"): AppointmentSu
           prescriptionJson: raw.clinicVisitRecord.prescriptionJson ?? null,
         }
       : null,
-    customItems: (raw.customItems ?? []).map((c: any) => ({
+    customItems: (raw.customItems ?? []).map((c) => ({
       id: c.id,
       description: c.description,
       price: c.priceCents,
     })),
     segments: [...segments]
       .sort(
-        (a: any, b: any) =>
+        (a: BackendSegment, b: BackendSegment) =>
           new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime(),
       )
-      .map((seg: any, i: number) => ({
+      .map((seg: BackendSegment, i: number) => ({
         id: seg.id,
         appointmentId: raw.id,
         serviceId: seg.serviceId,
@@ -60,14 +130,10 @@ export function mapBackendAppointment(raw: any, timezone = "UTC"): AppointmentSu
 
 export function mapBackendCalendarDay(
   date: string,
-  rawAppointments: any[],
-  rawStaff: any[],
-  rawBreaks: any[] = [],
-  rawSchedules: Array<{
-    staffId: string;
-    availability?: any[];
-    availabilityOverrides?: any[];
-  }> = [],
+  rawAppointments: BackendAppointment[],
+  rawStaff: BackendStaff[],
+  rawBreaks: BackendBreak[] = [],
+  rawSchedules: BackendSchedule[] = [],
   timezone = "UTC",
 ): CalendarDayData {
   const scheduleByStaffId = new Map(
@@ -83,15 +149,15 @@ export function mapBackendCalendarDay(
         id: s.id,
         name: s.name,
         role: s.role ?? "",
-        serviceIds: (s.serviceStaff ?? []).map((ss: any) => ss.serviceId),
-        availability: (schedule?.availability ?? []).map((a: any) => ({
+        serviceIds: (s.serviceStaff ?? []).map((ss) => ss.serviceId),
+        availability: (schedule?.availability ?? []).map((a) => ({
           dayOfWeek: a.dayOfWeek,
           startTime: a.startTime,
           endTime: a.endTime,
           breakAfterMin: a.breakAfterMin ?? null,
         })),
         availabilityOverrides: (schedule?.availabilityOverrides ?? []).map(
-          (o: any) => ({
+          (o) => ({
             id: o.id,
             overrideDate: o.overrideDate,
             isDayOff: o.isDayOff,
@@ -105,7 +171,7 @@ export function mapBackendCalendarDay(
     // as active blocks in the calendar or participate in its visual layout.
     appointments: rawAppointments
       .filter(
-        (appointment: any) =>
+        (appointment: BackendAppointment) =>
           appointment.status !== "cancelled_by_business" &&
           appointment.status !== "cancelled_by_customer",
       )

@@ -48,10 +48,10 @@ export default async function PublicBusinessPage({
     aboutText: content?.aboutText ?? "",
     logoUrl: business.logoUrl ?? null,
     heroPhotoUrl:
-      business.photos.find((p: any) => p.kind === "hero")?.url ?? null,
+      business.photos.find((p: { kind: string; url: string }) => p.kind === "hero")?.url ?? null,
     galleryPhotoUrls: business.photos
-      .filter((p: any) => p.kind === "gallery")
-      .map((p: any) => p.url),
+      .filter((p: { kind: string; url: string }) => p.kind === "gallery")
+      .map((p: { kind: string; url: string }) => p.url),
     primaryColor: content?.primaryColor ?? "#2B2420",
     sectionOrder: content?.sectionOrder ?? [
       "hero",
@@ -64,20 +64,31 @@ export default async function PublicBusinessPage({
     ],
     showTeam: content?.showTeam ?? true,
     showFaq: content?.showFaq ?? true,
-    services: business.services.map((s: any) => ({
+    services: business.services.map((s: {
+      id: string;
+      name: string;
+      category?: string;
+      priceEgp: number;
+      durationMin: number;
+    }) => ({
       id: s.id,
       name: s.name,
       category: s.category ?? undefined,
       priceEgp: Number(s.priceEgp),
       durationMin: s.durationMin,
     })),
-    staff: business.staff.map((s: any) => ({
+    staff: business.staff.map((s: {
+      id: string;
+      name: string;
+      role: string;
+      photoUrl?: string | null;
+    }) => ({
       id: s.id,
       name: s.name,
       role: s.role,
       photoUrl: s.photoUrl,
     })),
-    faqs: business.faqs.map((f: any) => ({
+    faqs: business.faqs.map((f: { question: string; answer: string }) => ({
       question: f.question,
       answer: f.answer,
     })),

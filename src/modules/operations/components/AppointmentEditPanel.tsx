@@ -389,8 +389,10 @@ export function AppointmentEditPanel({
     setValidationError(null);
     try {
       await callback();
-    } catch (error: any) {
-      setValidationError(error?.message ?? `${label} failed.`);
+    } catch (error: unknown) {
+      setValidationError(
+        error instanceof Error ? error.message : "Action failed.",
+      );
     } finally {
       setAction(null);
     }
@@ -405,8 +407,10 @@ export function AppointmentEditPanel({
     try {
       // TODO: PATCH /appointments/:id  — see API list
       await onSave(draft);
-    } catch (error: any) {
-      setValidationError(error?.message ?? "Save failed.");
+    } catch (error: unknown) {
+      setValidationError(
+        error instanceof Error ? error.message : "Save failed.",
+      );
     } finally {
       setSaving(false);
     }

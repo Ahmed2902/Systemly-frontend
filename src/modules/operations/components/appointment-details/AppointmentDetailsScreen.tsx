@@ -22,7 +22,10 @@ import type {
   ServiceCatalogItem,
 } from "@/modules/operations/appointment.types";
 import { mapBackendAppointment } from "@/shared/lib/Calendar/adapter";
+import type { BackendAppointment } from "@/shared/lib/Calendar/adapter";
 import { getDurationMinutes } from "@/shared/lib/Calendar/grid.utils";
+import { errorMessage } from "@/shared/lib/error-message";
+import type { Photo } from "./AppointmentProgressPhotos";
 import { AppointmentHeader } from "./AppointmentHeader";
 import { AppointmentOverviewCard } from "./AppointmentOverviewCard";
 import { AppointmentCustomerCard } from "./AppointmentCustomerCard";
@@ -41,6 +44,11 @@ type Segment = {
   price: number;
 };
 type Item = { id: string; description: string; priceCents: number };
+type AppointmentDetail = BackendAppointment & {
+  createdAt: string;
+  endsAt: string;
+  appointmentPhotos?: Photo[];
+};
 type Draft = {
   status: AppointmentStatus;
   segments: Segment[];
@@ -96,7 +104,7 @@ export default function AppointmentDetailsScreen() {
   const { user, accessToken, loading: authLoading } = useAuth();
   const { appointmentId } = useParams<{ appointmentId: string }>();
   const timezone = user?.timezone || "Africa/Cairo";
-  const [raw, setRaw] = useState<any>(null);
+  const [raw, setRaw] = useState<AppointmentDetail | null>(null);
   const [calendar, setCalendar] = useState<CalendarDayData | null>(null);
   const [catalog, setCatalog] = useState<ServiceCatalogItem[]>([]);
   const [draft, setDraft] = useState<Draft | null>(null);
@@ -109,15 +117,18 @@ export default function AppointmentDetailsScreen() {
     if (!accessToken || !appointmentId || !user?.businessId) return;
     setLoading(true);
     try {
-      const detail = await getAppointmentDetail(appointmentId, accessToken);
+      const detail = (await getAppointmentDetail(
+        appointmentId,
+        accessToken,
+      )) as AppointmentDetail;
       const mapped = mapBackendAppointment(detail, timezone);
       const [day, services] = await Promise.all([
         getCalendarDay(user.businessId, mapped.date, accessToken, timezone),
         getServiceCatalog(user.businessId, accessToken),
       ]);
       const next: Draft = {
-        status: detail.status,
-        segments: (detail.appointmentServices ?? []).map((s: any) => ({
+        status: detail.status as AppointmentStatus,
+        segments: (detail.appointmentServices ?? []).map((s) => ({
           id: s.id,
           serviceId: s.serviceId,
           staffId: s.staffId,
@@ -125,7 +136,7 @@ export default function AppointmentDetailsScreen() {
           endsAt: localValue(s.endsAt, timezone),
           price: Math.round(Number(s.priceEgpSnapshot ?? 0) * 100),
         })),
-        customItems: (detail.customItems ?? []).map((i: any) => ({
+        customItems: (detail.customItems ?? []).map((i) => ({
           id: i.id,
           description: i.description,
           priceCents: i.priceCents,
@@ -144,8 +155,8 @@ export default function AppointmentDetailsScreen() {
       setDraft(next);
       initialRef.current = JSON.stringify(next);
       setError(null);
-    } catch (e: any) {
-      setError(e.message ?? "Unable to load appointment");
+    } catch (e: unknown) {
+      setError(errorMessage(e, "Unable to load appointment"));
     } finally {
       setLoading(false);
     }
@@ -238,8 +249,8 @@ export default function AppointmentDetailsScreen() {
           accessToken,
         );
       await load();
-    } catch (e: any) {
-      setError(e.message ?? "Unable to save appointment");
+    } catch (e: unknown) {
+      setError(errorMessage(e, "Unable to save appointment"));
     } finally {
       setSaving(false);
     }
@@ -250,8 +261,8 @@ export default function AppointmentDetailsScreen() {
     try {
       await fn();
       await load();
-    } catch (e: any) {
-      setError(e.message ?? "Action failed");
+    } catch (e: unknown) {
+      setError(errorMessage(e, "Action failed"));
     } finally {
       setAction(null);
     }
@@ -338,12 +349,12 @@ export default function AppointmentDetailsScreen() {
           />
           <AppointmentCustomerCard
             customer={{
-              id: raw.customer?.id ?? raw.customerId,
+              id: raw.customer?.id ?? raw.customerId ?? "",
               name: raw.customer?.name ?? "Unknown",
               phone: raw.customer?.phone,
               visits: raw.customer?.visitCount ?? 0,
               noShows: raw.customer?.noShowCount ?? 0,
-              lastVisitAt: raw.customer?.lastVisitAt ?? null,
+              lastVisitAt: null,
             }}
           />
           <AppointmentQuickActions

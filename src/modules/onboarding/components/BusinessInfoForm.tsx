@@ -41,8 +41,12 @@ export function BusinessInfoForm() {
     try {
       await createBusiness(data, accessToken);
       router.push("/onboarding/customize"); // next wizard step, once website-content module is redesigned
-    } catch (err: any) {
-      setServerError(err?.error ?? "Something went wrong. Please try again.");
+    } catch (err: unknown) {
+      setServerError(
+        err instanceof Error
+          ? err.message
+          : "Something went wrong. Please try again.",
+      );
     }
   }
 

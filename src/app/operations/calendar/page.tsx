@@ -25,6 +25,7 @@ import type {
   ServiceCatalogItem,
 } from "../../../modules/operations/appointment.types";
 import { dateKeyInTimezone } from "../../../shared/lib/Calendar/grid.utils";
+import { errorMessage } from "@/shared/lib/error-message";
 
 export default function CalendarPage() {
   const { user, accessToken, loading: authLoading } = useAuth();
@@ -47,8 +48,8 @@ export default function CalendarPage() {
       const workspace = await getCalendarWorkspace(date, accessToken);
       setData(workspace.day);
       setCatalog(workspace.services);
-    } catch (e: any) {
-      setError(e.message ?? "Failed to load calendar");
+    } catch (e: unknown) {
+      setError(errorMessage(e, "Failed to load calendar"));
     }
   }, [date, businessId, accessToken]);
 

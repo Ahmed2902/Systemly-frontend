@@ -243,8 +243,10 @@ export function NewAppointmentModal() {
       );
       notifyAppointmentCreated();
       closeNewAppointment();
-    } catch (e: any) {
-      setError(e.message ?? "Failed to create appointment");
+    } catch (e: unknown) {
+      setError(
+        e instanceof Error ? e.message : "Failed to create appointment",
+      );
     } finally {
       setSubmitting(false);
     }
