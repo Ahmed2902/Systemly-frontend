@@ -39,7 +39,7 @@ export function Sidebar() {
       <div className="p-4">
         <div className="text-lg font-bold text-slate-900">Hgezli</div>
         <button
-          onClick={openNewAppointment}
+          onClick={() => openNewAppointment()}
           className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"
         >
           <Plus size={16} /> New Appointment

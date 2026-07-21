@@ -11,7 +11,8 @@ import {
 
 interface OperationsContextValue {
   isNewAppointmentOpen: boolean;
-  openNewAppointment: () => void;
+  appointmentCustomer: { name: string; phone: string } | null;
+  openNewAppointment: (customer?: { name: string; phone: string }) => void;
   closeNewAppointment: () => void;
   notifyAppointmentCreated: () => void;
   onAppointmentCreated: (cb: () => void) => () => void; // returns unsubscribe
@@ -25,10 +26,17 @@ export function OperationsProvider({
   children: React.ReactNode;
 }) {
   const [isNewAppointmentOpen, setIsNewAppointmentOpen] = useState(false);
+  const [appointmentCustomer, setAppointmentCustomer] = useState<{
+    name: string;
+    phone: string;
+  } | null>(null);
   const listenersRef = useRef<Set<() => void>>(new Set());
 
   const openNewAppointment = useCallback(
-    () => setIsNewAppointmentOpen(true),
+    (customer?: { name: string; phone: string }) => {
+      setAppointmentCustomer(customer ?? null);
+      setIsNewAppointmentOpen(true);
+    },
     [],
   );
   const closeNewAppointment = useCallback(
@@ -49,6 +57,7 @@ export function OperationsProvider({
     <OperationsContext.Provider
       value={{
         isNewAppointmentOpen,
+        appointmentCustomer,
         openNewAppointment,
         closeNewAppointment,
         notifyAppointmentCreated,

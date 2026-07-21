@@ -81,6 +81,11 @@ export function CustomerProfilePanel({
   const [notes, setNotes] = useState(customer.notes ?? "");
   const notesDirty = notes !== (customer.notes ?? "");
 
+  async function saveNotes() {
+    await onSaveNotes(notes);
+    setNotes(notes);
+  }
+
   return (
     <div className="min-w-0 space-y-4">
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -227,7 +232,7 @@ export function CustomerProfilePanel({
             <button
               type="button"
               disabled={!notesDirty || savingNotes}
-              onClick={() => void onSaveNotes(notes)}
+              onClick={() => void saveNotes()}
               className="rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-45"
             >
               {savingNotes ? "Saving…" : "Save notes"}

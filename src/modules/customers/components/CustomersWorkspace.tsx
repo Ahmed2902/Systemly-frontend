@@ -256,7 +256,12 @@ export function CustomersWorkspace({
                 savingNotes={savingNotes}
                 onEdit={openEdit}
                 onSaveNotes={saveNotes}
-                onNewAppointment={openNewAppointment}
+                onNewAppointment={() =>
+                  openNewAppointment({
+                    name: workspace.customer.name,
+                    phone: workspace.customer.phone,
+                  })
+                }
               />
             ) : (
               <div className="flex min-h-96 flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-white px-6 text-center">

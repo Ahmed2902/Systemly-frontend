@@ -21,6 +21,7 @@ import type { ServiceCatalogItem, StaffMember } from "../appointment.types";
 export function NewAppointmentModal() {
   const {
     isNewAppointmentOpen,
+    appointmentCustomer,
     closeNewAppointment,
     notifyAppointmentCreated,
   } = useOperations();
@@ -115,6 +116,14 @@ export function NewAppointmentModal() {
   }, [isNewAppointmentOpen]);
 
   useEffect(() => {
+    if (!isNewAppointmentOpen || !appointmentCustomer) return;
+    setCustomerName(appointmentCustomer.name);
+    setCustomerPhone(appointmentCustomer.phone);
+    setPhoneMatches([]);
+    setError(null);
+  }, [isNewAppointmentOpen, appointmentCustomer]);
+
+  useEffect(() => {
     if (!isNewAppointmentOpen) return;
     if (selectedServiceIds.length === 0 && activeStep > 2) {
       setActiveStep(2);
@@ -152,7 +161,7 @@ export function NewAppointmentModal() {
         .finally(() => setLoadingSlots(false));
     }, 250); // debounce rapid staff/service toggles
     return () => clearTimeout(timer);
-  }, [businessId, accessToken, date, JSON.stringify(selections)]);
+  }, [businessId, accessToken, date, selections]);
 
   // Debounced customer lookup by phone
   useEffect(() => {
@@ -211,11 +220,6 @@ export function NewAppointmentModal() {
     return true;
   }
 
-  function goNext() {
-    if (!validateStep(activeStep)) return;
-    setActiveStep((step) => Math.min(5, step + 1));
-  }
-
   function goBack() {
     setError(null);
     setActiveStep((step) => Math.max(1, step - 1));
@@ -244,9 +248,7 @@ export function NewAppointmentModal() {
       notifyAppointmentCreated();
       closeNewAppointment();
     } catch (e: unknown) {
-      setError(
-        e instanceof Error ? e.message : "Failed to create appointment",
-      );
+      setError(e instanceof Error ? e.message : "Failed to create appointment");
     } finally {
       setSubmitting(false);
     }
