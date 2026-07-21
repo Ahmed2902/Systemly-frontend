@@ -27,9 +27,7 @@ import { AppointmentOverviewCard } from "./AppointmentOverviewCard";
 import { AppointmentCustomerCard } from "./AppointmentCustomerCard";
 import { AppointmentQuickActions } from "./AppointmentQuickActions";
 import { BookedServicesSection } from "./BookedServicesSection";
-import { AppointmentNotesSection } from "./AppointmentNotesSection";
 import { ClinicVisitSection } from "./ClinicVisitSection";
-import { AssignedStaffCard } from "./AssignedStaffCard";
 import { AppointmentTimelineCard } from "./AppointmentTimelineCard";
 import { ReceptionNotesCard } from "./ReceptionNotesCard";
 import { AppointmentProgressPhotos } from "./AppointmentProgressPhotos";
@@ -160,8 +158,8 @@ export default function AppointmentDetailsScreen() {
   const dirty = Boolean(draft && JSON.stringify(draft) !== initialRef.current);
   const editable = Boolean(
     appointment &&
-    !appointment.isLocked &&
-    !appointment.status.startsWith("cancelled"),
+      !appointment.isLocked &&
+      !appointment.status.startsWith("cancelled"),
   );
   const total = draft
     ? Math.max(
@@ -308,7 +306,17 @@ export default function AppointmentDetailsScreen() {
           status={draft.status}
           saving={saving || Boolean(action)}
           canSave={Boolean(editable && dirty)}
+          canCancel={Boolean(editable && draft.status !== "no_show")}
           onSave={() => void saveChanges()}
+          onCancel={() =>
+            void runAction("Cancelling…", () =>
+              cancelAppointment(
+                appointment.id,
+                "Cancelled from appointment details",
+                accessToken!,
+              ),
+            )
+          }
           showComplete={
             draft.status === "confirmed" || draft.status === "in_progress"
           }
@@ -323,7 +331,7 @@ export default function AppointmentDetailsScreen() {
             {error}
           </div>
         ) : null}
-        <div className="grid gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)_minmax(18rem,.8fr)]">
+        <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)_minmax(18rem,.9fr)]">
           <AppointmentOverviewCard
             status={draft.status}
             startsAt={firstStart}
@@ -362,15 +370,6 @@ export default function AppointmentDetailsScreen() {
                 ),
               )
             }
-            onCancel={() =>
-              void runAction("Cancelling…", () =>
-                cancelAppointment(
-                  appointment.id,
-                  "Cancelled from appointment details",
-                  accessToken!,
-                ),
-              )
-            }
             onNoShow={() =>
               void runAction("Marking no-show…", () =>
                 markNoShow(appointment.id, accessToken!),
@@ -395,11 +394,6 @@ export default function AppointmentDetailsScreen() {
               toIso={(value) => toIso(value, timezone)}
               fromIso={(value) => localValue(value, timezone)}
             />
-            <AppointmentNotesSection
-              notes={draft.notes}
-              disabled={!editable}
-              onChange={(notes) => update({ notes })}
-            />
             {user?.vertical === "clinic" ? (
               <ClinicVisitSection
                 diagnosis={draft.diagnosis}
@@ -423,16 +417,16 @@ export default function AppointmentDetailsScreen() {
               onUploaded={load}
             />
           </main>
-          <aside className="space-y-4">
-            <AssignedStaffCard
-              segments={raw.appointmentServices ?? []}
-              staff={calendar?.staff ?? []}
-            />
+          <aside className="space-y-4 xl:sticky xl:top-5 xl:self-start">
             <AppointmentTimelineCard
               createdAt={raw.createdAt}
               statusLabel={draft.status}
             />
-            <ReceptionNotesCard notes={draft.notes} />
+            <ReceptionNotesCard
+              notes={draft.notes}
+              disabled={!editable}
+              onChange={(notes) => update({ notes })}
+            />
           </aside>
         </div>
       </div>
