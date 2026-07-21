@@ -7,10 +7,9 @@ import { StatusLegend } from "../../../modules/operations/components/StatusLegen
 import { AppointmentEditPanel } from "../../../modules/operations/components/AppointmentEditPanel";
 import { useAuth } from "@/modules/auth/useAuth";
 import { useOnAppointmentCreated } from "../../../modules/operations/operations.context";
+import { getCalendarWorkspace } from "../../../modules/operations/CalendarWorkspace.api";
 
 import {
-  getCalendarDay,
-  getServiceCatalog,
   saveAppointment,
   completeAppointment,
   cancelAppointment,
@@ -31,7 +30,9 @@ export default function CalendarPage() {
   const { user, accessToken, loading: authLoading } = useAuth();
 
   const timezone = user?.timezone || "Africa/Cairo";
-  const [date, setDate] = useState(() => dateKeyInTimezone(new Date(), "Africa/Cairo"));
+  const [date, setDate] = useState(() =>
+    dateKeyInTimezone(new Date(), "Africa/Cairo"),
+  );
   const [data, setData] = useState<CalendarDayData | null>(null);
   const [catalog, setCatalog] = useState<ServiceCatalogItem[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -43,16 +44,13 @@ export default function CalendarPage() {
     if (!businessId || !accessToken) return;
     try {
       setError(null);
-      const [day, services] = await Promise.all([
-        getCalendarDay(businessId, date, accessToken, timezone),
-        getServiceCatalog(businessId, accessToken),
-      ]);
-      setData(day);
-      setCatalog(services);
+      const workspace = await getCalendarWorkspace(date, accessToken);
+      setData(workspace.day);
+      setCatalog(workspace.services);
     } catch (e: any) {
       setError(e.message ?? "Failed to load calendar");
     }
-  }, [date, businessId, accessToken, timezone]);
+  }, [date, businessId, accessToken]);
 
   useOnAppointmentCreated(reload);
 
@@ -70,13 +68,10 @@ export default function CalendarPage() {
       setError("Missing access token.");
       return;
     }
-    reload();
+    void reload();
   }, [authLoading, user, businessId, accessToken, reload]);
 
   const selected = data?.appointments.find((a) => a.id === selectedId) ?? null;
-
-  // ---- All hooks are declared above this line, unconditionally. ----
-  // Everything below is just deciding what to render — no hooks here.
 
   if (authLoading) {
     return (
