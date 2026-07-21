@@ -54,6 +54,7 @@ export function AppointmentOverviewCard({
         </div>
         <div className="min-w-36">
           <AppointmentDropdown
+            align="center"
             value={status}
             disabled={!editable || actionRunning}
             onChange={(value) => onStatusChange(value as AppointmentStatus)}
@@ -61,12 +62,12 @@ export function AppointmentOverviewCard({
           />
         </div>
       </div>
-      <div className="mt-5 grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto]">
-        <div className="rounded-xl bg-slate-50 p-2">
+      <div className="mt-5 grid min-w-0 gap-3 sm:grid-cols-[minmax(0,1fr)_7.5rem]">
+        <div className="min-w-0 rounded-xl bg-slate-50 p-2">
           <p className="px-1.5 text-xs font-medium text-slate-500">
             Appointment time
           </p>
-          <div className="mt-1 grid grid-cols-[minmax(0,1fr)_7.5rem] gap-2">
+          <div className="mt-1 grid min-w-0 gap-2 sm:grid-cols-[minmax(0,1fr)_7rem]">
             <input
               aria-label="Appointment date"
               type="date"
@@ -75,7 +76,7 @@ export function AppointmentOverviewCard({
               onChange={(event) =>
                 onStartsAtChange(`${event.target.value}T${time}`)
               }
-              className={inputClass}
+              className={inputClass + " min-w-0"}
             />
             <AppointmentDropdown
               align="center"
@@ -86,11 +87,11 @@ export function AppointmentOverviewCard({
             />
           </div>
         </div>
-        <div className="rounded-xl bg-blue-50/60 px-4 py-3 sm:min-w-32">
+        <div className="min-w-0 rounded-xl bg-blue-50/60 px-3 py-3">
           <p className="text-xs font-medium text-blue-700">Duration</p>
           <p className="mt-1 flex items-center gap-2 text-sm font-semibold text-slate-800">
-            <Clock3 size={15} className="text-blue-600" />
-            {durationMinutes} min
+            <Clock3 size={15} className="shrink-0 text-blue-600" />
+            <span className="whitespace-nowrap">{durationMinutes} min</span>
           </p>
         </div>
       </div>

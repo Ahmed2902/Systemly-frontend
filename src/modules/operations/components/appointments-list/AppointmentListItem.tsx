@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { Clock3, UserRound } from "lucide-react";
 import type { AppointmentSummary } from "@/modules/operations/appointment.types";
-import { formatMoney } from "@/shared/lib/Calendar/grid.utils";
+import {
+  formatMoneyEgp,
+  formatTime12Hour,
+} from "@/shared/lib/Calendar/grid.utils";
 const STATUS_LABELS = {
   pending: "Pending",
   confirmed: "Confirmed",
@@ -69,8 +72,9 @@ function colorForStaff(id: string) {
 interface Props {
   appointment: AppointmentSummary;
   staff: Array<{ id: string; name: string }>;
+  timezone: string;
 }
-export function AppointmentListItem({ appointment, staff }: Props) {
+export function AppointmentListItem({ appointment, staff, timezone }: Props) {
   const first = appointment.segments[0];
   const last = appointment.segments.at(-1);
   const duration =
@@ -103,10 +107,7 @@ export function AppointmentListItem({ appointment, staff }: Props) {
       <div className="w-24 shrink-0 border-r border-slate-100 pr-4">
         <div className="text-lg font-bold text-slate-900">
           {first
-            ? new Date(first.startsAt).toLocaleTimeString([], {
-                hour: "numeric",
-                minute: "2-digit",
-              })
+            ? formatTime12Hour(first.startsAt, timezone)
             : "—"}
         </div>
         <div className="mt-1 flex items-center gap-1 text-xs text-slate-500">
@@ -120,11 +121,11 @@ export function AppointmentListItem({ appointment, staff }: Props) {
         >
           {initials(appointment.customer.name)}
         </div>
-        <div>
-          <div className="font-semibold text-slate-900 group-hover:text-blue-700">
+        <div className="min-w-0 flex-1">
+          <div className="truncate font-semibold text-slate-900 group-hover:text-blue-700">
             {appointment.customer.name}
           </div>
-          <div className="text-sm text-slate-500">
+          <div className="break-words text-sm text-slate-500">
             {appointment.segments
               .map((segment) => segment.serviceName)
               .join(" · ")}
@@ -137,10 +138,10 @@ export function AppointmentListItem({ appointment, staff }: Props) {
           </div>
         </div>
       </div>
-      <div className="flex min-w-44 items-center gap-2 text-sm text-slate-600">
+      <div className="flex min-w-44 max-w-full items-center gap-2 text-sm text-slate-600 md:max-w-56">
         <span className={`h-2.5 w-2.5 rounded-full ${color.dot}`} />
         <UserRound size={16} />
-        {staffNames || "Unassigned"}
+        <span className="truncate">{staffNames || "Unassigned"}</span>
       </div>
       <div className="ml-auto flex items-center gap-3">
         <span
@@ -149,7 +150,7 @@ export function AppointmentListItem({ appointment, staff }: Props) {
           {STATUS_LABELS[appointment.status]}
         </span>
         <span className="text-sm font-semibold text-slate-700">
-          {formatMoney(total)}
+          {formatMoneyEgp(total)}
         </span>
         <span className="text-slate-400">›</span>
       </div>

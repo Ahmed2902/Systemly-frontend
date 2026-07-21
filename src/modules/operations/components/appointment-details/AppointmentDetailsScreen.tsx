@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import { useAuth } from "@/modules/auth/useAuth";
 import {
@@ -22,6 +22,7 @@ import type {
   ServiceCatalogItem,
 } from "@/modules/operations/appointment.types";
 import { mapBackendAppointment } from "@/shared/lib/Calendar/adapter";
+import { getDurationMinutes } from "@/shared/lib/Calendar/grid.utils";
 import { AppointmentHeader } from "./AppointmentHeader";
 import { AppointmentOverviewCard } from "./AppointmentOverviewCard";
 import { AppointmentCustomerCard } from "./AppointmentCustomerCard";
@@ -158,8 +159,8 @@ export default function AppointmentDetailsScreen() {
   const dirty = Boolean(draft && JSON.stringify(draft) !== initialRef.current);
   const editable = Boolean(
     appointment &&
-      !appointment.isLocked &&
-      !appointment.status.startsWith("cancelled"),
+    !appointment.isLocked &&
+    !appointment.status.startsWith("cancelled"),
   );
   const total = draft
     ? Math.max(
@@ -275,14 +276,15 @@ export default function AppointmentDetailsScreen() {
     { value: "confirmed", label: "Confirmed" },
     { value: "in_progress", label: "In progress" },
     { value: "no_show", label: "No-show" },
-    { value: "completed", label: "Completed" },
+    //{ value: "completed", label: "Completed" },
     ...(appointment.status.startsWith("cancelled")
       ? [{ value: appointment.status, label: "Cancelled" }]
       : []),
   ];
   const firstStart = draft.segments[0]?.startsAt ?? "";
-  const duration = Math.round(
-    (new Date(raw.endsAt).getTime() - new Date(raw.startsAt).getTime()) / 60000,
+  const duration = getDurationMinutes(
+    draft.segments[0]?.startsAt ?? "",
+    draft.segments.at(-1)?.endsAt ?? "",
   );
   const updateTime = (value: string) => {
     const previous = draft.segments[0]?.startsAt;
@@ -306,17 +308,8 @@ export default function AppointmentDetailsScreen() {
           status={draft.status}
           saving={saving || Boolean(action)}
           canSave={Boolean(editable && dirty)}
-          canCancel={Boolean(editable && draft.status !== "no_show")}
+          dirty={dirty}
           onSave={() => void saveChanges()}
-          onCancel={() =>
-            void runAction("Cancelling…", () =>
-              cancelAppointment(
-                appointment.id,
-                "Cancelled from appointment details",
-                accessToken!,
-              ),
-            )
-          }
           showComplete={
             draft.status === "confirmed" || draft.status === "in_progress"
           }
@@ -354,13 +347,12 @@ export default function AppointmentDetailsScreen() {
             }}
           />
           <AppointmentQuickActions
-            saving={saving}
             actionRunning={Boolean(action)}
             editable={editable}
             dirty={dirty}
+            canCancel={Boolean(editable && draft.status !== "no_show")}
             paid={appointment.isPaid}
             status={draft.status}
-            onSave={() => void saveChanges()}
             onCollect={() =>
               void runAction("Collecting payment…", () =>
                 collectPayment(
@@ -373,6 +365,15 @@ export default function AppointmentDetailsScreen() {
             onNoShow={() =>
               void runAction("Marking no-show…", () =>
                 markNoShow(appointment.id, accessToken!),
+              )
+            }
+            onCancel={() =>
+              void runAction("Cancelling…", () =>
+                cancelAppointment(
+                  appointment.id,
+                  "Cancelled from appointment details",
+                  accessToken!,
+                ),
               )
             }
           />
@@ -421,6 +422,7 @@ export default function AppointmentDetailsScreen() {
             <AppointmentTimelineCard
               createdAt={raw.createdAt}
               statusLabel={draft.status}
+              timezone={timezone}
             />
             <ReceptionNotesCard
               notes={draft.notes}

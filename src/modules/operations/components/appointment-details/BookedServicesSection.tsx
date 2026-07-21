@@ -1,5 +1,8 @@
 import { Plus, Trash2 } from "lucide-react";
-import { formatMoney } from "@/shared/lib/Calendar/grid.utils";
+import {
+  formatMoneyEgp,
+  getDurationMinutes,
+} from "@/shared/lib/Calendar/grid.utils";
 import { AppointmentDropdown } from "./AppointmentDropdown";
 
 interface Segment {
@@ -121,12 +124,34 @@ export function BookedServicesSection({
         const nextStartsAt = cursor;
         const nextEndsAt = addMinutes(
           nextStartsAt,
-          service?.defaultDurationMinutes ?? 0,
+          getDurationMinutes(segment.startsAt, segment.endsAt) ||
+            service?.defaultDurationMinutes ||
+            0,
         );
         cursor = nextEndsAt;
         return {
           ...segment,
           startsAt: nextStartsAt,
+          endsAt: nextEndsAt,
+        };
+      }),
+    );
+  };
+  const updateEndTime = (index: number, endsAt: string) => {
+    const edited = segments[index];
+    if (!edited) return;
+    let cursor = endsAt;
+    onSegmentsChange(
+      segments.map((segment, segmentIndex) => {
+        if (segmentIndex < index) return segment;
+        if (segmentIndex === index) return { ...segment, endsAt };
+        const duration = getDurationMinutes(segment.startsAt, segment.endsAt);
+        const startsAt = cursor;
+        const nextEndsAt = addMinutes(startsAt, duration);
+        cursor = nextEndsAt;
+        return {
+          ...segment,
+          startsAt,
           endsAt: nextEndsAt,
         };
       }),
@@ -173,7 +198,7 @@ export function BookedServicesSection({
         </button>
       </div>
       <div className="relative mt-5 overflow-visible rounded-xl bg-slate-50/70">
-        <div className="hidden grid-cols-[1.2fr_1fr_1fr_1fr_auto] gap-3 border-b border-slate-100 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-400 md:grid">
+        <div className="hidden grid-cols-[minmax(11rem,1.2fr)_minmax(8rem,1fr)_minmax(7rem,1fr)_minmax(7rem,1fr)_auto] gap-3 border-b border-slate-100 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-400 md:grid">
           <span>Service</span>
           <span>Staff</span>
           <span>Starts</span>
@@ -184,11 +209,12 @@ export function BookedServicesSection({
           {segments.map((segment, index) => (
             <div
               key={segment.id}
-              className="relative grid gap-3 px-4 py-4 md:grid-cols-[1.2fr_1fr_1fr_1fr_auto] md:items-center"
+              className="relative grid gap-3 px-4 py-4 md:grid-cols-[minmax(11rem,1.2fr)_minmax(8rem,1fr)_minmax(7rem,1fr)_minmax(7rem,1fr)_auto] md:items-center"
             >
-              <label className="text-xs font-medium text-slate-500 md:text-transparent">
+              <label className="flex min-w-0 flex-col items-center text-center text-xs font-medium text-slate-500 md:text-transparent">
                 <span className="md:hidden">Service</span>
                 <AppointmentDropdown
+                  align="center"
                   value={segment.serviceId}
                   disabled={!editable}
                   options={eligibleCatalog.map((service) => ({
@@ -208,8 +234,11 @@ export function BookedServicesSection({
                     });
                   }}
                 />
+                <p className="mt-1 truncate px-1 text-center text-xs font-medium text-slate-500">
+                  {formatMoneyEgp(segment.price)}
+                </p>
               </label>
-              <label className="text-xs font-medium text-slate-500 md:text-transparent">
+              <label className="flex min-w-0 flex-col items-center text-center text-xs font-medium text-slate-500 md:text-transparent">
                 <span className="md:hidden">Staff</span>
                 <AppointmentDropdown
                   align="center"
@@ -219,9 +248,10 @@ export function BookedServicesSection({
                   onChange={(value) => updateSegment(index, { staffId: value })}
                 />
               </label>
-              <label className="text-xs font-medium text-slate-500 md:text-transparent">
+              <label className="flex min-w-0 flex-col items-center text-center text-xs font-medium text-slate-500 md:text-transparent">
                 <span className="md:hidden">Starts</span>
                 <AppointmentDropdown
+                  align="center"
                   value={timeValue(segment.startsAt)}
                   disabled={!editable}
                   options={optionsForTime(timeValue(segment.startsAt))}
@@ -230,18 +260,20 @@ export function BookedServicesSection({
                   }
                 />
               </label>
-              <label className="text-xs font-medium text-slate-500 md:text-transparent">
+              <label className="flex min-w-0 flex-col items-center text-center text-xs font-medium text-slate-500 md:text-transparent">
                 <span className="md:hidden">Ends</span>
                 <AppointmentDropdown
+                  align="center"
                   value={timeValue(segment.endsAt)}
                   disabled={!editable}
                   options={optionsForTime(timeValue(segment.endsAt))}
                   onChange={(value) =>
-                    updateSegment(index, {
-                      endsAt: withTime(segment.endsAt, value),
-                    })
+                    updateEndTime(index, withTime(segment.endsAt, value))
                   }
                 />
+                <p className="mt-1 px-1 text-center text-xs font-medium text-slate-500">
+                  {getDurationMinutes(segment.startsAt, segment.endsAt)} min
+                </p>
               </label>
               <button
                 type="button"
@@ -252,7 +284,7 @@ export function BookedServicesSection({
                     segments.filter((_, itemIndex) => itemIndex !== index),
                   )
                 }
-                className="flex h-9 w-9 items-center justify-center self-end rounded-lg text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-30 md:self-auto"
+                className="flex h-9 w-9 items-center justify-self-center rounded-lg text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-30"
               >
                 <Trash2 size={16} />
               </button>
@@ -312,7 +344,7 @@ export function BookedServicesSection({
                     aria-label="Item price in EGP"
                     type="number"
                     min="0"
-                    step="0.01"
+                    step="1"
                     value={item.priceCents / 100}
                     disabled={!editable}
                     onChange={(event) =>
@@ -358,7 +390,7 @@ export function BookedServicesSection({
               aria-label="Discount amount in EGP"
               type="number"
               min="0"
-              step="0.01"
+              step="1"
               value={discountCents / 100}
               disabled={!editable}
               onChange={(event) =>
@@ -373,10 +405,11 @@ export function BookedServicesSection({
             Amount in EGP
           </span>
         </div>
-        <div className="text-right">
+        <div className="pb-5 text-right">
           <p className="text-sm font-medium text-slate-500">Estimated total</p>
-          <p className="mt-1 text-xl font-bold tracking-tight text-slate-900">
-            {formatMoney(total)}
+
+          <p className="text-xl font-bold tracking-tight text-slate-900">
+            {formatMoneyEgp(total)}
           </p>
         </div>
       </div>

@@ -95,6 +95,30 @@ export function formatTimeRange(
   return `${fmt(startsAt)} – ${fmt(endsAt)}`;
 }
 
+export function formatTime12Hour(value: string, timezone: string): string {
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone: timezone,
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  }).format(new Date(value));
+}
+
+export function getDurationMinutes(startsAt: string, endsAt: string): number {
+  const start = new Date(startsAt + ":00Z").getTime();
+  const end = new Date(endsAt + ":00Z").getTime();
+
+  if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) {
+    return 0;
+  }
+
+  return Math.round((end - start) / 60_000);
+}
+
+export function formatMoneyEgp(cents: number): string {
+  return "EGP " + (cents / 100).toFixed(2);
+}
+
 export function formatMoney(cents: number): string {
   return `$${(cents / 100).toFixed(2)}`;
 }

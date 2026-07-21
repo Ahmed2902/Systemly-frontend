@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/modules/auth/useAuth";
 import { getCalendarWorkspace } from "@/modules/operations/CalendarWorkspace.api";
@@ -99,7 +100,18 @@ export default function AppointmentsPage() {
           onSortChange={setSort}
         />
 
-        {error ? <div className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div> : null}
+        {error ? (
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            <span>{error}</span>
+            <button
+              type="button"
+              onClick={() => void load()}
+              className="rounded-lg border border-red-200 bg-white px-3 py-1.5 font-semibold text-red-700 hover:bg-red-100 focus:outline-none focus:ring-4 focus:ring-red-100"
+            >
+              Retry
+            </button>
+          </div>
+        ) : null}
 
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-slate-900">
@@ -115,15 +127,43 @@ export default function AppointmentsPage() {
         </div>
 
         {loading ? (
-          <div className="rounded-2xl border bg-white p-10 text-center text-slate-400">Loading appointments…</div>
+          <div className="space-y-3" aria-label="Loading appointments">
+            {[1, 2, 3].map((item) => (
+              <div
+                key={item}
+                className="h-28 animate-pulse rounded-2xl border border-slate-200 bg-white"
+              />
+            ))}
+          </div>
         ) : visible.length === 0 ? (
-          <div className="rounded-2xl border border-dashed bg-white p-12 text-center text-slate-500">
-            No appointments match these filters.
+          <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-12 text-center">
+            <p className="font-semibold text-slate-800">
+              No appointments for{" "}
+              {new Date(date + "T12:00:00Z").toLocaleDateString(undefined, {
+                month: "long",
+                day: "numeric",
+                year: "numeric",
+              })}
+            </p>
+            <p className="mt-1 text-sm text-slate-500">
+              Try another date or create a new appointment.
+            </p>
+            <Link
+              href="/operations/appointments/new"
+              className="mt-5 inline-flex rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-100"
+            >
+              New Appointment
+            </Link>
           </div>
         ) : (
           <div className="space-y-3">
             {visible.map((appointment) => (
-              <AppointmentListItem key={appointment.id} appointment={appointment} staff={staff} />
+              <AppointmentListItem
+                key={appointment.id}
+                appointment={appointment}
+                staff={staff}
+                timezone={timezone}
+              />
             ))}
           </div>
         )}

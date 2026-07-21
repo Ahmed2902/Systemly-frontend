@@ -1,46 +1,34 @@
-import { Check, CircleDollarSign, Save } from "lucide-react";
+import { Check, CircleDollarSign, XCircle } from "lucide-react";
 import { AppointmentActionCard } from "./AppointmentActionCard";
 
 interface Props {
-  saving: boolean;
   actionRunning: boolean;
   editable: boolean;
   dirty: boolean;
+  canCancel: boolean;
   paid: boolean;
   status: string;
-  onSave: () => void;
   onCollect: () => void;
   onNoShow: () => void;
+  onCancel: () => void;
 }
 
 export function AppointmentQuickActions({
-  saving,
   actionRunning,
   editable,
   dirty,
+  canCancel,
   paid,
   status,
-  onSave,
   onCollect,
   onNoShow,
+  onCancel,
 }: Props) {
   return (
     <section className="self-start rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
-      <div className="flex items-center justify-between">
-        <h2 className="font-semibold text-slate-950">Quick Actions</h2>
-        {dirty ? (
-          <span className="text-xs font-medium text-amber-600">Unsaved changes</span>
-        ) : null}
-      </div>
+      <h2 className="font-semibold text-slate-950">Quick Actions</h2>
 
       <div className="mt-4 space-y-2.5">
-        <AppointmentActionCard
-          icon={<Save size={16} />}
-          label={saving ? "Saving changes…" : "Save changes"}
-          tone="blue"
-          disabled={!editable || !dirty || saving || actionRunning}
-          onClick={onSave}
-        />
         <AppointmentActionCard
           icon={<CircleDollarSign size={16} />}
           label={paid ? "Payment collected" : "Collect payment"}
@@ -57,6 +45,13 @@ export function AppointmentQuickActions({
             actionRunning
           }
           onClick={onNoShow}
+        />
+        <AppointmentActionCard
+          icon={<XCircle size={16} />}
+          label="Cancel appointment"
+          tone="red"
+          disabled={!canCancel || actionRunning}
+          onClick={onCancel}
         />
       </div>
     </section>

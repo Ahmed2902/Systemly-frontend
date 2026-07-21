@@ -27,10 +27,9 @@ interface Props {
   status: AppointmentStatus;
   saving: boolean;
   canSave: boolean;
-  canCancel: boolean;
+  dirty: boolean;
   showComplete: boolean;
   onSave: () => void;
-  onCancel: () => void;
   onComplete: () => void;
 }
 
@@ -39,10 +38,9 @@ export function AppointmentHeader({
   status,
   saving,
   canSave,
-  canCancel,
+  dirty,
   showComplete,
   onSave,
-  onCancel,
   onComplete,
 }: Props) {
   return (
@@ -70,24 +68,23 @@ export function AppointmentHeader({
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <button
-          type="button"
-          onClick={onSave}
-          disabled={!canSave || saving}
-          className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-blue-200 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-45"
-        >
-          <Save size={15} />
-          {saving ? "Saving…" : "Save changes"}
-        </button>
-
-        <button
-          type="button"
-          onClick={onCancel}
-          disabled={!canCancel || saving}
-          className="min-h-10 rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-45"
-        >
-          Cancel
-        </button>
+        <div className="flex items-center gap-2">
+          {dirty ? (
+            <span className="inline-flex items-center gap-1.5 text-xs font-medium text-amber-600">
+              <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+              Unsaved changes
+            </span>
+          ) : null}
+          <button
+            type="button"
+            onClick={onSave}
+            disabled={!canSave || saving}
+            className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-blue-200 hover:text-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-45"
+          >
+            <Save size={15} />
+            {saving ? "Saving…" : "Save changes"}
+          </button>
+        </div>
 
         {showComplete ? (
           <button
