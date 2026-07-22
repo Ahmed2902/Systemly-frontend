@@ -1,5 +1,8 @@
 export type ServiceStatusFilter = "all" | "active" | "inactive";
 
+export const MIN_SERVICE_DURATION = 5;
+export const SERVICE_DURATION_STEP = 5;
+
 export interface ServiceStaffOption {
   id: string;
   name: string;

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Check, Loader2, Plus, X } from "lucide-react";
+import { MIN_SERVICE_DURATION, SERVICE_DURATION_STEP } from "../services.types";
 import type {
   CatalogService,
   ServiceInput,
@@ -46,18 +47,32 @@ export function ServiceFormModal({
   onClose,
   onSubmit,
 }: Props) {
-  const [form, setForm] = useState<ServiceInput>(() => createInitialState(service));
+  const [form, setForm] = useState<ServiceInput>(() =>
+    createInitialState(service),
+  );
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (open) setForm(createInitialState(service));
+    if (open) {
+      setForm(createInitialState(service));
+      setValidationError(null);
+    }
   }, [open, service]);
 
   const categoryOptions = useMemo(
-    () => [...new Set(categories.filter(Boolean))].sort((a, b) => a.localeCompare(b)),
+    () =>
+      [...new Set(categories.filter(Boolean))].sort((a, b) =>
+        a.localeCompare(b),
+      ),
     [categories],
   );
 
   if (!open) return null;
+
+  const durationIsValid =
+    Number.isInteger(form.durationMin) &&
+    form.durationMin >= MIN_SERVICE_DURATION &&
+    (form.durationMin - MIN_SERVICE_DURATION) % SERVICE_DURATION_STEP === 0;
 
   const toggleStaff = (staffId: string) => {
     setForm((current) => ({
@@ -70,12 +85,20 @@ export function ServiceFormModal({
 
   const submit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (!durationIsValid) {
+      setValidationError(
+        `Duration must be a multiple of ${SERVICE_DURATION_STEP} minutes, starting at ${MIN_SERVICE_DURATION}.`,
+      );
+      return;
+    }
+
+    setValidationError(null);
     await onSubmit({
       ...form,
       name: form.name.trim(),
       description: form.description?.trim() || undefined,
       category: form.category?.trim() || undefined,
-      durationMin: Math.max(1, Number(form.durationMin)),
+      durationMin: Number(form.durationMin),
       ...(canManageMoney
         ? { priceEgp: Math.max(0, Number(form.priceEgp ?? 0)) }
         : { priceEgp: undefined }),
@@ -131,7 +154,10 @@ export function ServiceFormModal({
                 maxLength={255}
                 value={form.name}
                 onChange={(event) =>
-                  setForm((current) => ({ ...current, name: event.target.value }))
+                  setForm((current) => ({
+                    ...current,
+                    name: event.target.value,
+                  }))
                 }
                 className={inputClass}
                 placeholder="Haircut, consultation, treatment..."
@@ -165,8 +191,8 @@ export function ServiceFormModal({
                 <input
                   required
                   type="number"
-                  min={1}
-                  step={5}
+                  min={MIN_SERVICE_DURATION}
+                  step={SERVICE_DURATION_STEP}
                   value={form.durationMin}
                   onChange={(event) =>
                     setForm((current) => ({
@@ -174,6 +200,7 @@ export function ServiceFormModal({
                       durationMin: Number(event.target.value),
                     }))
                   }
+                  onInput={() => setValidationError(null)}
                   className={`${inputClass} pr-14`}
                 />
                 <span className="pointer-events-none absolute bottom-2.5 right-3 text-xs font-medium text-slate-400">
@@ -231,7 +258,8 @@ export function ServiceFormModal({
                   Eligible staff
                 </h3>
                 <p className="mt-1 text-xs text-slate-500">
-                  Services with no active staff remain visible but unavailable for booking.
+                  Services with no active staff remain visible but unavailable
+                  for booking.
                 </p>
               </div>
               <span className="rounded-full bg-violet-50 px-2.5 py-1 text-xs font-semibold text-violet-700">
@@ -259,8 +287,12 @@ export function ServiceFormModal({
                       }`}
                     >
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-medium">{member.name}</p>
-                        <p className="mt-0.5 text-xs text-slate-500">Active staff</p>
+                        <p className="truncate text-sm font-medium">
+                          {member.name}
+                        </p>
+                        <p className="mt-0.5 text-xs text-slate-500">
+                          Active staff
+                        </p>
                       </div>
                       <span
                         className={`flex h-5 w-5 items-center justify-center rounded-md border ${
@@ -281,7 +313,10 @@ export function ServiceFormModal({
           <button
             type="button"
             onClick={() =>
-              setForm((current) => ({ ...current, isActive: !current.isActive }))
+              setForm((current) => ({
+                ...current,
+                isActive: !current.isActive,
+              }))
             }
             className={`flex w-full items-center justify-between rounded-2xl border px-4 py-4 text-left transition ${
               form.isActive
@@ -312,9 +347,9 @@ export function ServiceFormModal({
             </span>
           </button>
 
-          {error ? (
+          {validationError || error ? (
             <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-              {error}
+              {validationError ?? error}
             </div>
           ) : null}
         </div>
@@ -330,7 +365,7 @@ export function ServiceFormModal({
           </button>
           <button
             type="submit"
-            disabled={saving || !form.name.trim() || form.durationMin < 1}
+            disabled={saving || !form.name.trim() || !durationIsValid}
             className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:from-violet-700 hover:to-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {saving ? <Loader2 size={16} className="animate-spin" /> : null}

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   AlertCircle,
+  Activity,
   Layers3,
   Loader2,
   Plus,
@@ -12,6 +13,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { useAuth } from "@/modules/auth/useAuth";
+import { OperationsDropdown } from "@/modules/operations/components/OperationsDropdown";
 import {
   archiveService,
   createService,
@@ -28,8 +30,7 @@ import { ServiceCategoryCards } from "./ServiceCategoryCards";
 import { ServiceFormModal } from "./ServiceFormModal";
 import { ServicesTable } from "./ServicesTable";
 
-const selectClass =
-  "h-11 rounded-xl border border-slate-200 bg-white px-3.5 text-sm font-medium text-slate-700 outline-none transition focus:border-violet-300 focus:ring-4 focus:ring-violet-100";
+const UNCATEGORIZED_CATEGORY = "Uncategorized";
 
 export default function ServiceCatalogScreen() {
   const { accessToken, loading: authLoading } = useAuth();
@@ -57,12 +58,25 @@ export default function ServiceCatalogScreen() {
     setError(null);
 
     try {
+      const response = await getServiceCatalog(accessToken, {
+        search: debouncedSearch || undefined,
+        category:
+          category === UNCATEGORIZED_CATEGORY ? undefined : category || undefined,
+        status,
+      });
+
       setCatalog(
-        await getServiceCatalog(accessToken, {
-          search: debouncedSearch || undefined,
-          category: category || undefined,
-          status,
-        }),
+        category === UNCATEGORIZED_CATEGORY
+          ? {
+              ...response,
+              items: response.items.filter(
+                (service) =>
+                  !service.category ||
+                  service.category.trim().toLocaleLowerCase() ===
+                    UNCATEGORIZED_CATEGORY.toLocaleLowerCase(),
+              ),
+            }
+          : response,
       );
     } catch (caught: unknown) {
       setError(
@@ -81,6 +95,18 @@ export default function ServiceCatalogScreen() {
     () => catalog?.categories.map((item) => item.name) ?? [],
     [catalog],
   );
+  const categoryOptions = useMemo(
+    () => [
+      { value: "", label: "All categories" },
+      ...categories.map((item) => ({ value: item, label: item })),
+    ],
+    [categories],
+  );
+  const statusOptions = [
+    { value: "all", label: "All statuses" },
+    { value: "active", label: "Active", tone: "active" as const },
+    { value: "inactive", label: "Inactive", tone: "inactive" as const },
+  ];
 
   const openCreate = () => {
     setEditingService(null);
@@ -196,7 +222,7 @@ export default function ServiceCatalogScreen() {
           </button>
         </header>
 
-        <section className="rounded-2xl border border-white/80 bg-white/90 p-3 shadow-sm backdrop-blur">
+        <section className="relative z-40 rounded-2xl border border-white/80 bg-white/90 p-3 shadow-sm backdrop-blur">
           <div className="grid gap-3 md:grid-cols-[minmax(16rem,1fr)_14rem_12rem_auto]">
             <label className="relative block">
               <Search
@@ -211,32 +237,21 @@ export default function ServiceCatalogScreen() {
               />
             </label>
 
-            <select
+            <OperationsDropdown
               value={category}
-              onChange={(event) => setCategory(event.target.value)}
-              className={selectClass}
+              onChange={setCategory}
+              options={categoryOptions}
+              icon={<Layers3 size={16} />}
               aria-label="Filter by category"
-            >
-              <option value="">All categories</option>
-              {categories.map((item) => (
-                <option key={item} value={item}>
-                  {item}
-                </option>
-              ))}
-            </select>
+            />
 
-            <select
+            <OperationsDropdown
               value={status}
-              onChange={(event) =>
-                setStatus(event.target.value as ServiceStatusFilter)
-              }
-              className={selectClass}
+              onChange={(value) => setStatus(value as ServiceStatusFilter)}
+              options={statusOptions}
+              icon={<Activity size={16} />}
               aria-label="Filter by status"
-            >
-              <option value="all">All statuses</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select>
+            />
 
             <button
               type="button"
@@ -293,6 +308,7 @@ export default function ServiceCatalogScreen() {
             <ServiceCategoryCards
               categories={catalog.categories}
               canManageMoney={catalog.canManageMoney}
+              selectedCategory={category}
               onSelect={setCategory}
             />
 
