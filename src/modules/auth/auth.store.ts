@@ -15,5 +15,7 @@ export function setAccessToken(token: string | null) {
 
 export function subscribeAccessToken(listener: AccessTokenListener) {
   listeners.add(listener);
-  return () => listeners.delete(listener);
+  return () => {
+    listeners.delete(listener);
+  };
 }
