@@ -158,32 +158,25 @@ export function InvoiceDetailPanel({
         {customItems.length > 0 ? (
           <section>
             <h3 className="font-semibold text-slate-900">Custom items</h3>
-            <div className="mt-3 overflow-x-auto rounded-2xl border border-slate-200">
-              <div className="grid min-w-[32rem] grid-cols-[minmax(10rem,1fr)_7rem_5rem_8rem] gap-3 border-b border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                <span>Item</span>
-                <span className="text-right">Amount</span>
-                <span className="text-right">Quantity</span>
-                <span className="text-right">Total</span>
-              </div>
+            <div className="mt-3 overflow-hidden rounded-2xl border border-slate-200">
               {customItems.map((item) => {
                 const calculatedTotal = item.unitPriceCents * item.quantity;
                 return (
                   <div
                     key={item.id}
-                    className="grid min-w-[32rem] grid-cols-[minmax(10rem,1fr)_7rem_5rem_8rem] gap-3 border-b border-slate-100 px-4 py-3 text-sm last:border-b-0"
+                    className="grid grid-cols-[minmax(0,1fr)_auto] gap-4 border-b border-slate-100 px-4 py-3 text-sm last:border-b-0"
                   >
-                    <span className="font-medium text-slate-800">
-                      {item.description}
-                    </span>
-                    <span className="text-right text-slate-600">
-                      {money(item.unitPriceCents)}
-                    </span>
-                    <span className="text-right text-slate-600">
-                      {item.quantity}
-                    </span>
-                    <span className="text-right font-semibold text-slate-900">
+                    <div className="min-w-0">
+                      <p className="truncate font-medium text-slate-800">
+                        {item.description}
+                      </p>
+                      <p className="mt-0.5 text-xs text-slate-500">
+                        {item.quantity} × {money(item.unitPriceCents)}
+                      </p>
+                    </div>
+                    <p className="font-semibold text-slate-900">
                       {money(calculatedTotal)}
-                    </span>
+                    </p>
                   </div>
                 );
               })}

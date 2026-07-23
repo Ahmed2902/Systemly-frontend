@@ -96,7 +96,10 @@ export function AppointmentListItem({ appointment, staff, timezone }: Props) {
   const total = Math.max(
     0,
     appointment.segments.reduce((sum, segment) => sum + segment.price, 0) +
-      appointment.customItems.reduce((sum, item) => sum + item.price, 0) -
+      appointment.customItems.reduce(
+        (sum, item) => sum + item.price * item.quantity,
+        0,
+      ) -
       appointment.discount,
   );
   return (

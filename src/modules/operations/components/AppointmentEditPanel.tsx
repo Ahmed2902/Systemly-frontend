@@ -214,7 +214,7 @@ export function AppointmentEditPanel({
 
   const subtotal =
     draft.segments.reduce((sum, s) => sum + s.price, 0) +
-    draft.customItems.reduce((sum, c) => sum + c.price, 0);
+    draft.customItems.reduce((sum, c) => sum + c.price * c.quantity, 0);
   const total = Math.max(0, subtotal - draft.discount);
 
   function updateSegment(index: number, patch: Partial<AppointmentSegment>) {
@@ -328,7 +328,7 @@ export function AppointmentEditPanel({
       ...d,
       customItems: [
         ...d.customItems,
-        { id: `custom-${Date.now()}`, description: "", price: 0 },
+        { id: `custom-${Date.now()}`, description: "", quantity: 1, price: 0 },
       ],
     }));
   }
@@ -844,9 +844,19 @@ export function AppointmentEditPanel({
             <h3 className="mb-4 text-lg font-semibold text-slate-950">
               Custom Items
             </h3>
-            <div className="space-y-3">
+            <div className="overflow-hidden rounded-2xl border border-slate-200">
+              <div className="grid grid-cols-[minmax(0,1fr)_5.5rem_3.5rem_5.5rem_2rem] gap-2 border-b border-slate-200 bg-slate-50 px-3 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                <span>Description</span>
+                <span className="text-right">Price</span>
+                <span className="text-right">Qty</span>
+                <span className="text-right">Total</span>
+                <span className="w-8" />
+              </div>
               {draft.customItems.map((item) => (
-                <div key={item.id} className="flex items-center gap-2">
+                <div
+                  key={item.id}
+                  className="grid grid-cols-[minmax(0,1fr)_5.5rem_3.5rem_5.5rem_2rem] items-center gap-2 border-b border-slate-100 px-3 py-2.5 last:border-b-0"
+                >
                   <input
                     disabled={locked}
                     placeholder="Description (e.g. extra cream used)"
@@ -861,7 +871,7 @@ export function AppointmentEditPanel({
                         ),
                       }))
                     }
-                    className="flex-1 rounded border border-slate-300 px-2 py-1 text-xs disabled:bg-slate-100"
+                    className="w-full min-w-0 rounded-lg border border-slate-300 px-2 py-1.5 text-xs disabled:bg-slate-100"
                   />
                   <input
                     disabled={locked}
@@ -880,8 +890,33 @@ export function AppointmentEditPanel({
                         ),
                       }))
                     }
-                    className="w-20 rounded border border-slate-300 px-2 py-1 text-xs disabled:bg-slate-100"
+                    className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-right text-xs disabled:bg-slate-100"
                   />
+                  <input
+                    aria-label="Custom item quantity"
+                    disabled={locked}
+                    type="number"
+                    min="1"
+                    step="1"
+                    value={item.quantity}
+                    onChange={(e) =>
+                      setDraft((d) => ({
+                        ...d,
+                        customItems: d.customItems.map((c) =>
+                          c.id === item.id
+                            ? {
+                                ...c,
+                                quantity: Math.max(1, Math.floor(Number(e.target.value) || 1)),
+                              }
+                            : c,
+                        ),
+                      }))
+                    }
+                    className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-right text-xs disabled:bg-slate-100"
+                  />
+                  <span className="text-right text-sm font-semibold text-slate-900">
+                    {formatMoney(item.price * item.quantity)}
+                  </span>
                   {!locked && (
                     <button
                       onClick={() => removeCustomItem(item.id)}

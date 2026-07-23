@@ -9,6 +9,7 @@ import { dateKeyInTimezone, toTimeValue } from "./grid.utils";
 export interface BackendCustomItem {
   id: string;
   description: string;
+  quantity?: number;
   priceCents: number;
 }
 export interface BackendSegment {
@@ -106,6 +107,7 @@ export function mapBackendAppointment(
     customItems: (raw.customItems ?? []).map((c) => ({
       id: c.id,
       description: c.description,
+      quantity: c.quantity ?? 1,
       price: c.priceCents,
     })),
     segments: [...segments]

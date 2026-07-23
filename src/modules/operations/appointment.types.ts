@@ -43,6 +43,7 @@ export interface ServiceCatalogItem {
 export interface CustomLineItem {
   id: string;
   description: string;
+  quantity: number;
   price: number; // cents
 }
 

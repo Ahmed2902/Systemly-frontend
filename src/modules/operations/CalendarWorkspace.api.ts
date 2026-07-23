@@ -1,5 +1,11 @@
 import { api } from "@/shared/lib/api";
-import { mapBackendCalendarDay } from "@/shared/lib/Calendar/adapter";
+import {
+  mapBackendCalendarDay,
+  type BackendAppointment,
+  type BackendBreak,
+  type BackendSchedule,
+  type BackendStaff,
+} from "@/shared/lib/Calendar/adapter";
 import type {
   CalendarDayData,
   ServiceCatalogItem,
@@ -10,10 +16,9 @@ type WorkspaceResult = {
   services: ServiceCatalogItem[];
 };
 
-type WorkspaceStaff = {
-  id: string;
-  availability?: unknown[];
-  availabilityOverrides?: unknown[];
+type WorkspaceStaff = BackendStaff & {
+  availability?: BackendSchedule["availability"];
+  availabilityOverrides?: BackendSchedule["availabilityOverrides"];
 };
 
 type WorkspaceService = {
@@ -26,9 +31,9 @@ type WorkspaceService = {
 type CalendarWorkspaceResponse = {
   date?: string;
   timezone?: string;
-  appointments?: unknown[];
+  appointments?: BackendAppointment[];
   staff?: WorkspaceStaff[];
-  breaks?: unknown[];
+  breaks?: BackendBreak[];
   services?: WorkspaceService[];
 };
 

@@ -44,7 +44,12 @@ type Segment = {
   endsAt: string;
   price: number;
 };
-type Item = { id: string; description: string; priceCents: number };
+type Item = {
+  id: string;
+  description: string;
+  quantity: number;
+  priceCents: number;
+};
 type AppointmentDetail = BackendAppointment & {
   createdAt: string;
   endsAt: string;
@@ -126,7 +131,7 @@ export default function AppointmentDetailsScreen() {
       )) as AppointmentDetail;
       const mapped = mapBackendAppointment(detail, timezone);
       const [day, services] = await Promise.all([
-        getCalendarDay(user.businessId, mapped.date, accessToken, timezone),
+        getCalendarDay(user.businessId, mapped.date, accessToken),
         getServiceCatalog(user.businessId, accessToken),
       ]);
       const next: Draft = {
@@ -142,6 +147,7 @@ export default function AppointmentDetailsScreen() {
         customItems: (detail.customItems ?? []).map((i) => ({
           id: i.id,
           description: i.description,
+          quantity: i.quantity ?? 1,
           priceCents: i.priceCents,
         })),
         discountCents: detail.discountCents ?? 0,
@@ -186,7 +192,10 @@ export default function AppointmentDetailsScreen() {
               ?.defaultPrice ?? segment.price),
           0,
         ) +
-          draft.customItems.reduce((sum, item) => sum + item.priceCents, 0) -
+          draft.customItems.reduce(
+            (sum, item) => sum + item.priceCents * item.quantity,
+            0,
+          ) -
           draft.discountCents,
       )
     : 0;
@@ -230,6 +239,7 @@ export default function AppointmentDetailsScreen() {
           customItems: draft.customItems.map((item) => ({
             id: item.id,
             description: item.description,
+            quantity: item.quantity,
             price: item.priceCents,
           })),
           discount: draft.discountCents,

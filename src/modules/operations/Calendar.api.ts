@@ -14,7 +14,6 @@ export async function getCalendarDay(
   _businessId: string,
   date: string,
   accessToken: string,
-  _timezone = "UTC",
 ): Promise<CalendarDayData> {
   return (await getCalendarWorkspace(date, accessToken)).day;
 }
@@ -100,6 +99,7 @@ export async function saveAppointment(
     customItems: appointment.customItems.map((item) => ({
       id: item.id.startsWith("custom-") ? undefined : item.id,
       description: item.description,
+      quantity: item.quantity,
       priceCents: item.price,
     })),
     discountCents: appointment.discount,
