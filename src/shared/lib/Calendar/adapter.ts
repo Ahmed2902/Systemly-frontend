@@ -9,6 +9,7 @@ import { dateKeyInTimezone, toTimeValue } from "./grid.utils";
 export interface BackendCustomItem {
   id: string;
   description: string;
+  quantity?: number;
   priceCents: number;
 }
 export interface BackendSegment {
@@ -103,26 +104,27 @@ export function mapBackendAppointment(
           prescriptionJson: raw.clinicVisitRecord.prescriptionJson ?? null,
         }
       : null,
-    customItems: (raw.customItems ?? []).map((c) => ({
-      id: c.id,
-      description: c.description,
-      price: c.priceCents,
+    customItems: (raw.customItems ?? []).map((item) => ({
+      id: item.id,
+      description: item.description,
+      quantity: item.quantity ?? 1,
+      price: item.priceCents,
     })),
     segments: [...segments]
       .sort(
         (a: BackendSegment, b: BackendSegment) =>
           new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime(),
       )
-      .map((seg: BackendSegment, i: number) => ({
-        id: seg.id,
+      .map((segment: BackendSegment, index: number) => ({
+        id: segment.id,
         appointmentId: raw.id,
-        serviceId: seg.serviceId,
-        serviceName: seg.service?.name ?? "Service",
-        staffId: seg.staffId,
-        startsAt: seg.startsAt,
-        endsAt: seg.endsAt,
-        price: Math.round(Number(seg.priceEgpSnapshot ?? 0) * 100),
-        segmentIndex: i + 1,
+        serviceId: segment.serviceId,
+        serviceName: segment.service?.name ?? "Service",
+        staffId: segment.staffId,
+        startsAt: segment.startsAt,
+        endsAt: segment.endsAt,
+        price: Math.round(Number(segment.priceEgpSnapshot ?? 0) * 100),
+        segmentIndex: index + 1,
         segmentCount,
       })),
   };
@@ -143,32 +145,30 @@ export function mapBackendCalendarDay(
   return {
     date,
     timezone,
-    staff: rawStaff.map((s): StaffMember => {
-      const schedule = scheduleByStaffId.get(s.id);
+    staff: rawStaff.map((staff): StaffMember => {
+      const schedule = scheduleByStaffId.get(staff.id);
       return {
-        id: s.id,
-        name: s.name,
-        role: s.role ?? "",
-        serviceIds: (s.serviceStaff ?? []).map((ss) => ss.serviceId),
-        availability: (schedule?.availability ?? []).map((a) => ({
-          dayOfWeek: a.dayOfWeek,
-          startTime: a.startTime,
-          endTime: a.endTime,
-          breakAfterMin: a.breakAfterMin ?? null,
+        id: staff.id,
+        name: staff.name,
+        role: staff.role ?? "",
+        serviceIds: (staff.serviceStaff ?? []).map((relation) => relation.serviceId),
+        availability: (schedule?.availability ?? []).map((entry) => ({
+          dayOfWeek: entry.dayOfWeek,
+          startTime: entry.startTime,
+          endTime: entry.endTime,
+          breakAfterMin: entry.breakAfterMin ?? null,
         })),
         availabilityOverrides: (schedule?.availabilityOverrides ?? []).map(
-          (o) => ({
-            id: o.id,
-            overrideDate: o.overrideDate,
-            isDayOff: o.isDayOff,
-            startTime: o.startTime ?? null,
-            endTime: o.endTime ?? null,
+          (override) => ({
+            id: override.id,
+            overrideDate: override.overrideDate,
+            isDayOff: override.isDayOff,
+            startTime: override.startTime ?? null,
+            endTime: override.endTime ?? null,
           }),
         ),
       };
     }),
-    // Cancelled records remain available from the API, but must not remain
-    // as active blocks in the calendar or participate in its visual layout.
     appointments: rawAppointments
       .filter(
         (appointment: BackendAppointment) =>
@@ -176,12 +176,20 @@ export function mapBackendCalendarDay(
           appointment.status !== "cancelled_by_customer",
       )
       .map((appointment) => mapBackendAppointment(appointment, timezone)),
-    breaks: rawBreaks.map((b) => ({
-      id: b.id,
-      staffId: b.staffId,
-      startsAt: fromBusinessTimeOnly(date, toTimeValue(b.startTime, "UTC"), timezone),
-      endsAt: fromBusinessTimeOnly(date, toTimeValue(b.endTime, "UTC"), timezone),
-      label: b.label,
+    breaks: rawBreaks.map((item) => ({
+      id: item.id,
+      staffId: item.staffId,
+      startsAt: fromBusinessTimeOnly(
+        date,
+        toTimeValue(item.startTime, "UTC"),
+        timezone,
+      ),
+      endsAt: fromBusinessTimeOnly(
+        date,
+        toTimeValue(item.endTime, "UTC"),
+        timezone,
+      ),
+      label: item.label,
     })),
   };
 }
@@ -190,15 +198,16 @@ function fromBusinessTimeOnly(date: string, time: string, timezone: string) {
   const [year, month, day] = date.split("-").map(Number);
   const [hour, minute] = time.split(":").map(Number);
   let guess = new Date(Date.UTC(year, month - 1, day, hour, minute));
-  for (let i = 0; i < 2; i++) {
+  for (let index = 0; index < 2; index += 1) {
     const parts = new Intl.DateTimeFormat("en-GB", {
       timeZone: timezone,
       hour: "2-digit",
       minute: "2-digit",
       hourCycle: "h23",
     }).formatToParts(guess);
-    const actual = Number(parts.find((p) => p.type === "hour")?.value ?? 0) * 60 +
-      Number(parts.find((p) => p.type === "minute")?.value ?? 0);
+    const actual =
+      Number(parts.find((part) => part.type === "hour")?.value ?? 0) * 60 +
+      Number(parts.find((part) => part.type === "minute")?.value ?? 0);
     let delta = hour * 60 + minute - actual;
     if (delta > 720) delta -= 1440;
     if (delta < -720) delta += 1440;
