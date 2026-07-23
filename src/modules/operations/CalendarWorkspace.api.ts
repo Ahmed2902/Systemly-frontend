@@ -1,4 +1,4 @@
-import { apiUrl } from "@/shared/lib/api-url";
+import { api } from "@/shared/lib/api";
 import { mapBackendCalendarDay } from "@/shared/lib/Calendar/adapter";
 import type {
   CalendarDayData,
@@ -23,28 +23,25 @@ type WorkspaceService = {
   priceEgp: number;
 };
 
+type CalendarWorkspaceResponse = {
+  date?: string;
+  timezone?: string;
+  appointments?: unknown[];
+  staff?: WorkspaceStaff[];
+  breaks?: unknown[];
+  services?: WorkspaceService[];
+};
+
 export async function getCalendarWorkspace(
   date: string,
   accessToken: string,
 ): Promise<WorkspaceResult> {
-  const res = await fetch(
-    apiUrl(`/calendar/workspace?date=${encodeURIComponent(date)}`),
-    {
-      credentials: "include",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    },
+  const workspace = await api<CalendarWorkspaceResponse>(
+    `/calendar/workspace?date=${encodeURIComponent(date)}`,
+    accessToken,
   );
-
-  const body = await res.json().catch(() => ({}));
-  if (!res.ok || body?.success === false) {
-    throw new Error(body?.message ?? `Request failed: ${res.status}`);
-  }
-
-  const workspace = body?.data ?? body;
   const staff = workspace.staff ?? [];
-  const schedules = staff.map((member: WorkspaceStaff) => ({
+  const schedules = staff.map((member) => ({
     staffId: member.id,
     availability: member.availability ?? [],
     availabilityOverrides: member.availabilityOverrides ?? [],
@@ -59,7 +56,7 @@ export async function getCalendarWorkspace(
       schedules,
       workspace.timezone ?? "UTC",
     ),
-    services: (workspace.services ?? []).map((service: WorkspaceService) => ({
+    services: (workspace.services ?? []).map((service) => ({
       id: service.id,
       name: service.name,
       defaultDurationMinutes: service.durationMin,
