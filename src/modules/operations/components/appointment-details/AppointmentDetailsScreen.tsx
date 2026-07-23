@@ -1,11 +1,11 @@
 "use client";
+
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import { useAuth } from "@/modules/auth/useAuth";
 import {
   cancelAppointment,
-  collectPayment,
   completeAppointment,
   getAppointmentDetail,
   getCalendarDay,
@@ -14,6 +14,10 @@ import {
   saveAppointment,
   updateAppointmentStatus,
 } from "@/modules/operations/Calendar.api";
+import { replaceAppointmentCustomItems } from "@/modules/operations/appointment-custom-items.api";
+import { collectPayment } from "@/modules/invoices/invoices.api";
+import type { CollectPaymentInput } from "@/modules/invoices/invoices.types";
+import { CollectPaymentModal } from "@/modules/invoices/components/CollectPaymentModal";
 import type {
   AppointmentSegment,
   AppointmentStatus,
@@ -35,6 +39,7 @@ import { ClinicVisitSection } from "./ClinicVisitSection";
 import { AppointmentTimelineCard } from "./AppointmentTimelineCard";
 import { ReceptionNotesCard } from "./ReceptionNotesCard";
 import { AppointmentProgressPhotos } from "./AppointmentProgressPhotos";
+
 type Segment = {
   id: string;
   serviceId: string;
@@ -43,7 +48,12 @@ type Segment = {
   endsAt: string;
   price: number;
 };
-type Item = { id: string; description: string; priceCents: number };
+type Item = {
+  id: string;
+  description: string;
+  quantity: number;
+  priceCents: number;
+};
 type AppointmentDetail = BackendAppointment & {
   createdAt: string;
   endsAt: string;
@@ -59,6 +69,7 @@ type Draft = {
   clinicalNotes: string;
   prescriptionText: string;
 };
+
 function localValue(value: string, timezone: string) {
   const parts = new Intl.DateTimeFormat("en-CA", {
     timeZone: timezone,
@@ -73,12 +84,13 @@ function localValue(value: string, timezone: string) {
     parts.find((part) => part.type === type)?.value ?? "";
   return `${get("year")}-${get("month")}-${get("day")}T${get("hour")}:${get("minute")}`;
 }
+
 function toIso(value: string, timezone: string) {
   const [date, time] = value.split("T");
   const [year, month, day] = date.split("-").map(Number);
   const [hour, minute] = time.split(":").map(Number);
   let guess = new Date(Date.UTC(year, month - 1, day, hour, minute));
-  for (let i = 0; i < 3; i++) {
+  for (let index = 0; index < 3; index += 1) {
     const parts = new Intl.DateTimeFormat("en-GB", {
       timeZone: timezone,
       hour: "2-digit",
@@ -91,15 +103,17 @@ function toIso(value: string, timezone: string) {
     let delta = hour * 60 + minute - actual;
     if (delta > 720) delta -= 1440;
     if (delta < -720) delta += 1440;
-    guess = new Date(guess.getTime() + delta * 60000);
+    guess = new Date(guess.getTime() + delta * 60_000);
   }
   return guess.toISOString();
 }
+
 function shift(value: string, delta: number) {
   return new Date(new Date(`${value}:00Z`).getTime() + delta)
     .toISOString()
     .slice(0, 16);
 }
+
 export default function AppointmentDetailsScreen() {
   const { user, accessToken, loading: authLoading } = useAuth();
   const { appointmentId } = useParams<{ appointmentId: string }>();
@@ -113,6 +127,9 @@ export default function AppointmentDetailsScreen() {
   const [saving, setSaving] = useState(false);
   const [action, setAction] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [paymentOpen, setPaymentOpen] = useState(false);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
+
   const load = useCallback(async () => {
     if (!accessToken || !appointmentId || !user?.businessId) return;
     setLoading(true);
@@ -128,18 +145,19 @@ export default function AppointmentDetailsScreen() {
       ]);
       const next: Draft = {
         status: detail.status as AppointmentStatus,
-        segments: (detail.appointmentServices ?? []).map((s) => ({
-          id: s.id,
-          serviceId: s.serviceId,
-          staffId: s.staffId,
-          startsAt: localValue(s.startsAt, timezone),
-          endsAt: localValue(s.endsAt, timezone),
-          price: Math.round(Number(s.priceEgpSnapshot ?? 0) * 100),
+        segments: (detail.appointmentServices ?? []).map((segment) => ({
+          id: segment.id,
+          serviceId: segment.serviceId,
+          staffId: segment.staffId,
+          startsAt: localValue(segment.startsAt, timezone),
+          endsAt: localValue(segment.endsAt, timezone),
+          price: Math.round(Number(segment.priceEgpSnapshot ?? 0) * 100),
         })),
-        customItems: (detail.customItems ?? []).map((i) => ({
-          id: i.id,
-          description: i.description,
-          priceCents: i.priceCents,
+        customItems: (detail.customItems ?? []).map((item) => ({
+          id: item.id,
+          description: item.description,
+          quantity: item.quantity ?? 1,
+          priceCents: item.priceCents,
         })),
         discountCents: detail.discountCents ?? 0,
         notes: detail.notes ?? "",
@@ -155,40 +173,46 @@ export default function AppointmentDetailsScreen() {
       setDraft(next);
       initialRef.current = JSON.stringify(next);
       setError(null);
-    } catch (e: unknown) {
-      setError(errorMessage(e, "Unable to load appointment"));
+    } catch (caught: unknown) {
+      setError(errorMessage(caught, "Unable to load appointment"));
     } finally {
       setLoading(false);
     }
   }, [accessToken, appointmentId, timezone, user?.businessId]);
+
   useEffect(() => {
     if (!authLoading) void load();
   }, [authLoading, load]);
+
   const appointment: AppointmentSummary | null = raw
     ? mapBackendAppointment(raw, timezone)
     : null;
   const dirty = Boolean(draft && JSON.stringify(draft) !== initialRef.current);
   const editable = Boolean(
     appointment &&
-    !appointment.isLocked &&
-    !appointment.status.startsWith("cancelled"),
+      !appointment.isLocked &&
+      !appointment.status.startsWith("cancelled"),
   );
-  const total = draft
-    ? Math.max(
+  const serviceSubtotal = draft
+    ? draft.segments.reduce(
+        (sum, segment) =>
+          sum +
+          (catalog.find((service) => service.id === segment.serviceId)
+            ?.defaultPrice ?? segment.price),
         0,
-        draft.segments.reduce(
-          (sum, segment) =>
-            sum +
-            (catalog.find((service) => service.id === segment.serviceId)
-              ?.defaultPrice ?? segment.price),
-          0,
-        ) +
-          draft.customItems.reduce((sum, item) => sum + item.priceCents, 0) -
-          draft.discountCents,
       )
     : 0;
+  const customSubtotal = draft
+    ? draft.customItems.reduce(
+        (sum, item) => sum + item.quantity * item.priceCents,
+        0,
+      )
+    : 0;
+  const subtotal = serviceSubtotal + customSubtotal;
+  const total = draft ? Math.max(0, subtotal - draft.discountCents) : 0;
   const update = (patch: Partial<Draft>) =>
     setDraft((current) => (current ? { ...current, ...patch } : current));
+
   async function saveChanges() {
     if (!draft || !appointment || !accessToken || !editable || !dirty) return;
     setSaving(true);
@@ -196,10 +220,11 @@ export default function AppointmentDetailsScreen() {
     try {
       let prescriptionJson: Record<string, unknown> | undefined;
       if (draft.prescriptionText.trim()) {
-        const parsed = JSON.parse(draft.prescriptionText);
-        if (!parsed || typeof parsed !== "object" || Array.isArray(parsed))
+        const parsed: unknown = JSON.parse(draft.prescriptionText);
+        if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
           throw new Error("Prescription must be a JSON object.");
-        prescriptionJson = parsed;
+        }
+        prescriptionJson = parsed as Record<string, unknown>;
       }
       const segments: AppointmentSegment[] = draft.segments.map(
         (segment, index) => ({
@@ -227,6 +252,7 @@ export default function AppointmentDetailsScreen() {
           customItems: draft.customItems.map((item) => ({
             id: item.id,
             description: item.description,
+            quantity: item.quantity,
             price: item.priceCents,
           })),
           discount: draft.discountCents,
@@ -242,38 +268,66 @@ export default function AppointmentDetailsScreen() {
         },
         accessToken,
       );
-      if (draft.status !== appointment.status)
+      await replaceAppointmentCustomItems(
+        appointment.id,
+        draft.customItems.map((item) => ({
+          description: item.description,
+          quantity: item.quantity,
+          priceCents: item.priceCents,
+        })),
+        accessToken,
+      );
+      if (draft.status !== appointment.status) {
         await updateAppointmentStatus(
           appointment.id,
           draft.status,
           accessToken,
         );
+      }
       await load();
-    } catch (e: unknown) {
-      setError(errorMessage(e, "Unable to save appointment"));
+    } catch (caught: unknown) {
+      setError(errorMessage(caught, "Unable to save appointment"));
     } finally {
       setSaving(false);
     }
   }
+
   async function runAction(label: string, fn: () => Promise<unknown>) {
     setAction(label);
     setError(null);
     try {
       await fn();
       await load();
-    } catch (e: unknown) {
-      setError(errorMessage(e, "Action failed"));
+    } catch (caught: unknown) {
+      setError(errorMessage(caught, "Action failed"));
     } finally {
       setAction(null);
     }
   }
-  if (authLoading || loading || !draft)
+
+  async function submitPayment(input: CollectPaymentInput) {
+    if (!accessToken) return;
+    setAction("Collecting payment…");
+    setPaymentError(null);
+    try {
+      await collectPayment(input, accessToken);
+      setPaymentOpen(false);
+      await load();
+    } catch (caught: unknown) {
+      setPaymentError(errorMessage(caught, "Unable to collect payment"));
+    } finally {
+      setAction(null);
+    }
+  }
+
+  if (authLoading || loading || !draft) {
     return (
       <div className="flex h-full items-center justify-center text-slate-400">
         Loading appointment…
       </div>
     );
-  if (!raw || !appointment)
+  }
+  if (!raw || !appointment) {
     return (
       <div className="p-8">
         <Link href="/operations/appointments" className="text-sm text-blue-600">
@@ -282,12 +336,13 @@ export default function AppointmentDetailsScreen() {
         <p className="mt-5 text-red-600">{error ?? "Appointment not found."}</p>
       </div>
     );
+  }
+
   const statusOptions = [
     { value: "pending", label: "Pending" },
     { value: "confirmed", label: "Confirmed" },
     { value: "in_progress", label: "In progress" },
     { value: "no_show", label: "No-show" },
-    //{ value: "completed", label: "Completed" },
     ...(appointment.status.startsWith("cancelled")
       ? [{ value: appointment.status, label: "Cancelled" }]
       : []),
@@ -311,6 +366,7 @@ export default function AppointmentDetailsScreen() {
       })),
     });
   };
+
   return (
     <div className="h-full overflow-y-auto bg-slate-50 p-4 sm:p-5 lg:p-8">
       <div className="mx-auto max-w-7xl">
@@ -321,9 +377,7 @@ export default function AppointmentDetailsScreen() {
           canSave={Boolean(editable && dirty)}
           dirty={dirty}
           onSave={() => void saveChanges()}
-          showComplete={
-            draft.status === "confirmed" || draft.status === "in_progress"
-          }
+          showComplete={false}
           onComplete={() =>
             void runAction("Completing…", () =>
               completeAppointment(appointment.id, accessToken!),
@@ -335,6 +389,7 @@ export default function AppointmentDetailsScreen() {
             {error}
           </div>
         ) : null}
+
         <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)_minmax(18rem,.9fr)]">
           <AppointmentOverviewCard
             status={draft.status}
@@ -364,15 +419,10 @@ export default function AppointmentDetailsScreen() {
             canCancel={Boolean(editable && draft.status !== "no_show")}
             paid={appointment.isPaid}
             status={draft.status}
-            onCollect={() =>
-              void runAction("Collecting payment…", () =>
-                collectPayment(
-                  appointment.id,
-                  draft.discountCents,
-                  accessToken!,
-                ),
-              )
-            }
+            onCollect={() => {
+              setPaymentError(null);
+              setPaymentOpen(true);
+            }}
             onNoShow={() =>
               void runAction("Marking no-show…", () =>
                 markNoShow(appointment.id, accessToken!),
@@ -389,6 +439,7 @@ export default function AppointmentDetailsScreen() {
             }
           />
         </div>
+
         <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1.55fr)_minmax(18rem,1fr)]">
           <main className="space-y-4">
             <BookedServicesSection
@@ -413,9 +464,7 @@ export default function AppointmentDetailsScreen() {
                 prescriptionText={draft.prescriptionText}
                 disabled={!editable}
                 onDiagnosisChange={(diagnosis) => update({ diagnosis })}
-                onClinicalNotesChange={(clinicalNotes) =>
-                  update({ clinicalNotes })
-                }
+                onClinicalNotesChange={(clinicalNotes) => update({ clinicalNotes })}
                 onPrescriptionChange={(prescriptionText) =>
                   update({ prescriptionText })
                 }
@@ -443,6 +492,21 @@ export default function AppointmentDetailsScreen() {
           </aside>
         </div>
       </div>
+
+      <CollectPaymentModal
+        open={paymentOpen}
+        appointmentId={appointment.id}
+        subtotalCents={subtotal}
+        initialDiscountCents={draft.discountCents}
+        saving={action === "Collecting payment…"}
+        error={paymentError}
+        onClose={() => {
+          if (action) return;
+          setPaymentOpen(false);
+          setPaymentError(null);
+        }}
+        onSubmit={submitPayment}
+      />
     </div>
   );
 }
