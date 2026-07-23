@@ -2,8 +2,10 @@
 
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
   type ReactNode,
 } from "react";
@@ -34,6 +36,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
   const [loading, setLoading] = useState(true);
 
+  const clearSession = useCallback(() => {
+    setUser(null);
+    storeAccessToken(null);
+  }, []);
+
+  const setSession = useCallback((nextUser: AuthUser, token: string) => {
+    setUser(nextUser);
+    storeAccessToken(token);
+  }, []);
+
+  const logout = useCallback(async () => {
+    try {
+      await logoutUser();
+    } catch (error) {
+      console.error("Logout request failed:", error);
+    } finally {
+      clearSession();
+    }
+  }, [clearSession]);
+
   useEffect(() => subscribeAccessToken(setAccessToken), []);
 
   useEffect(() => {
@@ -61,39 +83,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [clearSession]);
 
   useEffect(() => {
     if (!loading && user && !accessToken) setUser(null);
   }, [accessToken, loading, user]);
 
-  async function logout() {
-    try {
-      await logoutUser();
-    } catch (error) {
-      console.error("Logout request failed:", error);
-    } finally {
-      clearSession();
-    }
-  }
-
-  function setSession(nextUser: AuthUser, token: string) {
-    setUser(nextUser);
-    storeAccessToken(token);
-  }
-
-  function clearSession() {
-    setUser(null);
-    storeAccessToken(null);
-  }
-
-  return (
-    <AuthContext.Provider
-      value={{ user, accessToken, loading, setSession, clearSession, logout }}
-    >
-      {children}
-    </AuthContext.Provider>
+  const value = useMemo(
+    () => ({ user, accessToken, loading, setSession, clearSession, logout }),
+    [user, accessToken, loading, setSession, clearSession, logout],
   );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
