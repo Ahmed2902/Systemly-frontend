@@ -41,10 +41,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     async function bootstrap() {
       try {
-        // Access tokens live in memory. A browser reload restores the session once;
-        // client-side page navigation keeps the provider and token alive.
-        const refreshed = await refreshAccessToken();
-        const token = refreshed.data.accessToken;
+        // A full browser reload clears the in-memory access token, so restore the
+        // session once from the refresh cookie. Client-side navigation and Fast
+        // Refresh reuse the existing token instead of rotating the cookie again.
+        const existingToken = getAccessToken();
+        const token = existingToken ?? (await refreshAccessToken()).data.accessToken;
         const currentUser = await api<AuthUser>("/auth/me", token, {}, {
           retryOnUnauthorized: false,
         });
@@ -61,6 +62,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    if (!loading && user && !accessToken) setUser(null);
+  }, [accessToken, loading, user]);
 
   async function logout() {
     try {
