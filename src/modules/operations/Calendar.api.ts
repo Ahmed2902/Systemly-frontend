@@ -2,123 +2,24 @@ import type {
   AppointmentSummary,
   CalendarDayData,
   ServiceCatalogItem,
-} from "../operations/appointment.types";
-import {
-  mapBackendAppointment,
-  mapBackendCalendarDay,
-} from "../../shared/lib/Calendar/adapter";
+} from "./appointment.types";
+import { mapBackendAppointment } from "../../shared/lib/Calendar/adapter";
 import type { BackendAppointment } from "../../shared/lib/Calendar/adapter";
 import type { PaymentMethod } from "@/modules/invoices/invoices.types";
-
-import { apiUrl } from "@/shared/lib/api-url";
-
-async function api<T>(
-  path: string,
-  accessToken: string,
-  init?: RequestInit,
-): Promise<T> {
-  const res = await fetch(apiUrl(path), {
-    ...init,
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
-      ...init?.headers,
-    },
-  });
-
-  const body = await res.json().catch(() => ({}));
-
-  if (!res.ok || body?.success === false) {
-    throw new Error(body?.message ?? `Request failed: ${res.status}`);
-  }
-
-  // Backend wraps every response as { success, data }. Unwrap once here
-  // so every caller below just gets the real payload directly.
-  return (body?.data !== undefined ? body.data : body) as T;
-}
-
-function asRecords(value: unknown): Array<Record<string, unknown>> {
-  if (Array.isArray(value)) {
-    return value.filter(
-      (item): item is Record<string, unknown> =>
-        typeof item === "object" && item !== null,
-    );
-  }
-  if (
-    typeof value === "object" &&
-    value !== null &&
-    "items" in value &&
-    Array.isArray(value.items)
-  ) {
-    return asRecords(value.items);
-  }
-  return [];
-}
+import type { ServiceCatalogResponse } from "@/modules/services/services.types";
+import { api } from "@/shared/lib/api";
+import { getCalendarWorkspace } from "./CalendarWorkspace.api";
 
 export async function getCalendarDay(
-  businessId: string,
+  _businessId: string,
   date: string,
   accessToken: string,
-  timezone = "UTC",
+  _timezone = "UTC",
 ): Promise<CalendarDayData> {
-  const [appointmentsRes, staffRes, breaksRes] = await Promise.all([
-    api<unknown>(
-      `/appointments?businessId=${businessId}&date=${date}`,
-      accessToken,
-    ),
-    api<unknown>(`/staff?businessId=${businessId}`, accessToken),
-    api<unknown>(`/staff/breaks?date=${date}`, accessToken),
-  ]);
-
-  // listAppointments / listByBusiness return { items, total, page, perPage }
-  // inside `data`. If your actual response is a bare array instead, swap
-  // the lines below for: const appointments = appointmentsRes;
-  const appointments = asRecords(appointmentsRes);
-  const staff = asRecords(staffRes);
-  const breaks = asRecords(breaksRes);
-
-  const schedules = await Promise.all(
-    staff.map(async (member: Record<string, unknown>) => {
-      const [availabilityRes, overridesRes] = await Promise.all([
-        api<unknown>(`/staff/${String(member.id)}/availability`, accessToken),
-        api<unknown>(
-          `/staff/${member.id}/availability/overrides?date=${date}`,
-          accessToken,
-        ),
-      ]);
-
-      return {
-        staffId: member.id,
-        availability: asRecords(availabilityRes),
-        availabilityOverrides: asRecords(overridesRes),
-      };
-    }),
-  );
-
-  return mapBackendCalendarDay(
-    date,
-    appointments as unknown as BackendAppointment[],
-    staff as unknown as import("../../shared/lib/Calendar/adapter").BackendStaff[],
-    breaks as unknown as import("../../shared/lib/Calendar/adapter").BackendBreak[],
-    schedules as unknown as import("../../shared/lib/Calendar/adapter").BackendSchedule[],
-    timezone,
-  );
+  return (await getCalendarWorkspace(date, accessToken)).day;
 }
 
-export async function getAppointmentsForDay(
-  businessId: string,
-  date: string,
-  accessToken: string,
-): Promise<BackendAppointment[]> {
-  const raw = await api<unknown>(
-    `/appointments?businessId=${encodeURIComponent(businessId)}&date=${encodeURIComponent(date)}&perPage=100`,
-    accessToken,
-  );
-  return asRecords(raw) as unknown as BackendAppointment[];
-}
-
-export async function getAppointmentDetail(
+export function getAppointmentDetail(
   appointmentId: string,
   accessToken: string,
 ): Promise<BackendAppointment> {
@@ -134,17 +35,22 @@ export async function uploadAppointmentPhoto(
   accessToken: string,
 ): Promise<unknown> {
   const path = `/appointments/${encodeURIComponent(appointmentId)}/photos`;
-  const ticket = await api<{ uploadUrl: string; publicId: string }>(`${path}/presign`, accessToken, {
-    method: "POST",
-    body: JSON.stringify({ contentType: file.type, type: "progress" }),
-  });
+  const ticket = await api<{ uploadUrl: string; publicId: string }>(
+    `${path}/presign`,
+    accessToken,
+    {
+      method: "POST",
+      body: JSON.stringify({ contentType: file.type, type: "progress" }),
+    },
+  );
   const upload = await fetch(ticket.uploadUrl, {
     method: "PUT",
     headers: { "Content-Type": file.type },
     body: file,
   });
-  if (!upload.ok)
+  if (!upload.ok) {
     throw new Error(`Direct image upload failed: ${upload.status}`);
+  }
   return api<unknown>(`${path}/confirm`, accessToken, {
     method: "POST",
     body: JSON.stringify({ publicId: ticket.publicId, type: "progress" }),
@@ -164,17 +70,18 @@ export async function deleteAppointmentPhoto(
 }
 
 export async function getServiceCatalog(
-  businessId: string,
+  _businessId: string,
   accessToken: string,
 ): Promise<ServiceCatalogItem[]> {
-  const raw = await api<unknown>(`/services?businessId=${businessId}`, accessToken);
-  const services = asRecords(raw);
-
-  return services.map((s) => ({
-    id: String(s.id),
-    name: String(s.name),
-    defaultDurationMinutes: Number(s.durationMin),
-    defaultPrice: Math.round(Number(s.priceEgp) * 100),
+  const catalog = await api<ServiceCatalogResponse>(
+    "/services?status=active",
+    accessToken,
+  );
+  return catalog.items.map((service) => ({
+    id: service.id,
+    name: service.name,
+    defaultDurationMinutes: service.durationMin,
+    defaultPrice: Math.round(Number(service.priceEgp ?? 0) * 100),
   }));
 }
 
@@ -183,17 +90,17 @@ export async function saveAppointment(
   accessToken: string,
 ): Promise<AppointmentSummary> {
   const body = {
-    segments: appointment.segments.map((s) => ({
-      id: s.id.startsWith("seg-new") ? undefined : s.id,
-      serviceId: s.serviceId,
-      staffId: s.staffId,
-      startsAt: s.startsAt,
-      endsAt: s.endsAt,
+    segments: appointment.segments.map((segment) => ({
+      id: segment.id.startsWith("seg-new") ? undefined : segment.id,
+      serviceId: segment.serviceId,
+      staffId: segment.staffId,
+      startsAt: segment.startsAt,
+      endsAt: segment.endsAt,
     })),
-    customItems: appointment.customItems.map((c) => ({
-      id: c.id.startsWith("custom-") ? undefined : c.id,
-      description: c.description,
-      priceCents: c.price,
+    customItems: appointment.customItems.map((item) => ({
+      id: item.id.startsWith("custom-") ? undefined : item.id,
+      description: item.description,
+      priceCents: item.price,
     })),
     discountCents: appointment.discount,
     notes: appointment.notes,
@@ -206,42 +113,41 @@ export async function saveAppointment(
         }
       : undefined,
   };
-  console.log("PATCH payload:", JSON.stringify(body, null, 2)); // TEMP
-  const raw = await api<BackendAppointment>(`/appointments/${appointment.id}`, accessToken, {
-    method: "PATCH",
-    body: JSON.stringify(body),
-  });
+  const raw = await api<BackendAppointment>(
+    `/appointments/${encodeURIComponent(appointment.id)}`,
+    accessToken,
+    { method: "PATCH", body: JSON.stringify(body) },
+  );
   return mapBackendAppointment(raw);
 }
 
-export async function completeAppointment(
+async function appointmentAction(
   appointmentId: string,
+  action: string,
   accessToken: string,
-): Promise<AppointmentSummary> {
+  body?: unknown,
+) {
   const raw = await api<BackendAppointment>(
-    `/appointments/${appointmentId}/finish`,
+    `/appointments/${encodeURIComponent(appointmentId)}/${action}`,
     accessToken,
     {
       method: "POST",
+      ...(body === undefined ? {} : { body: JSON.stringify(body) }),
     },
   );
   return mapBackendAppointment(raw);
 }
 
-export async function cancelAppointment(
+export function completeAppointment(appointmentId: string, accessToken: string) {
+  return appointmentAction(appointmentId, "finish", accessToken);
+}
+
+export function cancelAppointment(
   appointmentId: string,
   reason: string,
   accessToken: string,
-): Promise<AppointmentSummary> {
-  const raw = await api<BackendAppointment>(
-    `/appointments/${appointmentId}/cancel`,
-    accessToken,
-    {
-      method: "POST",
-      body: JSON.stringify({ reason }),
-    },
-  );
-  return mapBackendAppointment(raw);
+) {
+  return appointmentAction(appointmentId, "cancel", accessToken, { reason });
 }
 
 export async function updateAppointmentStatus(
@@ -250,84 +156,49 @@ export async function updateAppointmentStatus(
   accessToken: string,
 ): Promise<AppointmentSummary> {
   const raw = await api<BackendAppointment>(
-    `/appointments/${appointmentId}/status`,
+    `/appointments/${encodeURIComponent(appointmentId)}/status`,
     accessToken,
-    {
-      method: "PATCH",
-      body: JSON.stringify({ status }),
-    },
+    { method: "PATCH", body: JSON.stringify({ status }) },
   );
   return mapBackendAppointment(raw);
 }
 
-export async function deleteAppointment(
-  appointmentId: string,
-  accessToken: string,
-) {
+export function deleteAppointment(appointmentId: string, accessToken: string) {
   return api<{ id: string; deleted: boolean }>(
-    `/appointments/${appointmentId}`,
+    `/appointments/${encodeURIComponent(appointmentId)}`,
     accessToken,
     { method: "DELETE" },
   );
 }
 
-export async function collectPayment(
+export function collectPayment(
   appointmentId: string,
   discountCents: number,
   paymentMethod: PaymentMethod,
   accessToken: string,
-): Promise<AppointmentSummary> {
-  const raw = await api<BackendAppointment>(`/invoices/collect-payment`, accessToken, {
+) {
+  return api<unknown>("/invoices/collect-payment", accessToken, {
     method: "POST",
     body: JSON.stringify({ appointmentId, discountCents, paymentMethod }),
   });
-  return mapBackendAppointment(raw);
 }
 
-export async function revertAppointment(
+export function revertAppointment(
   appointmentId: string,
   accessToken: string,
   businessId: string,
-): Promise<AppointmentSummary> {
-  console.log(appointmentId, accessToken, businessId);
-  const raw = await api<BackendAppointment>(
-    `/appointments/${appointmentId}/revert`,
-    accessToken,
-    {
-      method: "POST",
-      body: JSON.stringify({ businessId }),
-    },
-  );
-
-  return mapBackendAppointment(raw);
+) {
+  return appointmentAction(appointmentId, "revert", accessToken, { businessId });
 }
 
-export async function uncancelAppointment(
+export function uncancelAppointment(
   appointmentId: string,
   accessToken: string,
   businessId: string,
-): Promise<AppointmentSummary> {
-  const raw = await api<BackendAppointment>(
-    `/appointments/${appointmentId}/uncancel`,
-    accessToken,
-    {
-      method: "POST",
-      body: JSON.stringify({ businessId }),
-    },
-  );
-  return mapBackendAppointment(raw);
+) {
+  return appointmentAction(appointmentId, "uncancel", accessToken, { businessId });
 }
 
-export async function markNoShow(
-  appointmentId: string,
-  accessToken: string,
-): Promise<AppointmentSummary> {
-  const raw = await api<BackendAppointment>(
-    `/appointments/${appointmentId}/mark-no-show`,
-    accessToken,
-    {
-      method: "POST",
-    },
-  );
-  return mapBackendAppointment(raw);
+export function markNoShow(appointmentId: string, accessToken: string) {
+  return appointmentAction(appointmentId, "mark-no-show", accessToken);
 }
