@@ -17,6 +17,7 @@ import {
   getAvailableStaffForSegment,
   isStaffEligibleForSegment,
 } from "../../../shared/lib/Calendar/staff-eligibility";
+import type { PaymentMethod } from "@/modules/invoices/invoices.types";
 
 interface Props {
   appointment: AppointmentSummary;
@@ -38,7 +39,11 @@ interface Props {
   onCancelAppointment: (appointmentId: string, reason: string) => Promise<void>;
   onDelete: (appointmentId: string) => Promise<void>;
   onStatusChange: (status: AppointmentSummary["status"]) => Promise<void>;
-  onCollectPayment: (appointmentId: string, discountCents: number) => Promise<void>;
+  onCollectPayment: (
+    appointmentId: string,
+    discountCents: number,
+    paymentMethod: PaymentMethod,
+  ) => Promise<void>;
   onRevert: (appointmentId: string) => Promise<void>;
   onUncancel: (appointmentId: string) => Promise<void>;
   onMarkNoShow: (appointmentId: string) => Promise<void>;
@@ -53,6 +58,32 @@ const TIME_OPTIONS = Array.from({ length: 96 }, (_, index) => {
   const period = hour < 12 ? "AM" : "PM";
   return { value, label: `${displayHour}:${String(minute).padStart(2, "0")} ${period}` };
 });
+
+function timeLabel(value: string) {
+  const [hourValue, minute = "00"] = value.split(":");
+  const hour = Number(hourValue);
+  if (!Number.isInteger(hour) || hour < 0 || hour > 23) return value;
+  return `${hour % 12 || 12}:${minute} ${hour < 12 ? "AM" : "PM"}`;
+}
+
+function timeOptionsIncluding(value: string) {
+  if (!value || TIME_OPTIONS.some((option) => option.value === value)) {
+    return TIME_OPTIONS;
+  }
+  return [...TIME_OPTIONS, { value, label: timeLabel(value) }].sort((a, b) =>
+    a.value.localeCompare(b.value),
+  );
+}
+
+const PAYMENT_METHOD_OPTIONS: Array<{
+  value: PaymentMethod;
+  label: string;
+}> = [
+  { value: "CASH", label: "Cash" },
+  { value: "CARD", label: "Card" },
+  { value: "BANK_TRANSFER", label: "Bank transfer" },
+  { value: "MOBILE_WALLET", label: "Mobile wallet" },
+];
 
 interface StyledDropdownProps {
   value: string;
@@ -170,10 +201,13 @@ export function AppointmentEditPanel({
   const [saving, setSaving] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [action, setAction] = useState<string | null>(null);
+  const [paymentMethod, setPaymentMethod] =
+    useState<PaymentMethod>("CASH");
 
   // Reset local draft whenever a different appointment is selected
   useEffect(() => {
     setDraft(appointment);
+    setPaymentMethod("CASH");
   }, [appointment]);
 
   const locked = draft.isLocked;
@@ -205,14 +239,24 @@ export function AppointmentEditPanel({
   }
 
   function addService(service: ServiceCatalogItem) {
-    const lastEnd =
-      draft.segments
-        .map((segment) => new Date(segment.endsAt))
-        .sort((a, b) => b.getTime() - a.getTime())[0]
-        ?.toISOString() ?? fromTimeValue(draft.date, "09:00", businessTimezone);
-    const start = new Date(lastEnd);
+    const segmentEndTimes = draft.segments
+      .map((segment) => new Date(segment.endsAt).getTime())
+      .filter(Number.isFinite);
+    const fallbackStart = new Date(
+      fromTimeValue(draft.date, "09:00", businessTimezone),
+    ).getTime();
+    const start = new Date(
+      segmentEndTimes.length > 0
+        ? Math.max(...segmentEndTimes)
+        : fallbackStart,
+    );
+    const durationMinutes =
+      Number.isFinite(service.defaultDurationMinutes) &&
+      service.defaultDurationMinutes > 0
+        ? service.defaultDurationMinutes
+        : 30;
     const end = new Date(
-      start.getTime() + service.defaultDurationMinutes * 60000,
+      start.getTime() + durationMinutes * 60000,
     );
     const eligibleStaff = getAvailableStaffForSegment({
       staff,
@@ -440,14 +484,17 @@ export function AppointmentEditPanel({
   }
 
   async function handleCollectPayment() {
+    const paymentMethodLabel =
+      PAYMENT_METHOD_OPTIONS.find((option) => option.value === paymentMethod)
+        ?.label ?? "selected method";
     if (
       !confirm(
-        `Collect ${formatMoney(total)} in cash? This will lock the appointment.`,
+        `Collect ${formatMoney(total)} by ${paymentMethodLabel.toLowerCase()}? This will lock the appointment.`,
       )
     )
       return;
     await runAction("Collecting payment…", () =>
-      onCollectPayment(draft.id, draft.discount),
+      onCollectPayment(draft.id, draft.discount, paymentMethod),
     );
   }
 
@@ -748,13 +795,17 @@ export function AppointmentEditPanel({
                     <StyledDropdown
                       value={toTimeValue(seg.startsAt, businessTimezone)}
                       disabled={locked}
-                      options={TIME_OPTIONS}
+                      options={timeOptionsIncluding(
+                        toTimeValue(seg.startsAt, businessTimezone),
+                      )}
                       onChange={(value) => updateSegmentTime(i, "startsAt", value)}
                     />
                     <StyledDropdown
                       value={toTimeValue(seg.endsAt, businessTimezone)}
                       disabled={locked}
-                      options={TIME_OPTIONS}
+                      options={timeOptionsIncluding(
+                        toTimeValue(seg.endsAt, businessTimezone),
+                      )}
                       onChange={(value) => updateSegmentTime(i, "endsAt", value)}
                     />
                   </div>
@@ -940,6 +991,19 @@ export function AppointmentEditPanel({
                     }))
                   }
                   className="w-24 rounded-2xl border border-slate-300 px-3 py-2 text-xs disabled:bg-slate-100"
+                />
+              </div>
+              <div className="space-y-2 border-t border-slate-100 pt-3">
+                <span className="block text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Payment method
+                </span>
+                <StyledDropdown
+                  value={paymentMethod}
+                  options={PAYMENT_METHOD_OPTIONS}
+                  disabled={locked || draft.isPaid || Boolean(action)}
+                  onChange={(value) =>
+                    setPaymentMethod(value as PaymentMethod)
+                  }
                 />
               </div>
               <div className="flex justify-between border-t border-slate-200 pt-3 text-base font-semibold text-slate-950">

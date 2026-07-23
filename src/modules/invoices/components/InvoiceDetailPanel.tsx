@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Download, ExternalLink, Loader2, RotateCcw } from "lucide-react";
 import type { InvoiceDetail } from "../invoices.types";
 
@@ -47,6 +48,9 @@ export function InvoiceDetailPanel({
     );
   }
 
+  const serviceItems = invoice.lineItems.filter((item) => item.service);
+  const customItems = invoice.lineItems.filter((item) => !item.service);
+
   return (
     <aside className="overflow-hidden rounded-3xl border border-white/80 bg-white/95 shadow-xl shadow-slate-200/50">
       <div className="border-b border-slate-200 bg-gradient-to-br from-violet-50 via-white to-emerald-50 px-5 py-5">
@@ -71,9 +75,11 @@ export function InvoiceDetailPanel({
             </p>
           </div>
           {invoice.business.logoUrl ? (
-            <img
+            <Image
               src={invoice.business.logoUrl}
               alt={`${invoice.business.name} logo`}
+              width={44}
+              height={44}
               className="h-11 w-11 rounded-xl border border-white bg-white object-contain shadow-sm"
             />
           ) : null}
@@ -94,7 +100,9 @@ export function InvoiceDetailPanel({
         <section className="grid gap-3 rounded-2xl bg-slate-50 p-4 text-sm sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
           <div>
             <p className="text-xs font-medium text-slate-500">Customer</p>
-            <p className="mt-1 font-semibold text-slate-900">{invoice.customer.name}</p>
+            <p className="mt-1 font-semibold text-slate-900">
+              {invoice.customer.name}
+            </p>
             <p className="text-xs text-slate-500">{invoice.customer.phone}</p>
           </div>
           <div>
@@ -103,7 +111,9 @@ export function InvoiceDetailPanel({
               {paymentLabel(invoice.paymentMethod)}
             </p>
             {invoice.paymentReference ? (
-              <p className="text-xs text-slate-500">{invoice.paymentReference}</p>
+              <p className="text-xs text-slate-500">
+                {invoice.paymentReference}
+              </p>
             ) : null}
           </div>
         </section>
@@ -118,28 +128,68 @@ export function InvoiceDetailPanel({
           </Link>
         ) : null}
 
-        <section>
-          <h3 className="font-semibold text-slate-900">Items</h3>
-          <div className="mt-3 overflow-hidden rounded-2xl border border-slate-200">
-            {invoice.lineItems.map((item) => (
-              <div
-                key={item.id}
-                className="grid grid-cols-[1fr_auto] gap-4 border-b border-slate-100 px-4 py-3 text-sm last:border-b-0"
-              >
-                <div>
-                  <p className="font-medium text-slate-800">{item.description}</p>
-                  <p className="mt-0.5 text-xs text-slate-500">
-                    {item.quantity} × {money(item.unitPriceCents)}
-                    {item.staff ? ` · ${item.staff.name}` : ""}
+        {serviceItems.length > 0 ? (
+          <section>
+            <h3 className="font-semibold text-slate-900">Services</h3>
+            <div className="mt-3 overflow-hidden rounded-2xl border border-slate-200">
+              {serviceItems.map((item) => (
+                <div
+                  key={item.id}
+                  className="grid grid-cols-[1fr_auto] gap-4 border-b border-slate-100 px-4 py-3 text-sm last:border-b-0"
+                >
+                  <div>
+                    <p className="font-medium text-slate-800">
+                      {item.description}
+                    </p>
+                    <p className="mt-0.5 text-xs text-slate-500">
+                      {item.quantity} × {money(item.unitPriceCents)}
+                      {item.staff ? ` · ${item.staff.name}` : ""}
+                    </p>
+                  </div>
+                  <p className="font-semibold text-slate-900">
+                    {money(item.totalCents)}
                   </p>
                 </div>
-                <p className="font-semibold text-slate-900">
-                  {money(item.totalCents)}
-                </p>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        {customItems.length > 0 ? (
+          <section>
+            <h3 className="font-semibold text-slate-900">Custom items</h3>
+            <div className="mt-3 overflow-x-auto rounded-2xl border border-slate-200">
+              <div className="grid min-w-[32rem] grid-cols-[minmax(10rem,1fr)_7rem_5rem_8rem] gap-3 border-b border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <span>Item</span>
+                <span className="text-right">Amount</span>
+                <span className="text-right">Quantity</span>
+                <span className="text-right">Total</span>
               </div>
-            ))}
-          </div>
-        </section>
+              {customItems.map((item) => {
+                const calculatedTotal = item.unitPriceCents * item.quantity;
+                return (
+                  <div
+                    key={item.id}
+                    className="grid min-w-[32rem] grid-cols-[minmax(10rem,1fr)_7rem_5rem_8rem] gap-3 border-b border-slate-100 px-4 py-3 text-sm last:border-b-0"
+                  >
+                    <span className="font-medium text-slate-800">
+                      {item.description}
+                    </span>
+                    <span className="text-right text-slate-600">
+                      {money(item.unitPriceCents)}
+                    </span>
+                    <span className="text-right text-slate-600">
+                      {item.quantity}
+                    </span>
+                    <span className="text-right font-semibold text-slate-900">
+                      {money(calculatedTotal)}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        ) : null}
 
         <section className="space-y-2 rounded-2xl bg-slate-50 p-4 text-sm">
           <div className="flex justify-between text-slate-600">
@@ -170,7 +220,9 @@ export function InvoiceDetailPanel({
         {invoice.status === "voided" ? (
           <section className="rounded-2xl border border-slate-200 bg-slate-100 p-4 text-sm text-slate-600">
             <p className="font-semibold text-slate-800">Invoice voided</p>
-            <p className="mt-1">{invoice.voidReason ?? "No reason recorded."}</p>
+            <p className="mt-1">
+              {invoice.voidReason ?? "No reason recorded."}
+            </p>
           </section>
         ) : (
           <button

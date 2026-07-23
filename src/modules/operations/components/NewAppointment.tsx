@@ -139,8 +139,21 @@ export function NewAppointmentModal() {
       getStaffRoster(businessId, accessToken),
     ])
       .then(([services, staffList]) => {
+        const mergedStaff = new Map(
+          staffList.map((member) => [member.id, member]),
+        );
+        for (const service of services) {
+          for (const member of service.eligibleStaff ?? []) {
+            const rosterMember = mergedStaff.get(member.id);
+            mergedStaff.set(member.id, {
+              ...member,
+              ...rosterMember,
+              avatarUrl: rosterMember?.avatarUrl ?? member.avatarUrl,
+            });
+          }
+        }
         setCatalog(services);
-        setStaff(staffList);
+        setStaff([...mergedStaff.values()]);
       })
       .catch((e) => setError(e.message ?? "Failed to load services/staff"))
       .finally(() => setLoadingCatalog(false));
@@ -196,6 +209,13 @@ export function NewAppointmentModal() {
   }
 
   function eligibleStaffFor(serviceId: string): StaffMember[] {
+    const service = catalog.find((item) => item.id === serviceId);
+    if (service?.eligibleStaff) {
+      const eligibleIds = new Set(
+        service.eligibleStaff.map((member) => member.id),
+      );
+      return staff.filter((member) => eligibleIds.has(member.id));
+    }
     return staff.filter((s) => s.serviceIds?.includes(serviceId));
   }
 

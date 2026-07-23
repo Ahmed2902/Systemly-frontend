@@ -35,6 +35,7 @@ import { ClinicVisitSection } from "./ClinicVisitSection";
 import { AppointmentTimelineCard } from "./AppointmentTimelineCard";
 import { ReceptionNotesCard } from "./ReceptionNotesCard";
 import { AppointmentProgressPhotos } from "./AppointmentProgressPhotos";
+import type { PaymentMethod } from "@/modules/invoices/invoices.types";
 type Segment = {
   id: string;
   serviceId: string;
@@ -107,6 +108,8 @@ export default function AppointmentDetailsScreen() {
   const [raw, setRaw] = useState<AppointmentDetail | null>(null);
   const [calendar, setCalendar] = useState<CalendarDayData | null>(null);
   const [catalog, setCatalog] = useState<ServiceCatalogItem[]>([]);
+  const [paymentMethod, setPaymentMethod] =
+    useState<PaymentMethod>("CASH");
   const [draft, setDraft] = useState<Draft | null>(null);
   const initialRef = useRef("");
   const [loading, setLoading] = useState(true);
@@ -364,11 +367,14 @@ export default function AppointmentDetailsScreen() {
             canCancel={Boolean(editable && draft.status !== "no_show")}
             paid={appointment.isPaid}
             status={draft.status}
+            paymentMethod={paymentMethod}
+            onPaymentMethodChange={setPaymentMethod}
             onCollect={() =>
               void runAction("Collecting payment…", () =>
                 collectPayment(
                   appointment.id,
                   draft.discountCents,
+                  paymentMethod,
                   accessToken!,
                 ),
               )

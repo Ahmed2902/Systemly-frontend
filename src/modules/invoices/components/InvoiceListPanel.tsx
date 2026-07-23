@@ -8,6 +8,15 @@ const money = (cents: number) =>
     maximumFractionDigits: 2,
   }).format(cents / 100);
 
+const paymentMethodLabel = (value?: string | null) =>
+  value
+    ? value
+        .toLowerCase()
+        .split("_")
+        .map((part) => part[0].toUpperCase() + part.slice(1))
+        .join(" ")
+    : "Not recorded";
+
 export function InvoiceListPanel({
   invoices,
   selectedId,
@@ -31,10 +40,11 @@ export function InvoiceListPanel({
 
   return (
     <div className="overflow-hidden rounded-2xl border border-white/80 bg-white/90 shadow-sm backdrop-blur">
-      <div className="hidden grid-cols-[1.1fr_1.4fr_.9fr_.8fr_.7fr] gap-4 border-b border-slate-200 bg-slate-50/80 px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 lg:grid">
+      <div className="hidden grid-cols-[1.05fr_1.3fr_.8fr_.9fr_.75fr_.65fr] gap-4 border-b border-slate-200 bg-slate-50/80 px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 lg:grid">
         <span>Invoice</span>
         <span>Customer</span>
         <span>Date</span>
+        <span>Payment method</span>
         <span>Amount</span>
         <span>Status</span>
       </div>
@@ -43,7 +53,7 @@ export function InvoiceListPanel({
           type="button"
           key={invoice.id}
           onClick={() => onSelect(invoice.id)}
-          className={`grid w-full gap-3 border-b border-slate-100 px-5 py-4 text-left transition last:border-b-0 lg:grid-cols-[1.1fr_1.4fr_.9fr_.8fr_.7fr] lg:items-center ${
+          className={`grid w-full gap-3 border-b border-slate-100 px-5 py-4 text-left transition last:border-b-0 lg:grid-cols-[1.05fr_1.3fr_.8fr_.9fr_.75fr_.65fr] lg:items-center ${
             selectedId === invoice.id
               ? "bg-violet-50/80 shadow-[inset_3px_0_0_#7c3aed]"
               : "hover:bg-slate-50"
@@ -65,6 +75,9 @@ export function InvoiceListPanel({
           </div>
           <p className="hidden text-sm text-slate-600 lg:block">
             {new Date(invoice.issuedAt).toLocaleDateString("en-GB")}
+          </p>
+          <p className="text-sm font-medium text-slate-700">
+            {paymentMethodLabel(invoice.paymentMethod)}
           </p>
           <p className="font-semibold text-slate-900">{money(invoice.totalCents)}</p>
           <span

@@ -26,6 +26,7 @@ import type {
 } from "../../../modules/operations/appointment.types";
 import { dateKeyInTimezone } from "../../../shared/lib/Calendar/grid.utils";
 import { errorMessage } from "@/shared/lib/error-message";
+import type { PaymentMethod } from "@/modules/invoices/invoices.types";
 
 export default function CalendarPage() {
   const { user, accessToken, loading: authLoading } = useAuth();
@@ -175,8 +176,17 @@ export default function CalendarPage() {
                 );
                 await reload();
               }}
-              onCollectPayment={async (id, discountCents) => {
-                await collectPayment(id, discountCents, String(accessToken));
+              onCollectPayment={async (
+                id,
+                discountCents,
+                paymentMethod: PaymentMethod,
+              ) => {
+                await collectPayment(
+                  id,
+                  discountCents,
+                  paymentMethod,
+                  String(accessToken),
+                );
                 await reload();
               }}
               onRevert={async (id) => {

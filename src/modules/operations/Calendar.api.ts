@@ -8,6 +8,7 @@ import {
   mapBackendCalendarDay,
 } from "../../shared/lib/Calendar/adapter";
 import type { BackendAppointment } from "../../shared/lib/Calendar/adapter";
+import type { PaymentMethod } from "@/modules/invoices/invoices.types";
 
 import { apiUrl } from "@/shared/lib/api-url";
 
@@ -273,11 +274,12 @@ export async function deleteAppointment(
 export async function collectPayment(
   appointmentId: string,
   discountCents: number,
+  paymentMethod: PaymentMethod,
   accessToken: string,
 ): Promise<AppointmentSummary> {
   const raw = await api<BackendAppointment>(`/invoices/collect-payment`, accessToken, {
     method: "POST",
-    body: JSON.stringify({ appointmentId, discountCents }),
+    body: JSON.stringify({ appointmentId, discountCents, paymentMethod }),
   });
   return mapBackendAppointment(raw);
 }

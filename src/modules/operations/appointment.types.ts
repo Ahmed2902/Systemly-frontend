@@ -37,6 +37,7 @@ export interface ServiceCatalogItem {
   name: string;
   defaultDurationMinutes: number;
   defaultPrice: number; // cents
+  eligibleStaff?: StaffMember[];
 }
 
 export interface CustomLineItem {

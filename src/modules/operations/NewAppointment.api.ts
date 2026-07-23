@@ -76,12 +76,27 @@ export async function getServiceCatalog(
 ): Promise<ServiceCatalogItem[]> {
   const raw = await api<unknown>(`/services?businessId=${businessId}`, accessToken);
   const services = records(raw);
-  return services.map((s: Record<string, unknown>) => ({
-    id: String(s.id),
-    name: String(s.name),
-    defaultDurationMinutes: Number(s.durationMin),
-    defaultPrice: Math.round(Number(s.priceEgp) * 100),
-  }));
+  return services
+    .filter((service) => service.isActive !== false)
+    .map((service: Record<string, unknown>) => ({
+      id: String(service.id),
+      name: String(service.name),
+      defaultDurationMinutes: Number(service.durationMin),
+      defaultPrice: Math.round(Number(service.priceEgp) * 100),
+      eligibleStaff: records(service.eligibleStaff)
+        .filter((member) => member.isActive !== false)
+        .map((member) => ({
+          id: String(member.id),
+          name: String(member.name),
+          role: String(member.role ?? ""),
+          avatarUrl:
+            typeof member.photoUrl === "string"
+              ? member.photoUrl
+              : typeof member.avatarUrl === "string"
+                ? member.avatarUrl
+                : null,
+        })),
+    }));
 }
 
 export async function getStaffRoster(
@@ -94,7 +109,12 @@ export async function getStaffRoster(
     id: String(s.id),
     name: String(s.name),
     role: String(s.role ?? ""),
-    avatarUrl: typeof s.avatarUrl === "string" ? s.avatarUrl : null,
+    avatarUrl:
+      typeof s.photoUrl === "string"
+        ? s.photoUrl
+        : typeof s.avatarUrl === "string"
+          ? s.avatarUrl
+          : null,
     serviceIds: Array.isArray(s.serviceIds)
       ? s.serviceIds.map(String)
       : (s.serviceStaff as Array<{ serviceId: string }> | undefined)?.map(
