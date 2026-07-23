@@ -86,6 +86,7 @@ export function OperationsDropdown({
   };
 
   const moveActive = (direction: 1 | -1) => {
+    if (options.length === 0) return;
     setActiveIndex((current) =>
       selectableIndex(
         (current + direction + options.length) % options.length,
@@ -104,7 +105,7 @@ export function OperationsDropdown({
   const handleTriggerKeyDown = (
     event: React.KeyboardEvent<HTMLButtonElement>,
   ) => {
-    if (disabled) return;
+    if (disabled || options.length === 0) return;
 
     if (event.key === "ArrowDown" || event.key === "ArrowUp") {
       event.preventDefault();
@@ -116,7 +117,10 @@ export function OperationsDropdown({
     if (event.key === "Home" || event.key === "End") {
       event.preventDefault();
       setActiveIndex(
-        selectableIndex(event.key === "Home" ? 0 : options.length - 1, event.key === "Home" ? 1 : -1),
+        selectableIndex(
+          event.key === "Home" ? 0 : options.length - 1,
+          event.key === "Home" ? 1 : -1,
+        ),
       );
       setOpen(true);
       return;
@@ -141,7 +145,7 @@ export function OperationsDropdown({
       <button
         ref={triggerRef}
         type="button"
-        disabled={disabled}
+        disabled={disabled || options.length === 0}
         onClick={() => setOpen((current) => !current)}
         onKeyDown={handleTriggerKeyDown}
         aria-label={ariaLabel}
@@ -151,9 +155,7 @@ export function OperationsDropdown({
         className="flex h-11 w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-3.5 text-left text-sm font-medium text-slate-700 shadow-sm outline-none transition hover:border-slate-300 hover:bg-slate-50 focus:border-violet-300 focus:ring-4 focus:ring-violet-100 disabled:cursor-not-allowed disabled:opacity-50"
       >
         <span className="flex min-w-0 items-center gap-2.5">
-          {icon ? (
-            <span className="shrink-0 text-slate-400">{icon}</span>
-          ) : null}
+          {icon ? <span className="shrink-0 text-slate-400">{icon}</span> : null}
           <span
             className={`truncate ${selected ? toneClass[selected.tone ?? "default"] : "text-slate-400"}`}
           >
@@ -194,9 +196,7 @@ export function OperationsDropdown({
               } disabled:cursor-not-allowed disabled:opacity-40`}
             >
               <span>{option.label}</span>
-              {isSelected ? (
-                <Check size={15} className="shrink-0 text-violet-600" />
-              ) : null}
+              {isSelected ? <Check size={15} className="shrink-0 text-violet-600" /> : null}
             </button>
           );
         })}
