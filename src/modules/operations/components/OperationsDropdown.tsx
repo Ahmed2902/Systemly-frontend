@@ -179,7 +179,7 @@ export function OperationsDropdown({
           const isActive = index === activeIndex;
           return (
             <button
-              key={option.value}
+              key={`${option.value}-${index}`}
               type="button"
               role="option"
               aria-selected={isSelected}
