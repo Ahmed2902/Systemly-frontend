@@ -28,10 +28,20 @@ type ApiEnvelope<T> = {
 function headersFor(init: RequestInit, token: string | null) {
   const headers = new Headers(init.headers);
   if (token) headers.set("Authorization", `Bearer ${token}`);
-  if (init.body && !(init.body instanceof FormData) && !headers.has("Content-Type")) {
+  const isFormData =
+    typeof FormData !== "undefined" && init.body instanceof FormData;
+  if (init.body && !isFormData && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
   return headers;
+}
+
+function send(path: string, token: string | null, init: RequestInit) {
+  return fetch(apiUrl(path), {
+    ...init,
+    credentials: "include",
+    headers: headersFor(init, token),
+  });
 }
 
 async function request(
@@ -40,22 +50,19 @@ async function request(
   init: RequestInit,
   retryOnUnauthorized: boolean,
 ): Promise<Response> {
-  const token = getAccessToken() ?? fallbackToken;
-  const response = await fetch(apiUrl(path), {
-    ...init,
-    credentials: "include",
-    headers: headersFor(init, token),
-  });
-
+  const tokenUsed = getAccessToken() ?? fallbackToken;
+  const response = await send(path, tokenUsed, init);
   if (response.status !== 401 || !retryOnUnauthorized) return response;
 
+  // Another request may have completed a refresh while this request was in
+  // flight. Reuse that token before starting another refresh-cookie rotation.
+  const currentToken = getAccessToken();
+  if (currentToken && currentToken !== tokenUsed) {
+    return send(path, currentToken, init);
+  }
+
   const refreshed = await refreshAccessToken();
-  const nextToken = refreshed.data.accessToken;
-  return fetch(apiUrl(path), {
-    ...init,
-    credentials: "include",
-    headers: headersFor(init, nextToken),
-  });
+  return send(path, refreshed.data.accessToken, init);
 }
 
 async function parseEnvelope<T>(response: Response): Promise<T> {
