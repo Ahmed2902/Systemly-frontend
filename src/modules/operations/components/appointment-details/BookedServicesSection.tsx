@@ -16,6 +16,7 @@ interface Segment {
 interface Item {
   id: string;
   description: string;
+  quantity: number;
   priceCents: number;
 }
 interface Props {
@@ -27,7 +28,12 @@ interface Props {
     defaultDurationMinutes: number;
     defaultPrice: number;
   }>;
-  staff: Array<{ id: string; name: string; serviceIds?: string[] }>;
+  staff: Array<{
+    id: string;
+    name: string;
+    serviceIds?: string[];
+    availability?: Array<{ startTime: string; endTime: string }>;
+  }>;
   timezone: string;
   editable: boolean;
   discountCents: number;
@@ -38,6 +44,7 @@ interface Props {
   toIso: (value: string) => string;
   fromIso: (value: string) => string;
 }
+
 const timeValue = (value: string) => value.split("T")[1]?.slice(0, 5) ?? "";
 const withTime = (value: string, time: string) =>
   `${value.split("T")[0]}T${time}`;
@@ -48,16 +55,16 @@ const addMinutes = (value: string, minutes: number) =>
 const minutesFromTime = (value: string) => {
   const match = value.match(/(?:T|^)(\d{2}):(\d{2})/);
   if (match) return Number(match[1]) * 60 + Number(match[2]);
-  const parsed = new Date(value);
-  return parsed.getHours() * 60 + parsed.getMinutes();
+  return 8 * 60;
 };
 const formatTime = (minutes: number) => {
   const hour = Math.floor(minutes / 60);
   const minute = minutes % 60;
-  const value = `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
   return {
-    value,
-    label: `${hour % 12 || 12}:${String(minute).padStart(2, "0")} ${hour < 12 ? "AM" : "PM"}`,
+    value: `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`,
+    label: `${hour % 12 || 12}:${String(minute).padStart(2, "0")} ${
+      hour < 12 ? "AM" : "PM"
+    }`,
   };
 };
 
@@ -80,80 +87,63 @@ export function BookedServicesSection({
   const eligibleCatalog = catalog.filter(
     (service) => staffOptions(service.id).length > 0,
   );
-  const workingTimes = staff.flatMap(
-    (member) =>
-      (
-        member as {
-          availability?: Array<{ startTime: string; endTime: string }>;
-        }
-      ).availability ?? [],
-  );
-  const earliestWorkingMinute = workingTimes.length
+  const workingTimes = staff.flatMap((member) => member.availability ?? []);
+  const earliest = workingTimes.length
     ? Math.min(...workingTimes.map((entry) => minutesFromTime(entry.startTime)))
     : 8 * 60;
-  const latestWorkingMinute = workingTimes.length
+  const latest = workingTimes.length
     ? Math.max(...workingTimes.map((entry) => minutesFromTime(entry.endTime)))
     : 20 * 60;
   const timeOptions = Array.from(
-    {
-      length: Math.max(
-        1,
-        Math.floor((latestWorkingMinute - earliestWorkingMinute) / 15) + 1,
-      ),
-    },
-    (_, index) => formatTime(earliestWorkingMinute + index * 15),
+    { length: Math.max(1, Math.floor((latest - earliest) / 15) + 1) },
+    (_, index) => formatTime(earliest + index * 15),
   );
+  const optionsForTime = (value: string) =>
+    timeOptions.some((option) => option.value === value) || !value
+      ? timeOptions
+      : [formatTime(minutesFromTime(value)), ...timeOptions];
+
   const updateSegment = (index: number, patch: Partial<Segment>) =>
     onSegmentsChange(
-      segments.map((item, itemIndex) =>
-        itemIndex === index ? { ...item, ...patch } : item,
+      segments.map((segment, current) =>
+        current === index ? { ...segment, ...patch } : segment,
       ),
     );
   const updateItem = (index: number, patch: Partial<Item>) =>
     onItemsChange(
-      customItems.map((item, itemIndex) =>
-        itemIndex === index ? { ...item, ...patch } : item,
+      customItems.map((item, current) =>
+        current === index ? { ...item, ...patch } : item,
       ),
     );
   const updateStartTime = (index: number, startsAt: string) => {
     let cursor = startsAt;
     onSegmentsChange(
-      segments.map((segment, segmentIndex) => {
-        if (segmentIndex < index) return segment;
+      segments.map((segment, current) => {
+        if (current < index) return segment;
         const service = catalog.find((item) => item.id === segment.serviceId);
-        const nextStartsAt = cursor;
-        const nextEndsAt = addMinutes(
-          nextStartsAt,
+        const nextStart = cursor;
+        const nextEnd = addMinutes(
+          nextStart,
           getDurationMinutes(segment.startsAt, segment.endsAt) ||
             service?.defaultDurationMinutes ||
             0,
         );
-        cursor = nextEndsAt;
-        return {
-          ...segment,
-          startsAt: nextStartsAt,
-          endsAt: nextEndsAt,
-        };
+        cursor = nextEnd;
+        return { ...segment, startsAt: nextStart, endsAt: nextEnd };
       }),
     );
   };
   const updateEndTime = (index: number, endsAt: string) => {
-    const edited = segments[index];
-    if (!edited) return;
     let cursor = endsAt;
     onSegmentsChange(
-      segments.map((segment, segmentIndex) => {
-        if (segmentIndex < index) return segment;
-        if (segmentIndex === index) return { ...segment, endsAt };
+      segments.map((segment, current) => {
+        if (current < index) return segment;
+        if (current === index) return { ...segment, endsAt };
         const duration = getDurationMinutes(segment.startsAt, segment.endsAt);
         const startsAt = cursor;
-        const nextEndsAt = addMinutes(startsAt, duration);
-        cursor = nextEndsAt;
-        return {
-          ...segment,
-          startsAt,
-          endsAt: nextEndsAt,
-        };
+        const nextEnd = addMinutes(startsAt, duration);
+        cursor = nextEnd;
+        return { ...segment, startsAt, endsAt: nextEnd };
       }),
     );
   };
@@ -161,23 +151,19 @@ export function BookedServicesSection({
     const service = eligibleCatalog[0];
     const previous = segments.at(-1);
     if (!service || !previous) return;
-    const startsAt = previous.endsAt;
     onSegmentsChange([
       ...segments,
       {
         id: `seg-new-${Date.now()}`,
         serviceId: service.id,
         staffId: staffOptions(service.id)[0]?.value ?? "",
-        startsAt,
-        endsAt: addMinutes(startsAt, service.defaultDurationMinutes),
+        startsAt: previous.endsAt,
+        endsAt: addMinutes(previous.endsAt, service.defaultDurationMinutes),
         price: service.defaultPrice,
       },
     ]);
   };
-  const optionsForTime = (value: string) =>
-    timeOptions.some((option) => option.value === value) || !value
-      ? timeOptions
-      : [formatTime(minutesFromTime(value)), ...timeOptions];
+
   return (
     <section className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200/60">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -189,30 +175,25 @@ export function BookedServicesSection({
         </div>
         <button
           type="button"
-          disabled={!editable || !eligibleCatalog[0]}
+          disabled={!editable || eligibleCatalog.length === 0}
           onClick={addService}
-          className="flex min-h-10 items-center gap-1.5 rounded-xl bg-blue-50 px-3.5 py-2 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-45"
+          className="inline-flex min-h-10 items-center gap-1.5 rounded-xl bg-blue-50 px-3.5 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-100 disabled:opacity-45"
         >
-          <Plus size={15} />
-          Add service
+          <Plus size={15} /> Add service
         </button>
       </div>
-      <div className="relative mt-5 overflow-visible rounded-xl bg-slate-50/70">
-        <div className="hidden grid-cols-[minmax(11rem,1.2fr)_minmax(8rem,1fr)_minmax(7rem,1fr)_minmax(7rem,1fr)_auto] gap-3 border-b border-slate-100 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-400 md:grid">
-          <span>Service</span>
-          <span>Staff</span>
-          <span>Starts</span>
-          <span>Ends</span>
-          <span aria-hidden="true" />
+
+      <div className="mt-5 overflow-visible rounded-xl bg-slate-50/70">
+        <div className="hidden grid-cols-[1.2fr_1fr_1fr_1fr_auto] gap-3 border-b border-slate-100 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-400 md:grid">
+          <span>Service</span><span>Staff</span><span>Starts</span><span>Ends</span><span />
         </div>
         <div className="divide-y divide-slate-100">
           {segments.map((segment, index) => (
             <div
               key={segment.id}
-              className="relative grid gap-3 px-4 py-4 md:grid-cols-[minmax(11rem,1.2fr)_minmax(8rem,1fr)_minmax(7rem,1fr)_minmax(7rem,1fr)_auto] md:items-center"
+              className="grid gap-3 px-4 py-4 md:grid-cols-[1.2fr_1fr_1fr_1fr_auto] md:items-center"
             >
-              <label className="flex min-w-0 flex-col items-center text-center text-xs font-medium text-slate-500 md:text-transparent">
-                <span className="md:hidden">Service</span>
+              <div>
                 <AppointmentDropdown
                   align="center"
                   value={segment.serviceId}
@@ -234,34 +215,27 @@ export function BookedServicesSection({
                     });
                   }}
                 />
-                <p className="mt-1 truncate px-1 text-center text-xs font-medium text-slate-500">
+                <p className="mt-1 text-center text-xs text-slate-500">
                   {formatMoneyEgp(segment.price)}
                 </p>
-              </label>
-              <label className="flex min-w-0 flex-col items-center text-center text-xs font-medium text-slate-500 md:text-transparent">
-                <span className="md:hidden">Staff</span>
-                <AppointmentDropdown
-                  align="center"
-                  value={segment.staffId}
-                  disabled={!editable}
-                  options={staffOptions(segment.serviceId)}
-                  onChange={(value) => updateSegment(index, { staffId: value })}
-                />
-              </label>
-              <label className="flex min-w-0 flex-col items-center text-center text-xs font-medium text-slate-500 md:text-transparent">
-                <span className="md:hidden">Starts</span>
-                <AppointmentDropdown
-                  align="center"
-                  value={timeValue(segment.startsAt)}
-                  disabled={!editable}
-                  options={optionsForTime(timeValue(segment.startsAt))}
-                  onChange={(value) =>
-                    updateStartTime(index, withTime(segment.startsAt, value))
-                  }
-                />
-              </label>
-              <label className="flex min-w-0 flex-col items-center text-center text-xs font-medium text-slate-500 md:text-transparent">
-                <span className="md:hidden">Ends</span>
+              </div>
+              <AppointmentDropdown
+                align="center"
+                value={segment.staffId}
+                disabled={!editable}
+                options={staffOptions(segment.serviceId)}
+                onChange={(value) => updateSegment(index, { staffId: value })}
+              />
+              <AppointmentDropdown
+                align="center"
+                value={timeValue(segment.startsAt)}
+                disabled={!editable}
+                options={optionsForTime(timeValue(segment.startsAt))}
+                onChange={(value) =>
+                  updateStartTime(index, withTime(segment.startsAt, value))
+                }
+              />
+              <div>
                 <AppointmentDropdown
                   align="center"
                   value={timeValue(segment.endsAt)}
@@ -271,20 +245,20 @@ export function BookedServicesSection({
                     updateEndTime(index, withTime(segment.endsAt, value))
                   }
                 />
-                <p className="mt-1 px-1 text-center text-xs font-medium text-slate-500">
+                <p className="mt-1 text-center text-xs text-slate-500">
                   {getDurationMinutes(segment.startsAt, segment.endsAt)} min
                 </p>
-              </label>
+              </div>
               <button
                 type="button"
                 aria-label={`Delete service ${index + 1}`}
                 disabled={!editable || segments.length <= 1}
                 onClick={() =>
                   onSegmentsChange(
-                    segments.filter((_, itemIndex) => itemIndex !== index),
+                    segments.filter((_, current) => current !== index),
                   )
                 }
-                className="flex h-9 w-9 items-center justify-self-center rounded-lg text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-30"
+                className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-600 disabled:opacity-30"
               >
                 <Trash2 size={16} />
               </button>
@@ -292,12 +266,13 @@ export function BookedServicesSection({
           ))}
         </div>
       </div>
+
       <div className="mt-6 border-t border-slate-100 pt-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h3 className="font-semibold text-slate-800">Custom items</h3>
             <p className="mt-1 text-sm text-slate-500">
-              Add products, extra charges, or other custom items.
+              Untimed products and extra charges.
             </p>
           </div>
           <button
@@ -309,22 +284,23 @@ export function BookedServicesSection({
                 {
                   id: `custom-new-${Date.now()}`,
                   description: "",
+                  quantity: 1,
                   priceCents: 0,
                 },
               ])
             }
-            className="flex min-h-10 items-center gap-1.5 rounded-xl bg-slate-50 px-3 py-2 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-45"
+            className="inline-flex min-h-10 items-center gap-1.5 rounded-xl bg-slate-50 px-3 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-50 disabled:opacity-45"
           >
-            <Plus size={15} />
-            Add item
+            <Plus size={15} /> Add item
           </button>
         </div>
+
         <div className="mt-4 space-y-2">
           {customItems.length ? (
             customItems.map((item, index) => (
               <div
                 key={item.id}
-                className="flex flex-wrap items-center gap-2 rounded-xl bg-slate-50/70 p-2"
+                className="grid gap-2 rounded-xl bg-slate-50/70 p-2 sm:grid-cols-[minmax(10rem,1fr)_6rem_9rem_8rem_auto] sm:items-center"
               >
                 <input
                   aria-label="Item description"
@@ -334,17 +310,29 @@ export function BookedServicesSection({
                   onChange={(event) =>
                     updateItem(index, { description: event.target.value })
                   }
-                  className="min-w-40 flex-1 rounded-lg border border-transparent bg-white px-3 py-2.5 text-sm outline-none focus:border-blue-300 focus:ring-4 focus:ring-blue-100/60 disabled:cursor-not-allowed disabled:bg-slate-50/60"
+                  className="rounded-lg border border-transparent bg-white px-3 py-2.5 text-sm outline-none focus:border-blue-300 focus:ring-4 focus:ring-blue-100/60"
+                />
+                <input
+                  aria-label="Item quantity"
+                  type="number"
+                  min={1}
+                  step={1}
+                  value={item.quantity}
+                  disabled={!editable}
+                  onChange={(event) =>
+                    updateItem(index, {
+                      quantity: Math.max(1, Number(event.target.value) || 1),
+                    })
+                  }
+                  className="rounded-lg border border-transparent bg-white px-3 py-2.5 text-center text-sm outline-none focus:border-blue-300 focus:ring-4 focus:ring-blue-100/60"
                 />
                 <div className="relative">
-                  <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-slate-400">
-                    EGP
-                  </span>
+                  <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-xs text-slate-400">EGP</span>
                   <input
-                    aria-label="Item price in EGP"
+                    aria-label="Item unit price in EGP"
                     type="number"
-                    min="0"
-                    step="1"
+                    min={0}
+                    step="0.01"
                     value={item.priceCents / 100}
                     disabled={!editable}
                     onChange={(event) =>
@@ -354,19 +342,22 @@ export function BookedServicesSection({
                         ),
                       })
                     }
-                    className="w-32 rounded-lg border border-transparent bg-white py-2.5 pl-11 pr-3 text-sm outline-none focus:border-blue-300 focus:ring-4 focus:ring-blue-100/60 disabled:cursor-not-allowed disabled:bg-slate-50/60"
+                    className="w-full rounded-lg border border-transparent bg-white py-2.5 pl-11 pr-3 text-sm outline-none focus:border-blue-300 focus:ring-4 focus:ring-blue-100/60"
                   />
                 </div>
+                <p className="text-right text-sm font-semibold text-slate-800">
+                  {formatMoneyEgp(item.quantity * item.priceCents)}
+                </p>
                 <button
                   type="button"
                   aria-label="Delete custom item"
                   disabled={!editable}
                   onClick={() =>
                     onItemsChange(
-                      customItems.filter((_, itemIndex) => itemIndex !== index),
+                      customItems.filter((_, current) => current !== index),
                     )
                   }
-                  className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-30"
+                  className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-600 disabled:opacity-30"
                 >
                   <Trash2 size={15} />
                 </button>
@@ -379,18 +370,17 @@ export function BookedServicesSection({
           )}
         </div>
       </div>
+
       <div className="mt-6 flex flex-wrap items-end justify-between gap-4 rounded-xl bg-slate-50/80 p-4">
         <div>
           <p className="text-sm font-medium text-slate-600">Discount</p>
           <div className="relative mt-1.5">
-            <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-slate-400">
-              EGP
-            </span>
+            <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-slate-400">EGP</span>
             <input
               aria-label="Discount amount in EGP"
               type="number"
-              min="0"
-              step="1"
+              min={0}
+              step="0.01"
               value={discountCents / 100}
               disabled={!editable}
               onChange={(event) =>
@@ -398,16 +388,12 @@ export function BookedServicesSection({
                   Math.round((Number(event.target.value) || 0) * 100),
                 )
               }
-              className="block w-32 rounded-xl border border-transparent bg-white py-2.5 pl-11 pr-3 text-right text-sm outline-none focus:border-blue-300 focus:ring-4 focus:ring-blue-100/60 disabled:cursor-not-allowed disabled:bg-slate-50/60"
+              className="block w-32 rounded-xl border border-transparent bg-white py-2.5 pl-11 pr-3 text-right text-sm outline-none focus:border-blue-300 focus:ring-4 focus:ring-blue-100/60"
             />
           </div>
-          <span className="mt-1 block text-xs font-normal text-slate-400">
-            Amount in EGP
-          </span>
         </div>
-        <div className="pb-5 text-right">
+        <div className="pb-2 text-right">
           <p className="text-sm font-medium text-slate-500">Estimated total</p>
-
           <p className="text-xl font-bold tracking-tight text-slate-900">
             {formatMoneyEgp(total)}
           </p>
