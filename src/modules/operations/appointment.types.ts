@@ -12,7 +12,7 @@ export interface StaffMember {
   name: string;
   role: string;
   avatarUrl?: string | null;
-  serviceIds?: string[]; // optional array of service IDs that this staff member can perform
+  serviceIds?: string[];
   availability?: AvailabilityEntry[];
   availabilityOverrides?: AvailabilityOverride[];
 }
@@ -36,13 +36,14 @@ export interface ServiceCatalogItem {
   id: string;
   name: string;
   defaultDurationMinutes: number;
-  defaultPrice: number; // cents
+  defaultPrice: number;
 }
 
 export interface CustomLineItem {
   id: string;
   description: string;
-  price: number; // cents
+  quantity: number;
+  price: number;
 }
 
 export interface CustomerProfile {
@@ -59,24 +60,23 @@ export interface AppointmentSegment {
   serviceId: string;
   serviceName: string;
   staffId: string;
-  startsAt: string; // ISO 8601
-  endsAt: string; // ISO 8601
-  price: number; // cents
-  segmentIndex: number; // 1-based position within the appointment
-  segmentCount: number; // total segments in the appointment
+  startsAt: string;
+  endsAt: string;
+  price: number;
+  segmentIndex: number;
+  segmentCount: number;
 }
 
 export interface AppointmentSummary {
   id: string;
-  date: string; // YYYY-MM-DD
+  date: string;
   customer: CustomerProfile;
   status: AppointmentStatus;
-  /** true once Complete or Collect Payment has fired — freezes the record */
   isLocked: boolean;
   isPaid: boolean;
   segments: AppointmentSegment[];
   customItems: CustomLineItem[];
-  discount: number; // cents, flat
+  discount: number;
   notes?: string;
   clinicVisitRecord?: ClinicVisitRecord | null;
 }
