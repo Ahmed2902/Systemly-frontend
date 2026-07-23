@@ -14,22 +14,13 @@ import {
   setAccessToken as storeAccessToken,
   subscribeAccessToken,
 } from "./auth.store";
-
-type User = {
-  id: string;
-  name: string;
-  email: string;
-  businessId: string | null;
-  role: string;
-  vertical?: string | null;
-  timezone?: string | null;
-};
+import type { AuthUser } from "./auth.types";
 
 type AuthContextType = {
-  user: User | null;
+  user: AuthUser | null;
   accessToken: string | null;
   loading: boolean;
-  setSession: (user: User, accessToken: string) => void;
+  setSession: (user: AuthUser, accessToken: string) => void;
   clearSession: () => void;
   logout: () => Promise<void>;
 };
@@ -37,7 +28,7 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(() =>
     getAccessToken(),
   );
@@ -50,11 +41,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     async function bootstrap() {
       try {
-        // Access tokens intentionally live in memory. A full browser reload needs
-        // one refresh-cookie exchange; client-side page navigation does not.
+        // Access tokens live in memory. A browser reload restores the session once;
+        // client-side page navigation keeps the provider and token alive.
         const refreshed = await refreshAccessToken();
         const token = refreshed.data.accessToken;
-        const currentUser = await api<User>("/auth/me", token, {}, {
+        const currentUser = await api<AuthUser>("/auth/me", token, {}, {
           retryOnUnauthorized: false,
         });
         if (!cancelled) setUser(currentUser);
@@ -81,7 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  function setSession(nextUser: User, token: string) {
+  function setSession(nextUser: AuthUser, token: string) {
     setUser(nextUser);
     storeAccessToken(token);
   }
