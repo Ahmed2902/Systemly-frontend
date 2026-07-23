@@ -1,15 +1,19 @@
-// src/modules/auth/useAuth.ts
 "use client";
 
 import {
   createContext,
   useContext,
-  useState,
   useEffect,
-  ReactNode,
+  useState,
+  type ReactNode,
 } from "react";
-import { apiUrl } from "@/shared/lib/api-url";
+import { api } from "@/shared/lib/api";
 import { logoutUser, refreshAccessToken } from "./auth.api";
+import {
+  getAccessToken,
+  setAccessToken as storeAccessToken,
+  subscribeAccessToken,
+} from "./auth.store";
 
 type User = {
   id: string;
@@ -34,93 +38,57 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(() =>
+    getAccessToken(),
+  );
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => subscribeAccessToken(setAccessToken), []);
 
   useEffect(() => {
     let cancelled = false;
 
-    async function fetchCurrentUser(token: string) {
-      const res = await fetch(apiUrl("/auth/me"), {
-        headers: { Authorization: `Bearer ${token}` },
-        credentials: "include",
-        cache: "no-store",
-      });
-
-      if (!res.ok) throw new Error("Unable to load current user");
-
-      const json = await res.json();
-      return json?.data ?? null;
-    }
-
     async function bootstrap() {
       try {
+        // Access tokens intentionally live in memory. A full browser reload needs
+        // one refresh-cookie exchange; client-side page navigation does not.
         const refreshed = await refreshAccessToken();
-        if (cancelled) return;
-
-        const nextToken = refreshed?.data?.accessToken;
-        if (!nextToken) return;
-
-        setAccessToken(nextToken);
-
-        const currentUser = await fetchCurrentUser(nextToken);
-        if (cancelled || !currentUser) return;
-
-        setUser(currentUser);
+        const token = refreshed.data.accessToken;
+        const currentUser = await api<User>("/auth/me", token, {}, {
+          retryOnUnauthorized: false,
+        });
+        if (!cancelled) setUser(currentUser);
       } catch {
-        // No active session: stay signed out without surfacing a noisy auth error.
+        if (!cancelled) clearSession();
       } finally {
         if (!cancelled) setLoading(false);
       }
     }
 
-    bootstrap();
-
+    void bootstrap();
     return () => {
       cancelled = true;
     };
   }, []);
 
-  // inside AuthProvider, alongside the bootstrap effect
-  useEffect(() => {
-    if (!user) return;
-
-    const interval = setInterval(
-      () => {
-        refreshAccessToken()
-          .then((res) => {
-            const nextToken = res?.data?.accessToken;
-            if (nextToken) setAccessToken(nextToken);
-          })
-          .catch(() => {
-            // refresh failed — token likely expired, force logout
-            clearSession();
-          });
-      },
-      13 * 60 * 1000,
-    ); // slightly before the 15-minute expiry
-
-    return () => clearInterval(interval);
-  }, [user]);
-
   async function logout() {
     try {
       await logoutUser();
-    } catch (err) {
-      console.error("Logout request failed:", err);
+    } catch (error) {
+      console.error("Logout request failed:", error);
     } finally {
       clearSession();
     }
   }
 
-  function setSession(user: User, accessToken: string) {
-    setUser(user);
-    setAccessToken(accessToken);
+  function setSession(nextUser: User, token: string) {
+    setUser(nextUser);
+    storeAccessToken(token);
   }
 
   function clearSession() {
     setUser(null);
-    setAccessToken(null);
+    storeAccessToken(null);
   }
 
   return (
@@ -133,7 +101,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 }
 
 export function useAuth() {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
-  return ctx;
+  const context = useContext(AuthContext);
+  if (!context) throw new Error("useAuth must be used within AuthProvider");
+  return context;
 }
