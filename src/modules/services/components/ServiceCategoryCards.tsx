@@ -155,20 +155,20 @@ export function ServiceCategoryCards({
         {categories.map((category, index) => {
           const accent = getOperationsAccent(category.name, index);
           const Icon = ICONS[index % ICONS.length];
-          const selected = selectedCategory === category.name;
+          const selected = selectedCategory === category.value;
 
           return (
             <article
-              key={category.name}
+              key={category.value}
               role="button"
               tabIndex={0}
               aria-pressed={selected}
               aria-label={`Filter services by ${category.name}`}
-              onClick={() => onSelect(category.name)}
+              onClick={() => onSelect(category.value)}
               onKeyDown={(event) => {
                 if (event.key === "Enter" || event.key === " ") {
                   event.preventDefault();
-                  onSelect(category.name);
+                  onSelect(category.value);
                 }
               }}
               style={{ width: cardWidth }}
@@ -216,7 +216,7 @@ export function ServiceCategoryCards({
                 type="button"
                 onClick={(event) => {
                   event.stopPropagation();
-                  onSelect(category.name);
+                  onSelect(category.value);
                 }}
                 onKeyDown={(event) => event.stopPropagation()}
                 className={`mt-4 inline-flex items-center gap-1.5 text-sm font-semibold ${accent.link}`}

@@ -30,8 +30,6 @@ import { ServiceCategoryCards } from "./ServiceCategoryCards";
 import { ServiceFormModal } from "./ServiceFormModal";
 import { ServicesTable } from "./ServicesTable";
 
-const UNCATEGORIZED_CATEGORY = "Uncategorized";
-
 export default function ServiceCatalogScreen() {
   const { accessToken, loading: authLoading } = useAuth();
   const [catalog, setCatalog] = useState<ServiceCatalogResponse | null>(null);
@@ -60,24 +58,10 @@ export default function ServiceCatalogScreen() {
     try {
       const response = await getServiceCatalog(accessToken, {
         search: debouncedSearch || undefined,
-        category:
-          category === UNCATEGORIZED_CATEGORY ? undefined : category || undefined,
+        category: category || undefined,
         status,
       });
-
-      setCatalog(
-        category === UNCATEGORIZED_CATEGORY
-          ? {
-              ...response,
-              items: response.items.filter(
-                (service) =>
-                  !service.category ||
-                  service.category.trim().toLocaleLowerCase() ===
-                    UNCATEGORIZED_CATEGORY.toLocaleLowerCase(),
-              ),
-            }
-          : response,
-      );
+      setCatalog(response);
     } catch (caught: unknown) {
       setError(
         caught instanceof Error ? caught.message : "Unable to load services",
@@ -98,9 +82,12 @@ export default function ServiceCatalogScreen() {
   const categoryOptions = useMemo(
     () => [
       { value: "", label: "All categories" },
-      ...categories.map((item) => ({ value: item, label: item })),
+      ...(catalog?.categories ?? []).map((item) => ({
+        value: item.value,
+        label: item.name,
+      })),
     ],
-    [categories],
+    [catalog?.categories],
   );
   const statusOptions = [
     { value: "all", label: "All statuses" },
