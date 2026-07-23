@@ -1,4 +1,5 @@
 import type { SignupInput, LoginInput } from "./auth.schema";
+import type { AuthSessionResponse } from "./auth.types";
 import { apiUrl } from "../../shared/lib/api-url";
 import { getCsrfToken } from "@/shared/lib/csrf";
 import { setAccessToken } from "./auth.store";
@@ -40,7 +41,7 @@ export async function loginUser(payload: LoginInput) {
     credentials: "include",
     body: JSON.stringify(payload),
   });
-  return handle<{ success: true; data: { accessToken: string; user: unknown } }>(res);
+  return handle<AuthSessionResponse>(res);
 }
 
 let refreshPromise: Promise<RefreshResponse> | null = null;
