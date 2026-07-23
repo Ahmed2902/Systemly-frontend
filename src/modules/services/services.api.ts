@@ -1,39 +1,10 @@
-import { apiUrl } from "@/shared/lib/api-url";
+import { api } from "@/shared/lib/api";
 import type {
   CatalogService,
   ServiceCatalogResponse,
   ServiceInput,
   ServiceStatusFilter,
 } from "./services.types";
-
-async function api<T>(
-  path: string,
-  accessToken: string,
-  init?: RequestInit,
-): Promise<T> {
-  const response = await fetch(apiUrl(path), {
-    ...init,
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
-      ...init?.headers,
-    },
-  });
-
-  const body: unknown = await response.json().catch(() => ({}));
-  const envelope = body as {
-    success?: boolean;
-    message?: string;
-    data?: T;
-  };
-
-  if (!response.ok || envelope.success === false) {
-    throw new Error(envelope.message ?? `Request failed: ${response.status}`);
-  }
-
-  return envelope.data ?? (body as T);
-}
 
 export function getServiceCatalog(
   accessToken: string,
@@ -47,7 +18,6 @@ export function getServiceCatalog(
   if (options.search) params.set("search", options.search);
   if (options.category) params.set("category", options.category);
   if (options.status) params.set("status", options.status);
-
   const query = params.toString();
   return api<ServiceCatalogResponse>(
     `/services${query ? `?${query}` : ""}`,
@@ -70,10 +40,7 @@ export function updateService(
   return api<CatalogService>(
     `/services/${encodeURIComponent(serviceId)}`,
     accessToken,
-    {
-      method: "PATCH",
-      body: JSON.stringify(input),
-    },
+    { method: "PATCH", body: JSON.stringify(input) },
   );
 }
 

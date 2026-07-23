@@ -1,4 +1,3 @@
-// src/app/(auth)/oauth-callback/page.tsx
 "use client";
 
 export const dynamic = "force-dynamic";
@@ -6,7 +5,8 @@ export const dynamic = "force-dynamic";
 import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/modules/auth/useAuth";
-import { apiUrl } from "@/shared/lib/api-url";
+import type { AuthUser } from "@/modules/auth/auth.types";
+import { api } from "@/shared/lib/api";
 
 export default function OAuthCallbackPage() {
   const router = useRouter();
@@ -20,22 +20,13 @@ export default function OAuthCallbackPage() {
       return;
     }
 
-    fetch(apiUrl("/auth/me"), {
-      headers: { Authorization: `Bearer ${token}` },
-      credentials: "include",
-      cache: "no-store",
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Not authenticated");
-        return res.json();
-      })
-      .then((res) => {
-        const user = res.data; // <- was res.data.user
+    api<AuthUser>("/auth/me", token, {}, { retryOnUnauthorized: false })
+      .then((user) => {
         setSession(user, token);
         router.replace(user.businessId ? "/operations" : "/onboarding");
       })
       .catch(() => router.replace("/login"));
-  }, [searchParams, router, setSession]);
+  }, [router, searchParams, setSession]);
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-background">

@@ -1,4 +1,4 @@
-import { apiUrl } from "@/shared/lib/api-url";
+import { api, apiFetch } from "@/shared/lib/api";
 import type {
   CollectPaymentInput,
   InvoiceDetail,
@@ -6,28 +6,6 @@ import type {
   InvoiceStatus,
   PaymentMethod,
 } from "./invoices.types";
-
-async function api<T>(
-  path: string,
-  accessToken: string,
-  init?: RequestInit,
-): Promise<T> {
-  const response = await fetch(apiUrl(path), {
-    ...init,
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
-      ...init?.headers,
-    },
-  });
-  const body: unknown = await response.json().catch(() => ({}));
-  const envelope = body as { success?: boolean; message?: string; data?: T };
-  if (!response.ok || envelope.success === false) {
-    throw new Error(envelope.message ?? `Request failed: ${response.status}`);
-  }
-  return envelope.data ?? (body as T);
-}
 
 export function getInvoices(
   accessToken: string,
@@ -46,11 +24,17 @@ export function getInvoices(
   if (filters.from) params.set("from", filters.from);
   if (filters.to) params.set("to", filters.to);
   const query = params.toString();
-  return api<InvoiceListResponse>(`/invoices${query ? `?${query}` : ""}`, accessToken);
+  return api<InvoiceListResponse>(
+    `/invoices${query ? `?${query}` : ""}`,
+    accessToken,
+  );
 }
 
 export function getInvoice(invoiceId: string, accessToken: string) {
-  return api<InvoiceDetail>(`/invoices/${encodeURIComponent(invoiceId)}`, accessToken);
+  return api<InvoiceDetail>(
+    `/invoices/${encodeURIComponent(invoiceId)}`,
+    accessToken,
+  );
 }
 
 export function collectPayment(input: CollectPaymentInput, accessToken: string) {
@@ -60,7 +44,11 @@ export function collectPayment(input: CollectPaymentInput, accessToken: string) 
   });
 }
 
-export function voidInvoice(invoiceId: string, reason: string, accessToken: string) {
+export function voidInvoice(
+  invoiceId: string,
+  reason: string,
+  accessToken: string,
+) {
   return api<InvoiceDetail>(
     `/invoices/${encodeURIComponent(invoiceId)}/void`,
     accessToken,
@@ -73,12 +61,9 @@ export async function downloadInvoiceReceipt(
   invoiceNumber: string,
   accessToken: string,
 ) {
-  const response = await fetch(
-    apiUrl(`/invoices/${encodeURIComponent(invoiceId)}/receipt`),
-    {
-      credentials: "include",
-      headers: { Authorization: `Bearer ${accessToken}` },
-    },
+  const response = await apiFetch(
+    `/invoices/${encodeURIComponent(invoiceId)}/receipt`,
+    accessToken,
   );
   if (!response.ok) throw new Error("Unable to download receipt");
   const blob = await response.blob();

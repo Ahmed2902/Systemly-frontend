@@ -1,4 +1,4 @@
-import { apiUrl } from "@/shared/lib/api-url";
+import { api } from "@/shared/lib/api";
 import type {
   CommissionType,
   StaffAvailabilityEntry,
@@ -10,59 +10,6 @@ import type {
   StaffTimeOffInput,
   StaffWorkspaceResponse,
 } from "./staff.types";
-
-async function api<T>(
-  path: string,
-  accessToken: string,
-  init?: RequestInit,
-): Promise<T> {
-  const response = await fetch(apiUrl(path), {
-    ...init,
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
-      ...init?.headers,
-    },
-  });
-
-  const body: unknown = await response.json().catch(() => ({}));
-  const envelope = body as {
-    success?: boolean;
-    message?: string;
-    data?: T;
-  };
-
-  if (!response.ok || envelope.success === false) {
-    throw new Error(envelope.message ?? `Request failed: ${response.status}`);
-  }
-
-  return envelope.data ?? (body as T);
-}
-
-function isStaffDirectoryResponse(
-  value: unknown,
-): value is StaffDirectoryResponse {
-  if (!value || typeof value !== "object") return false;
-
-  const candidate = value as Partial<StaffDirectoryResponse>;
-  const metrics = candidate.metrics;
-
-  return (
-    Array.isArray(candidate.items) &&
-    Array.isArray(candidate.serviceOptions) &&
-    typeof candidate.total === "number" &&
-    typeof candidate.page === "number" &&
-    typeof candidate.perPage === "number" &&
-    typeof candidate.canManageMoney === "boolean" &&
-    typeof candidate.canManageProtectedFields === "boolean" &&
-    Boolean(metrics) &&
-    typeof metrics?.total === "number" &&
-    typeof metrics.active === "number" &&
-    typeof metrics.availableToday === "number" &&
-    typeof metrics.onTimeOff === "number"
-  );
-}
 
 export function getStaffDirectory(
   accessToken: string,
@@ -81,15 +28,9 @@ export function getStaffDirectory(
   if (filters.serviceId) params.set("serviceId", filters.serviceId);
   if (filters.availableToday) params.set("availableToday", "true");
   const query = params.toString();
-  return api<unknown>(`/staff${query ? `?${query}` : ""}`, accessToken).then(
-    (response) => {
-      if (!isStaffDirectoryResponse(response)) {
-        throw new Error(
-          "The staff directory response is incomplete. Please refresh after the API is updated.",
-        );
-      }
-      return response;
-    },
+  return api<StaffDirectoryResponse>(
+    `/staff${query ? `?${query}` : ""}`,
+    accessToken,
   );
 }
 

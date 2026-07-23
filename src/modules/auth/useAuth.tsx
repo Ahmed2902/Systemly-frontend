@@ -1,31 +1,28 @@
-// src/modules/auth/useAuth.ts
 "use client";
 
 import {
   createContext,
+  useCallback,
   useContext,
-  useState,
   useEffect,
-  ReactNode,
+  useMemo,
+  useState,
+  type ReactNode,
 } from "react";
-import { apiUrl } from "@/shared/lib/api-url";
+import { api } from "@/shared/lib/api";
 import { logoutUser, refreshAccessToken } from "./auth.api";
-
-type User = {
-  id: string;
-  name: string;
-  email: string;
-  businessId: string | null;
-  role: string;
-  vertical?: string | null;
-  timezone?: string | null;
-};
+import {
+  getAccessToken,
+  setAccessToken as storeAccessToken,
+  subscribeAccessToken,
+} from "./auth.store";
+import type { AuthUser } from "./auth.types";
 
 type AuthContextType = {
-  user: User | null;
+  user: AuthUser | null;
   accessToken: string | null;
   loading: boolean;
-  setSession: (user: User, accessToken: string) => void;
+  setSession: (user: AuthUser, accessToken: string) => void;
   clearSession: () => void;
   logout: () => Promise<void>;
 };
@@ -33,107 +30,75 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(() =>
+    getAccessToken(),
+  );
   const [loading, setLoading] = useState(true);
+
+  const clearSession = useCallback(() => {
+    setUser(null);
+    storeAccessToken(null);
+  }, []);
+
+  const setSession = useCallback((nextUser: AuthUser, token: string) => {
+    setUser(nextUser);
+    storeAccessToken(token);
+  }, []);
+
+  const logout = useCallback(async () => {
+    try {
+      await logoutUser();
+    } catch (error) {
+      console.error("Logout request failed:", error);
+    } finally {
+      clearSession();
+    }
+  }, [clearSession]);
+
+  useEffect(() => subscribeAccessToken(setAccessToken), []);
 
   useEffect(() => {
     let cancelled = false;
 
-    async function fetchCurrentUser(token: string) {
-      const res = await fetch(apiUrl("/auth/me"), {
-        headers: { Authorization: `Bearer ${token}` },
-        credentials: "include",
-        cache: "no-store",
-      });
-
-      if (!res.ok) throw new Error("Unable to load current user");
-
-      const json = await res.json();
-      return json?.data ?? null;
-    }
-
     async function bootstrap() {
       try {
-        const refreshed = await refreshAccessToken();
-        if (cancelled) return;
-
-        const nextToken = refreshed?.data?.accessToken;
-        if (!nextToken) return;
-
-        setAccessToken(nextToken);
-
-        const currentUser = await fetchCurrentUser(nextToken);
-        if (cancelled || !currentUser) return;
-
-        setUser(currentUser);
+        // A full browser reload clears the in-memory access token, so restore the
+        // session once from the refresh cookie. Client-side navigation and Fast
+        // Refresh reuse the existing token instead of rotating the cookie again.
+        const existingToken = getAccessToken();
+        const token = existingToken ?? (await refreshAccessToken()).data.accessToken;
+        const currentUser = await api<AuthUser>("/auth/me", token, {}, {
+          retryOnUnauthorized: false,
+        });
+        if (!cancelled) setUser(currentUser);
       } catch {
-        // No active session: stay signed out without surfacing a noisy auth error.
+        if (!cancelled) clearSession();
       } finally {
         if (!cancelled) setLoading(false);
       }
     }
 
-    bootstrap();
-
+    void bootstrap();
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [clearSession]);
 
-  // inside AuthProvider, alongside the bootstrap effect
   useEffect(() => {
-    if (!user) return;
+    if (!loading && user && !accessToken) setUser(null);
+  }, [accessToken, loading, user]);
 
-    const interval = setInterval(
-      () => {
-        refreshAccessToken()
-          .then((res) => {
-            const nextToken = res?.data?.accessToken;
-            if (nextToken) setAccessToken(nextToken);
-          })
-          .catch(() => {
-            // refresh failed — token likely expired, force logout
-            clearSession();
-          });
-      },
-      13 * 60 * 1000,
-    ); // slightly before the 15-minute expiry
-
-    return () => clearInterval(interval);
-  }, [user]);
-
-  async function logout() {
-    try {
-      await logoutUser();
-    } catch (err) {
-      console.error("Logout request failed:", err);
-    } finally {
-      clearSession();
-    }
-  }
-
-  function setSession(user: User, accessToken: string) {
-    setUser(user);
-    setAccessToken(accessToken);
-  }
-
-  function clearSession() {
-    setUser(null);
-    setAccessToken(null);
-  }
-
-  return (
-    <AuthContext.Provider
-      value={{ user, accessToken, loading, setSession, clearSession, logout }}
-    >
-      {children}
-    </AuthContext.Provider>
+  const value = useMemo(
+    () => ({ user, accessToken, loading, setSession, clearSession, logout }),
+    [user, accessToken, loading, setSession, clearSession, logout],
   );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
-  return ctx;
+  const context = useContext(AuthContext);
+  if (!context) throw new Error("useAuth must be used within AuthProvider");
+  return context;
 }

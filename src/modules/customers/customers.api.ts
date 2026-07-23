@@ -1,4 +1,4 @@
-import { apiUrl } from "@/shared/lib/api-url";
+import { api } from "@/shared/lib/api";
 import type {
   CustomerFilter,
   CustomerInput,
@@ -6,35 +6,6 @@ import type {
   CustomerProfile,
   CustomerWorkspaceResponse,
 } from "./customers.types";
-
-async function api<T>(
-  path: string,
-  accessToken: string,
-  init?: RequestInit,
-): Promise<T> {
-  const response = await fetch(apiUrl(path), {
-    ...init,
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
-      ...init?.headers,
-    },
-  });
-
-  const body: unknown = await response.json().catch(() => ({}));
-  const envelope = body as {
-    success?: boolean;
-    message?: string;
-    data?: T;
-  };
-
-  if (!response.ok || envelope.success === false) {
-    throw new Error(envelope.message ?? `Request failed: ${response.status}`);
-  }
-
-  return envelope.data ?? (body as T);
-}
 
 export function listCustomers(
   accessToken: string,
@@ -50,7 +21,6 @@ export function listCustomers(
   if (options.filter) params.set("filter", options.filter);
   params.set("page", String(options.page ?? 1));
   params.set("perPage", String(options.perPage ?? 20));
-
   return api<CustomerListResponse>(`/customers?${params.toString()}`, accessToken);
 }
 
@@ -76,9 +46,6 @@ export function updateCustomer(
   return api<CustomerProfile>(
     `/customers/${encodeURIComponent(customerId)}`,
     accessToken,
-    {
-      method: "PATCH",
-      body: JSON.stringify(input),
-    },
+    { method: "PATCH", body: JSON.stringify(input) },
   );
 }
