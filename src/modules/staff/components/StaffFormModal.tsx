@@ -1,7 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Check, Loader2, Plus, UserRound, X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  Check,
+  ImagePlus,
+  Loader2,
+  Plus,
+  Trash2,
+  UserRound,
+  X,
+} from "lucide-react";
 import { OperationsDropdown } from "@/modules/operations/components/OperationsDropdown";
 import type {
   StaffDirectoryItem,
@@ -19,6 +27,11 @@ const roleOptions = [
   { value: "BusinessAdmin", label: "Business admin" },
 ];
 
+export type StaffPhotoChange = {
+  file?: File;
+  remove?: boolean;
+};
+
 function initialForm(member: StaffDirectoryItem | null): StaffProfileInput {
   return {
     name: member?.name ?? "",
@@ -28,7 +41,6 @@ function initialForm(member: StaffDirectoryItem | null): StaffProfileInput {
     bio: member?.bio ?? "",
     phone: member?.phone ?? "",
     email: member?.email ?? "",
-    photoUrl: member?.photoUrl ?? "",
     isActive: member?.isActive ?? true,
     serviceIds: member?.services.map((service) => service.id) ?? [],
   };
@@ -51,15 +63,38 @@ export function StaffFormModal({
   saving: boolean;
   error?: string | null;
   onClose: () => void;
-  onSubmit: (input: StaffProfileInput) => Promise<void>;
+  onSubmit: (
+    input: StaffProfileInput,
+    photoChange: StaffPhotoChange,
+  ) => Promise<void>;
 }) {
   const [form, setForm] = useState<StaffProfileInput>(() => initialForm(member));
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [removePhoto, setRemovePhoto] = useState(false);
+  const [photoError, setPhotoError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (open) setForm(initialForm(member));
+    if (!open) return;
+    setForm(initialForm(member));
+    setPhotoFile(null);
+    setRemovePhoto(false);
+    setPhotoError(null);
   }, [member, open]);
 
+  const selectedPreview = useMemo(
+    () => (photoFile ? URL.createObjectURL(photoFile) : null),
+    [photoFile],
+  );
+
+  useEffect(() => {
+    return () => {
+      if (selectedPreview) URL.revokeObjectURL(selectedPreview);
+    };
+  }, [selectedPreview]);
+
   if (!open) return null;
+
+  const previewUrl = selectedPreview ?? (!removePhoto ? member?.photoUrl : null);
 
   const toggleService = (serviceId: string) => {
     setForm((current) => ({
@@ -70,17 +105,37 @@ export function StaffFormModal({
     }));
   };
 
+  const choosePhoto = (file?: File) => {
+    if (!file) return;
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      setPhotoError("Choose a JPG, PNG, or WebP image.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setPhotoError("Image size must be 5 MB or less.");
+      return;
+    }
+    setPhotoError(null);
+    setPhotoFile(file);
+    setRemovePhoto(false);
+  };
+
   const submit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    await onSubmit({
-      ...form,
-      name: form.name.trim(),
-      jobTitle: form.jobTitle?.trim() || undefined,
-      bio: form.bio?.trim() || undefined,
-      phone: form.phone?.trim() || undefined,
-      email: form.email?.trim() || undefined,
-      photoUrl: form.photoUrl?.trim() || undefined,
-    });
+    await onSubmit(
+      {
+        ...form,
+        name: form.name.trim(),
+        jobTitle: form.jobTitle?.trim() || undefined,
+        bio: form.bio?.trim() || undefined,
+        phone: form.phone?.trim() || undefined,
+        email: form.email?.trim() || undefined,
+      },
+      {
+        file: photoFile ?? undefined,
+        remove: removePhoto,
+      },
+    );
   };
 
   return (
@@ -106,7 +161,7 @@ export function StaffFormModal({
                 {member ? "Edit staff profile" : "Add staff member"}
               </h2>
               <p className="mt-0.5 text-sm text-slate-500">
-                Manage the internal profile and future public team information.
+                Manage the internal profile and public team information.
               </p>
             </div>
           </div>
@@ -122,6 +177,56 @@ export function StaffFormModal({
 
         <div className="space-y-7 px-6 py-6">
           <section className="grid gap-4 sm:grid-cols-2">
+            <div className="sm:col-span-2">
+              <p className="text-sm font-medium text-slate-700">Profile photo</p>
+              <div className="mt-2 flex flex-col gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-center">
+                <div className="flex h-28 w-28 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200">
+                  {previewUrl ? (
+                    <img
+                      src={previewUrl}
+                      alt="Staff photo preview"
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <ImagePlus className="text-slate-300" size={32} />
+                  )}
+                </div>
+                <div>
+                  <p className="text-sm text-slate-500">
+                    JPG, PNG, or WebP. Maximum size 5 MB.
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-violet-50 px-3 py-2 text-sm font-semibold text-violet-700 transition hover:bg-violet-100">
+                      <ImagePlus size={15} />
+                      {previewUrl ? "Replace photo" : "Upload photo"}
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        className="hidden"
+                        onChange={(event) => choosePhoto(event.target.files?.[0])}
+                      />
+                    </label>
+                    {previewUrl ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPhotoFile(null);
+                          setRemovePhoto(Boolean(member?.photoUrl));
+                          setPhotoError(null);
+                        }}
+                        className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-rose-600 transition hover:bg-rose-50"
+                      >
+                        <Trash2 size={15} /> Remove
+                      </button>
+                    ) : null}
+                  </div>
+                  {photoError ? (
+                    <p className="mt-2 text-sm text-rose-600">{photoError}</p>
+                  ) : null}
+                </div>
+              </div>
+            </div>
+
             <label className="sm:col-span-2 text-sm font-medium text-slate-700">
               Full name
               <input
@@ -193,19 +298,6 @@ export function StaffFormModal({
                 }
                 className={inputClass}
                 placeholder="staff@example.com"
-              />
-            </label>
-
-            <label className="sm:col-span-2 text-sm font-medium text-slate-700">
-              Photo URL
-              <input
-                type="url"
-                value={form.photoUrl ?? ""}
-                onChange={(event) =>
-                  setForm((current) => ({ ...current, photoUrl: event.target.value }))
-                }
-                className={inputClass}
-                placeholder="https://..."
               />
             </label>
 
@@ -352,7 +444,7 @@ export function StaffFormModal({
           </button>
           <button
             type="submit"
-            disabled={saving || !form.name.trim()}
+            disabled={saving || !form.name.trim() || Boolean(photoError)}
             className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:from-violet-700 hover:to-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {saving ? <Loader2 size={16} className="animate-spin" /> : null}

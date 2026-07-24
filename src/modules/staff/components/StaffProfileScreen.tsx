@@ -27,10 +27,12 @@ import {
   deleteStaffBreak,
   deleteStaffTimeOff,
   getStaffWorkspace,
+  removeStaffPhoto,
   replaceStaffAvailability,
   unassignStaffService,
   updateStaff,
   updateStaffServiceCommission,
+  uploadStaffPhoto,
 } from "../staff.api";
 import type {
   CommissionType,
@@ -40,7 +42,10 @@ import type {
   StaffTimeOffInput,
   StaffWorkspaceResponse,
 } from "../staff.types";
-import { StaffFormModal } from "./StaffFormModal";
+import {
+  StaffFormModal,
+  type StaffPhotoChange,
+} from "./StaffFormModal";
 
 type Tab = "overview" | "services" | "schedule" | "time-off" | "appointments";
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -90,11 +95,12 @@ export default function StaffProfileScreen({ staffId }: { staffId: string }) {
       ...workspace.staff,
       availableToday: false,
       workingDays: [...new Set(workspace.availability.map((entry) => entry.dayOfWeek))],
-      currentTimeOff: workspace.timeOff.find(
-        (entry) =>
-          entry.startsOn <= new Date().toISOString().slice(0, 10) &&
-          entry.endsOn >= new Date().toISOString().slice(0, 10),
-      ) ?? null,
+      currentTimeOff:
+        workspace.timeOff.find(
+          (entry) =>
+            entry.startsOn <= new Date().toISOString().slice(0, 10) &&
+            entry.endsOn >= new Date().toISOString().slice(0, 10),
+        ) ?? null,
       services: workspace.services,
     };
   }, [workspace]);
@@ -110,7 +116,9 @@ export default function StaffProfileScreen({ staffId }: { staffId: string }) {
   if (!workspace || error) {
     return (
       <div className="p-8">
-        <Link href="/operations/staff" className="text-sm font-semibold text-violet-700">← Back to staff</Link>
+        <Link href="/operations/staff" className="text-sm font-semibold text-violet-700">
+          ← Back to staff
+        </Link>
         <div className="mt-6 rounded-2xl border border-rose-200 bg-rose-50 p-5 text-rose-700">
           {error ?? "Staff profile not found"}
         </div>
@@ -118,11 +126,20 @@ export default function StaffProfileScreen({ staffId }: { staffId: string }) {
     );
   }
 
-  const saveProfile = async (input: StaffProfileInput) => {
+  const saveProfile = async (
+    input: StaffProfileInput,
+    photoChange: StaffPhotoChange,
+  ) => {
     if (!accessToken) return;
     setSaving(true);
+    setError(null);
     try {
       await updateStaff(staffId, input, accessToken);
+      if (photoChange.file) {
+        await uploadStaffPhoto(staffId, photoChange.file, accessToken);
+      } else if (photoChange.remove) {
+        await removeStaffPhoto(staffId, accessToken);
+      }
       setEditing(false);
       await load();
     } catch (caught: unknown) {
@@ -231,14 +248,12 @@ function ServicesPanel({ workspace, accessToken, reload }: { workspace: StaffWor
   const addable = workspace.serviceOptions.filter((service) => !assignedIds.has(service.id));
   const [serviceId, setServiceId] = useState(addable[0]?.id ?? "");
   const [busy, setBusy] = useState(false);
-
   const add = async () => {
     if (!serviceId) return;
     setBusy(true);
     try { await assignStaffService(workspace.staff.id, { serviceId }, accessToken); await reload(); }
     finally { setBusy(false); }
   };
-
   return (
     <section className="rounded-3xl border border-white bg-white/90 p-6 shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-3">

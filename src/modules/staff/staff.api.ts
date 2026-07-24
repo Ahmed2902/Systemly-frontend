@@ -67,6 +67,43 @@ export function deactivateStaff(staffId: string, accessToken: string) {
   );
 }
 
+export async function uploadStaffPhoto(
+  staffId: string,
+  file: File,
+  accessToken: string,
+) {
+  const encodedStaffId = encodeURIComponent(staffId);
+  const ticket = await api<{
+    uploadUrl: string;
+    publicUrl: string;
+    publicId: string;
+  }>(`/staff/${encodedStaffId}/photo/presign`, accessToken, {
+    method: "POST",
+    body: JSON.stringify({ contentType: file.type }),
+  });
+
+  const upload = await fetch(ticket.uploadUrl, {
+    method: "PUT",
+    headers: { "Content-Type": file.type },
+    body: file,
+  });
+  if (!upload.ok) throw new Error(`Image upload failed: ${upload.status}`);
+
+  return api(`/staff/${encodedStaffId}/photo/confirm`, accessToken, {
+    method: "POST",
+    body: JSON.stringify({
+      publicId: ticket.publicId,
+      publicUrl: ticket.publicUrl,
+    }),
+  });
+}
+
+export function removeStaffPhoto(staffId: string, accessToken: string) {
+  return api(`/staff/${encodeURIComponent(staffId)}/photo`, accessToken, {
+    method: "DELETE",
+  });
+}
+
 export function replaceStaffAvailability(
   staffId: string,
   entries: StaffAvailabilityEntry[],

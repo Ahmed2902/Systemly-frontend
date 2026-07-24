@@ -19,7 +19,9 @@ import {
   createStaff,
   deactivateStaff,
   getStaffDirectory,
+  removeStaffPhoto,
   updateStaff,
+  uploadStaffPhoto,
 } from "../staff.api";
 import type {
   StaffDirectoryItem,
@@ -29,7 +31,10 @@ import type {
   StaffStatusFilter,
 } from "../staff.types";
 import { StaffCard } from "./StaffCard";
-import { StaffFormModal } from "./StaffFormModal";
+import {
+  StaffFormModal,
+  type StaffPhotoChange,
+} from "./StaffFormModal";
 
 const statusOptions = [
   { value: "all", label: "All statuses" },
@@ -101,18 +106,36 @@ export default function StaffDirectoryScreen() {
     [data?.serviceOptions],
   );
 
-  const submit = async (input: StaffProfileInput) => {
+  const submit = async (
+    input: StaffProfileInput,
+    photoChange: StaffPhotoChange,
+  ) => {
     if (!accessToken) return;
     setSaving(true);
     setFormError(null);
     try {
-      if (editing) await updateStaff(editing.id, input, accessToken);
-      else await createStaff(input, accessToken);
+      let staffId: string;
+      if (editing) {
+        staffId = editing.id;
+        await updateStaff(staffId, input, accessToken);
+      } else {
+        const created = await createStaff(input, accessToken);
+        staffId = created.id;
+      }
+
+      if (photoChange.file) {
+        await uploadStaffPhoto(staffId, photoChange.file, accessToken);
+      } else if (editing && photoChange.remove) {
+        await removeStaffPhoto(staffId, accessToken);
+      }
+
       setModalOpen(false);
       setEditing(null);
       await load();
     } catch (caught: unknown) {
-      setFormError(caught instanceof Error ? caught.message : "Unable to save staff member");
+      setFormError(
+        caught instanceof Error ? caught.message : "Unable to save staff member",
+      );
     } finally {
       setSaving(false);
     }
@@ -134,7 +157,9 @@ export default function StaffDirectoryScreen() {
       <div className="flex h-full items-center justify-center bg-gradient-to-br from-violet-50 via-slate-50 to-emerald-50">
         <div className="rounded-2xl border border-white bg-white/90 px-6 py-5 text-center shadow-sm">
           <Loader2 className="mx-auto animate-spin text-violet-600" size={26} />
-          <p className="mt-3 text-sm font-medium text-slate-600">Loading staff directory...</p>
+          <p className="mt-3 text-sm font-medium text-slate-600">
+            Loading staff directory...
+          </p>
         </div>
       </div>
     );
@@ -148,7 +173,9 @@ export default function StaffDirectoryScreen() {
             <div className="inline-flex items-center gap-2 rounded-full bg-violet-100 px-3 py-1 text-xs font-semibold text-violet-700">
               <Sparkles size={13} /> Team & availability
             </div>
-            <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-950">Staff Directory</h1>
+            <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-950">
+              Staff Directory
+            </h1>
             <p className="mt-1.5 text-sm text-slate-500">
               Manage profiles, specialties, schedules, time off, and service commissions.
             </p>
@@ -168,17 +195,40 @@ export default function StaffDirectoryScreen() {
 
         {data ? (
           <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <Metric icon={<UsersRound size={18} />} label="Total team members" value={data.metrics.total} tone="violet" />
-            <Metric icon={<BriefcaseBusiness size={18} />} label="Active staff" value={data.metrics.active} tone="sky" />
-            <Metric icon={<CalendarCheck2 size={18} />} label="Available today" value={data.metrics.availableToday} tone="emerald" />
-            <Metric icon={<CalendarOff size={18} />} label="On time off" value={data.metrics.onTimeOff} tone="amber" />
+            <Metric
+              icon={<UsersRound size={18} />}
+              label="Total team members"
+              value={data.metrics.total}
+              tone="violet"
+            />
+            <Metric
+              icon={<BriefcaseBusiness size={18} />}
+              label="Active staff"
+              value={data.metrics.active}
+              tone="sky"
+            />
+            <Metric
+              icon={<CalendarCheck2 size={18} />}
+              label="Available today"
+              value={data.metrics.availableToday}
+              tone="emerald"
+            />
+            <Metric
+              icon={<CalendarOff size={18} />}
+              label="On time off"
+              value={data.metrics.onTimeOff}
+              tone="amber"
+            />
           </section>
         ) : null}
 
         <section className="relative z-40 rounded-2xl border border-white/80 bg-white/90 p-3 shadow-sm backdrop-blur">
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-[minmax(16rem,1fr)_12rem_13rem_14rem_auto]">
             <label className="relative block">
-              <Search size={17} className="pointer-events-none absolute left-3.5 top-3 text-slate-400" />
+              <Search
+                size={17}
+                className="pointer-events-none absolute left-3.5 top-3 text-slate-400"
+              />
               <input
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
@@ -186,13 +236,32 @@ export default function StaffDirectoryScreen() {
                 className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-3 text-sm outline-none focus:border-violet-300 focus:ring-4 focus:ring-violet-100"
               />
             </label>
-            <OperationsDropdown value={status} onChange={(value) => setStatus(value as StaffStatusFilter)} options={statusOptions} aria-label="Filter staff status" />
-            <OperationsDropdown value={role} onChange={(value) => setRole(value as StaffRole | "")} options={roleOptions} aria-label="Filter staff role" />
-            <OperationsDropdown value={serviceId} onChange={setServiceId} options={serviceOptions} aria-label="Filter by service" />
+            <OperationsDropdown
+              value={status}
+              onChange={(value) => setStatus(value as StaffStatusFilter)}
+              options={statusOptions}
+              aria-label="Filter staff status"
+            />
+            <OperationsDropdown
+              value={role}
+              onChange={(value) => setRole(value as StaffRole | "")}
+              options={roleOptions}
+              aria-label="Filter staff role"
+            />
+            <OperationsDropdown
+              value={serviceId}
+              onChange={setServiceId}
+              options={serviceOptions}
+              aria-label="Filter by service"
+            />
             <button
               type="button"
               onClick={() => setAvailableToday((current) => !current)}
-              className={`h-11 rounded-xl border px-4 text-sm font-semibold transition ${availableToday ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}
+              className={`h-11 rounded-xl border px-4 text-sm font-semibold transition ${
+                availableToday
+                  ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                  : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+              }`}
             >
               Available today
             </button>
@@ -201,8 +270,17 @@ export default function StaffDirectoryScreen() {
 
         {error ? (
           <div className="flex items-center justify-between gap-3 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-            <span className="inline-flex items-center gap-2"><AlertCircle size={17} />{error}</span>
-            <button type="button" onClick={() => void load()} className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 font-semibold"><RefreshCw size={14} />Retry</button>
+            <span className="inline-flex items-center gap-2">
+              <AlertCircle size={17} />
+              {error}
+            </span>
+            <button
+              type="button"
+              onClick={() => void load()}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 font-semibold"
+            >
+              <RefreshCw size={14} /> Retry
+            </button>
           </div>
         ) : null}
 
@@ -226,8 +304,12 @@ export default function StaffDirectoryScreen() {
         ) : (
           <div className="rounded-3xl border border-dashed border-slate-300 bg-white/70 px-6 py-16 text-center">
             <UsersRound className="mx-auto text-violet-400" size={38} />
-            <h2 className="mt-4 text-lg font-semibold text-slate-900">No staff members found</h2>
-            <p className="mt-1 text-sm text-slate-500">Adjust the filters or add the first team member.</p>
+            <h2 className="mt-4 text-lg font-semibold text-slate-900">
+              No staff members found
+            </h2>
+            <p className="mt-1 text-sm text-slate-500">
+              Adjust the filters or add the first team member.
+            </p>
           </div>
         )}
       </div>
@@ -251,7 +333,17 @@ export default function StaffDirectoryScreen() {
   );
 }
 
-function Metric({ icon, label, value, tone }: { icon: React.ReactNode; label: string; value: number; tone: "violet" | "sky" | "emerald" | "amber" }) {
+function Metric({
+  icon,
+  label,
+  value,
+  tone,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: number;
+  tone: "violet" | "sky" | "emerald" | "amber";
+}) {
   const tones = {
     violet: "from-violet-100 to-violet-50 text-violet-700",
     sky: "from-sky-100 to-sky-50 text-sky-700",
@@ -260,8 +352,15 @@ function Metric({ icon, label, value, tone }: { icon: React.ReactNode; label: st
   };
   return (
     <div className="flex items-center gap-3 rounded-2xl border border-white/80 bg-white/85 p-4 shadow-sm">
-      <span className={`flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br ${tones[tone]}`}>{icon}</span>
-      <div><p className="text-2xl font-bold text-slate-900">{value}</p><p className="text-xs font-medium text-slate-500">{label}</p></div>
+      <span
+        className={`flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br ${tones[tone]}`}
+      >
+        {icon}
+      </span>
+      <div>
+        <p className="text-2xl font-bold text-slate-900">{value}</p>
+        <p className="text-xs font-medium text-slate-500">{label}</p>
+      </div>
     </div>
   );
 }
