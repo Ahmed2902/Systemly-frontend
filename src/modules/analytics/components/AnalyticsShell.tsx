@@ -45,20 +45,24 @@ export function AnalyticsShell({
   const preset = useAnalyticsPreset();
 
   return (
-    <div className="analytics-page h-full overflow-y-auto px-5 py-6">
-      <div className="mx-auto max-w-[1500px]">
-        <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
+    <div className="analytics-page h-full overflow-y-auto">
+      <div className="mx-auto w-full max-w-[1480px] px-4 py-4 lg:px-6 lg:py-5">
+        <header className="analytics-header">
           <div>
-            <h1 className="analytics-title text-3xl font-semibold tracking-tight">{title}</h1>
-            <p className="analytics-muted mt-1 text-sm">{subtitle}</p>
+            <p className="analytics-eyebrow">OWNER ANALYTICS</p>
+            <h1 className="analytics-title text-[26px] font-bold tracking-[-0.03em] lg:text-[30px]">
+              {title}
+            </h1>
+            <p className="analytics-muted mt-1 text-[13px]">{subtitle}</p>
           </div>
-          <div className="analytics-preset flex flex-wrap gap-1 rounded-xl p-1">
+
+          <div className="analytics-preset flex max-w-full gap-1 overflow-x-auto rounded-lg p-1">
             {ANALYTICS_PRESETS.map((item) => (
               <button
                 key={item}
                 type="button"
                 onClick={() => router.push(`${pathname}?preset=${item}`)}
-                className={`rounded-lg px-3 py-2 text-xs font-semibold transition ${
+                className={`whitespace-nowrap rounded-md px-2.5 py-1.5 text-[11px] font-semibold transition ${
                   preset === item ? "is-active" : ""
                 }`}
               >
@@ -66,9 +70,9 @@ export function AnalyticsShell({
               </button>
             ))}
           </div>
-        </div>
+        </header>
 
-        <nav className="analytics-nav mt-6 flex gap-1 overflow-x-auto border-b pb-2">
+        <nav className="analytics-nav mt-4 flex gap-1 overflow-x-auto rounded-lg p-1">
           {LINKS.map(([href, label]) => {
             const active =
               href === "/operations/dashboard"
@@ -78,7 +82,9 @@ export function AnalyticsShell({
               <Link
                 key={href}
                 href={`${href}?preset=${preset}`}
-                className={`whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium ${active ? "is-active" : ""}`}
+                className={`whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-semibold transition ${
+                  active ? "is-active" : ""
+                }`}
               >
                 {label}
               </Link>
@@ -86,7 +92,7 @@ export function AnalyticsShell({
           })}
         </nav>
 
-        <div className="mt-6">{children}</div>
+        <div className="mt-4">{children}</div>
       </div>
     </div>
   );
@@ -96,16 +102,27 @@ export function MetricCard({
   label,
   value,
   hint,
+  trend,
+  tone = "neutral",
 }: {
   label: string;
   value: string;
   hint?: string;
+  trend?: string;
+  tone?: "neutral" | "positive" | "negative" | "warning";
 }) {
   return (
-    <div className="analytics-card rounded-2xl p-5 shadow-sm">
-      <p className="analytics-muted text-sm">{label}</p>
-      <p className="analytics-title mt-2 text-2xl font-semibold">{value}</p>
-      {hint ? <p className="analytics-subtle mt-2 text-xs">{hint}</p> : null}
+    <div className="analytics-card analytics-metric-card rounded-xl px-4 py-3.5">
+      <div className="flex items-start justify-between gap-3">
+        <p className="analytics-muted text-[11px] font-medium">{label}</p>
+        {trend ? (
+          <span className={`analytics-trend analytics-trend-${tone}`}>{trend}</span>
+        ) : null}
+      </div>
+      <p className="analytics-title mt-2 text-xl font-bold tracking-[-0.025em]">
+        {value}
+      </p>
+      {hint ? <p className="analytics-subtle mt-1 text-[10px]">{hint}</p> : null}
     </div>
   );
 }
@@ -114,22 +131,27 @@ export function AnalyticsPanel({
   title,
   children,
   className = "",
+  action,
 }: {
   title: string;
   children: ReactNode;
   className?: string;
+  action?: ReactNode;
 }) {
   return (
-    <section className={`analytics-card rounded-2xl p-5 ${className}`}>
-      <h2 className="analytics-title text-base font-semibold">{title}</h2>
-      <div className="mt-4">{children}</div>
+    <section className={`analytics-card rounded-xl p-4 ${className}`}>
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="analytics-title text-[13px] font-bold">{title}</h2>
+        {action ? <div>{action}</div> : null}
+      </div>
+      <div className="mt-3">{children}</div>
     </section>
   );
 }
 
 export function AnalyticsState({ message }: { message: string }) {
   return (
-    <div className="analytics-state rounded-2xl border border-dashed p-10 text-center text-sm">
+    <div className="analytics-state rounded-xl border border-dashed px-5 py-12 text-center text-sm">
       {message}
     </div>
   );
