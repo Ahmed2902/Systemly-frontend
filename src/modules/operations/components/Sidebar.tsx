@@ -6,15 +6,18 @@ import {
   CalendarDays,
   ClipboardList,
   LayoutDashboard,
+  Moon,
   Plus,
   Receipt,
   Settings,
   Sparkles,
+  Sun,
   UserRound,
   Users,
 } from "lucide-react";
 import { useAuth } from "@/modules/auth/useAuth";
 import { useOperations } from "../operations.context";
+import { useOperationsTheme } from "../operations-theme";
 
 const NAV_ITEMS = [
   {
@@ -73,12 +76,13 @@ export function Sidebar() {
   const pathname = usePathname();
   const { user } = useAuth();
   const { openNewAppointment } = useOperations();
+  const { theme, toggleTheme } = useOperationsTheme();
   const ownerView =
     user?.role === "BusinessAdmin" || user?.role === "SuperAdmin";
   const items = NAV_ITEMS.filter((item) => !item.ownerOnly || ownerView);
 
   return (
-    <aside className="flex w-60 flex-shrink-0 flex-col border-r border-slate-200/80 bg-white/95 shadow-sm backdrop-blur">
+    <aside className="flex w-60 flex-shrink-0 flex-col border-r border-slate-200/80 bg-white/95 shadow-sm backdrop-blur transition-colors duration-200">
       <div className="p-4">
         <div className="flex items-center gap-2.5">
           <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 text-sm font-bold text-white shadow-md shadow-violet-200">
@@ -129,11 +133,28 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div className="m-3 rounded-2xl border border-violet-100 bg-gradient-to-br from-violet-50 to-indigo-50 p-3">
-        <p className="text-xs font-semibold text-violet-800">Need a hand?</p>
-        <p className="mt-1 text-[11px] leading-relaxed text-violet-600">
-          Help and setup guides will live here as the workspace grows.
-        </p>
+      <div className="space-y-3 p-3">
+        <button
+          type="button"
+          onClick={toggleTheme}
+          className="flex w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+          aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+        >
+          <span className="flex items-center gap-2">
+            {theme === "dark" ? <Moon size={16} /> : <Sun size={16} />}
+            {theme === "dark" ? "Dark mode" : "Light mode"}
+          </span>
+          <span className="text-xs font-medium text-slate-400">
+            {theme === "dark" ? "On" : "On"}
+          </span>
+        </button>
+
+        <div className="rounded-2xl border border-violet-100 bg-gradient-to-br from-violet-50 to-indigo-50 p-3">
+          <p className="text-xs font-semibold text-violet-800">Need a hand?</p>
+          <p className="mt-1 text-[11px] leading-relaxed text-violet-600">
+            Help and setup guides will live here as the workspace grows.
+          </p>
+        </div>
       </div>
     </aside>
   );
