@@ -11,7 +11,15 @@ import {
   MetricCard,
   useAnalyticsPreset,
 } from "@/modules/analytics/components/AnalyticsShell";
+import {
+  AreaChart,
+  DonutChart,
+  MultiLineChart,
+} from "@/modules/analytics/components/AnalyticsCharts";
 import { formatEgp, formatPercent } from "@/modules/analytics/analytics.formatters";
+
+const monthLabel = (value: string) =>
+  new Intl.DateTimeFormat("en-GB", { month: "short", year: "2-digit" }).format(new Date(value));
 
 export default function GrowthAnalyticsPage() {
   const { accessToken } = useAuth();
@@ -51,55 +59,50 @@ export default function GrowthAnalyticsPage() {
             />
           </div>
 
-          <AnalyticsPanel title="Monthly revenue and growth">
-            <div className="overflow-x-auto">
-              <div className="flex min-w-[760px] items-end gap-3 border-b border-slate-800 pb-3">
-                {data.monthlyGrowth.map((row) => {
-                  const max = Math.max(...data.monthlyGrowth.map((item) => item.totalCents), 1);
-                  return (
-                    <div key={row.bucket} className="flex min-w-20 flex-1 flex-col items-center gap-2">
-                      <span className="text-[10px] text-slate-400">{formatPercent(row.growthPct)}</span>
-                      <div className="w-full rounded-t bg-gradient-to-t from-fuchsia-700 to-violet-400" style={{ height: `${Math.max((row.totalCents / max) * 230, 2)}px` }} />
-                      <span className="text-[10px] text-slate-500">
-                        {new Intl.DateTimeFormat("en-GB", { month: "short", year: "2-digit" }).format(new Date(row.bucket))}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+          <AnalyticsPanel title="Monthly revenue">
+            <AreaChart
+              data={data.monthlyGrowth.map((row) => ({ label: monthLabel(row.bucket), value: row.totalCents }))}
+              formatValue={formatEgp}
+              height={330}
+            />
           </AnalyticsPanel>
 
-          <div className="grid gap-4 xl:grid-cols-2">
-            <AnalyticsPanel title="Acquisition mix">
-              <div className="space-y-3">
-                {data.acquisitionSources.map((row) => (
-                  <div key={row.source} className="flex justify-between rounded-xl bg-slate-950/60 px-4 py-3 text-sm">
-                    <span className="capitalize">{row.source.replaceAll("_", " ")}</span>
-                    <span className="font-semibold">{row.count}</span>
-                  </div>
-                ))}
-              </div>
+          <div className="grid gap-4 xl:grid-cols-[1.2fr_1fr]">
+            <AnalyticsPanel title="Revenue momentum and invoice volume">
+              <MultiLineChart
+                labels={data.monthlyGrowth.map((row) => monthLabel(row.bucket))}
+                series={[
+                  { name: "Growth %", values: data.monthlyGrowth.map((row) => row.growthPct ?? 0), colour: "#8b5cf6" },
+                  { name: "Invoices", values: data.monthlyGrowth.map((row) => row.invoiceCount), colour: "#06b6d4" },
+                ]}
+                height={300}
+              />
             </AnalyticsPanel>
 
-            <AnalyticsPanel title="Retention cohorts">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm">
-                  <thead className="text-slate-500"><tr><th className="pb-3">Cohort</th><th className="pb-3">30d</th><th className="pb-3">60d</th><th className="pb-3">90d</th></tr></thead>
-                  <tbody>
-                    {data.retentionCohorts.map((row) => (
-                      <tr key={row.cohortStart} className="border-t border-slate-800">
-                        <td className="py-3">{new Intl.DateTimeFormat("en-GB", { month: "short", year: "numeric" }).format(new Date(row.cohortStart))}</td>
-                        <td className="py-3">{row.totalCustomers ? formatPercent((row.retained30 / row.totalCustomers) * 100) : "—"}</td>
-                        <td className="py-3">{row.totalCustomers ? formatPercent((row.retained60 / row.totalCustomers) * 100) : "—"}</td>
-                        <td className="py-3">{row.totalCustomers ? formatPercent((row.retained90 / row.totalCustomers) * 100) : "—"}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+            <AnalyticsPanel title="Acquisition mix">
+              <DonutChart
+                items={data.acquisitionSources.map((row) => ({ label: row.source.replaceAll("_", " "), value: row.count }))}
+              />
             </AnalyticsPanel>
           </div>
+
+          <AnalyticsPanel title="Retention cohorts">
+            <div className="overflow-x-auto">
+              <table className="analytics-table w-full text-left text-sm">
+                <thead><tr><th className="pb-3">Cohort</th><th className="pb-3">30d</th><th className="pb-3">60d</th><th className="pb-3">90d</th></tr></thead>
+                <tbody>
+                  {data.retentionCohorts.map((row) => (
+                    <tr key={row.cohortStart} className="border-t">
+                      <td className="py-3">{new Intl.DateTimeFormat("en-GB", { month: "short", year: "numeric" }).format(new Date(row.cohortStart))}</td>
+                      <td className="py-3">{row.totalCustomers ? formatPercent((row.retained30 / row.totalCustomers) * 100) : "—"}</td>
+                      <td className="py-3">{row.totalCustomers ? formatPercent((row.retained60 / row.totalCustomers) * 100) : "—"}</td>
+                      <td className="py-3">{row.totalCustomers ? formatPercent((row.retained90 / row.totalCustomers) * 100) : "—"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </AnalyticsPanel>
         </div>
       ) : null}
     </AnalyticsShell>
