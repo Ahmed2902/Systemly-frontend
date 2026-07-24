@@ -11,7 +11,14 @@ import {
   MetricCard,
   useAnalyticsPreset,
 } from "@/modules/analytics/components/AnalyticsShell";
+import {
+  DonutChart,
+  MultiLineChart,
+} from "@/modules/analytics/components/AnalyticsCharts";
 import { formatEgp, formatPercent } from "@/modules/analytics/analytics.formatters";
+
+const shortDate = (value: string) =>
+  new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short" }).format(new Date(value));
 
 export default function CustomerAnalyticsPage() {
   const { accessToken } = useAuth();
@@ -48,66 +55,66 @@ export default function CustomerAnalyticsPage() {
             <MetricCard label="Lapsed customers" value={String(data.summary.lapsedCustomerCount)} />
           </div>
 
-          <div className="grid gap-4 xl:grid-cols-[1.3fr_1fr]">
+          <div className="grid gap-4 xl:grid-cols-[1.4fr_1fr]">
             <AnalyticsPanel title="New vs returning customers">
-              <div className="space-y-3">
-                {data.newVsReturning.map((row) => (
-                  <div key={row.bucket} className="grid grid-cols-[110px_1fr_1fr] items-center gap-3 text-sm">
-                    <span className="text-slate-500">{new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short" }).format(new Date(row.bucket))}</span>
-                    <div className="rounded-lg bg-emerald-500/15 px-3 py-2 text-emerald-300">New {row.newCustomers}</div>
-                    <div className="rounded-lg bg-violet-500/15 px-3 py-2 text-violet-300">Returning {row.returningCustomers}</div>
-                  </div>
-                ))}
-              </div>
+              <MultiLineChart
+                labels={data.newVsReturning.map((row) => shortDate(row.bucket))}
+                series={[
+                  { name: "New", values: data.newVsReturning.map((row) => row.newCustomers), colour: "#22c55e" },
+                  { name: "Returning", values: data.newVsReturning.map((row) => row.returningCustomers), colour: "#8b5cf6" },
+                ]}
+                height={310}
+              />
+            </AnalyticsPanel>
+
+            <AnalyticsPanel title="Acquisition sources">
+              <DonutChart
+                items={data.acquisitionSources.map((row) => ({ label: row.source.replaceAll("_", " "), value: row.count }))}
+              />
+            </AnalyticsPanel>
+          </div>
+
+          <div className="grid gap-4 xl:grid-cols-2">
+            <AnalyticsPanel title="Customer health trend">
+              <MultiLineChart
+                labels={data.noShowRate.map((row) => shortDate(row.bucket))}
+                series={[
+                  { name: "No-show rate", values: data.noShowRate.map((row) => row.rate), colour: "#f59e0b" },
+                  { name: "Cancellation rate", values: data.cancellationRate.map((row) => row.rate), colour: "#ef4444" },
+                ]}
+                height={280}
+              />
             </AnalyticsPanel>
 
             <AnalyticsPanel title="Retention health">
-              <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
-                {[
-                  ["30-day retention", data.retentionSummary.day30Rate],
-                  ["60-day retention", data.retentionSummary.day60Rate],
-                  ["90-day retention", data.retentionSummary.day90Rate],
-                ].map(([label, value]) => (
-                  <div key={String(label)} className="rounded-xl bg-slate-950/60 p-4">
-                    <p className="text-sm text-slate-400">{label}</p>
-                    <p className="mt-2 text-2xl font-semibold">{formatPercent(value as number | null)}</p>
-                  </div>
-                ))}
-              </div>
+              <DonutChart
+                items={[
+                  { label: "30-day", value: data.retentionSummary.day30Rate ?? 0 },
+                  { label: "60-day", value: data.retentionSummary.day60Rate ?? 0 },
+                  { label: "90-day", value: data.retentionSummary.day90Rate ?? 0 },
+                ]}
+                centreLabel={formatPercent(data.retentionSummary.day30Rate)}
+                formatValue={(value) => formatPercent(value)}
+              />
             </AnalyticsPanel>
           </div>
 
-          <div className="grid gap-4 xl:grid-cols-3">
-            <AnalyticsPanel title="Acquisition sources">
-              <div className="space-y-3">
-                {data.acquisitionSources.map((row) => (
-                  <div key={row.source} className="flex justify-between rounded-xl bg-slate-950/60 px-4 py-3 text-sm">
-                    <span className="capitalize">{row.source.replaceAll("_", " ")}</span>
-                    <span className="font-semibold">{row.count}</span>
-                  </div>
-                ))}
-              </div>
-            </AnalyticsPanel>
-
-            <AnalyticsPanel title="Top customers" className="xl:col-span-2">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm">
-                  <thead className="text-slate-500">
-                    <tr><th className="pb-3">Customer</th><th className="pb-3">Spend</th><th className="pb-3">Invoices</th></tr>
-                  </thead>
-                  <tbody>
-                    {data.lifetimeValue.map((row) => (
-                      <tr key={row.id} className="border-t border-slate-800">
-                        <td className="py-3">{row.name}</td>
-                        <td className="py-3 font-semibold">{formatEgp(row.totalCents)}</td>
-                        <td className="py-3 text-slate-400">{row.invoiceCount}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </AnalyticsPanel>
-          </div>
+          <AnalyticsPanel title="Top customers">
+            <div className="overflow-x-auto">
+              <table className="analytics-table w-full text-left text-sm">
+                <thead><tr><th className="pb-3">Customer</th><th className="pb-3">Spend</th><th className="pb-3">Invoices</th></tr></thead>
+                <tbody>
+                  {data.lifetimeValue.map((row) => (
+                    <tr key={row.id} className="border-t">
+                      <td className="py-3">{row.name}</td>
+                      <td className="py-3 font-semibold">{formatEgp(row.totalCents)}</td>
+                      <td className="analytics-muted py-3">{row.invoiceCount}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </AnalyticsPanel>
         </div>
       ) : null}
     </AnalyticsShell>
