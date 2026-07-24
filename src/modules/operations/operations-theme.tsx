@@ -9,6 +9,8 @@ import {
   useState,
 } from "react";
 
+export { getOperationsAccent, OPERATIONS_ACCENTS } from "./operations-accents";
+
 type OperationsTheme = "light" | "dark";
 
 type OperationsThemeContextValue = {

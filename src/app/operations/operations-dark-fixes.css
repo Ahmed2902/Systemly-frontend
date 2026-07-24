@@ -1,0 +1,73 @@
+/* Scoped follow-up fixes for Operations dark mode. */
+
+/* The New Appointment overlay is a direct child of the theme wrapper. The
+   original compatibility rule made every direct child opaque. Restore a
+   translucent overlay while keeping the modal itself themed. */
+.operations-dark > .fixed.inset-0 {
+  background-color: rgb(2 6 23 / 0.58) !important;
+}
+
+/* Missing translucent surfaces used by Staff, Customers, Invoices and
+   Appointment Details. */
+.operations-dark [class~="bg-white/55"],
+.operations-dark [class~="bg-white/70"],
+.operations-dark [class~="bg-white/75"],
+.operations-dark [class~="bg-white/80"] {
+  background-color: var(--operations-panel) !important;
+}
+
+.operations-dark [class~="bg-slate-50/80"] {
+  background-color: var(--operations-panel-muted) !important;
+}
+
+.operations-dark [class~="bg-violet-50/80"] {
+  background-color: #241b3d !important;
+}
+
+.operations-dark [class~="bg-blue-50"],
+.operations-dark [class~="bg-blue-50/70"],
+.operations-dark [class~="bg-blue-100"] {
+  background-color: #132a46 !important;
+}
+
+.operations-dark [class~="text-blue-900"],
+.operations-dark [class~="text-blue-800"],
+.operations-dark [class~="text-blue-700"],
+.operations-dark [class~="text-blue-600"] {
+  color: #bfdbfe !important;
+}
+
+.operations-dark [class~="text-violet-900"] {
+  color: #ddd6fe !important;
+}
+
+.operations-dark [class~="border-blue-300"],
+.operations-dark [class~="border-blue-400"] {
+  border-color: #3b82f6 !important;
+}
+
+/* Preserve readable hover states that use opacity variants. */
+.operations-dark [class~="hover:bg-slate-50/80"]:hover {
+  background-color: var(--operations-hover) !important;
+}
+
+/* Staff-card and service-category gradients that begin with white. */
+.operations-dark [class*="bg-gradient-to-br"][class*="from-white"][class*="to-emerald-50"] {
+  background-image: linear-gradient(135deg, var(--operations-panel) 0%, #10281f 100%) !important;
+}
+
+.operations-dark [class*="bg-gradient-to-br"][class*="from-white"][class*="to-violet-50"] {
+  background-image: linear-gradient(135deg, var(--operations-panel) 0%, #211936 100%) !important;
+}
+
+.operations-dark [class*="bg-gradient-to-br"][class*="from-white"][class*="to-amber-50"] {
+  background-image: linear-gradient(135deg, var(--operations-panel) 0%, #2c2110 100%) !important;
+}
+
+.operations-dark [class*="bg-gradient-to-br"][class*="from-violet-50"][class*="via-white"],
+.operations-dark [class*="bg-gradient-to-br"][class*="from-emerald-50"][class*="via-white"],
+.operations-dark [class*="bg-gradient-to-br"][class*="from-orange-50"][class*="via-white"],
+.operations-dark [class*="bg-gradient-to-br"][class*="from-sky-50"][class*="via-white"],
+.operations-dark [class*="bg-gradient-to-br"][class*="from-rose-50"][class*="via-white"] {
+  background-image: linear-gradient(135deg, var(--operations-panel-raised) 0%, var(--operations-panel) 100%) !important;
+}
