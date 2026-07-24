@@ -11,6 +11,11 @@ import {
   MetricCard,
   useAnalyticsPreset,
 } from "@/modules/analytics/components/AnalyticsShell";
+import {
+  BookingHeatmap,
+  DonutChart,
+  LollipopChart,
+} from "@/modules/analytics/components/AnalyticsCharts";
 import { WEEKDAYS } from "@/modules/analytics/analytics.formatters";
 
 const LEAD_TIME_LABELS: Record<OperationsAnalytics["leadTimes"][number]["bucket"], string> = {
@@ -39,9 +44,14 @@ export default function OperationsAnalyticsPage() {
     };
   }, [accessToken, preset]);
 
-  const hours = useMemo(() => Array.from({ length: 14 }, (_, index) => index + 8), []);
-  const maxHeat = Math.max(...(data?.heatmap.map((row) => row.count) ?? [1]), 1);
-  const heat = new Map(data?.heatmap.map((row) => [`${row.weekday}-${row.hour}`, row.count]) ?? []);
+  const serviceItems = useMemo(
+    () => data?.mostBookedServices.map((row) => ({ label: row.name, value: row.count })) ?? [],
+    [data],
+  );
+  const leadTimeItems = useMemo(
+    () => data?.leadTimes.map((row) => ({ label: LEAD_TIME_LABELS[row.bucket], value: row.count })) ?? [],
+    [data],
+  );
 
   return (
     <AnalyticsShell
@@ -61,62 +71,16 @@ export default function OperationsAnalyticsPage() {
           </div>
 
           <AnalyticsPanel title="Peak booking times">
-            <div className="overflow-x-auto">
-              <div className="min-w-[900px]">
-                <div className="grid grid-cols-[60px_repeat(14,minmax(44px,1fr))] gap-1 text-[10px] text-slate-500">
-                  <span />
-                  {hours.map((hour) => <span key={hour} className="text-center">{hour}:00</span>)}
-                  {WEEKDAYS.map((day, weekday) => (
-                    <div key={day} className="contents">
-                      <span className="flex items-center">{day}</span>
-                      {hours.map((hour) => {
-                        const count = heat.get(`${weekday}-${hour}`) ?? 0;
-                        const opacity = count === 0 ? 0.08 : 0.2 + (count / maxHeat) * 0.8;
-                        return (
-                          <div
-                            key={`${day}-${hour}`}
-                            title={`${day} ${hour}:00 · ${count} bookings`}
-                            className="h-9 rounded bg-violet-500"
-                            style={{ opacity }}
-                          />
-                        );
-                      })}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+            <BookingHeatmap rows={data.heatmap} />
           </AnalyticsPanel>
 
-          <div className="grid gap-4 xl:grid-cols-2">
+          <div className="grid gap-4 xl:grid-cols-[1.2fr_1fr]">
             <AnalyticsPanel title="Most booked services">
-              <div className="space-y-3">
-                {data.mostBookedServices.map((row, index) => (
-                  <div key={row.id} className="flex items-center justify-between rounded-xl bg-slate-950/60 px-4 py-3 text-sm">
-                    <span>{index + 1}. {row.name}</span>
-                    <span className="font-semibold">{row.count}</span>
-                  </div>
-                ))}
-              </div>
+              <LollipopChart items={serviceItems.slice(0, 8)} />
             </AnalyticsPanel>
 
             <AnalyticsPanel title="Booking lead time">
-              <div className="space-y-4">
-                {data.leadTimes.map((row) => {
-                  const total = data.leadTimes.reduce((sum, item) => sum + item.count, 0) || 1;
-                  return (
-                    <div key={row.bucket}>
-                      <div className="flex justify-between text-sm">
-                        <span>{LEAD_TIME_LABELS[row.bucket]}</span>
-                        <span className="text-slate-400">{row.count} · {((row.count / total) * 100).toFixed(0)}%</span>
-                      </div>
-                      <div className="mt-2 h-2 rounded-full bg-slate-800">
-                        <div className="h-full rounded-full bg-cyan-500" style={{ width: `${(row.count / total) * 100}%` }} />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+              <DonutChart items={leadTimeItems} centreLabel={`${data.summary.bookingCount}`} />
             </AnalyticsPanel>
           </div>
         </div>

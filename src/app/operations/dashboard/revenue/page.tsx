@@ -12,10 +12,18 @@ import {
   useAnalyticsPreset,
 } from "@/modules/analytics/components/AnalyticsShell";
 import {
+  AreaChart,
+  LollipopChart,
+  MultiLineChart,
+} from "@/modules/analytics/components/AnalyticsCharts";
+import {
   formatDateRange,
   formatEgp,
   WEEKDAYS,
 } from "@/modules/analytics/analytics.formatters";
+
+const shortDate = (value: string) =>
+  new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short" }).format(new Date(value));
 
 export default function RevenueAnalyticsPage() {
   const { accessToken } = useAuth();
@@ -53,56 +61,40 @@ export default function RevenueAnalyticsPage() {
           </div>
 
           <AnalyticsPanel title={`Revenue over time · ${formatDateRange(data.range.from, data.range.to)}`}>
-            <div className="flex h-72 items-end gap-2 overflow-x-auto border-b border-slate-800 pb-2">
-              {data.trend.map((row) => {
-                const max = Math.max(...data.trend.map((item) => item.totalCents), 1);
-                return (
-                  <div key={row.bucket} className="flex min-w-12 flex-1 flex-col items-center gap-2">
-                    <span className="text-[10px] text-slate-400">{formatEgp(row.totalCents)}</span>
-                    <div
-                      className="w-full rounded-t bg-gradient-to-t from-violet-700 to-violet-400"
-                      style={{ height: `${Math.max((row.totalCents / max) * 220, 2)}px` }}
-                    />
-                    <span className="text-[10px] text-slate-500">
-                      {new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short" }).format(new Date(row.bucket))}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
+            <AreaChart
+              data={data.trend.map((row) => ({ label: shortDate(row.bucket), value: row.totalCents }))}
+              formatValue={formatEgp}
+              height={330}
+            />
           </AnalyticsPanel>
 
-          <div className="grid gap-4 xl:grid-cols-2">
+          <div className="grid gap-4 xl:grid-cols-[1.15fr_1fr]">
             <AnalyticsPanel title="Revenue by category">
-              <div className="space-y-4">
-                {data.byCategory.map((row) => {
-                  const max = Math.max(...data.byCategory.map((item) => item.totalCents), 1);
-                  return (
-                    <div key={row.category}>
-                      <div className="flex justify-between text-sm">
-                        <span>{row.category}</span>
-                        <span className="text-slate-400">{formatEgp(row.totalCents)}</span>
-                      </div>
-                      <div className="mt-2 h-2 rounded-full bg-slate-800">
-                        <div className="h-full rounded-full bg-violet-500" style={{ width: `${(row.totalCents / max) * 100}%` }} />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+              <LollipopChart
+                items={data.byCategory.map((row) => ({ label: row.category, value: row.totalCents }))}
+                formatValue={formatEgp}
+              />
             </AnalyticsPanel>
 
             <AnalyticsPanel title="Revenue by weekday">
-              <div className="space-y-3">
-                {data.byWeekday.map((row) => (
-                  <div key={row.weekday} className="flex items-center justify-between rounded-xl bg-slate-950/60 px-4 py-3">
-                    <span>{WEEKDAYS[row.weekday]}</span>
-                    <span className="font-semibold">{formatEgp(row.totalCents)}</span>
-                  </div>
-                ))}
-              </div>
+              <MultiLineChart
+                labels={data.byWeekday.map((row) => WEEKDAYS[row.weekday])}
+                series={[
+                  { name: "Revenue", values: data.byWeekday.map((row) => row.totalCents) },
+                  { name: "Invoices", values: data.byWeekday.map((row) => row.invoiceCount), colour: "#06b6d4" },
+                ]}
+                height={290}
+              />
             </AnalyticsPanel>
           </div>
+
+          <AnalyticsPanel title="Average invoice trend">
+            <AreaChart
+              data={data.averageInvoiceValueTrend.map((row) => ({ label: shortDate(row.bucket), value: row.averageCents }))}
+              formatValue={formatEgp}
+              height={280}
+            />
+          </AnalyticsPanel>
         </div>
       ) : null}
     </AnalyticsShell>
