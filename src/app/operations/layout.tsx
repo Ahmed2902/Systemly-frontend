@@ -12,9 +12,9 @@ export default function OperationsLayout({
   return (
     <OperationsThemeProvider>
       <OperationsProvider>
-        <div className="flex h-screen bg-slate-50 transition-colors duration-200">
+        <div className="operations-workspace flex h-screen min-h-0 overflow-hidden transition-colors duration-200">
           <Sidebar />
-          <main className="flex-1 overflow-hidden">{children}</main>
+          <main className="min-w-0 flex-1 overflow-hidden">{children}</main>
         </div>
         <NewAppointmentModal />
       </OperationsProvider>
