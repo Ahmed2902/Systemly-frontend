@@ -8,12 +8,12 @@ async function getBusiness(slug: string) {
   const res = await fetch(url, {
     cache: "no-store",
   });
-  console.log("Fetching:", url);
   if (res.status === 404) return null;
-  if (!res.ok)
+  if (!res.ok) {
     throw new Error(
-      `Failed to load business : ${res.status} ${await res.text()}`,
+      `Failed to load business: ${res.status} ${await res.text()}`,
     );
+  }
   const json = await res.json();
   return json.data;
 }
@@ -25,20 +25,17 @@ export default async function PublicBusinessPage({
 }) {
   const { slug } = await params;
   const business = await getBusiness(slug);
-  console.log("business:", business ? "found" : "null");
 
   if (!business) notFound();
 
   const content = business.websiteContent;
   const template = getTemplateById(content?.template ?? "aura-wellness");
-  console.log(
-    "template lookup:",
-    content?.template,
-    "->",
-    template ? "found" : "null",
-  );
 
   if (!template) notFound();
+
+  const legacyHeroUrl = business.photos.find(
+    (photo: { kind: string; url: string }) => photo.kind === "hero",
+  )?.url;
 
   const templateData: SalonTemplateData = {
     businessName: business.name,
@@ -47,11 +44,10 @@ export default async function PublicBusinessPage({
     template: content?.template ?? "",
     aboutText: content?.aboutText ?? "",
     logoUrl: business.logoUrl ?? null,
-    heroPhotoUrl:
-      business.photos.find((p: { kind: string; url: string }) => p.kind === "hero")?.url ?? null,
+    heroPhotoUrl: business.coverUrl ?? legacyHeroUrl ?? null,
     galleryPhotoUrls: business.photos
-      .filter((p: { kind: string; url: string }) => p.kind === "gallery")
-      .map((p: { kind: string; url: string }) => p.url),
+      .filter((photo: { kind: string; url: string }) => photo.kind === "gallery")
+      .map((photo: { kind: string; url: string }) => photo.url),
     primaryColor: content?.primaryColor ?? "#2B2420",
     sectionOrder: content?.sectionOrder ?? [
       "hero",
@@ -64,34 +60,40 @@ export default async function PublicBusinessPage({
     ],
     showTeam: content?.showTeam ?? true,
     showFaq: content?.showFaq ?? true,
-    services: business.services.map((s: {
-      id: string;
-      name: string;
-      category?: string;
-      priceEgp: number;
-      durationMin: number;
-    }) => ({
-      id: s.id,
-      name: s.name,
-      category: s.category ?? undefined,
-      priceEgp: Number(s.priceEgp),
-      durationMin: s.durationMin,
-    })),
-    staff: business.staff.map((s: {
-      id: string;
-      name: string;
-      role: string;
-      photoUrl?: string | null;
-    }) => ({
-      id: s.id,
-      name: s.name,
-      role: s.role,
-      photoUrl: s.photoUrl,
-    })),
-    faqs: business.faqs.map((f: { question: string; answer: string }) => ({
-      question: f.question,
-      answer: f.answer,
-    })),
+    services: business.services.map(
+      (service: {
+        id: string;
+        name: string;
+        category?: string;
+        priceEgp: number;
+        durationMin: number;
+      }) => ({
+        id: service.id,
+        name: service.name,
+        category: service.category ?? undefined,
+        priceEgp: Number(service.priceEgp),
+        durationMin: service.durationMin,
+      }),
+    ),
+    staff: business.staff.map(
+      (staff: {
+        id: string;
+        name: string;
+        role: string;
+        photoUrl?: string | null;
+      }) => ({
+        id: staff.id,
+        name: staff.name,
+        role: staff.role,
+        photoUrl: staff.photoUrl,
+      }),
+    ),
+    faqs: business.faqs.map(
+      (faq: { question: string; answer: string }) => ({
+        question: faq.question,
+        answer: faq.answer,
+      }),
+    ),
     phone: business.phone,
     address: business.address ?? undefined,
     instagram: content?.instagramUrl ?? undefined,
