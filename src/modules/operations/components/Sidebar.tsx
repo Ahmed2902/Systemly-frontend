@@ -13,6 +13,7 @@ import {
   UserRound,
   Users,
 } from "lucide-react";
+import { useAuth } from "@/modules/auth/useAuth";
 import { useOperations } from "../operations.context";
 
 const NAV_ITEMS = [
@@ -21,6 +22,7 @@ const NAV_ITEMS = [
     label: "Dashboard",
     icon: LayoutDashboard,
     accent: "bg-violet-100 text-violet-700",
+    ownerOnly: true,
   },
   {
     href: "/operations/calendar",
@@ -63,12 +65,17 @@ const NAV_ITEMS = [
     label: "Settings",
     icon: Settings,
     accent: "bg-slate-200 text-slate-700",
+    ownerOnly: true,
   },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { user } = useAuth();
   const { openNewAppointment } = useOperations();
+  const ownerView =
+    user?.role === "BusinessAdmin" || user?.role === "SuperAdmin";
+  const items = NAV_ITEMS.filter((item) => !item.ownerOnly || ownerView);
 
   return (
     <aside className="flex w-60 flex-shrink-0 flex-col border-r border-slate-200/80 bg-white/95 shadow-sm backdrop-blur">
@@ -97,7 +104,7 @@ export function Sidebar() {
       </div>
 
       <nav className="flex-1 space-y-1 px-2.5 py-2">
-        {NAV_ITEMS.map(({ href, label, icon: Icon, accent }) => {
+        {items.map(({ href, label, icon: Icon, accent }) => {
           const active = pathname?.startsWith(href);
           return (
             <Link
