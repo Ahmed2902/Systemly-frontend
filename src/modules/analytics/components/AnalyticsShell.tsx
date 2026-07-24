@@ -45,23 +45,21 @@ export function AnalyticsShell({
   const preset = useAnalyticsPreset();
 
   return (
-    <div className="h-full overflow-y-auto bg-slate-950 px-5 py-6 text-slate-100">
+    <div className="analytics-page h-full overflow-y-auto px-5 py-6">
       <div className="mx-auto max-w-[1500px]">
         <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
           <div>
-            <h1 className="text-3xl font-semibold tracking-tight">{title}</h1>
-            <p className="mt-1 text-sm text-slate-400">{subtitle}</p>
+            <h1 className="analytics-title text-3xl font-semibold tracking-tight">{title}</h1>
+            <p className="analytics-muted mt-1 text-sm">{subtitle}</p>
           </div>
-          <div className="flex flex-wrap gap-1 rounded-xl border border-slate-800 bg-slate-900 p-1">
+          <div className="analytics-preset flex flex-wrap gap-1 rounded-xl p-1">
             {ANALYTICS_PRESETS.map((item) => (
               <button
                 key={item}
                 type="button"
                 onClick={() => router.push(`${pathname}?preset=${item}`)}
                 className={`rounded-lg px-3 py-2 text-xs font-semibold transition ${
-                  preset === item
-                    ? "bg-violet-600 text-white"
-                    : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                  preset === item ? "is-active" : ""
                 }`}
               >
                 {LABELS[item]}
@@ -70,7 +68,7 @@ export function AnalyticsShell({
           </div>
         </div>
 
-        <nav className="mt-6 flex gap-1 overflow-x-auto border-b border-slate-800 pb-2">
+        <nav className="analytics-nav mt-6 flex gap-1 overflow-x-auto border-b pb-2">
           {LINKS.map(([href, label]) => {
             const active =
               href === "/operations/dashboard"
@@ -80,11 +78,7 @@ export function AnalyticsShell({
               <Link
                 key={href}
                 href={`${href}?preset=${preset}`}
-                className={`whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium ${
-                  active
-                    ? "bg-violet-500/15 text-violet-300"
-                    : "text-slate-400 hover:bg-slate-900 hover:text-white"
-                }`}
+                className={`whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium ${active ? "is-active" : ""}`}
               >
                 {label}
               </Link>
@@ -108,10 +102,10 @@ export function MetricCard({
   hint?: string;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900/80 p-5 shadow-sm">
-      <p className="text-sm text-slate-400">{label}</p>
-      <p className="mt-2 text-2xl font-semibold text-white">{value}</p>
-      {hint ? <p className="mt-2 text-xs text-slate-500">{hint}</p> : null}
+    <div className="analytics-card rounded-2xl p-5 shadow-sm">
+      <p className="analytics-muted text-sm">{label}</p>
+      <p className="analytics-title mt-2 text-2xl font-semibold">{value}</p>
+      {hint ? <p className="analytics-subtle mt-2 text-xs">{hint}</p> : null}
     </div>
   );
 }
@@ -126,10 +120,8 @@ export function AnalyticsPanel({
   className?: string;
 }) {
   return (
-    <section
-      className={`rounded-2xl border border-slate-800 bg-slate-900/80 p-5 ${className}`}
-    >
-      <h2 className="text-base font-semibold text-white">{title}</h2>
+    <section className={`analytics-card rounded-2xl p-5 ${className}`}>
+      <h2 className="analytics-title text-base font-semibold">{title}</h2>
       <div className="mt-4">{children}</div>
     </section>
   );
@@ -137,7 +129,7 @@ export function AnalyticsPanel({
 
 export function AnalyticsState({ message }: { message: string }) {
   return (
-    <div className="rounded-2xl border border-dashed border-slate-700 bg-slate-900/50 p-10 text-center text-sm text-slate-400">
+    <div className="analytics-state rounded-2xl border border-dashed p-10 text-center text-sm">
       {message}
     </div>
   );
