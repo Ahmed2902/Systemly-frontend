@@ -11,7 +11,7 @@ import {
   Stethoscope,
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { getOperationsAccent } from "@/modules/operations/operations-theme";
+import { getOperationsAccent } from "@/modules/operations/operations-accents";
 import type { ServiceCategorySummary } from "../services.types";
 
 const ICONS = [Stethoscope, Droplets, Sparkles, Scissors, HeartPulse];
