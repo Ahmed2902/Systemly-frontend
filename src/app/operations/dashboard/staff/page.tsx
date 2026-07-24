@@ -43,33 +43,15 @@ export default function StaffAnalyticsPage() {
       subtitle="Revenue contribution, commission, booked time, and utilisation"
     >
       {error ? <AnalyticsState message={error} /> : null}
-      {!data && !error ? (
-        <AnalyticsState message="Loading staff analytics…" />
-      ) : null}
+      {!data && !error ? <AnalyticsState message="Loading staff analytics…" /> : null}
       {data ? (
         <div className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-            <MetricCard
-              label="Staff revenue"
-              value={formatEgp(data.summary.revenueCents)}
-            />
-            <MetricCard
-              label="Commission"
-              value={formatEgp(data.summary.commissionCents)}
-            />
-            <MetricCard
-              label="Average utilisation"
-              value={formatPercent(data.summary.averageUtilizationRate)}
-            />
-            <MetricCard
-              label="Top performer"
-              value={top?.name ?? "—"}
-              hint={top ? formatEgp(top.totalCents) : undefined}
-            />
-            <MetricCard
-              label="Below 40% utilisation"
-              value={String(data.summary.lowUtilizationCount)}
-            />
+            <MetricCard label="Staff revenue" value={formatEgp(data.summary.revenueCents)} />
+            <MetricCard label="Commission" value={formatEgp(data.summary.commissionCents)} />
+            <MetricCard label="Average utilisation" value={formatPercent(data.summary.averageUtilizationRate)} />
+            <MetricCard label="Top performer" value={top?.name ?? "—"} hint={top ? formatEgp(top.totalCents) : undefined} />
+            <MetricCard label="Below 40% utilisation" value={String(data.summary.lowUtilizationCount)} />
           </div>
 
           <div className="grid gap-4 xl:grid-cols-[1.5fr_1fr]">
@@ -92,19 +74,11 @@ export default function StaffAnalyticsPage() {
                       <tr key={row.id} className="border-t border-slate-800">
                         <td className="py-4 font-medium">{row.name}</td>
                         <td className="py-4">{formatEgp(row.totalCents)}</td>
-                        <td className="py-4">
-                          {formatEgp(row.commissionEarnedCents)}
-                        </td>
+                        <td className="py-4">{formatEgp(row.commissionEarnedCents)}</td>
                         <td className="py-4">{row.lineItemCount}</td>
-                        <td className="py-4">
-                          {formatMinutes(row.bookedMinutes)}
-                        </td>
-                        <td className="py-4">
-                          {formatMinutes(row.availableMinutes)}
-                        </td>
-                        <td className="py-4">
-                          {formatPercent(row.utilizationRate)}
-                        </td>
+                        <td className="py-4">{formatMinutes(row.bookedMinutes)}</td>
+                        <td className="py-4">{formatMinutes(row.availableMinutes)}</td>
+                        <td className="py-4">{formatPercent(row.utilizationRate)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -120,16 +94,12 @@ export default function StaffAnalyticsPage() {
                     <div key={row.id}>
                       <div className="flex items-center justify-between text-sm">
                         <span>{row.name}</span>
-                        <span className="text-slate-400">
-                          {formatPercent(row.utilizationRate)}
-                        </span>
+                        <span className="text-slate-400">{formatPercent(row.utilizationRate)}</span>
                       </div>
                       <div className="mt-2 h-2 rounded-full bg-slate-800">
                         <div
                           className="h-full rounded-full bg-emerald-500"
-                          style={{
-                            width: `${Math.min(row.utilizationRate, 100)}%`,
-                          }}
+                          style={{ width: `${Math.min(row.utilizationRate, 100)}%` }}
                         />
                       </div>
                     </div>
