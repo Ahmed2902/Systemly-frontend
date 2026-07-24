@@ -11,11 +11,8 @@ import {
   MetricCard,
   useAnalyticsPreset,
 } from "@/modules/analytics/components/AnalyticsShell";
-import {
-  formatEgp,
-  formatMinutes,
-  formatPercent,
-} from "@/modules/analytics/analytics.formatters";
+import { DonutChart, LollipopChart } from "@/modules/analytics/components/AnalyticsCharts";
+import { formatEgp, formatMinutes, formatPercent } from "@/modules/analytics/analytics.formatters";
 
 export default function StaffAnalyticsPage() {
   const { accessToken } = useAuth();
@@ -30,80 +27,70 @@ export default function StaffAnalyticsPage() {
     getStaffAnalytics(preset, accessToken)
       .then((value) => !cancelled && setData(value))
       .catch((reason: Error) => !cancelled && setError(reason.message));
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [accessToken, preset]);
 
-  const top = useMemo(() => data?.staffPerformance[0] ?? null, [data]);
+  const top = useMemo(
+    () => data?.staffPerformance.reduce((best, row) => row.totalCents > best.totalCents ? row : best, data.staffPerformance[0]) ?? null,
+    [data],
+  );
 
   return (
-    <AnalyticsShell
-      title="Staff Analytics"
-      subtitle="Revenue contribution, commission, booked time, and utilisation"
-    >
+    <AnalyticsShell title="Staff Analytics" subtitle="Revenue contribution, commission, booked time, and utilisation">
       {error ? <AnalyticsState message={error} /> : null}
       {!data && !error ? <AnalyticsState message="Loading staff analytics…" /> : null}
       {data ? (
-        <div className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-            <MetricCard label="Staff revenue" value={formatEgp(data.summary.revenueCents)} />
-            <MetricCard label="Commission" value={formatEgp(data.summary.commissionCents)} />
+        <div className="space-y-3">
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+            <MetricCard label="Revenue generated" value={formatEgp(data.summary.revenueCents)} />
+            <MetricCard label="Total commission" value={formatEgp(data.summary.commissionCents)} />
             <MetricCard label="Average utilisation" value={formatPercent(data.summary.averageUtilizationRate)} />
+            <MetricCard label="Low-utilisation staff" value={String(data.summary.lowUtilizationCount)} tone="warning" />
             <MetricCard label="Top performer" value={top?.name ?? "—"} hint={top ? formatEgp(top.totalCents) : undefined} />
-            <MetricCard label="Below 40% utilisation" value={String(data.summary.lowUtilizationCount)} />
           </div>
 
-          <div className="grid gap-4 xl:grid-cols-[1.5fr_1fr]">
-            <AnalyticsPanel title="Staff performance">
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[850px] text-left text-sm">
-                  <thead className="text-slate-500">
-                    <tr>
-                      <th className="pb-3">Staff</th>
-                      <th className="pb-3">Revenue</th>
-                      <th className="pb-3">Commission</th>
-                      <th className="pb-3">Jobs</th>
-                      <th className="pb-3">Booked</th>
-                      <th className="pb-3">Available</th>
-                      <th className="pb-3">Utilisation</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data.staffPerformance.map((row) => (
-                      <tr key={row.id} className="border-t border-slate-800">
-                        <td className="py-4 font-medium">{row.name}</td>
-                        <td className="py-4">{formatEgp(row.totalCents)}</td>
-                        <td className="py-4">{formatEgp(row.commissionEarnedCents)}</td>
-                        <td className="py-4">{row.lineItemCount}</td>
-                        <td className="py-4">{formatMinutes(row.bookedMinutes)}</td>
-                        <td className="py-4">{formatMinutes(row.availableMinutes)}</td>
-                        <td className="py-4">{formatPercent(row.utilizationRate)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+          <AnalyticsPanel title="Staff performance">
+            <div className="overflow-x-auto">
+              <table className="analytics-table w-full min-w-[820px] text-left text-[11px]">
+                <thead><tr><th className="pb-2">Staff</th><th className="pb-2">Revenue</th><th className="pb-2">Commission</th><th className="pb-2">Jobs</th><th className="pb-2">Utilisation</th><th className="pb-2">Booked</th><th className="pb-2">Available</th></tr></thead>
+                <tbody>{data.staffPerformance.map((row) => (
+                  <tr key={row.id} className="border-t"><td className="py-2.5 font-semibold">{row.name}</td><td>{formatEgp(row.totalCents)}</td><td>{formatEgp(row.commissionEarnedCents)}</td><td>{row.lineItemCount}</td><td>{formatPercent(row.utilizationRate)}</td><td>{formatMinutes(row.bookedMinutes)}</td><td>{formatMinutes(row.availableMinutes)}</td></tr>
+                ))}</tbody>
+              </table>
+            </div>
+          </AnalyticsPanel>
+
+          <div className="grid gap-3 xl:grid-cols-3">
+            <AnalyticsPanel title="Revenue by staff">
+              <LollipopChart
+                items={[...data.staffPerformance].sort((a, b) => b.totalCents - a.totalCents).slice(0, 7).map((row) => ({ label: row.name, value: row.totalCents }))}
+                formatValue={formatEgp}
+              />
             </AnalyticsPanel>
 
-            <AnalyticsPanel title="Utilisation ranking">
-              <div className="space-y-4">
-                {[...data.staffPerformance]
-                  .sort((a, b) => b.utilizationRate - a.utilizationRate)
-                  .map((row) => (
+            <AnalyticsPanel title="Utilisation distribution">
+              <DonutChart
+                centreLabel={formatPercent(data.summary.averageUtilizationRate)}
+                items={[
+                  { label: "80% or more", value: data.staffPerformance.filter((row) => row.utilizationRate >= 80).length },
+                  { label: "60–79%", value: data.staffPerformance.filter((row) => row.utilizationRate >= 60 && row.utilizationRate < 80).length },
+                  { label: "40–59%", value: data.staffPerformance.filter((row) => row.utilizationRate >= 40 && row.utilizationRate < 60).length },
+                  { label: "Below 40%", value: data.staffPerformance.filter((row) => row.utilizationRate < 40).length },
+                ]}
+              />
+            </AnalyticsPanel>
+
+            <AnalyticsPanel title="Booked vs available time">
+              <div className="space-y-3">
+                {data.staffPerformance.slice(0, 7).map((row) => {
+                  const total = Math.max(row.availableMinutes, row.bookedMinutes, 1);
+                  return (
                     <div key={row.id}>
-                      <div className="flex items-center justify-between text-sm">
-                        <span>{row.name}</span>
-                        <span className="text-slate-400">{formatPercent(row.utilizationRate)}</span>
-                      </div>
-                      <div className="mt-2 h-2 rounded-full bg-slate-800">
-                        <div
-                          className="h-full rounded-full bg-emerald-500"
-                          style={{ width: `${Math.min(row.utilizationRate, 100)}%` }}
-                        />
-                      </div>
+                      <div className="mb-1 flex justify-between text-[10px]"><span className="analytics-muted">{row.name}</span><span>{formatMinutes(row.bookedMinutes)} / {formatMinutes(row.availableMinutes)}</span></div>
+                      <div className="relative h-2 overflow-hidden rounded-full bg-[var(--analytics-grid)]"><div className="absolute inset-y-0 left-0 rounded-full bg-violet-500" style={{ width: `${Math.min((row.bookedMinutes / total) * 100, 100)}%` }} /></div>
                     </div>
-                  ))}
+                  );
+                })}
               </div>
             </AnalyticsPanel>
           </div>
