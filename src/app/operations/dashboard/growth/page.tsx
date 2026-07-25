@@ -11,7 +11,16 @@ import {
   MetricCard,
   useAnalyticsPreset,
 } from "@/modules/analytics/components/AnalyticsShell";
+import {
+  AreaChart,
+  DonutChart,
+  LollipopChart,
+  MultiLineChart,
+} from "@/modules/analytics/components/AnalyticsCharts";
 import { formatEgp, formatPercent } from "@/modules/analytics/analytics.formatters";
+
+const monthLabel = (value: string) =>
+  new Intl.DateTimeFormat("en-GB", { month: "short", year: "2-digit" }).format(new Date(value));
 
 export default function GrowthAnalyticsPage() {
   const { accessToken } = useAuth();
@@ -26,80 +35,50 @@ export default function GrowthAnalyticsPage() {
     getGrowthAnalytics(preset, accessToken)
       .then((value) => !cancelled && setData(value))
       .catch((reason: Error) => !cancelled && setError(reason.message));
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [accessToken, preset]);
 
   return (
-    <AnalyticsShell
-      title="Growth Analytics"
-      subtitle="Month-over-month momentum, acquisition mix, and long-term retention"
-    >
+    <AnalyticsShell title="Growth Analytics" subtitle="Monthly momentum, acquisition mix, invoice volume, and retention">
       {error ? <AnalyticsState message={error} /> : null}
       {!data && !error ? <AnalyticsState message="Loading growth analytics…" /> : null}
       {data ? (
-        <div className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="space-y-3">
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <MetricCard label="Current month revenue" value={formatEgp(data.summary.currentMonthRevenueCents)} />
             <MetricCard label="Previous month revenue" value={formatEgp(data.summary.previousMonthRevenueCents)} />
-            <MetricCard label="Month-over-month growth" value={formatPercent(data.summary.monthOverMonthGrowthPct)} />
-            <MetricCard
-              label="Best growth month"
-              value={data.summary.bestGrowthMonth ? new Intl.DateTimeFormat("en-GB", { month: "short", year: "numeric" }).format(new Date(data.summary.bestGrowthMonth.bucket)) : "—"}
-              hint={formatPercent(data.summary.bestGrowthMonth?.growthPct)}
-            />
+            <MetricCard label="Month-over-month growth" value={formatPercent(data.summary.monthOverMonthGrowthPct)} tone={data.summary.monthOverMonthGrowthPct != null && data.summary.monthOverMonthGrowthPct < 0 ? "negative" : "positive"} />
+            <MetricCard label="Best growth month" value={data.summary.bestGrowthMonth ? new Intl.DateTimeFormat("en-GB", { month: "short", year: "numeric" }).format(new Date(data.summary.bestGrowthMonth.bucket)) : "—"} hint={formatPercent(data.summary.bestGrowthMonth?.growthPct)} />
           </div>
 
-          <AnalyticsPanel title="Monthly revenue and growth">
+          <div className="grid gap-3 xl:grid-cols-[1.55fr_.75fr]">
+            <AnalyticsPanel title="Monthly revenue">
+              <AreaChart data={data.monthlyGrowth.map((row) => ({ label: monthLabel(row.bucket), value: row.totalCents }))} formatValue={formatEgp} height={275} />
+            </AnalyticsPanel>
+            <AnalyticsPanel title="Month-over-month growth">
+              <LollipopChart items={data.monthlyGrowth.filter((row) => row.growthPct != null).map((row) => ({ label: monthLabel(row.bucket), value: Math.max(row.growthPct ?? 0, 0) }))} formatValue={(value) => formatPercent(value)} />
+            </AnalyticsPanel>
+          </div>
+
+          <div className="grid gap-3 xl:grid-cols-2">
+            <AnalyticsPanel title="Monthly invoice count">
+              <MultiLineChart labels={data.monthlyGrowth.map((row) => monthLabel(row.bucket))} series={[{ name: "Invoices", values: data.monthlyGrowth.map((row) => row.invoiceCount), colour: "#8b5cf6" }]} height={215} />
+            </AnalyticsPanel>
+            <AnalyticsPanel title="Acquisition sources">
+              <DonutChart items={data.acquisitionSources.map((row) => ({ label: row.source.replaceAll("_", " "), value: row.count }))} />
+            </AnalyticsPanel>
+          </div>
+
+          <AnalyticsPanel title="Customer retention cohorts">
             <div className="overflow-x-auto">
-              <div className="flex min-w-[760px] items-end gap-3 border-b border-slate-800 pb-3">
-                {data.monthlyGrowth.map((row) => {
-                  const max = Math.max(...data.monthlyGrowth.map((item) => item.totalCents), 1);
-                  return (
-                    <div key={row.bucket} className="flex min-w-20 flex-1 flex-col items-center gap-2">
-                      <span className="text-[10px] text-slate-400">{formatPercent(row.growthPct)}</span>
-                      <div className="w-full rounded-t bg-gradient-to-t from-fuchsia-700 to-violet-400" style={{ height: `${Math.max((row.totalCents / max) * 230, 2)}px` }} />
-                      <span className="text-[10px] text-slate-500">
-                        {new Intl.DateTimeFormat("en-GB", { month: "short", year: "2-digit" }).format(new Date(row.bucket))}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
+              <table className="analytics-table w-full min-w-[600px] text-left text-[11px]">
+                <thead><tr><th className="pb-2">Cohort</th><th className="pb-2">Customers</th><th className="pb-2">30-day</th><th className="pb-2">60-day</th><th className="pb-2">90-day</th></tr></thead>
+                <tbody>{data.retentionCohorts.map((row) => (
+                  <tr key={row.cohortStart} className="border-t"><td className="py-2.5 font-semibold">{new Intl.DateTimeFormat("en-GB", { month: "short", year: "numeric" }).format(new Date(row.cohortStart))}</td><td>{row.totalCustomers}</td><td>{row.totalCustomers ? formatPercent((row.retained30 / row.totalCustomers) * 100) : "—"}</td><td>{row.totalCustomers ? formatPercent((row.retained60 / row.totalCustomers) * 100) : "—"}</td><td>{row.totalCustomers ? formatPercent((row.retained90 / row.totalCustomers) * 100) : "—"}</td></tr>
+                ))}</tbody>
+              </table>
             </div>
           </AnalyticsPanel>
-
-          <div className="grid gap-4 xl:grid-cols-2">
-            <AnalyticsPanel title="Acquisition mix">
-              <div className="space-y-3">
-                {data.acquisitionSources.map((row) => (
-                  <div key={row.source} className="flex justify-between rounded-xl bg-slate-950/60 px-4 py-3 text-sm">
-                    <span className="capitalize">{row.source.replaceAll("_", " ")}</span>
-                    <span className="font-semibold">{row.count}</span>
-                  </div>
-                ))}
-              </div>
-            </AnalyticsPanel>
-
-            <AnalyticsPanel title="Retention cohorts">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm">
-                  <thead className="text-slate-500"><tr><th className="pb-3">Cohort</th><th className="pb-3">30d</th><th className="pb-3">60d</th><th className="pb-3">90d</th></tr></thead>
-                  <tbody>
-                    {data.retentionCohorts.map((row) => (
-                      <tr key={row.cohortStart} className="border-t border-slate-800">
-                        <td className="py-3">{new Intl.DateTimeFormat("en-GB", { month: "short", year: "numeric" }).format(new Date(row.cohortStart))}</td>
-                        <td className="py-3">{row.totalCustomers ? formatPercent((row.retained30 / row.totalCustomers) * 100) : "—"}</td>
-                        <td className="py-3">{row.totalCustomers ? formatPercent((row.retained60 / row.totalCustomers) * 100) : "—"}</td>
-                        <td className="py-3">{row.totalCustomers ? formatPercent((row.retained90 / row.totalCustomers) * 100) : "—"}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </AnalyticsPanel>
-          </div>
         </div>
       ) : null}
     </AnalyticsShell>

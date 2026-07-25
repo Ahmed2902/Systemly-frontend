@@ -20,7 +20,6 @@ type OperationsThemeContextValue = {
 };
 
 const STORAGE_KEY = "hgezli-operations-theme";
-
 const OperationsThemeContext =
   createContext<OperationsThemeContextValue | null>(null);
 
@@ -35,6 +34,21 @@ function resolveInitialTheme(): OperationsTheme {
     : "light";
 }
 
+function applyDocumentTheme(theme: OperationsTheme) {
+  const root = document.documentElement;
+  const body = document.body;
+  const isDark = theme === "dark";
+
+  root.dataset.operationsTheme = theme;
+  root.classList.toggle("operations-dark", isDark);
+  root.classList.toggle("operations-light", !isDark);
+  root.style.colorScheme = theme;
+
+  body.dataset.operationsTheme = theme;
+  body.classList.toggle("operations-dark", isDark);
+  body.classList.toggle("operations-light", !isDark);
+}
+
 export function OperationsThemeProvider({
   children,
 }: {
@@ -44,13 +58,21 @@ export function OperationsThemeProvider({
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    setThemeState(resolveInitialTheme());
+    const initialTheme = resolveInitialTheme();
+    setThemeState(initialTheme);
+    applyDocumentTheme(initialTheme);
     setReady(true);
   }, []);
+
+  useEffect(() => {
+    if (!ready) return;
+    applyDocumentTheme(theme);
+  }, [ready, theme]);
 
   const setTheme = useCallback((nextTheme: OperationsTheme) => {
     setThemeState(nextTheme);
     window.localStorage.setItem(STORAGE_KEY, nextTheme);
+    applyDocumentTheme(nextTheme);
   }, []);
 
   const toggleTheme = useCallback(() => {
@@ -62,13 +84,13 @@ export function OperationsThemeProvider({
     [setTheme, theme, toggleTheme],
   );
 
+  const resolvedTheme = ready ? theme : "light";
+
   return (
     <OperationsThemeContext.Provider value={value}>
       <div
-        className={`operations-theme ${
-          ready && theme === "dark" ? "operations-dark" : "operations-light"
-        }`}
-        data-operations-theme={ready ? theme : "light"}
+        className={`operations-theme operations-${resolvedTheme} h-full min-h-0`}
+        data-operations-theme={resolvedTheme}
       >
         {children}
       </div>

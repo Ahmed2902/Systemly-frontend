@@ -11,6 +11,11 @@ import {
   MetricCard,
   useAnalyticsPreset,
 } from "@/modules/analytics/components/AnalyticsShell";
+import {
+  BookingHeatmap,
+  DonutChart,
+  LollipopChart,
+} from "@/modules/analytics/components/AnalyticsCharts";
 import { WEEKDAYS } from "@/modules/analytics/analytics.formatters";
 
 const LEAD_TIME_LABELS: Record<OperationsAnalytics["leadTimes"][number]["bucket"], string> = {
@@ -34,88 +39,57 @@ export default function OperationsAnalyticsPage() {
     getOperationsAnalytics(preset, accessToken)
       .then((value) => !cancelled && setData(value))
       .catch((reason: Error) => !cancelled && setError(reason.message));
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [accessToken, preset]);
 
-  const hours = useMemo(() => Array.from({ length: 14 }, (_, index) => index + 8), []);
-  const maxHeat = Math.max(...(data?.heatmap.map((row) => row.count) ?? [1]), 1);
-  const heat = new Map(data?.heatmap.map((row) => [`${row.weekday}-${row.hour}`, row.count]) ?? []);
+  const categories = useMemo(() => {
+    const totals = new Map<string, number>();
+    for (const row of data?.mostBookedServices ?? []) {
+      totals.set(row.category || "Other", (totals.get(row.category || "Other") ?? 0) + row.count);
+    }
+    return [...totals.entries()].map(([label, value]) => ({ label, value }));
+  }, [data]);
+
+  const busiestPeriod = data?.summary.busiestWeekday == null || data.summary.busiestHour == null
+    ? "—"
+    : `${WEEKDAYS[data.summary.busiestWeekday]} ${String(data.summary.busiestHour).padStart(2, "0")}:00`;
 
   return (
-    <AnalyticsShell
-      title="Operations Analytics"
-      subtitle="Booking demand, peak periods, service popularity, and lead times"
-    >
+    <AnalyticsShell title="Operations Analytics" subtitle="Booking demand, peak periods, service popularity, and lead times">
       {error ? <AnalyticsState message={error} /> : null}
       {!data && !error ? <AnalyticsState message="Loading operations analytics…" /> : null}
       {data ? (
-        <div className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-            <MetricCard label="Bookings" value={String(data.summary.bookingCount)} />
+        <div className="space-y-3">
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+            <MetricCard label="Total bookings" value={String(data.summary.bookingCount)} />
             <MetricCard label="Busiest weekday" value={data.summary.busiestWeekday == null ? "—" : WEEKDAYS[data.summary.busiestWeekday]} />
             <MetricCard label="Busiest hour" value={data.summary.busiestHour == null ? "—" : `${String(data.summary.busiestHour).padStart(2, "0")}:00`} />
             <MetricCard label="Most booked service" value={data.summary.mostBookedService?.name ?? "—"} />
             <MetricCard label="Top service bookings" value={String(data.summary.mostBookedService?.count ?? 0)} />
           </div>
 
-          <AnalyticsPanel title="Peak booking times">
-            <div className="overflow-x-auto">
-              <div className="min-w-[900px]">
-                <div className="grid grid-cols-[60px_repeat(14,minmax(44px,1fr))] gap-1 text-[10px] text-slate-500">
-                  <span />
-                  {hours.map((hour) => <span key={hour} className="text-center">{hour}:00</span>)}
-                  {WEEKDAYS.map((day, weekday) => (
-                    <div key={day} className="contents">
-                      <span className="flex items-center">{day}</span>
-                      {hours.map((hour) => {
-                        const count = heat.get(`${weekday}-${hour}`) ?? 0;
-                        const opacity = count === 0 ? 0.08 : 0.2 + (count / maxHeat) * 0.8;
-                        return (
-                          <div
-                            key={`${day}-${hour}`}
-                            title={`${day} ${hour}:00 · ${count} bookings`}
-                            className="h-9 rounded bg-violet-500"
-                            style={{ opacity }}
-                          />
-                        );
-                      })}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+          <AnalyticsPanel title="Booking heatmap">
+            <BookingHeatmap rows={data.heatmap} />
           </AnalyticsPanel>
 
-          <div className="grid gap-4 xl:grid-cols-2">
+          <div className="grid gap-3 xl:grid-cols-2">
             <AnalyticsPanel title="Most booked services">
-              <div className="space-y-3">
-                {data.mostBookedServices.map((row, index) => (
-                  <div key={row.id} className="flex items-center justify-between rounded-xl bg-slate-950/60 px-4 py-3 text-sm">
-                    <span>{index + 1}. {row.name}</span>
-                    <span className="font-semibold">{row.count}</span>
-                  </div>
-                ))}
-              </div>
+              <LollipopChart items={data.mostBookedServices.slice(0, 8).map((row) => ({ label: row.name, value: row.count }))} />
             </AnalyticsPanel>
-
             <AnalyticsPanel title="Booking lead time">
-              <div className="space-y-4">
-                {data.leadTimes.map((row) => {
-                  const total = data.leadTimes.reduce((sum, item) => sum + item.count, 0) || 1;
-                  return (
-                    <div key={row.bucket}>
-                      <div className="flex justify-between text-sm">
-                        <span>{LEAD_TIME_LABELS[row.bucket]}</span>
-                        <span className="text-slate-400">{row.count} · {((row.count / total) * 100).toFixed(0)}%</span>
-                      </div>
-                      <div className="mt-2 h-2 rounded-full bg-slate-800">
-                        <div className="h-full rounded-full bg-cyan-500" style={{ width: `${(row.count / total) * 100}%` }} />
-                      </div>
-                    </div>
-                  );
-                })}
+              <DonutChart items={data.leadTimes.map((row) => ({ label: LEAD_TIME_LABELS[row.bucket], value: row.count }))} />
+            </AnalyticsPanel>
+          </div>
+
+          <div className="grid gap-3 xl:grid-cols-[1.2fr_.8fr]">
+            <AnalyticsPanel title="Bookings by service category">
+              <LollipopChart items={categories} />
+            </AnalyticsPanel>
+            <AnalyticsPanel title="Operational insights">
+              <div className="space-y-2 text-[11px]">
+                <div className="analytics-soft-row rounded-lg px-3 py-2.5"><span className="analytics-muted">Peak period</span><p className="mt-1 font-semibold">{busiestPeriod}</p></div>
+                <div className="analytics-soft-row rounded-lg px-3 py-2.5"><span className="analytics-muted">Strongest service</span><p className="mt-1 font-semibold">{data.summary.mostBookedService?.name ?? "No booking data"}</p></div>
+                <div className="analytics-soft-row rounded-lg px-3 py-2.5"><span className="analytics-muted">Most common lead time</span><p className="mt-1 font-semibold">{data.leadTimes.length ? LEAD_TIME_LABELS[[...data.leadTimes].sort((a, b) => b.count - a.count)[0].bucket] : "No booking data"}</p></div>
               </div>
             </AnalyticsPanel>
           </div>
