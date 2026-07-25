@@ -1,499 +1,168 @@
-// src/modules/wizard/components/StepCustomizePreview.tsx
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Upload, Check, User, X } from "lucide-react";
+import { Check, ImagePlus, Monitor, Smartphone, Upload, X } from "lucide-react";
 import { useWizard } from "../wizard.context";
 import { StepProps } from "../wizard.types";
+import { uploadImage } from "../wizard.api";
 import { LivePreviewPane } from "./LivePreviewPane";
 import { SectionOrderList } from "./SectionOrderList";
-import { Button } from "@/shared/components/ui/button";
-import { submitOnboarding, uploadImage } from "../wizard.api";
 import { FaqEditor } from "./FaqEditor";
 import { getTemplatesForVertical } from "@/modules/templates/template-registry";
 
-const COLOR_SWATCHES = [
-  "#2B2420", // Deep Espresso/Charcoal
-  "#8A7F73", // Warm Taupe/Muted Earth
-  "#A3947F", // Luxury Soft Gold / Champagne
-  "#4A5343", // Sage / Muted Olive Green
-  "#6B5B52", // Rich Cocoa / Walnut
-  "#1A2E26", // Deep Premium Emerald Night
-];
+const COLOURS = ["#9be9d6", "#5cbba4", "#2f6f62", "#263936", "#f4f6f5"];
 
-export function StepCustomizePreview({ onBack }: StepProps) {
+export function StepCustomizePreview({ onNext, onBack }: StepProps) {
   const { state, patch } = useWizard();
-  const router = useRouter();
-  const [publishing, setPublishing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [device, setDevice] = useState<"desktop" | "mobile">("desktop");
+  const [uploading, setUploading] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  // Track using clientId since that's what the wizard state populates
-  const [selectedStaffId, setSelectedStaffId] = useState<string>(
-    state.staff?.[0]?.clientId || "",
-  );
-  const [uploadingStaff, setUploadingStaff] = useState(false);
-
-  async function handleHeroUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
+  async function upload(kind: "hero" | "logo" | "gallery", file?: File) {
     if (!file) return;
-    try {
-      const { url } = await uploadImage(file);
-      patch({ heroPhotoUrl: url });
-    } catch (err) {
-      console.error("Hero upload failed:", err);
-    }
-  }
-
-  function handleRemoveHero(e: React.MouseEvent) {
-    e.preventDefault();
-    e.stopPropagation();
-    patch({ heroPhotoUrl: null });
-  }
-
-  async function handleGalleryUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    try {
-      const { url } = await uploadImage(file);
-      patch({ galleryPhotoUrls: [...state.galleryPhotoUrls, url] });
-    } catch (err) {
-      console.error("Gallery upload failed:", err);
-    }
-  }
-
-  function handleRemoveGalleryImage(indexToRemove: number) {
-    const updatedGallery = state.galleryPhotoUrls.filter(
-      (_, idx) => idx !== indexToRemove,
-    );
-    patch({ galleryPhotoUrls: updatedGallery });
-  }
-
-  // Handle uploading a specific image to a chosen staff member
-  async function handleStaffPhotoUpload(
-    e: React.ChangeEvent<HTMLInputElement>,
-  ) {
-    const file = e.target.files?.[0];
-    if (!file || !selectedStaffId) return;
-
-    setUploadingStaff(true);
-    try {
-      const { url } = await uploadImage(file);
-
-      const updatedStaff = state.staff.map((member) =>
-        member.clientId === selectedStaffId
-          ? { ...member, photoUrl: url, id: member.id || member.clientId }
-          : member,
-      );
-
-      patch({ staff: updatedStaff });
-    } catch (err) {
-      console.error("Staff photo upload failed:", err);
-    } finally {
-      setUploadingStaff(false);
-    }
-  }
-
-  function handleRemoveStaffPhoto() {
-    if (!selectedStaffId) return;
-    const updatedStaff = state.staff.map((member) =>
-      member.clientId === selectedStaffId
-        ? { ...member, photoUrl: "" }
-        : member,
-    );
-    patch({ staff: updatedStaff });
-  }
-
-  async function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    try {
-      const { url } = await uploadImage(file);
-      patch({ logoUrl: url });
-    } catch (err) {
-      console.error("Logo upload failed:", err);
-    }
-  }
-
-  function handleRemoveLogo(e: React.MouseEvent) {
-    e.preventDefault();
-    e.stopPropagation();
-    patch({ logoUrl: null });
-  }
-
-  async function handlePublish() {
-    setPublishing(true);
+    setUploading(kind);
     setError(null);
     try {
-      await submitOnboarding(state);
-      router.push(`/${state.slug}`);
-    } catch (err: unknown) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Something went wrong while publishing.",
-      );
-      setPublishing(false);
+      const { url } = await uploadImage(file);
+      if (kind === "hero") patch({ heroPhotoUrl: url });
+      if (kind === "logo") patch({ logoUrl: url });
+      if (kind === "gallery") patch({ galleryPhotoUrls: [...state.galleryPhotoUrls, url] });
+    } catch (uploadError) {
+      console.error(uploadError);
+      setError("The image could not be uploaded. Please try again.");
+    } finally {
+      setUploading(null);
     }
   }
 
-  const selectedMember = state.staff?.find(
-    (m) => m.clientId === selectedStaffId,
-  );
+  const templates = getTemplatesForVertical(state.vertical);
 
   return (
-    <div className="mx-auto grid max-w-[1500px] w-full grid-cols-1 gap-20 lg:grid-cols-[500px_1fr]">
-      <div className="space-y-7">
-        <div>
-          <h1 className="text-2xl font-semibold text-foreground">
-            Customize your site
-          </h1>
-          <p className="mt-2 text-sm text-muted">
-            See your changes update live on the right.
-          </p>
-        </div>
+    <div>
+      <div className="onboarding-grid-preview">
+        <section className="onboarding-card onboarding-card-pad">
+          <h1 className="onboarding-card-title">Customise your website</h1>
+          <p className="onboarding-card-subtitle">Personalise your site to match your brand. Changes update live.</p>
 
-        <div>
-          <label className="text-sm text-muted">Tagline</label>
-          <input
-            value={state.tagline}
-            onChange={(e) => patch({ tagline: e.target.value })}
-            className="mt-1.5 w-full rounded-lg border border-surface-border bg-surface-1 px-3 py-2.5 text-sm text-foreground outline-none transition-colors focus:border-surface-border-strong"
-          />
-        </div>
-
-        <div>
-          <label className="text-sm text-muted">About</label>
-          <textarea
-            value={state.aboutText}
-            onChange={(e) => patch({ aboutText: e.target.value })}
-            rows={3}
-            className="mt-1.5 w-full rounded-lg border border-surface-border bg-surface-1 px-3 py-2.5 text-sm text-foreground outline-none transition-colors focus:border-surface-border-strong"
-          />
-        </div>
-
-        <div>
-          <label className="text-sm text-muted">Hero photo</label>
-          <div className="relative mt-1.5">
-            <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-dashed border-surface-border bg-surface-1 p-3 transition-colors hover:border-surface-border-strong">
-              {state.heroPhotoUrl ? (
-                <img
-                  src={state.heroPhotoUrl}
-                  className="h-12 w-12 rounded object-cover"
-                />
-              ) : (
-                <div className="flex h-12 w-12 items-center justify-center rounded bg-surface-2">
-                  <Upload size={16} className="text-muted" />
-                </div>
-              )}
-              <span className="text-sm text-muted">
-                {state.heroPhotoUrl ? "Click to replace" : "Click to upload"}
-              </span>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleHeroUpload}
-                className="hidden"
-              />
-            </label>
-            {state.heroPhotoUrl && (
-              <button
-                type="button"
-                onClick={handleRemoveHero}
-                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-surface-3 p-1.5 text-muted transition-colors hover:bg-red-950 hover:text-red-400"
-                title="Remove hero image"
-              >
-                <X size={14} />
-              </button>
-            )}
-          </div>
-        </div>
-
-        <div>
-          <label className="text-sm text-muted">Logo</label>
-          <div className="relative mt-1.5">
-            <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-dashed border-surface-border bg-surface-1 p-3 transition-colors hover:border-surface-border-strong">
-              {state.logoUrl ? (
-                <img
-                  src={state.logoUrl}
-                  className="h-12 w-12 rounded object-cover"
-                />
-              ) : (
-                <div className="flex h-12 w-12 items-center justify-center rounded bg-surface-2">
-                  <Upload size={16} className="text-muted" />
-                </div>
-              )}
-              <span className="text-sm text-muted">
-                {state.logoUrl ? "Click to replace" : "Click to upload"}
-              </span>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleLogoUpload}
-                className="hidden"
-              />
-            </label>
-            {state.logoUrl && (
-              <button
-                type="button"
-                onClick={handleRemoveLogo}
-                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-surface-3 p-1.5 text-muted transition-colors hover:bg-red-950 hover:text-red-400"
-                title="Remove logo"
-              >
-                <X size={14} />
-              </button>
-            )}
-          </div>
-        </div>
-
-        <div>
-          <label className="text-sm text-muted">Gallery photos</label>
-          <label className="mt-1.5 flex cursor-pointer items-center gap-3 rounded-lg border border-dashed border-surface-border bg-surface-1 p-3 transition-colors hover:border-surface-border-strong">
-            <div className="flex h-12 w-12 items-center justify-center rounded bg-surface-2">
-              <Upload size={16} className="text-muted" />
+          <div className="mt-7 grid gap-5">
+            <div className="onboarding-field">
+              <label>Template</label>
+              <select value={state.template} onChange={(event) => patch({ template: event.target.value })} className="onboarding-select">
+                {templates.map((template) => <option key={template.id} value={template.id}>{template.label}</option>)}
+              </select>
             </div>
-            <span className="text-sm text-muted">
-              Add a photo ({state.galleryPhotoUrls.length} added)
-            </span>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleGalleryUpload}
-              className="hidden"
-            />
-          </label>
 
-          {state.galleryPhotoUrls.length > 0 && (
-            <div className="mt-3 grid grid-cols-4 gap-3 rounded-lg border border-surface-border bg-surface-1 p-3">
-              {state.galleryPhotoUrls.map((url, idx) => (
-                <div
-                  key={idx}
-                  className="group relative aspect-square overflow-hidden rounded-md border border-surface-border bg-surface-2"
-                >
-                  <img src={url} className="h-full w-full object-cover" />
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveGalleryImage(idx)}
-                    className="absolute right-1 top-1 rounded-full bg-black/70 p-1 text-white transition-opacity hover:bg-red-600"
-                  >
-                    <X size={12} />
+            <div className="onboarding-field">
+              <label>Brand colours</label>
+              <div className="flex flex-wrap gap-3">
+                {COLOURS.map((colour) => (
+                  <button key={colour} type="button" onClick={() => patch({ primaryColor: colour })} className="relative h-10 w-10 rounded-full border border-white/15 transition-transform hover:scale-105" style={{ backgroundColor: colour }}>
+                    {state.primaryColor === colour ? <Check size={17} className="absolute inset-0 m-auto text-black" /> : null}
                   </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {state.staff && state.staff.length > 0 && (
-          <div>
-            <label className="text-sm text-muted">Artist photos</label>
-            <div className="mt-1.5 flex flex-col gap-3 rounded-lg border border-surface-border bg-surface-1 p-4">
-              <div className="flex items-center gap-3">
-                <select
-                  value={selectedStaffId}
-                  onChange={(e) => setSelectedStaffId(e.target.value)}
-                  className="flex-1 rounded-lg border border-surface-border bg-surface-2 px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-surface-border-strong"
-                >
-                  {!selectedStaffId && (
-                    <option value="">Select an artist...</option>
-                  )}
-                  {state.staff.map((member) => (
-                    <option key={member.clientId} value={member.clientId}>
-                      {member.name || "Unnamed"} ({member.role || "Staff"})
-                    </option>
-                  ))}
-                </select>
-
-                <div className="h-9 w-9 overflow-hidden rounded-full border border-surface-border bg-surface-2 flex items-center justify-center flex-shrink-0">
-                  {selectedMember?.photoUrl ? (
-                    <img
-                      src={selectedMember.photoUrl}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <User size={16} className="text-muted" />
-                  )}
-                </div>
+                ))}
               </div>
+            </div>
 
-              <div className="flex gap-2">
-                <label
-                  className={`flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border border-surface-border bg-surface-2 py-2 text-xs font-medium text-foreground transition-colors hover:bg-surface-3 ${!selectedStaffId ? "opacity-50 pointer-events-none" : ""}`}
-                >
-                  <Upload size={14} className="text-muted" />
-                  <span>
-                    {uploadingStaff
-                      ? "Uploading..."
-                      : selectedMember?.photoUrl
-                        ? "Replace Photo"
-                        : "Upload Photo"}
-                  </span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleStaffPhotoUpload}
-                    disabled={uploadingStaff || !selectedStaffId}
-                    className="hidden"
-                  />
+            <div className="grid gap-4 sm:grid-cols-2">
+              <UploadTile
+                label="Logo"
+                value={state.logoUrl}
+                uploading={uploading === "logo"}
+                onUpload={(file) => upload("logo", file)}
+                onClear={() => patch({ logoUrl: null })}
+              />
+              <UploadTile
+                label="Hero image"
+                value={state.heroPhotoUrl}
+                uploading={uploading === "hero"}
+                onUpload={(file) => upload("hero", file)}
+                onClear={() => patch({ heroPhotoUrl: null })}
+              />
+            </div>
+
+            <div className="onboarding-field">
+              <label>Gallery images</label>
+              <div className="grid grid-cols-4 gap-2">
+                {state.galleryPhotoUrls.slice(0, 7).map((url, index) => (
+                  <div key={`${url}-${index}`} className="group relative aspect-square overflow-hidden rounded-lg border border-[var(--onboarding-border)]">
+                    <img src={url} alt="Gallery" className="h-full w-full object-cover" />
+                    <button type="button" onClick={() => patch({ galleryPhotoUrls: state.galleryPhotoUrls.filter((_, itemIndex) => itemIndex !== index) })} className="absolute right-1 top-1 grid h-7 w-7 place-items-center rounded-full bg-black/75 opacity-0 group-hover:opacity-100"><X size={13} /></button>
+                  </div>
+                ))}
+                <label className="grid aspect-square cursor-pointer place-items-center rounded-lg border border-dashed border-[var(--onboarding-border-strong)] text-[var(--onboarding-mint)] hover:bg-white/5">
+                  <ImagePlus />
+                  <input type="file" accept="image/*" className="hidden" onChange={(event) => upload("gallery", event.target.files?.[0])} />
                 </label>
-
-                {selectedMember?.photoUrl && (
-                  <button
-                    type="button"
-                    onClick={handleRemoveStaffPhoto}
-                    className="flex items-center justify-center gap-1 rounded-lg border border-surface-border bg-surface-2 px-3 text-xs font-medium text-red-400 transition-colors hover:bg-red-950/40"
-                  >
-                    <X size={14} />
-                    <span>Clear</span>
-                  </button>
-                )}
               </div>
             </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="onboarding-field"><label>Headline</label><input value={state.tagline} onChange={(event) => patch({ tagline: event.target.value })} placeholder="Beauty that brings out you." className="onboarding-input" /></div>
+              <div className="onboarding-field"><label>WhatsApp</label><input value={state.whatsapp || ""} onChange={(event) => patch({ whatsapp: event.target.value })} placeholder="+20 100 000 0000" className="onboarding-input" /></div>
+            </div>
+
+            <div className="onboarding-field"><label>About</label><textarea value={state.aboutText} onChange={(event) => patch({ aboutText: event.target.value })} placeholder="Tell customers what makes your business special." className="onboarding-textarea" /></div>
+            <div className="onboarding-field"><label>Instagram URL</label><input value={state.instagram || ""} onChange={(event) => patch({ instagram: event.target.value })} placeholder="https://instagram.com/yourpage" className="onboarding-input" /></div>
+
+            <div className="onboarding-field">
+              <label>Reorder sections</label>
+              <SectionOrderList />
+            </div>
+
+            <label className="flex items-center justify-between rounded-xl border border-[var(--onboarding-border)] p-4">
+              <span><strong className="block text-sm">Show FAQ section</strong><small className="mt-1 block text-[var(--onboarding-muted)]">Answer common questions before customers book.</small></span>
+              <input type="checkbox" checked={state.showFaq} onChange={(event) => patch({ showFaq: event.target.checked })} className="h-5 w-5 accent-[var(--onboarding-mint)]" />
+            </label>
+            {state.showFaq ? <FaqEditor /> : null}
+            {error ? <p className="onboarding-error">{error}</p> : null}
           </div>
-        )}
+        </section>
 
-        <div>
-          <label className="text-sm text-muted">Template</label>
-          <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
-            {(
-              getTemplatesForVertical(state.vertical as "salon" | "clinic") ||
-              []
-            ).map((template) => (
-              <button
-                key={template.id}
-                type="button"
-                onClick={() => patch({ template: template.id })}
-                className={`rounded-lg border px-4 py-3 text-left transition-colors ${
-                  state.template === template.id
-                    ? "border-accent bg-accent/10"
-                    : "border-surface-border bg-surface-1 hover:border-surface-border-strong"
-                }`}
-              >
-                <div className="text-sm font-medium text-foreground">
-                  {template.label}
-                </div>
-                <div className="text-xs text-muted">{template.vertical}</div>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <label className="text-sm text-muted">Primary color</label>
-          <div className="mt-2 flex gap-2">
-            {COLOR_SWATCHES.map((color) => (
-              <button
-                key={color}
-                onClick={() => patch({ primaryColor: color })}
-                className="relative h-8 w-8 rounded-full transition-transform hover:scale-110"
-                style={{ backgroundColor: color }}
-              >
-                {state.primaryColor === color && (
-                  <Check
-                    size={14}
-                    strokeWidth={3}
-                    className="absolute inset-0 m-auto text-white"
-                  />
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <label className="text-sm text-muted">Instagram URL</label>
-          <input
-            value={state.instagram || ""}
-            onChange={(e) => patch({ instagram: e.target.value })}
-            placeholder="https://instagram.com/yourpage"
-            className="mt-1.5 w-full rounded-lg border border-surface-border bg-surface-1 px-3 py-2.5 text-sm text-foreground outline-none transition-colors focus:border-surface-border-strong"
-          />
-        </div>
-
-        <div>
-          <label className="text-sm text-muted">WhatsApp number</label>
-          <input
-            value={state.whatsapp || ""}
-            onChange={(e) => patch({ whatsapp: e.target.value })}
-            placeholder="+20 100 000 0000"
-            className="mt-1.5 w-full rounded-lg border border-surface-border bg-surface-1 px-3 py-2.5 text-sm text-foreground outline-none transition-colors focus:border-surface-border-strong"
-          />
-        </div>
-
-        <div>
-          <label className="text-sm text-muted">Section order</label>
-          <div className="mt-2">
-            <SectionOrderList />
-          </div>
-        </div>
-
-        <div className="flex gap-5">
-          <label className="flex items-center gap-2 text-sm text-foreground">
-            <input
-              type="checkbox"
-              checked={state.showTeam}
-              onChange={(e) => patch({ showTeam: e.target.checked })}
-              className="accent-foreground"
-            />
-            Show team
-          </label>
-          <label className="flex items-center gap-2 text-sm text-foreground">
-            <input
-              type="checkbox"
-              checked={state.showFaq}
-              onChange={(e) => patch({ showFaq: e.target.checked })}
-              className="accent-foreground"
-            />
-            Show FAQ
-          </label>
-        </div>
-        {state.showFaq && (
-          <div>
-            <label className="text-sm text-muted">FAQ</label>
-            <div className="mt-2">
-              <FaqEditor />
+        <section className="onboarding-card onboarding-card-pad">
+          <div className="flex items-center justify-between gap-4">
+            <div><h2 className="onboarding-section-title">Live preview</h2><p className="onboarding-card-subtitle">See how your website looks to customers.</p></div>
+            <div className="flex rounded-lg border border-[var(--onboarding-border)] p-1">
+              <button type="button" onClick={() => setDevice("desktop")} className={`flex items-center gap-2 rounded-md px-4 py-2 text-sm ${device === "desktop" ? "bg-[var(--onboarding-mint)] text-black" : "text-[var(--onboarding-muted)]"}`}><Monitor size={16} />Desktop</button>
+              <button type="button" onClick={() => setDevice("mobile")} className={`flex items-center gap-2 rounded-md px-4 py-2 text-sm ${device === "mobile" ? "bg-[var(--onboarding-mint)] text-black" : "text-[var(--onboarding-muted)]"}`}><Smartphone size={16} />Mobile</button>
             </div>
           </div>
-        )}
-
-        {error && <p className="text-sm text-red-400">{error}</p>}
-
-        <div className="flex gap-3 pt-2">
-          <Button
-            onClick={onBack}
-            className="flex-1 border border-surface-border bg-surface-1 text-foreground transition-colors hover:bg-surface-2"
-          >
-            Back
-          </Button>
-          <Button
-            onClick={handlePublish}
-            disabled={publishing}
-            className="flex-1 bg-accent text-black transition-colors hover:bg-accent/90"
-          >
-            {publishing ? "Publishing..." : "Publish my site"}
-          </Button>
-        </div>
+          <div className={`mt-6 overflow-hidden rounded-xl border border-[var(--onboarding-border)] bg-black p-2 ${device === "mobile" ? "mx-auto max-w-sm" : ""}`}>
+            <LivePreviewPane />
+          </div>
+        </section>
       </div>
 
-      <div className="sticky top-8 h-fit w-full">
-        <div className="mb-3 flex justify-center gap-1 rounded-full border border-surface-border bg-surface-1 p-1 w-fit mx-auto">
-          {(["desktop", "mobile"] as const).map((d) => (
-            <button
-              key={d}
-              onClick={() => setDevice(d)}
-              className={`rounded-full px-4 py-1.5 text-xs capitalize transition-colors ${
-                device === d ? "bg-surface-2 text-foreground" : "text-muted"
-              }`}
-            >
-              {d}
-            </button>
-          ))}
-        </div>
+      <footer className="onboarding-footer">
+        <button type="button" onClick={onBack} className="onboarding-secondary-button">← Back</button>
+        <div className="onboarding-footer-actions"><button type="button" className="onboarding-secondary-button">Save draft</button><button type="button" onClick={onNext} className="onboarding-primary-button">Continue →</button></div>
+      </footer>
+    </div>
+  );
+}
 
-        <div className={device === "mobile" ? "mx-auto max-w-sm" : "w-full"}>
-          <LivePreviewPane />
-        </div>
+function UploadTile({
+  label,
+  value,
+  uploading,
+  onUpload,
+  onClear,
+}: {
+  label: string;
+  value: string | null;
+  uploading: boolean;
+  onUpload: (file?: File) => void;
+  onClear: () => void;
+}) {
+  return (
+    <div className="onboarding-field">
+      <label>{label}</label>
+      <div className="relative overflow-hidden rounded-xl border border-dashed border-[var(--onboarding-border-strong)]">
+        {value ? <img src={value} alt={label} className="h-28 w-full object-cover" /> : null}
+        <label className={`flex h-28 cursor-pointer items-center justify-center gap-2 text-sm text-[var(--onboarding-muted)] ${value ? "absolute inset-0 bg-black/55 opacity-0 hover:opacity-100" : ""}`}>
+          <Upload size={17} />{uploading ? "Uploading…" : value ? "Replace image" : `Upload ${label.toLowerCase()}`}
+          <input type="file" accept="image/*" className="hidden" disabled={uploading} onChange={(event) => onUpload(event.target.files?.[0])} />
+        </label>
+        {value ? <button type="button" onClick={onClear} className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full bg-black/70"><X size={13} /></button> : null}
       </div>
     </div>
   );
