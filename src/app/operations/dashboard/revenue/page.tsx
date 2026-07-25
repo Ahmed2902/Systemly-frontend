@@ -58,17 +58,31 @@ export default function RevenueAnalyticsPage() {
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
             <MetricCard label="Total revenue" value={formatEgp(data.summary.revenueCents)} />
             <MetricCard label="Paid invoices" value={String(data.summary.paidInvoiceCount)} />
-            <MetricCard label="Average invoice" value={formatEgp(data.summary.averageInvoiceCents)} />
-            <MetricCard label="Outstanding" value={formatEgp(data.summary.outstandingTotalCents)} tone="warning" />
-            <MetricCard label="Outstanding invoices" value={String(data.summary.outstandingInvoiceCount)} />
+            <MetricCard label="Average paid invoice" value={formatEgp(data.summary.averageInvoiceCents)} />
+            <MetricCard
+              label="Top revenue category"
+              value={data.summary.topCategory?.category ?? "—"}
+              hint={data.summary.topCategory ? formatEgp(data.summary.topCategory.totalCents) : undefined}
+            />
+            <MetricCard
+              label="Best revenue weekday"
+              value={data.summary.bestWeekday ? WEEKDAYS[data.summary.bestWeekday.weekday] : "—"}
+              hint={data.summary.bestWeekday ? formatEgp(data.summary.bestWeekday.totalCents) : undefined}
+            />
           </div>
 
           <AnalyticsPanel
             title={`Revenue over time · ${formatDateRange(data.range.from, data.range.to)}`}
           >
             <AreaChart
-              data={data.trend.map((row) => ({ label: shortDate(row.bucket), value: row.totalCents }))}
+              data={data.trend.map((row) => ({
+                label: shortDate(row.bucket),
+                value: row.totalCents,
+                tooltip: [{ label: "Paid invoices", value: String(row.invoiceCount) }],
+              }))}
+              valueLabel="Revenue"
               formatValue={formatEgp}
+              formatAxisValue={formatEgp}
               height={285}
             />
           </AnalyticsPanel>
@@ -89,20 +103,36 @@ export default function RevenueAnalyticsPage() {
                 items={data.byWeekday.map((row) => ({
                   label: WEEKDAYS[row.weekday],
                   value: row.totalCents,
+                  tooltip: [
+                    { label: "Revenue", value: formatEgp(row.totalCents) },
+                    { label: "Paid invoices", value: String(row.invoiceCount) },
+                  ],
                 }))}
                 formatValue={formatEgp}
               />
             </AnalyticsPanel>
 
-            <AnalyticsPanel title="Average invoice trend">
+            <AnalyticsPanel
+              title="Average paid invoice by period"
+              action={<span className="analytics-muted text-xs">Average amount collected per paid invoice</span>}
+            >
               <MultiLineChart
                 labels={data.averageInvoiceValueTrend.map((row) => shortDate(row.bucket))}
                 series={[
                   {
-                    name: "Average invoice",
-                    values: data.averageInvoiceValueTrend.map((row) => row.averageCents),
+                    name: "Average paid invoice",
+                    values: data.averageInvoiceValueTrend.map((row) =>
+                      row.invoiceCount > 0 ? row.averageCents : null,
+                    ),
+                    formatValue: formatEgp,
+                    tooltipValues: data.averageInvoiceValueTrend.map((row) =>
+                      row.invoiceCount > 0
+                        ? `${formatEgp(row.averageCents ?? 0)} · ${row.invoiceCount} paid ${row.invoiceCount === 1 ? "invoice" : "invoices"}`
+                        : null,
+                    ),
                   },
                 ]}
+                formatAxisValue={formatEgp}
                 height={220}
               />
             </AnalyticsPanel>
