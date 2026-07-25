@@ -7,6 +7,7 @@ import { StepServicesStaff } from "./StepServiceStaff";
 import { StepAssignments } from "./StepAssignments";
 import { StepCustomizePreview } from "./StepCustomizePreview";
 import { StepLaunch } from "./StepLaunch";
+import { useWizard } from "../wizard.context";
 import "../onboarding-systerra.css";
 
 const steps = [
@@ -19,7 +20,15 @@ const steps = [
 
 export function WizardShell() {
   const [stepIndex, setStepIndex] = useState(0);
+  const [saved, setSaved] = useState(false);
+  const { saveDraft } = useWizard();
   const StepComponent = steps[stepIndex].component;
+
+  function handleSaveDraft() {
+    saveDraft();
+    setSaved(true);
+    window.setTimeout(() => setSaved(false), 1600);
+  }
 
   return (
     <main className="onboarding-systerra">
@@ -28,7 +37,7 @@ export function WizardShell() {
           <div className="onboarding-brand"><span className="onboarding-brand-mark">H</span>Hgezli</div>
           <div className="onboarding-top-actions">
             <button type="button" className="onboarding-ghost-button"><HelpCircle size={16} className="mr-2 inline" />Help</button>
-            <button type="button" className="onboarding-ghost-button"><CloudUpload size={16} className="mr-2 inline" />Save draft</button>
+            <button type="button" onClick={handleSaveDraft} className="onboarding-ghost-button"><CloudUpload size={16} className="mr-2 inline" />{saved ? "Draft saved" : "Save draft"}</button>
           </div>
         </header>
 
@@ -36,13 +45,7 @@ export function WizardShell() {
           {steps.map((step, index) => {
             const status = index < stepIndex ? "is-complete" : index === stepIndex ? "is-active" : "";
             return (
-              <button
-                type="button"
-                key={step.label}
-                disabled={index > stepIndex}
-                onClick={() => index <= stepIndex && setStepIndex(index)}
-                className={`onboarding-progress-step ${status}`}
-              >
+              <button type="button" key={step.label} disabled={index > stepIndex} onClick={() => index <= stepIndex && setStepIndex(index)} className={`onboarding-progress-step ${status}`}>
                 <span className="onboarding-progress-number">{index < stepIndex ? <Check size={15} /> : index + 1}</span>
                 <span className="onboarding-progress-copy"><strong>{step.label}</strong><span>{step.hint}</span></span>
               </button>
