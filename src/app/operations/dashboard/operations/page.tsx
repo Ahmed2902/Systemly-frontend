@@ -53,11 +53,12 @@ export default function OperationsAnalyticsPage() {
   const busiestPeriod = data?.summary.busiestWeekday == null || data.summary.busiestHour == null
     ? "—"
     : `${WEEKDAYS[data.summary.busiestWeekday]} ${String(data.summary.busiestHour).padStart(2, "0")}:00`;
+  const serviceSelectionCount = data?.mostBookedServices.reduce((sum, row) => sum + row.count, 0) ?? 0;
 
   return (
-    <AnalyticsShell title="Operations Analytics" subtitle="Booking demand, peak periods, service popularity, and lead times">
+    <AnalyticsShell title="Bookings & Services" subtitle="Booking demand, peak periods, service popularity, and lead times">
       {error ? <AnalyticsState message={error} /> : null}
-      {!data && !error ? <AnalyticsState message="Loading operations analytics…" /> : null}
+      {!data && !error ? <AnalyticsState message="Loading bookings and services analytics…" /> : null}
       {data ? (
         <div className="space-y-3">
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
@@ -65,7 +66,7 @@ export default function OperationsAnalyticsPage() {
             <MetricCard label="Busiest weekday" value={data.summary.busiestWeekday == null ? "—" : WEEKDAYS[data.summary.busiestWeekday]} />
             <MetricCard label="Busiest hour" value={data.summary.busiestHour == null ? "—" : `${String(data.summary.busiestHour).padStart(2, "0")}:00`} />
             <MetricCard label="Most booked service" value={data.summary.mostBookedService?.name ?? "—"} />
-            <MetricCard label="Top service bookings" value={String(data.summary.mostBookedService?.count ?? 0)} />
+            <MetricCard label="Service selections" value={String(serviceSelectionCount)} hint="One booking may contain several services" />
           </div>
 
           <AnalyticsPanel title="Booking heatmap">
@@ -74,7 +75,16 @@ export default function OperationsAnalyticsPage() {
 
           <div className="grid gap-3 xl:grid-cols-2">
             <AnalyticsPanel title="Most booked services">
-              <LollipopChart items={data.mostBookedServices.slice(0, 8).map((row) => ({ label: row.name, value: row.count }))} />
+              <LollipopChart
+                items={data.mostBookedServices.slice(0, 8).map((row) => ({
+                  label: row.name,
+                  value: row.count,
+                  tooltip: [
+                    { label: "Service selections", value: String(row.count) },
+                    { label: "Share", value: serviceSelectionCount ? `${((row.count / serviceSelectionCount) * 100).toFixed(1)}%` : "0%" },
+                  ],
+                }))}
+              />
             </AnalyticsPanel>
             <AnalyticsPanel title="Booking lead time">
               <DonutChart items={data.leadTimes.map((row) => ({ label: LEAD_TIME_LABELS[row.bucket], value: row.count }))} />
@@ -82,11 +92,11 @@ export default function OperationsAnalyticsPage() {
           </div>
 
           <div className="grid gap-3 xl:grid-cols-[1.2fr_.8fr]">
-            <AnalyticsPanel title="Bookings by service category">
+            <AnalyticsPanel title="Service selections by category">
               <LollipopChart items={categories} />
             </AnalyticsPanel>
-            <AnalyticsPanel title="Operational insights">
-              <div className="space-y-2 text-[11px]">
+            <AnalyticsPanel title="Booking insights">
+              <div className="space-y-2 text-[13px]">
                 <div className="analytics-soft-row rounded-lg px-3 py-2.5"><span className="analytics-muted">Peak period</span><p className="mt-1 font-semibold">{busiestPeriod}</p></div>
                 <div className="analytics-soft-row rounded-lg px-3 py-2.5"><span className="analytics-muted">Strongest service</span><p className="mt-1 font-semibold">{data.summary.mostBookedService?.name ?? "No booking data"}</p></div>
                 <div className="analytics-soft-row rounded-lg px-3 py-2.5"><span className="analytics-muted">Most common lead time</span><p className="mt-1 font-semibold">{data.leadTimes.length ? LEAD_TIME_LABELS[[...data.leadTimes].sort((a, b) => b.count - a.count)[0].bucket] : "No booking data"}</p></div>

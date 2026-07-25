@@ -26,15 +26,15 @@ export type RevenueAnalytics = AnalyticsMeta & {
     revenueCents: number;
     paidInvoiceCount: number;
     averageInvoiceCents: number;
-    outstandingInvoiceCount: number;
-    outstandingTotalCents: number;
+    topCategory: { category: string; totalCents: number } | null;
+    bestWeekday: { weekday: number; totalCents: number } | null;
   };
   trend: { bucket: string; totalCents: number; invoiceCount: number }[];
   byCategory: { category: string; totalCents: number; itemCount: number }[];
   byWeekday: { weekday: number; totalCents: number; invoiceCount: number }[];
   averageInvoiceValueTrend: {
     bucket: string;
-    averageCents: number;
+    averageCents: number | null;
     invoiceCount: number;
   }[];
 };
@@ -45,7 +45,11 @@ export type CustomerAnalytics = AnalyticsMeta & {
     returningCustomers: number;
     lapsedCustomerCount: number;
     noShowRate: number;
+    noShowCount: number;
+    completedCount: number;
     cancellationRate: number;
+    cancellationCount: number;
+    appointmentOutcomeCount: number;
   };
   retentionSummary: {
     day30Rate: number | null;
@@ -62,6 +66,7 @@ export type CustomerAnalytics = AnalyticsMeta & {
   acquisitionSources: { source: string; count: number }[];
   lapsedCustomers: {
     total: number;
+    thresholdDays: number;
     items: {
       id: string;
       name: string;
@@ -76,8 +81,8 @@ export type CustomerAnalytics = AnalyticsMeta & {
     retained60: number;
     retained90: number;
   }[];
-  noShowRate: RateRow[];
-  cancellationRate: RateRow[];
+  noShowRate: NoShowRateRow[];
+  cancellationRate: CancellationRateRow[];
 };
 
 export type CustomerValueRow = {
@@ -87,7 +92,23 @@ export type CustomerValueRow = {
   invoiceCount: number;
 };
 
-export type RateRow = { bucket: string; rate: number } & Record<string, unknown>;
+export type NoShowRateRow = {
+  bucket: string;
+  noShowCount: number;
+  completedCount: number;
+  rate: number;
+};
+
+export type CancellationRateRow = {
+  bucket: string;
+  customerCancelled: number;
+  businessCancelled: number;
+  totalCancelled: number;
+  completedCount: number;
+  noShowCount: number;
+  outcomeCount: number;
+  rate: number;
+};
 
 export type StaffPerformanceRow = {
   id: string;
