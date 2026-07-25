@@ -10,7 +10,7 @@ const LINKS = [
   ["/operations/dashboard/revenue", "Revenue"],
   ["/operations/dashboard/customers", "Customers"],
   ["/operations/dashboard/staff", "Staff"],
-  ["/operations/dashboard/operations", "Operations"],
+  ["/operations/dashboard/operations", "Bookings & Services"],
   ["/operations/dashboard/growth", "Growth"],
 ] as const;
 
@@ -53,7 +53,7 @@ export function AnalyticsShell({
             <h1 className="analytics-title text-[26px] font-bold tracking-[-0.03em] lg:text-[30px]">
               {title}
             </h1>
-            <p className="analytics-muted mt-1 text-[13px]">{subtitle}</p>
+            <p className="analytics-muted mt-1 text-sm">{subtitle}</p>
           </div>
 
           <div className="analytics-preset flex max-w-full gap-1 overflow-x-auto rounded-lg p-1">
@@ -62,7 +62,7 @@ export function AnalyticsShell({
                 key={item}
                 type="button"
                 onClick={() => router.push(`${pathname}?preset=${item}`)}
-                className={`whitespace-nowrap rounded-md px-2.5 py-1.5 text-[11px] font-semibold transition ${
+                className={`whitespace-nowrap rounded-md px-3 py-2 text-xs font-semibold transition ${
                   preset === item ? "is-active" : ""
                 }`}
               >
@@ -82,7 +82,7 @@ export function AnalyticsShell({
               <Link
                 key={href}
                 href={`${href}?preset=${preset}`}
-                className={`whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-semibold transition ${
+                className={`whitespace-nowrap rounded-md px-3 py-2 text-[13px] font-semibold transition ${
                   active ? "is-active" : ""
                 }`}
               >
@@ -114,7 +114,7 @@ export function MetricCard({
   return (
     <div className="analytics-card analytics-metric-card rounded-xl px-4 py-3.5">
       <div className="flex items-start justify-between gap-3">
-        <p className="analytics-muted text-[11px] font-medium">{label}</p>
+        <p className="analytics-muted text-xs font-medium">{label}</p>
         {trend ? (
           <span className={`analytics-trend analytics-trend-${tone}`}>{trend}</span>
         ) : null}
@@ -122,7 +122,7 @@ export function MetricCard({
       <p className="analytics-title mt-2 text-xl font-bold tracking-[-0.025em]">
         {value}
       </p>
-      {hint ? <p className="analytics-subtle mt-1 text-[10px]">{hint}</p> : null}
+      {hint ? <p className="analytics-subtle mt-1 text-xs">{hint}</p> : null}
     </div>
   );
 }
@@ -141,7 +141,7 @@ export function AnalyticsPanel({
   return (
     <section className={`analytics-card rounded-xl p-4 ${className}`}>
       <div className="flex items-center justify-between gap-3">
-        <h2 className="analytics-title text-[13px] font-bold">{title}</h2>
+        <h2 className="analytics-title text-sm font-bold">{title}</h2>
         {action ? <div>{action}</div> : null}
       </div>
       <div className="mt-3">{children}</div>
