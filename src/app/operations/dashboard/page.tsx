@@ -129,13 +129,14 @@ export default function DashboardOverviewPage() {
             </AnalyticsPanel>
           </div>
 
-          <div className="grid gap-3 xl:grid-cols-[1.2fr_.8fr_.8fr]">
+          <div className="grid gap-3 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,.8fr)_minmax(0,.6fr)]">
             <AnalyticsPanel title="Peak booking times">
               <BookingHeatmap rows={data.operations.heatmap} />
             </AnalyticsPanel>
 
             <AnalyticsPanel title="Most booked services">
               <DonutChart
+                compact
                 items={data.operations.mostBookedServices.slice(0, 5).map((row) => ({
                   label: row.name,
                   value: row.count,

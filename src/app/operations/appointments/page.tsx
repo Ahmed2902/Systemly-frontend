@@ -15,7 +15,9 @@ import { AppointmentListItem } from "@/modules/operations/components/appointment
 export default function AppointmentsPage() {
   const { user, accessToken, loading: authLoading } = useAuth();
   const timezone = user?.timezone || "Africa/Cairo";
-  const [date, setDate] = useState(() => dateKeyInTimezone(new Date(), "Africa/Cairo"));
+  const [date, setDate] = useState(() =>
+    dateKeyInTimezone(new Date(), "Africa/Cairo"),
+  );
   const [appointments, setAppointments] = useState<AppointmentSummary[]>([]);
   const [staff, setStaff] = useState<Array<{ id: string; name: string }>>([]);
   const [query, setQuery] = useState("");
@@ -34,7 +36,9 @@ export default function AppointmentsPage() {
       setAppointments(workspace.day.appointments);
       setStaff(workspace.day.staff.map(({ id, name }) => ({ id, name })));
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "Unable to load appointments");
+      setError(
+        error instanceof Error ? error.message : "Unable to load appointments",
+      );
     } finally {
       setLoading(false);
     }
@@ -50,11 +54,17 @@ export default function AppointmentsPage() {
       .filter((appointment) => {
         const textMatch =
           !needle ||
-          `${appointment.customer.name} ${appointment.customer.phone}`.toLowerCase().includes(needle) ||
-          appointment.segments.some((segment) => segment.serviceName.toLowerCase().includes(needle));
+          `${appointment.customer.name} ${appointment.customer.phone}`
+            .toLowerCase()
+            .includes(needle) ||
+          appointment.segments.some((segment) =>
+            segment.serviceName.toLowerCase().includes(needle),
+          );
         const staffMatch =
           staffFilter === "all" ||
-          appointment.segments.some((segment) => segment.staffId === staffFilter);
+          appointment.segments.some(
+            (segment) => segment.staffId === staffFilter,
+          );
         const statusMatch =
           statusFilter === "all" ||
           (statusFilter === "cancelled"
@@ -63,7 +73,8 @@ export default function AppointmentsPage() {
         return textMatch && staffMatch && statusMatch;
       })
       .sort((a, b) => {
-        if (sort === "customer") return a.customer.name.localeCompare(b.customer.name);
+        if (sort === "customer")
+          return a.customer.name.localeCompare(b.customer.name);
         if (sort === "status") return a.status.localeCompare(b.status);
         const aTime = new Date(a.segments[0]?.startsAt ?? 0).getTime();
         const bTime = new Date(b.segments[0]?.startsAt ?? 0).getTime();
@@ -72,7 +83,11 @@ export default function AppointmentsPage() {
   }, [appointments, query, sort, staffFilter, statusFilter]);
 
   if (authLoading || !user) {
-    return <div className="flex h-full items-center justify-center text-slate-400">Loading…</div>;
+    return (
+      <div className="flex h-full items-center justify-center text-slate-400">
+        Loading…
+      </div>
+    );
   }
 
   return (
@@ -80,9 +95,12 @@ export default function AppointmentsPage() {
       <div className="mx-auto max-w-6xl">
         <div className="mb-6">
           <p className="text-sm font-medium text-blue-600">Operations</p>
-          <h1 className="mt-1 text-3xl font-bold text-slate-900">Appointments</h1>
+          <h1 className="mt-1 text-3xl font-bold text-slate-900">
+            Appointments
+          </h1>
           <p className="mt-1 text-sm text-slate-500">
-            Review the queue, filter the day, and open any appointment for its full workspace.
+            Review the queue, filter the day, and open any appointment for its
+            full workspace.
           </p>
         </div>
 
@@ -148,12 +166,12 @@ export default function AppointmentsPage() {
             <p className="mt-1 text-sm text-slate-500">
               Try another date or create a new appointment.
             </p>
-            <Link
+            {/* <Link
               href="/operations/appointments/new"
               className="mt-5 inline-flex rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-100"
             >
               New Appointment
-            </Link>
+            </Link> */}
           </div>
         ) : (
           <div className="space-y-3">

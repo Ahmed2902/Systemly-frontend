@@ -87,26 +87,12 @@ export default function RevenueAnalyticsPage() {
             />
           </AnalyticsPanel>
 
-          <div className="grid gap-3 xl:grid-cols-3">
+          <div className="grid gap-3 xl:grid-cols-[minmax(0,.9fr)_minmax(0,1.6fr)]">
             <AnalyticsPanel title="Revenue by category">
               <DonutChart
                 items={data.byCategory.slice(0, 6).map((row) => ({
                   label: row.category,
                   value: row.totalCents,
-                }))}
-                formatValue={formatEgp}
-              />
-            </AnalyticsPanel>
-
-            <AnalyticsPanel title="Revenue by weekday">
-              <LollipopChart
-                items={data.byWeekday.map((row) => ({
-                  label: WEEKDAYS[row.weekday],
-                  value: row.totalCents,
-                  tooltip: [
-                    { label: "Revenue", value: formatEgp(row.totalCents) },
-                    { label: "Paid invoices", value: String(row.invoiceCount) },
-                  ],
                 }))}
                 formatValue={formatEgp}
               />
@@ -133,7 +119,41 @@ export default function RevenueAnalyticsPage() {
                   },
                 ]}
                 formatAxisValue={formatEgp}
-                height={220}
+                height={315}
+              />
+            </AnalyticsPanel>
+          </div>
+
+          <div className="grid gap-3 xl:grid-cols-2">
+            <AnalyticsPanel title="Paid invoices by period">
+              <MultiLineChart
+                labels={data.trend.map((row) => shortDate(row.bucket))}
+                series={[
+                  {
+                    name: "Paid invoices",
+                    values: data.trend.map((row) => row.invoiceCount),
+                    formatValue: (value) => String(Math.round(value)),
+                    tooltipValues: data.trend.map((row) =>
+                      `${row.invoiceCount} ${row.invoiceCount === 1 ? "paid invoice" : "paid invoices"}`,
+                    ),
+                  },
+                ]}
+                formatAxisValue={(value) => String(Math.round(value))}
+                height={285}
+              />
+            </AnalyticsPanel>
+
+            <AnalyticsPanel title="Revenue by weekday">
+              <LollipopChart
+                items={data.byWeekday.map((row) => ({
+                  label: WEEKDAYS[row.weekday],
+                  value: row.totalCents,
+                  tooltip: [
+                    { label: "Revenue", value: formatEgp(row.totalCents) },
+                    { label: "Paid invoices", value: String(row.invoiceCount) },
+                  ],
+                }))}
+                formatValue={formatEgp}
               />
             </AnalyticsPanel>
           </div>

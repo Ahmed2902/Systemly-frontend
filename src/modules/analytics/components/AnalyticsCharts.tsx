@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useMemo, useState, type PointerEvent } from "react";
+import { useEffect, useId, useMemo, useRef, useState, type PointerEvent } from "react";
 import { WEEKDAYS } from "../analytics.formatters";
 
 export type TooltipLine = {
@@ -79,6 +79,26 @@ function tooltipPositionClass(index: number, length: number) {
   return "";
 }
 
+function useResponsiveChartWidth(defaultWidth = 900) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [width, setWidth] = useState(defaultWidth);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const update = () => setWidth(Math.max(container.clientWidth, 320));
+    update();
+    if (typeof ResizeObserver === "undefined") return;
+
+    const observer = new ResizeObserver(update);
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
+
+  return [containerRef, width] as const;
+}
+
 export function AreaChart({
   data,
   formatValue = compactNumber,
@@ -95,7 +115,7 @@ export function AreaChart({
   const rawId = useId();
   const gradientId = `area-${rawId.replace(/:/g, "")}`;
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const width = 900;
+  const [containerRef, width] = useResponsiveChartWidth();
   const margin = { top: 22, right: 24, bottom: 44, left: 86 };
   const innerWidth = width - margin.left - margin.right;
   const innerHeight = height - margin.top - margin.bottom;
@@ -115,7 +135,7 @@ export function AreaChart({
   if (data.length === 0) return <ChartEmpty />;
 
   return (
-    <div className="analytics-chart-interactive" style={{ height }}>
+    <div ref={containerRef} className="analytics-chart-interactive" style={{ height }}>
       <svg
         viewBox={`0 0 ${width} ${height}`}
         role="img"
@@ -210,7 +230,7 @@ export function MultiLineChart({
   height?: number;
 }) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const width = 900;
+  const [containerRef, width] = useResponsiveChartWidth();
   const margin = { top: 24, right: 24, bottom: 48, left: 76 };
   const innerWidth = width - margin.left - margin.right;
   const innerHeight = height - margin.top - margin.bottom;
@@ -237,7 +257,7 @@ export function MultiLineChart({
         ))}
       </div>
 
-      <div className="analytics-chart-interactive" style={{ height }}>
+      <div ref={containerRef} className="analytics-chart-interactive" style={{ height }}>
         <svg
           viewBox={`0 0 ${width} ${height}`}
           role="img"
@@ -360,10 +380,12 @@ export function DonutChart({
   items,
   centreLabel,
   formatValue = compactNumber,
+  compact = false,
 }: {
   items: ChartDatum[];
   centreLabel?: string;
   formatValue?: (value: number) => string;
+  compact?: boolean;
 }) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const total = items.reduce((sum, item) => sum + item.value, 0);
@@ -379,7 +401,7 @@ export function DonutChart({
   const active = activeIndex == null ? null : segments[activeIndex];
 
   return (
-    <div className="analytics-donut-layout">
+    <div className={`analytics-donut-layout${compact ? " is-compact" : ""}`}>
       <div className="analytics-donut-svg-wrap" onPointerLeave={() => setActiveIndex(null)}>
         <svg viewBox="0 0 180 180" role="img" aria-label="Donut chart">
           <circle cx="90" cy="90" r="62" fill="none" stroke="var(--analytics-grid)" strokeWidth="26" />

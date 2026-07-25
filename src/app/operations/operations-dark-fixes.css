@@ -85,6 +85,19 @@ body.operations-dark {
   background-color: var(--operations-panel-muted) !important;
 }
 
+.operations-dark .new-appointment-modal [class~="bg-blue-50"] {
+  background-color: var(--operations-violet-soft, #251d43) !important;
+}
+.operations-dark .new-appointment-modal [class~="hover:bg-blue-50"]:hover {
+  background-color: var(--operations-hover) !important;
+}
+.operations-dark .new-appointment-modal [class~="hover:bg-blue-50/60"]:hover {
+  background-color: var(--operations-hover) !important;
+}
+.operations-dark .new-appointment-modal [class~="border-blue-500"] {
+  border-color: #60a5fa !important;
+}
+
 .analytics-header {
   display: flex;
   align-items: flex-start;
@@ -187,6 +200,8 @@ body.operations-dark {
 .analytics-tooltip b { font-weight: 750; }
 
 .analytics-donut-layout { display: grid; grid-template-columns: minmax(150px, 190px) minmax(0, 1fr); align-items: center; gap: 20px; }
+.analytics-donut-layout.is-compact { grid-template-columns: 1fr; gap: 12px; }
+.analytics-donut-layout.is-compact .analytics-donut-svg-wrap { width: min(190px, 100%); margin-inline: auto; }
 .analytics-donut-svg-wrap { position: relative; aspect-ratio: 1; }
 .analytics-donut-svg-wrap svg { width: 100%; height: 100%; overflow: visible; }
 .analytics-donut-segment { cursor: pointer; transition: stroke-width 100ms ease, filter 100ms ease; }
