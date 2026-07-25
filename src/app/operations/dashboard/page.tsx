@@ -71,31 +71,38 @@ export default function DashboardOverviewPage() {
               hint="Completed payments"
             />
             <MetricCard
-              label="Average invoice"
+              label="Average paid invoice"
               value={formatEgp(data.revenue.summary.averageInvoiceCents)}
-              hint="Per paid invoice"
+              hint="Amount collected per paid invoice"
             />
             <MetricCard
-              label="Outstanding"
-              value={formatEgp(data.revenue.summary.outstandingTotalCents)}
-              hint={`${data.revenue.summary.outstandingInvoiceCount} invoices`}
-              tone="warning"
+              label="Total bookings"
+              value={String(data.operations.summary.bookingCount)}
+              hint="Appointments in the selected period"
             />
             <MetricCard
-              label="New customers"
-              value={String(data.customers.summary.newCustomers)}
-              hint={`${data.customers.summary.returningCustomers} returning`}
+              label="Customers"
+              value={String(
+                data.customers.summary.newCustomers +
+                  data.customers.summary.returningCustomers,
+              )}
+              hint={`${data.customers.summary.newCustomers} new · ${data.customers.summary.returningCustomers} returning`}
             />
           </div>
 
-          <div className="grid gap-3 xl:grid-cols-[minmax(0,1.65fr)_minmax(280px,.75fr)]">
+          <div className="grid gap-3 xl:grid-cols-[minmax(0,1.65fr)_minmax(300px,.75fr)]">
             <AnalyticsPanel title="Revenue over time">
               <AreaChart
                 data={data.revenue.trend.map((row) => ({
                   label: shortDate(row.bucket),
                   value: row.totalCents,
+                  tooltip: [
+                    { label: "Paid invoices", value: String(row.invoiceCount) },
+                  ],
                 }))}
+                valueLabel="Revenue"
                 formatValue={formatEgp}
+                formatAxisValue={formatEgp}
                 height={265}
               />
             </AnalyticsPanel>
@@ -105,12 +112,17 @@ export default function DashboardOverviewPage() {
                 items={data.staff.staffPerformance.slice(0, 6).map((row) => ({
                   label: row.name,
                   value: row.totalCents,
+                  tooltip: [
+                    { label: "Revenue", value: formatEgp(row.totalCents) },
+                    { label: "Jobs", value: String(row.lineItemCount) },
+                    { label: "Utilisation", value: formatPercent(row.utilizationRate) },
+                  ],
                 }))}
                 formatValue={formatEgp}
               />
               <Link
                 href={`/operations/dashboard/staff?preset=${preset}`}
-                className="analytics-muted mt-4 block text-right text-[11px] font-semibold hover:underline"
+                className="analytics-muted mt-4 block text-right text-[13px] font-semibold hover:underline"
               >
                 View staff analytics
               </Link>
@@ -132,21 +144,13 @@ export default function DashboardOverviewPage() {
             </AnalyticsPanel>
 
             <AnalyticsPanel title="Needs attention">
-              <div className="space-y-2 text-[11px]">
-                {data.revenue.summary.outstandingInvoiceCount > 0 ? (
-                  <Link
-                    href="/operations/invoices"
-                    className="block rounded-lg bg-rose-500/10 px-3 py-2.5 text-rose-500"
-                  >
-                    {data.revenue.summary.outstandingInvoiceCount} outstanding invoices
-                  </Link>
-                ) : null}
+              <div className="space-y-2 text-[13px]">
                 {data.customers.summary.lapsedCustomerCount > 0 ? (
                   <Link
                     href="/operations/customers"
                     className="block rounded-lg bg-amber-500/10 px-3 py-2.5 text-amber-500"
                   >
-                    {data.customers.summary.lapsedCustomerCount} lapsed customers
+                    {data.customers.summary.lapsedCustomerCount} inactive customers
                   </Link>
                 ) : null}
                 {data.staff.summary.lowUtilizationCount > 0 ? (
@@ -157,8 +161,7 @@ export default function DashboardOverviewPage() {
                     {data.staff.summary.lowUtilizationCount} staff below 40% utilisation
                   </Link>
                 ) : null}
-                {data.revenue.summary.outstandingInvoiceCount === 0 &&
-                data.customers.summary.lapsedCustomerCount === 0 &&
+                {data.customers.summary.lapsedCustomerCount === 0 &&
                 data.staff.summary.lowUtilizationCount === 0 ? (
                   <p className="rounded-lg bg-emerald-500/10 px-3 py-2.5 text-emerald-500">
                     No urgent analytics alerts.
