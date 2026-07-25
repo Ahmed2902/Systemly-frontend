@@ -51,10 +51,10 @@ export default function StaffAnalyticsPage() {
 
           <AnalyticsPanel title="Staff performance">
             <div className="overflow-x-auto">
-              <table className="analytics-table w-full min-w-[820px] text-left text-[11px]">
+              <table className="analytics-table w-full min-w-[820px] text-left">
                 <thead><tr><th className="pb-2">Staff</th><th className="pb-2">Revenue</th><th className="pb-2">Commission</th><th className="pb-2">Jobs</th><th className="pb-2">Utilisation</th><th className="pb-2">Booked</th><th className="pb-2">Available</th></tr></thead>
                 <tbody>{data.staffPerformance.map((row) => (
-                  <tr key={row.id} className="border-t"><td className="py-2.5 font-semibold">{row.name}</td><td>{formatEgp(row.totalCents)}</td><td>{formatEgp(row.commissionEarnedCents)}</td><td>{row.lineItemCount}</td><td>{formatPercent(row.utilizationRate)}</td><td>{formatMinutes(row.bookedMinutes)}</td><td>{formatMinutes(row.availableMinutes)}</td></tr>
+                  <tr key={row.id} className="border-t"><td className="py-3 font-semibold">{row.name}</td><td>{formatEgp(row.totalCents)}</td><td>{formatEgp(row.commissionEarnedCents)}</td><td>{row.lineItemCount}</td><td>{formatPercent(row.utilizationRate)}</td><td>{formatMinutes(row.bookedMinutes)}</td><td>{formatMinutes(row.availableMinutes)}</td></tr>
                 ))}</tbody>
               </table>
             </div>
@@ -63,7 +63,18 @@ export default function StaffAnalyticsPage() {
           <div className="grid gap-3 xl:grid-cols-3">
             <AnalyticsPanel title="Revenue by staff">
               <LollipopChart
-                items={[...data.staffPerformance].sort((a, b) => b.totalCents - a.totalCents).slice(0, 7).map((row) => ({ label: row.name, value: row.totalCents }))}
+                items={[...data.staffPerformance]
+                  .sort((a, b) => b.totalCents - a.totalCents)
+                  .slice(0, 7)
+                  .map((row) => ({
+                    label: row.name,
+                    value: row.totalCents,
+                    tooltip: [
+                      { label: "Revenue", value: formatEgp(row.totalCents) },
+                      { label: "Jobs", value: String(row.lineItemCount) },
+                      { label: "Utilisation", value: formatPercent(row.utilizationRate) },
+                    ],
+                  }))}
                 formatValue={formatEgp}
               />
             </AnalyticsPanel>
@@ -81,13 +92,13 @@ export default function StaffAnalyticsPage() {
             </AnalyticsPanel>
 
             <AnalyticsPanel title="Booked vs available time">
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {data.staffPerformance.slice(0, 7).map((row) => {
                   const total = Math.max(row.availableMinutes, row.bookedMinutes, 1);
                   return (
-                    <div key={row.id}>
-                      <div className="mb-1 flex justify-between text-[10px]"><span className="analytics-muted">{row.name}</span><span>{formatMinutes(row.bookedMinutes)} / {formatMinutes(row.availableMinutes)}</span></div>
-                      <div className="relative h-2 overflow-hidden rounded-full bg-[var(--analytics-grid)]"><div className="absolute inset-y-0 left-0 rounded-full bg-violet-500" style={{ width: `${Math.min((row.bookedMinutes / total) * 100, 100)}%` }} /></div>
+                    <div key={row.id} title={`${row.name}: ${formatMinutes(row.bookedMinutes)} booked, ${formatMinutes(row.availableMinutes)} available, ${formatPercent(row.utilizationRate)} utilisation`}>
+                      <div className="mb-1.5 flex justify-between text-xs"><span className="analytics-muted">{row.name}</span><span>{formatMinutes(row.bookedMinutes)} / {formatMinutes(row.availableMinutes)}</span></div>
+                      <div className="relative h-2.5 overflow-hidden rounded-full bg-[var(--analytics-grid)]"><div className="absolute inset-y-0 left-0 rounded-full bg-violet-500 transition-all hover:brightness-125" style={{ width: `${Math.min((row.bookedMinutes / total) * 100, 100)}%` }} /></div>
                     </div>
                   );
                 })}
