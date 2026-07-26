@@ -1,141 +1,95 @@
-// src/modules/templates/salon/sections/Gallery.tsx
 "use client";
-import { useState, useEffect } from "react";
+
+import { useEffect, useState } from "react";
 import Image from "next/image";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export function Gallery({ photos }: { photos: string[] }) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Auto-play effect: switch image every 4 seconds
-  useEffect(() => {
-    if (photos.length <= 1) return;
-
-    const interval = setInterval(() => {
-      handleNext();
-    }, 4000);
-
-    return () => clearInterval(interval);
-  }, [photos.length]);
-
   const handlePrev = () => {
-    setCurrentIndex((prev) => (prev === 0 ? photos.length - 1 : prev - 1));
+    setCurrentIndex((previous) => (previous === 0 ? photos.length - 1 : previous - 1));
   };
 
   const handleNext = () => {
-    setCurrentIndex((prev) => (prev === photos.length - 1 ? 0 : prev + 1));
+    setCurrentIndex((previous) => (previous === photos.length - 1 ? 0 : previous + 1));
   };
+
+  useEffect(() => {
+    if (photos.length <= 1) return;
+    const interval = window.setInterval(() => {
+      setCurrentIndex((previous) => (previous === photos.length - 1 ? 0 : previous + 1));
+    }, 4500);
+    return () => window.clearInterval(interval);
+  }, [photos.length]);
 
   if (photos.length === 0) return null;
 
   return (
-    <section id="gallery" className="py-24">
-      {/* Header Container */}
-      <div className="px-8 md:px-16 mb-12">
-        <p
-          className="text-xs font-medium uppercase tracking-[0.2em]"
-          style={{ color: "var(--accent)" }}
-        >
-          Gallery
-        </p>
-
-        <h2 className="font-display mt-2 text-4xl text-[#2B2420] md:text-5xl">
-          A Glimpse Inside
-        </h2>
-      </div>
-
-      {/* Carousel Wrapper with Arrows */}
-      <div className="relative mx-auto w-full max-w-7xl px-8 md:px-16 group/carousel">
-        <div className="relative overflow-hidden">
-          <div
-            className="flex gap-6 transition-transform duration-700 ease-out"
-            style={{
-              transform: `translateX(calc(-${currentIndex * 100}% - ${currentIndex * 24}px))`,
-            }}
-          >
-            {photos.map((url, index) => (
-              <div
-                key={`${index}-${url}`}
-                className="relative h-[550px] w-full flex-shrink-0 overflow-hidden rounded-2xl md:h-[700px]"
-              >
-                <Image
-                  src={url}
-                  alt={`Gallery image ${index + 1}`}
-                  fill
-                  priority={index === 0}
-                  sizes="(max-width: 768px) 100vw, 672px"
-                  className="object-cover"
-                />
-                <div className="absolute inset-0 bg-black/5" />
-              </div>
-            ))}
-          </div>
+    <section id="gallery" className="px-6 py-24 md:px-12 lg:px-16 lg:py-32">
+      <div className="mx-auto max-w-7xl">
+        <div className="mx-auto max-w-2xl text-center">
+          <p className="text-xs font-medium uppercase tracking-[0.22em]" style={{ color: "var(--accent)" }}>
+            Our space
+          </p>
+          <h2 className="font-display mt-3 text-4xl text-[#2B2420] md:text-5xl">
+            A space designed for you
+          </h2>
         </div>
 
-        {/* arrows/dots unchanged below */}
-        {/* Navigation Arrows (Visible on hover) */}
-        {photos.length > 1 && (
-          <>
-            <button
-              onClick={handlePrev}
-              className="absolute left-12 top-1/2 -translate-y-1/2 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-white/80 backdrop-blur-sm text-[#2B2420] shadow-md opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-300 hover:bg-white"
-              aria-label="Previous slide"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={2}
-                stroke="currentColor"
-                className="w-5 h-5"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M15.75 19.5L8.25 12l7.5-7.5"
-                />
-              </svg>
-            </button>
-
-            <button
-              onClick={handleNext}
-              className="absolute right-12 top-1/2 -translate-y-1/2 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-white/80 backdrop-blur-sm text-[#2B2420] shadow-md opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-300 hover:bg-white"
-              aria-label="Next slide"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={2}
-                stroke="currentColor"
-                className="w-5 h-5"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M8.25 4.5l7.5 7.5-7.5 7.5"
-                />
-              </svg>
-            </button>
-          </>
-        )}
-
-        {/* Navigation Dots */}
-        {photos.length > 1 && (
-          <div className="mt-6 flex justify-center gap-3">
-            {photos.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentIndex(index)}
-                className={`h-2.5 transition-all duration-300 rounded-full ${
-                  currentIndex === index
-                    ? "w-8 bg-[#2B2420]"
-                    : "w-2.5 bg-[#2B2420]/30 hover:bg-[#2B2420]/60"
+        <div className="group relative mt-12 overflow-hidden rounded-[2rem] bg-[#E8DFD3] shadow-[0_18px_55px_rgba(43,36,32,0.08)]">
+          <div className="relative h-[360px] md:h-[560px] lg:h-[640px]">
+            {photos.map((url, index) => (
+              <Image
+                key={`${url}-${index}`}
+                src={url}
+                alt={`Inside the salon ${index + 1}`}
+                fill
+                priority={index === 0}
+                sizes="(max-width: 768px) 100vw, 1280px"
+                className={`object-cover transition duration-700 ${
+                  currentIndex === index ? "scale-100 opacity-100" : "pointer-events-none scale-[1.02] opacity-0"
                 }`}
-                aria-label={`Go to slide ${index + 1}`}
               />
             ))}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
           </div>
-        )}
+
+          {photos.length > 1 ? (
+            <>
+              <button
+                type="button"
+                onClick={handlePrev}
+                aria-label="Previous image"
+                className="absolute left-4 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-[#2B2420] shadow-lg backdrop-blur transition hover:bg-white md:left-7"
+              >
+                <ChevronLeft size={20} />
+              </button>
+              <button
+                type="button"
+                onClick={handleNext}
+                aria-label="Next image"
+                className="absolute right-4 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-[#2B2420] shadow-lg backdrop-blur transition hover:bg-white md:right-7"
+              >
+                <ChevronRight size={20} />
+              </button>
+
+              <div className="absolute bottom-5 left-1/2 flex -translate-x-1/2 gap-2 rounded-full bg-black/20 px-3 py-2 backdrop-blur-sm">
+                {photos.map((_, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => setCurrentIndex(index)}
+                    aria-label={`Go to image ${index + 1}`}
+                    className={`h-2 rounded-full bg-white transition-all ${
+                      currentIndex === index ? "w-7" : "w-2 opacity-60 hover:opacity-100"
+                    }`}
+                  />
+                ))}
+              </div>
+            </>
+          ) : null}
+        </div>
       </div>
     </section>
   );
