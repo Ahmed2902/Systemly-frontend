@@ -7,6 +7,7 @@ import { PricingSection } from "@/modules/landing/components/PricingSection";
 import { FinalCta } from "@/modules/landing/components/FinalCta";
 import { LandingFooter } from "@/modules/landing/components/LandingFooter";
 import "@/modules/landing/landing-premium.css";
+import "@/modules/landing/landing-operations-demo.css";
 
 export default function LandingPage() {
   return (
