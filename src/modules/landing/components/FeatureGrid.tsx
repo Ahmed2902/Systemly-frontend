@@ -1,25 +1,96 @@
-import { BarChart3, CalendarClock, CalendarDays, Globe2, ReceiptText, Tags } from "lucide-react";
+import {
+  BarChart3,
+  CalendarClock,
+  CalendarDays,
+  Globe2,
+  ReceiptText,
+  Tags,
+} from "lucide-react";
 
-const modules = [
-  { icon: CalendarDays, title: "Online Booking", copy: "Let clients book appointments 24/7 with real-time availability, confirmations and service selection." },
-  { icon: Globe2, title: "Website Builder", copy: "Launch a fast, mobile-friendly website for your salon or clinic without writing code." },
-  { icon: CalendarClock, title: "Calendar & Scheduling", copy: "Coordinate staff, services, resources and multi-staff appointments from one smart calendar." },
-  { icon: Tags, title: "Services & Pricing", copy: "Organise your catalogue, durations, prices, categories and staff eligibility in one place." },
-  { icon: ReceiptText, title: "Invoices & Payments", copy: "Create clear invoices, collect cash payments and keep a reliable financial record." },
-  { icon: BarChart3, title: "Owner Dashboard", copy: "See bookings, revenue, customers, staff performance and growth without exposing analytics to staff." },
+const compactModules = [
+  {
+    icon: CalendarDays,
+    title: "Online booking",
+    copy: "Customers choose services, staff, and available times from your website in Arabic or English.",
+  },
+  {
+    icon: Tags,
+    title: "Services & pricing",
+    copy: "Keep durations, prices, categories, and eligible staff organised in one catalogue.",
+  },
+  {
+    icon: ReceiptText,
+    title: "Invoices & payments",
+    copy: "Collect payment from an appointment, issue a receipt, and void it safely when required.",
+  },
+  {
+    icon: BarChart3,
+    title: "Owner dashboard",
+    copy: "Revenue and performance stay owner-only while reception works from operational pages.",
+  },
 ];
 
 export function FeatureGrid() {
   return (
-    <section className="lp-section lp-fade-section">
+    <section className="lp-section">
       <div className="lp-shell">
-        <div className="text-center">
-          <p className="lp-kicker">Modules</p>
-          <h2 className="lp-title">One system. Everything your <span className="lp-accent-text">business needs.</span></h2>
-          <p className="lp-copy mx-auto max-w-2xl">Hgezli combines your public website, booking journey and daily operations so every part of the business works together.</p>
+        <div className="max-w-3xl">
+          <p className="lp-kicker">Website + operations</p>
+          <h2 className="lp-title">
+            Built around how appointment businesses{" "}
+            <span className="lp-accent-text">actually work.</span>
+          </h2>
+          <p className="lp-copy max-w-2xl">
+            Hgezli connects the customer-facing website to the same services,
+            staff, availability, appointments, customers, and invoices used by
+            the front desk. No duplicate setup and no disconnected tools.
+          </p>
         </div>
-        <div className="lp-grid">
-          {modules.map(({ icon: Icon, title, copy }) => <article className="lp-card lp-feature-card" key={title}><span className="lp-icon-box"><Icon size={24}/></span><h3>{title}</h3><p>{copy}</p></article>)}
+
+        <div className="lp-feature-layout">
+          <article className="lp-card lp-feature-primary">
+            <span className="lp-icon-box"><CalendarClock size={25} /></span>
+            <h3 className="mt-6 text-2xl font-semibold">Calendar & daily operations</h3>
+            <p className="mt-3 max-w-2xl text-sm leading-7 text-[#929991]">
+              Staff stay in rows, time stays in columns, and every service segment
+              appears with the correct person. Multi-service appointments remain
+              one customer journey without hiding who performs each part.
+            </p>
+            <div className="lp-feature-primary-preview" aria-label="Small preview of the Hgezli operations calendar">
+              <div className="mini-toolbar">
+                <span className="mini-chip">Monday, 27 July</span>
+                <span className="mini-chip">All staff</span>
+                <span className="mini-chip">All services</span>
+              </div>
+              <div className="mini-calendar">
+                <div className="font-semibold text-slate-500">Staff</div>
+                <div className="font-semibold text-slate-500">10:00</div>
+                <div className="font-semibold text-slate-500">11:00</div>
+                <div className="font-semibold text-slate-500">12:00</div>
+                <div className="font-semibold text-slate-700">Nour Khalil</div>
+                <div className="col-span-2"><div className="mini-appointment"><strong>Mariam Adel</strong><br/>Haircut & blow-dry</div></div>
+                <div />
+                <div className="font-semibold text-slate-700">Mona Adel</div>
+                <div />
+                <div className="col-span-2"><div className="mini-appointment"><strong>Yasmine Ali</strong><br/>Gel manicure · Nail art</div></div>
+              </div>
+            </div>
+          </article>
+
+          <div className="lp-feature-stack">
+            <article className="lp-card lp-feature-compact">
+              <span className="lp-icon-box"><Globe2 size={22}/></span>
+              <h3>Website builder</h3>
+              <p>Your site reads directly from the business content, services, team, and booking setup you manage in Hgezli.</p>
+            </article>
+            {compactModules.map(({ icon: Icon, title, copy }) => (
+              <article className="lp-card lp-feature-compact" key={title}>
+                <span className="lp-icon-box"><Icon size={22}/></span>
+                <h3>{title}</h3>
+                <p>{copy}</p>
+              </article>
+            ))}
+          </div>
         </div>
       </div>
     </section>
