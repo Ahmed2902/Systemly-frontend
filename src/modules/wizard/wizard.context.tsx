@@ -35,7 +35,7 @@ const initialState: WizardState = {
   logoUrl: null,
   galleryPhotoUrls: [],
   primaryColor: "#0E6B4D",
-  sectionOrder: ["hero", "about", "services", "gallery", "team", "contact", "faq"],
+  sectionOrder: ["hero", "services", "team", "gallery", "about", "faq", "contact"],
   showTeam: true,
   showFaq: true,
   instagram: "",
