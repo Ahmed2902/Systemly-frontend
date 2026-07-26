@@ -1,19 +1,12 @@
 import { notFound } from "next/navigation";
-import { getTemplateById } from "@/modules/templates/template-registry";
-import type { SalonTemplateData } from "@/modules/templates/salon/salon.types";
+import { resolveTemplateForVertical } from "@/modules/templates/template-registry";
+import type { TemplateData, TemplateVertical } from "@/modules/templates/template.types";
 import { apiUrl } from "../../shared/lib/api-url";
 
 async function getBusiness(slug: string) {
-  const url = apiUrl(`/businesses/public/${slug}`);
-  const res = await fetch(url, {
-    cache: "no-store",
-  });
+  const res = await fetch(apiUrl(`/businesses/public/${slug}`), { cache: "no-store" });
   if (res.status === 404) return null;
-  if (!res.ok) {
-    throw new Error(
-      `Failed to load business: ${res.status} ${await res.text()}`,
-    );
-  }
+  if (!res.ok) throw new Error(`Failed to load business: ${res.status} ${await res.text()}`);
   const json = await res.json();
   return json.data;
 }
@@ -25,80 +18,66 @@ export default async function PublicBusinessPage({
 }) {
   const { slug } = await params;
   const business = await getBusiness(slug);
-
   if (!business) notFound();
 
-  const content = business.websiteContent;
-  const template = getTemplateById(content?.template ?? "aura-wellness");
+  const vertical = business.vertical as TemplateVertical;
+  if (vertical !== "salon" && vertical !== "clinic") notFound();
 
+  const content = business.websiteContent;
+  const template = resolveTemplateForVertical(content?.template ?? "", vertical);
   if (!template) notFound();
 
   const legacyHeroUrl = business.photos.find(
     (photo: { kind: string; url: string }) => photo.kind === "hero",
   )?.url;
 
-  const templateData: SalonTemplateData = {
+  const commonData = {
     businessName: business.name,
     tagline: content?.tagline ?? "",
-    vertical: business.vertical,
-    template: content?.template ?? "",
+    template: template.id,
     aboutText: content?.aboutText ?? "",
     logoUrl: business.logoUrl ?? null,
     heroPhotoUrl: business.coverUrl ?? legacyHeroUrl ?? null,
     galleryPhotoUrls: business.photos
       .filter((photo: { kind: string; url: string }) => photo.kind === "gallery")
-      .map((photo: { kind: string; url: string }) => photo.url),
-    primaryColor: content?.primaryColor ?? "#2B2420",
-    sectionOrder: content?.sectionOrder ?? [
-      "hero",
-      "about",
-      "services",
-      "gallery",
-      "team",
-      "contact",
-      "faq",
-    ],
+      .map((photo: { url: string }) => photo.url),
+    primaryColor: content?.primaryColor ?? (vertical === "clinic" ? "#0f766e" : "#8C5A3C"),
+    sectionOrder: content?.sectionOrder ?? ["hero", "about", "services", "gallery", "team", "contact", "faq"],
     showTeam: content?.showTeam ?? true,
     showFaq: content?.showFaq ?? true,
-    services: business.services.map(
-      (service: {
-        id: string;
-        name: string;
-        category?: string;
-        priceEgp: number;
-        durationMin: number;
-      }) => ({
-        id: service.id,
-        name: service.name,
-        category: service.category ?? undefined,
-        priceEgp: Number(service.priceEgp),
-        durationMin: service.durationMin,
-      }),
-    ),
-    staff: business.staff.map(
-      (staff: {
-        id: string;
-        name: string;
-        role: string;
-        photoUrl?: string | null;
-      }) => ({
-        id: staff.id,
-        name: staff.name,
-        role: staff.role,
-        photoUrl: staff.photoUrl,
-      }),
-    ),
-    faqs: business.faqs.map(
-      (faq: { question: string; answer: string }) => ({
-        question: faq.question,
-        answer: faq.answer,
-      }),
-    ),
+    services: business.services.map((service: any) => ({
+      id: service.id,
+      name: service.name,
+      category: service.category ?? undefined,
+      description: service.description ?? null,
+      priceEgp: Number(service.priceEgp),
+      durationMin: service.durationMin,
+    })),
+    staff: business.staff.map((staff: any) => ({
+      id: staff.id,
+      name: staff.name,
+      role: staff.role,
+      jobTitle: staff.jobTitle ?? null,
+      bio: staff.bio ?? null,
+      yearsExperience: staff.yearsExperience ?? null,
+      photoUrl: staff.photoUrl ?? null,
+    })),
+    faqs: business.faqs.map((faq: any) => ({ question: faq.question, answer: faq.answer })),
     phone: business.phone,
     address: business.address ?? undefined,
+    city: business.city ?? undefined,
     instagram: content?.instagramUrl ?? undefined,
     whatsapp: content?.whatsappNumber ?? undefined,
+    timezone: business.timezone || "Africa/Cairo",
+    language: business.language === "ar" ? "ar" : "en",
+    bookingHref: `/${slug}/book`,
+    previewMode: false,
   };
 
-  return template.component(templateData);
+  const templateData: TemplateData = vertical === "clinic"
+    ? { ...commonData, vertical: "clinic" }
+    : { ...commonData, vertical: "salon" };
+  const Template = template.component;
+
+  return <Template {...templateData} />;
 }
