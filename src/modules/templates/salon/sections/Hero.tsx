@@ -1,32 +1,27 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation"; // 1. Import useParams
 
 export function Hero({
   tagline,
   heroPhotoUrl,
+  bookingHref,
+  previewMode = false,
 }: {
   tagline: string;
   heroPhotoUrl: string | null;
+  bookingHref: string;
+  previewMode?: boolean;
 }) {
-  const words = tagline.trim().split(" ");
-  const lastWord = words.pop() ?? "";
-  const leadWords = words.join(" ");
-
-  // 2. Grab the business slug safely from the router state
-  const params = useParams();
-  const slug = params?.slug || "";
+  const words = tagline.trim().split(" ").filter(Boolean);
+  const lastWord = words.pop() ?? "you";
+  const leadWords = words.join(" ") || "Beauty that feels like";
 
   return (
     <section className="relative">
       <div className="absolute inset-0">
         {heroPhotoUrl ? (
-          <img
-            src={heroPhotoUrl}
-            alt=""
-            className="h-full w-full object-cover"
-          />
+          <img src={heroPhotoUrl} alt="" className="h-full w-full object-cover" />
         ) : (
           <div className="h-full w-full bg-[#E8DFD3]" />
         )}
@@ -34,41 +29,34 @@ export function Hero({
       </div>
 
       <div className="relative px-8 py-28 md:px-16 md:py-40">
-        <p
-          className="text-xs font-medium uppercase tracking-[0.2em]"
-          style={{ color: "var(--accent)" }}
-        >
-          A sanctuary of style
+        <p className="text-xs font-medium uppercase tracking-[0.2em]" style={{ color: "var(--accent)" }}>
+          Personal care, beautifully organised
         </p>
         <h1 className="font-display mt-4 max-w-xl text-5xl leading-[1.1] text-[#2B2420] md:text-6xl">
           {leadWords}{" "}
-          <span
-            className="italic font-medium"
-            style={{ color: "var(--accent)" }}
-          >
+          <span className="font-medium italic" style={{ color: "var(--accent)" }}>
             {lastWord}
           </span>
         </h1>
         <p className="mt-6 max-w-md text-sm leading-relaxed text-[#5C5349]">
-          Bespoke beauty and wellness services, tailored to your unique essence.
+          Explore services, meet the team, and reserve an appointment from one simple website.
         </p>
-        <div className="mt-8 flex gap-3">
-          {/* 3. Uses the dynamically determined URL parameter */}
+        <div className="mt-8 flex flex-wrap gap-3">
           <Link
-            href={`/${slug}/book`}
-            className="rounded-sm px-6 py-3 text-xs font-medium uppercase tracking-wider text-white text-center transition-opacity hover:opacity-90"
+            href={bookingHref}
+            aria-disabled={previewMode}
+            onClick={previewMode ? (event) => event.preventDefault() : undefined}
+            className="rounded-sm px-6 py-3 text-center text-xs font-medium uppercase tracking-wider text-white transition-opacity hover:opacity-90"
             style={{ backgroundColor: "var(--accent)" }}
-              scroll={false}
-
+            scroll={false}
           >
-            Reserve Your Moment
+            Reserve your moment
           </Link>
-
           <a
             href="#services"
-            className="rounded-sm border border-[#2B2420]/20 px-6 py-3 text-xs font-medium uppercase tracking-wider text-[#2B2420] text-center transition-colors hover:bg-[#2B2420]/5"
+            className="rounded-sm border border-[#2B2420]/20 px-6 py-3 text-center text-xs font-medium uppercase tracking-wider text-[#2B2420] transition-colors hover:bg-[#2B2420]/5"
           >
-            Explore Services
+            Explore services
           </a>
         </div>
       </div>
