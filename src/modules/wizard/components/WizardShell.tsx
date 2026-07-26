@@ -32,25 +32,29 @@ export function WizardShell() {
 
   return (
     <main className="onboarding-systerra">
-      <div className="onboarding-shell">
-        <header className="onboarding-topbar">
-          <div className="onboarding-brand">
-            <span className="onboarding-brand-mark">H</span>
-            <span>Hgezli</span>
-          </div>
-          <div className="onboarding-top-actions">
-            <button type="button" className="onboarding-ghost-button">
-              <HelpCircle size={16} className="mr-2 inline" />Help
-            </button>
-            <button type="button" onClick={handleSaveDraft} className="onboarding-ghost-button">
-              <CloudUpload size={16} className="mr-2 inline" />
-              {saved ? "Draft saved" : "Save draft"}
-            </button>
-          </div>
-        </header>
+      <header className="onboarding-topbar">
+        <div className="onboarding-brand">
+          <span className="onboarding-brand-mark">H</span>
+          <span>Hgezli</span>
+        </div>
 
+        <div className="onboarding-top-actions">
+          <button type="button" className="onboarding-nav-link">How it works</button>
+          <button type="button" className="onboarding-nav-link">Industries</button>
+          <button type="button" className="onboarding-nav-link">Pricing</button>
+          <button type="button" className="onboarding-nav-link">Resources</button>
+          <button type="button" className="onboarding-ghost-button">
+            <HelpCircle size={16} className="mr-2 inline" />Help
+          </button>
+          <button type="button" onClick={handleSaveDraft} className="onboarding-ghost-button">
+            <CloudUpload size={16} className="mr-2 inline" />
+            {saved ? "Draft saved" : "Save draft"}
+          </button>
+        </div>
+      </header>
+
+      <div className="onboarding-shell">
         <div className="onboarding-progress-wrap">
-          <p className="onboarding-progress-kicker">Set up your workspace</p>
           <nav className="onboarding-progress" aria-label="Onboarding progress">
             {steps.map((step, index) => {
               const status = index < stepIndex ? "is-complete" : index === stepIndex ? "is-active" : "";
@@ -61,14 +65,13 @@ export function WizardShell() {
                   disabled={index > stepIndex}
                   onClick={() => index <= stepIndex && setStepIndex(index)}
                   className={`onboarding-progress-step ${status}`}
+                  aria-current={index === stepIndex ? "step" : undefined}
+                  title={`${step.label}: ${step.hint}`}
                 >
                   <span className="onboarding-progress-number">
-                    {index < stepIndex ? <Check size={14} /> : index + 1}
+                    {index < stepIndex ? <Check size={13} /> : index + 1}
                   </span>
-                  <span className="onboarding-progress-copy">
-                    <strong>{step.label}</strong>
-                    <span>{step.hint}</span>
-                  </span>
+                  <span className="onboarding-progress-label">{step.label}</span>
                 </button>
               );
             })}
