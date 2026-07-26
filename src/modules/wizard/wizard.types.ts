@@ -1,5 +1,3 @@
-// src/modules/wizard/wizard.types.ts
-
 export type StepProps = {
   onNext: () => void;
   onBack: () => void;
@@ -11,13 +9,14 @@ export type WizardService = {
   clientId: string;
   name: string;
   category?: string;
+  description?: string;
   durationMin: number;
   priceEgp: number;
 };
 
 export type AvailabilityEntry = {
   dayOfWeek: number;
-  startTime: string; // "HH:mm"
+  startTime: string;
   endTime: string;
 };
 
@@ -25,7 +24,10 @@ export type WizardStaffMember = {
   id: string;
   clientId: string;
   name: string;
-  role: string;
+  role: "Staff" | "Receptionist";
+  jobTitle?: string;
+  bio?: string;
+  yearsExperience?: number;
   photoUrl?: string;
   serviceIds: string[];
   availability: AvailabilityEntry[];
@@ -38,13 +40,15 @@ export type WizardFaq = {
 };
 
 export type WizardState = {
-  vertical: string | null;
+  vertical: "salon" | "clinic" | null;
   template: string;
   name: string;
   slug: string;
   phone: string;
   city: string;
   address: string;
+  timezone: string;
+  language: "en" | "ar";
   services: WizardService[];
   staff: WizardStaffMember[];
   tagline: string;
