@@ -6,50 +6,14 @@ import {
   getTemplatesForVertical,
   getTemplateById,
 } from "../../templates/template-registry";
-import type { SalonTemplateData } from "@/modules/templates/salon/salon.types";
-import hero from "../../../../images/hero.jpg";
+import { wizardStateToTemplateData } from "../wizard.preview";
 
 export function LivePreviewPane({ expanded = false }: { expanded?: boolean }) {
   const { state, patch } = useWizard();
   const vertical = (state.vertical ?? "salon") as "salon" | "clinic";
   const options = getTemplatesForVertical(vertical);
   const activeTemplate = getTemplateById(state.template) ?? options[0];
-
-  const templateData: SalonTemplateData = {
-    businessName: state.name,
-    tagline: state.tagline,
-    vertical,
-    template: state.template,
-    aboutText: state.aboutText,
-    heroPhotoUrl: state.heroPhotoUrl ?? hero.src,
-    logoUrl: state.logoUrl ?? null,
-    galleryPhotoUrls: state.galleryPhotoUrls,
-    primaryColor: state.primaryColor,
-    sectionOrder: state.sectionOrder,
-    showTeam: state.showTeam,
-    showFaq: state.showFaq,
-    services: state.services.map((s) => ({
-      id: s.clientId,
-      name: s.name,
-      category: s.category,
-      priceEgp: s.priceEgp,
-      durationMin: s.durationMin,
-    })),
-    staff: state.staff.map((s) => ({
-      id: s.clientId,
-      name: s.name,
-      role: s.role,
-      photoUrl: s.photoUrl ?? null,
-    })),
-    faqs: state.faqs.map((f) => ({
-      question: f.question,
-      answer: f.answer,
-    })),
-    phone: state.phone,
-    address: state.address,
-    instagram: state.instagram,
-    whatsapp: state.whatsapp,
-  };
+  const templateData = wizardStateToTemplateData(state);
 
   return (
     <div className="overflow-hidden rounded-lg border border-[var(--onboarding-border)] bg-[#080a09]">
@@ -82,7 +46,7 @@ export function LivePreviewPane({ expanded = false }: { expanded?: boolean }) {
       </div>
 
       <div className={`onboarding-live-preview-scroll ${expanded ? "is-expanded" : ""}`}>
-        <ScaledPreview baseWidth={800}>
+        <ScaledPreview baseWidth={1280}>
           {activeTemplate?.component(templateData)}
         </ScaledPreview>
       </div>

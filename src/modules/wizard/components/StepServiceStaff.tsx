@@ -1,9 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { BriefcaseBusiness, Clock3, Plus, Trash2, Users } from "lucide-react";
+import { BriefcaseBusiness, Clock3, ImagePlus, Plus, Trash2, Upload, Users, X } from "lucide-react";
 import { useWizard } from "../wizard.context";
 import { StepProps, WizardService, WizardStaffMember } from "../wizard.types";
+import { uploadImage } from "../wizard.api";
 
 const STAFF_ROLE_OPTIONS = ["Staff", "Receptionist"];
 const uid = () => Math.random().toString(36).slice(2, 10);
@@ -17,6 +18,7 @@ function normalizeCategory(value: string) {
 export function StepServicesStaff({ onNext, onBack }: StepProps) {
   const { state, patch } = useWizard();
   const [error, setError] = useState<string | null>(null);
+  const [uploadingStaffId, setUploadingStaffId] = useState<string | null>(null);
 
   const categories = useMemo(
     () =>
@@ -83,6 +85,21 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
         member.clientId === clientId ? { ...member, ...updates } : member,
       ),
     });
+  }
+
+  async function uploadStaffPhoto(clientId: string, file?: File) {
+    if (!file) return;
+    setUploadingStaffId(clientId);
+    setError(null);
+    try {
+      const { url } = await uploadImage(file);
+      updateStaff(clientId, { photoUrl: url });
+    } catch (uploadError) {
+      console.error(uploadError);
+      setError("The staff photo could not be uploaded. Please try again.");
+    } finally {
+      setUploadingStaffId(null);
+    }
   }
 
   function toggleStaffService(staffId: string, serviceId: string) {
@@ -224,7 +241,19 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
           <div className="mt-5 space-y-3">
             {state.staff.map((member) => (
               <article key={member.clientId} className="onboarding-choice p-4">
-                <div className="grid gap-4 lg:grid-cols-[minmax(220px,.9fr)_150px_minmax(260px,1.2fr)_40px] lg:items-center">
+                <div className="grid gap-4 lg:grid-cols-[120px_minmax(220px,.9fr)_150px_minmax(260px,1.2fr)_40px] lg:items-center">
+                  <div className="onboarding-field">
+                    <label>Photo</label>
+                    <div className="relative overflow-hidden rounded-xl border border-dashed border-[var(--onboarding-border-strong)]">
+                      {member.photoUrl ? <img src={member.photoUrl} alt={`${member.name || "Team member"} profile`} className="h-24 w-full object-cover" /> : null}
+                      <label className={`flex h-24 cursor-pointer flex-col items-center justify-center gap-1 text-center text-[11px] text-[var(--onboarding-muted)] ${member.photoUrl ? "absolute inset-0 bg-black/55 opacity-0 hover:opacity-100" : ""}`}>
+                        {member.photoUrl ? <Upload size={16} /> : <ImagePlus size={19} />}
+                        {uploadingStaffId === member.clientId ? "Uploading…" : member.photoUrl ? "Replace" : "Add photo"}
+                        <input type="file" accept="image/*" className="hidden" disabled={uploadingStaffId === member.clientId} onChange={(event) => uploadStaffPhoto(member.clientId, event.target.files?.[0])} />
+                      </label>
+                      {member.photoUrl ? <button type="button" onClick={() => updateStaff(member.clientId, { photoUrl: undefined })} className="absolute right-1 top-1 grid h-6 w-6 place-items-center rounded-full bg-black/75" aria-label={`Remove ${member.name || "team member"} photo`}><X size={12} /></button> : null}
+                    </div>
+                  </div>
                   <div>
                     <input
                       value={member.name}

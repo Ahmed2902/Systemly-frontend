@@ -1,6 +1,6 @@
 import { JSX } from "react";
 import { SalonTemplate } from "./salon/SalonTemplate";
-import type { SalonTemplateData } from "./salon/salon.types";
+import type { TemplateData } from "./template.types";
 import type { TemplateTheme } from "./theme.types";
 import { auraWellnessTheme } from "./salon/salon.theme";
 
@@ -10,7 +10,7 @@ export type TemplateDefinition = {
   id: string;
   label: string;
   vertical: TemplateVertical;
-  component: (data: SalonTemplateData) => JSX.Element;
+  component: (data: TemplateData) => JSX.Element;
   theme: TemplateTheme;
 };
 

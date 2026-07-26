@@ -1,4 +1,4 @@
-import { SalonTemplateData } from "./salon.types";
+import type { TemplateData } from "../template.types";
 import { Nav } from "./sections/Nav";
 import { Hero } from "./sections/Hero";
 import { About } from "./sections/About";
@@ -12,7 +12,7 @@ import hero from "../../../../images/hero.jpg";
 
 const defaultHero = hero.src;
 
-export function SalonTemplate(data: SalonTemplateData) {
+export function SalonTemplate(data: TemplateData) {
   const sectionMap: Record<string, React.ReactNode> = {
     hero: (
       <Hero

@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Check, ImagePlus, Monitor, Smartphone, Upload, X } from "lucide-react";
+import { Check, ExternalLink, ImagePlus, Monitor, Smartphone, Upload, X } from "lucide-react";
 import { useWizard } from "../wizard.context";
 import { StepProps } from "../wizard.types";
 import { uploadImage } from "../wizard.api";
+import { WIZARD_PREVIEW_STORAGE_KEY } from "../wizard.preview";
 import { LivePreviewPane } from "./LivePreviewPane";
 import { SectionOrderList } from "./SectionOrderList";
 import { FaqEditor } from "./FaqEditor";
@@ -35,7 +36,16 @@ export function StepCustomizePreview({ onNext, onBack }: StepProps) {
     }
   }
 
-  const templates = getTemplatesForVertical(state.vertical);
+  const templates = getTemplatesForVertical((state.vertical ?? "salon") as "salon" | "clinic");
+
+  function openPreview() {
+    try {
+      window.localStorage.setItem(WIZARD_PREVIEW_STORAGE_KEY, JSON.stringify(state));
+    } catch (storageError) {
+      console.warn("Unable to prepare website preview", storageError);
+    }
+    window.open("/preview", "_blank", "noopener,noreferrer");
+  }
 
   return (
     <div className="onboarding-website-step">
@@ -185,24 +195,29 @@ export function StepCustomizePreview({ onNext, onBack }: StepProps) {
             <div>
               <h2 className="text-xl font-semibold">Live preview</h2>
               <p className="mt-1 text-sm text-[var(--onboarding-muted)]">
-                The preview now uses most of the screen so you can properly review the real website.
+                Review your website at a comfortable scale before launch.
               </p>
             </div>
-            <div className="flex rounded-lg border border-[var(--onboarding-border)] p-1">
-              <button
-                type="button"
-                onClick={() => setDevice("desktop")}
-                className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm ${device === "desktop" ? "bg-[var(--onboarding-mint)] text-white" : "text-[var(--onboarding-muted)]"}`}
-              >
-                <Monitor size={16} />Desktop
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              <button type="button" onClick={openPreview} className="onboarding-secondary-button !min-h-10 !px-3">
+                <ExternalLink size={15} className="mr-2 inline" />Preview
               </button>
-              <button
-                type="button"
-                onClick={() => setDevice("mobile")}
-                className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm ${device === "mobile" ? "bg-[var(--onboarding-mint)] text-white" : "text-[var(--onboarding-muted)]"}`}
-              >
-                <Smartphone size={16} />Mobile
-              </button>
+              <div className="flex rounded-lg border border-[var(--onboarding-border)] p-1">
+                <button
+                  type="button"
+                  onClick={() => setDevice("desktop")}
+                  className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm ${device === "desktop" ? "bg-[var(--onboarding-mint)] text-white" : "text-[var(--onboarding-muted)]"}`}
+                >
+                  <Monitor size={16} />Desktop
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDevice("mobile")}
+                  className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm ${device === "mobile" ? "bg-[var(--onboarding-mint)] text-white" : "text-[var(--onboarding-muted)]"}`}
+                >
+                  <Smartphone size={16} />Mobile
+                </button>
+              </div>
             </div>
           </div>
 

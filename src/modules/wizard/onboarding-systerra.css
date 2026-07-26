@@ -275,7 +275,7 @@
 }
 
 .onboarding-grid-preview {
-  grid-template-columns: minmax(300px, 0.42fr) minmax(680px, 1.58fr);
+  grid-template-columns: minmax(390px, 0.56fr) minmax(560px, 1.44fr);
   align-items: start;
 }
 
@@ -632,7 +632,7 @@
 
 @media (max-width: 1240px) {
   .onboarding-grid-preview {
-    grid-template-columns: minmax(300px, 0.55fr) minmax(560px, 1.45fr);
+    grid-template-columns: minmax(360px, 0.62fr) minmax(520px, 1.38fr);
   }
 }
 

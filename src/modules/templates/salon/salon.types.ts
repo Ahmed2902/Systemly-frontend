@@ -3,7 +3,7 @@
 export type SalonTemplateData = {
   businessName: string;
   tagline: string;
-  vertical: "salon" | "clinic";
+  vertical: "salon";
   template: string;
   aboutText: string;
   heroPhotoUrl: string | null;
