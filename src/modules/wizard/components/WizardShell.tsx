@@ -32,33 +32,48 @@ export function WizardShell() {
 
   return (
     <main className="onboarding-systerra">
-      <div
-        className="onboarding-shell"
-        style={{ width: "min(1320px, calc(100% - 24px))", padding: "16px 0 26px" }}
-      >
-        <header className="onboarding-topbar" style={{ paddingBottom: 14 }}>
-          <div className="onboarding-brand"><span className="onboarding-brand-mark">H</span>Hgezli</div>
+      <div className="onboarding-shell">
+        <header className="onboarding-topbar">
+          <div className="onboarding-brand">
+            <span className="onboarding-brand-mark">H</span>
+            <span>Hgezli</span>
+          </div>
           <div className="onboarding-top-actions">
-            <button type="button" className="onboarding-ghost-button"><HelpCircle size={16} className="mr-2 inline" />Help</button>
-            <button type="button" onClick={handleSaveDraft} className="onboarding-ghost-button"><CloudUpload size={16} className="mr-2 inline" />{saved ? "Draft saved" : "Save draft"}</button>
+            <button type="button" className="onboarding-ghost-button">
+              <HelpCircle size={16} className="mr-2 inline" />Help
+            </button>
+            <button type="button" onClick={handleSaveDraft} className="onboarding-ghost-button">
+              <CloudUpload size={16} className="mr-2 inline" />
+              {saved ? "Draft saved" : "Save draft"}
+            </button>
           </div>
         </header>
 
-        <nav
-          className="onboarding-progress"
-          aria-label="Onboarding progress"
-          style={{ maxWidth: 900, margin: "16px auto 18px" }}
-        >
-          {steps.map((step, index) => {
-            const status = index < stepIndex ? "is-complete" : index === stepIndex ? "is-active" : "";
-            return (
-              <button type="button" key={step.label} disabled={index > stepIndex} onClick={() => index <= stepIndex && setStepIndex(index)} className={`onboarding-progress-step ${status}`}>
-                <span className="onboarding-progress-number">{index < stepIndex ? <Check size={15} /> : index + 1}</span>
-                <span className="onboarding-progress-copy"><strong>{step.label}</strong><span>{step.hint}</span></span>
-              </button>
-            );
-          })}
-        </nav>
+        <div className="onboarding-progress-wrap">
+          <p className="onboarding-progress-kicker">Set up your workspace</p>
+          <nav className="onboarding-progress" aria-label="Onboarding progress">
+            {steps.map((step, index) => {
+              const status = index < stepIndex ? "is-complete" : index === stepIndex ? "is-active" : "";
+              return (
+                <button
+                  type="button"
+                  key={step.label}
+                  disabled={index > stepIndex}
+                  onClick={() => index <= stepIndex && setStepIndex(index)}
+                  className={`onboarding-progress-step ${status}`}
+                >
+                  <span className="onboarding-progress-number">
+                    {index < stepIndex ? <Check size={14} /> : index + 1}
+                  </span>
+                  <span className="onboarding-progress-copy">
+                    <strong>{step.label}</strong>
+                    <span>{step.hint}</span>
+                  </span>
+                </button>
+              );
+            })}
+          </nav>
+        </div>
 
         <section key={stepIndex} className="onboarding-stage">
           <StepComponent
