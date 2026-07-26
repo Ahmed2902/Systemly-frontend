@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getTemplateById } from "@/modules/templates/template-registry";
+import { resolveTemplateForVertical } from "@/modules/templates/template-registry";
 import {
   WIZARD_PREVIEW_STORAGE_KEY,
   wizardStateToTemplateData,
@@ -26,15 +26,17 @@ export default function PreviewPage() {
         <div>
           <h1 className="text-2xl font-semibold">Preview unavailable</h1>
           <p className="mt-2 text-sm text-[#999d96]">
-            Return to the website customizer and open Preview again.
+            Return to the website customiser and open Preview again.
           </p>
         </div>
       </main>
     );
   }
 
-  const template = getTemplateById(state.template);
+  const vertical = state.vertical ?? "salon";
+  const template = resolveTemplateForVertical(state.template, vertical);
   if (!template) return null;
+  const Template = template.component;
 
-  return template.component(wizardStateToTemplateData(state));
+  return <Template {...wizardStateToTemplateData(state)} />;
 }

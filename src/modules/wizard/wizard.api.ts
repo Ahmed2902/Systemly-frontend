@@ -1,5 +1,4 @@
-// src/modules/wizard/wizard.api.ts
-import { WizardState } from "./wizard.types";
+import type { WizardState } from "./wizard.types";
 import { api } from "@/shared/lib/api";
 import { apiUrl } from "@/shared/lib/api-url";
 
@@ -16,52 +15,32 @@ export async function checkSlugAvailability(slug: string): Promise<boolean> {
   return json.available;
 }
 
-/**
- * High-performance Direct-to-Cloud Upload
- * 1. Requests a secure presigned upload ticket from Express backend
- * 2. Uploads binary data straight to Supabase Storage CDN
- */
-export async function uploadImage(
-  file: File,
-): Promise<{ url: string; publicId: string }> {
+export async function uploadImage(file: File): Promise<{ url: string; publicId: string }> {
   const fileExt = file.name.split(".").pop() || "jpg";
-  const uniqueId =
-    typeof crypto.randomUUID === "function"
-      ? crypto.randomUUID()
-      : Math.random().toString(36).slice(2);
+  const uniqueId = typeof crypto.randomUUID === "function"
+    ? crypto.randomUUID()
+    : Math.random().toString(36).slice(2);
   const storagePath = `gallery/${uniqueId}.${fileExt}`;
 
   const presignRes = await fetch(apiUrl("/photos/gallery/presign"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
-    body: JSON.stringify({
-      filePath: storagePath,
-      contentType: file.type,
-    }),
+    body: JSON.stringify({ filePath: storagePath, contentType: file.type }),
   });
 
   const presignJson = await presignRes.json();
-  if (!presignRes.ok || presignJson.success === false) {
-    throw presignJson;
-  }
+  if (!presignRes.ok || presignJson.success === false) throw presignJson;
 
   const { uploadUrl, publicUrl } = presignJson.data;
-
   const cloudRes = await fetch(uploadUrl, {
     method: "PUT",
     headers: { "Content-Type": file.type },
     body: file,
   });
+  if (!cloudRes.ok) throw new Error("Direct cloud storage delivery transaction failed.");
 
-  if (!cloudRes.ok) {
-    throw new Error("Direct cloud storage delivery transaction failed.");
-  }
-
-  return {
-    url: publicUrl,
-    publicId: storagePath,
-  };
+  return { url: publicUrl, publicId: storagePath };
 }
 
 export async function submitOnboarding(state: WizardState) {
@@ -73,6 +52,8 @@ export async function submitOnboarding(state: WizardState) {
     phone: state.phone,
     city: state.city,
     address: state.address,
+    timezone: state.timezone,
+    language: state.language,
     tagline: state.tagline,
     aboutText: state.aboutText,
     logoUrl: state.logoUrl || undefined,
@@ -87,21 +68,25 @@ export async function submitOnboarding(state: WizardState) {
     services: state.services.map((service) => ({
       clientId: service.clientId,
       name: service.name.trim(),
-      category: normalizeCategory(service.category || ""),
+      category: normalizeCategory(service.category || "") || undefined,
+      description: service.description?.trim() || undefined,
       priceEgp: service.priceEgp,
       durationMin: service.durationMin,
     })),
     staff: state.staff.map((staffMember) => ({
       clientId: staffMember.clientId,
-      name: staffMember.name,
+      name: staffMember.name.trim(),
       role: staffMember.role,
+      jobTitle: staffMember.jobTitle?.trim() || undefined,
+      bio: staffMember.bio?.trim() || undefined,
+      yearsExperience: staffMember.yearsExperience,
       photoUrl: staffMember.photoUrl || undefined,
       serviceClientIds: staffMember.serviceIds,
       availability: staffMember.availability,
     })),
     faqs: state.faqs.map((faq) => ({
-      question: faq.question,
-      answer: faq.answer,
+      question: faq.question.trim(),
+      answer: faq.answer.trim(),
     })),
   };
 

@@ -1,4 +1,4 @@
-import type { TemplateData } from "../template.types";
+import type { SalonTemplateData } from "./salon.types";
 import { Nav } from "./sections/Nav";
 import { Hero } from "./sections/Hero";
 import { About } from "./sections/About";
@@ -12,17 +12,17 @@ import hero from "../../../../images/hero.jpg";
 
 const defaultHero = hero.src;
 
-export function SalonTemplate(data: TemplateData) {
+export function SalonTemplate(data: SalonTemplateData) {
   const sectionMap: Record<string, React.ReactNode> = {
     hero: (
       <Hero
         tagline={data.tagline}
         heroPhotoUrl={data.heroPhotoUrl || defaultHero}
+        bookingHref={data.bookingHref}
+        previewMode={data.previewMode}
       />
     ),
-    about: (
-      <About businessName={data.businessName} aboutText={data.aboutText} />
-    ),
+    about: <About businessName={data.businessName} aboutText={data.aboutText} />,
     services: <Services services={data.services} />,
     gallery: <Gallery photos={data.galleryPhotoUrls} />,
     team: data.showTeam ? <Team staff={data.staff} /> : null,
@@ -39,19 +39,19 @@ export function SalonTemplate(data: TemplateData) {
   return (
     <div
       className="font-body bg-[#F7F3EE]"
-      style={
-        { "--accent": data.primaryColor || "#8C5A3C" } as React.CSSProperties
-      }
+      dir={data.language === "ar" ? "rtl" : "ltr"}
+      style={{ "--accent": data.primaryColor || "#8C5A3C" } as React.CSSProperties}
     >
-      <Nav businessName={data.businessName} logoUrl={data.logoUrl} />
-      {data.sectionOrder.map((key) => (
-        <div key={key}>{sectionMap[key]}</div>
-      ))}
-      <Footer
+      <Nav
         businessName={data.businessName}
-        phone={data.phone}
-        address={data.address}
+        logoUrl={data.logoUrl}
+        bookingHref={data.bookingHref}
+        previewMode={data.previewMode}
       />
+      {data.sectionOrder.map((key) => (
+        <div key={key}>{sectionMap[key] ?? null}</div>
+      ))}
+      <Footer businessName={data.businessName} phone={data.phone} address={data.address} />
     </div>
   );
 }

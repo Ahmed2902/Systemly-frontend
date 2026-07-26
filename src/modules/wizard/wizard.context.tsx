@@ -9,7 +9,11 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { WizardState } from "./wizard.types";
+import {
+  getDefaultTemplateId,
+  isTemplateValidForVertical,
+} from "@/modules/templates/template-registry";
+import type { WizardState } from "./wizard.types";
 
 const DRAFT_STORAGE_KEY = "hgezli:onboarding-draft:v1";
 
@@ -21,6 +25,8 @@ const initialState: WizardState = {
   phone: "",
   city: "",
   address: "",
+  timezone: "Africa/Cairo",
+  language: "en",
   services: [],
   staff: [],
   tagline: "",
@@ -37,17 +43,25 @@ const initialState: WizardState = {
   faqs: [],
 };
 
+function normalizeState(value: Partial<WizardState>): WizardState {
+  const merged = { ...initialState, ...value };
+  const template = merged.vertical && isTemplateValidForVertical(merged.template, merged.vertical)
+    ? merged.template
+    : getDefaultTemplateId(merged.vertical);
+  return { ...merged, template };
+}
+
 type Action =
   | { type: "PATCH"; payload: Partial<WizardState> }
-  | { type: "RESTORE"; payload: WizardState }
+  | { type: "RESTORE"; payload: Partial<WizardState> }
   | { type: "RESET" };
 
 function reducer(state: WizardState, action: Action): WizardState {
   switch (action.type) {
     case "PATCH":
-      return { ...state, ...action.payload };
+      return normalizeState({ ...state, ...action.payload });
     case "RESTORE":
-      return { ...initialState, ...action.payload };
+      return normalizeState(action.payload);
     case "RESET":
       return initialState;
     default:
@@ -70,7 +84,7 @@ export function WizardProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     try {
       const stored = window.localStorage.getItem(DRAFT_STORAGE_KEY);
-      if (stored) dispatch({ type: "RESTORE", payload: JSON.parse(stored) as WizardState });
+      if (stored) dispatch({ type: "RESTORE", payload: JSON.parse(stored) as Partial<WizardState> });
     } catch (error) {
       console.warn("Unable to restore onboarding draft", error);
     } finally {
