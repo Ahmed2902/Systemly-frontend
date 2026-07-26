@@ -27,33 +27,27 @@ export function SlugInput({
     const timeout = setTimeout(async () => {
       const available = await checkSlugAvailability(value);
       setStatus(available ? "available" : "taken");
-    }, 400); // debounce so we're not hitting the endpoint on every keystroke
+    }, 400);
 
     return () => clearTimeout(timeout);
   }, [value, error]);
 
   return (
-    <div>
-      <label className="text-sm text-muted">Website address</label>
-      <div className="mt-1 flex items-center rounded-md border border-surfaceBorder bg-background focus-within:border-accent">
-        <span className="pl-3 text-sm text-muted">hgezli.com/</span>
+    <div className="onboarding-field">
+      <label>Website address <span className="font-normal text-[var(--onboarding-muted)]">(optional)</span></label>
+      <div className="onboarding-input flex items-center overflow-hidden p-0 focus-within:border-[rgba(123,29,58,.75)] focus-within:shadow-[0_0_0_3px_rgba(106,18,46,.11)]">
+        <span className="border-r border-[var(--onboarding-border)] px-3.5 text-sm text-[var(--onboarding-muted)]">hgezli.com/</span>
         <input
           value={value}
-          onChange={(e) => onChange(e.target.value.toLowerCase())}
-          className="w-full bg-transparent px-1 py-2 text-foreground outline-none"
+          onChange={(event) => onChange(event.target.value.toLowerCase())}
+          className="h-full min-w-0 flex-1 bg-transparent px-3.5 text-sm text-[var(--onboarding-text)] outline-none placeholder:text-[#4b474d]"
           placeholder="your-business"
         />
       </div>
-      {error && <p className="mt-1 text-sm text-red-400">{error}</p>}
-      {!error && status === "checking" && (
-        <p className="mt-1 text-sm text-muted">Checking availability...</p>
-      )}
-      {!error && status === "available" && (
-        <p className="mt-1 text-sm text-accent">Available</p>
-      )}
-      {!error && status === "taken" && (
-        <p className="mt-1 text-sm text-red-400">Already taken</p>
-      )}
+      {error && <p className="onboarding-error">{error}</p>}
+      {!error && status === "checking" && <p className="text-xs text-[var(--onboarding-muted)]">Checking availability...</p>}
+      {!error && status === "available" && <p className="text-xs text-[#a44362]">Available</p>}
+      {!error && status === "taken" && <p className="onboarding-error">Already taken</p>}
     </div>
   );
 }
