@@ -37,7 +37,7 @@ export function FeatureGrid() {
         <div className="max-w-3xl">
           <p className="lp-kicker">Website + operations</p>
           <h2 className="lp-title">
-            Built around how appointment businesses{" ""}
+            Built around how appointment businesses{" "}
             <span className="lp-accent-text">actually work.</span>
           </h2>
           <p className="lp-copy max-w-2xl">
