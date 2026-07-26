@@ -42,7 +42,7 @@ export function StepBusinessInfo({ onNext }: StepProps) {
         <section className="onboarding-card">
           <header className="onboarding-form-header">
             <div className="flex items-center gap-3">
-              <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-[var(--onboarding-border-strong)] bg-[rgba(91,14,38,.18)] text-[#9a3153]">
+              <div className="onboarding-icon-tile">
                 <Building2 size={20} />
               </div>
               <div>
@@ -51,7 +51,7 @@ export function StepBusinessInfo({ onNext }: StepProps) {
               </div>
             </div>
             <span className="inline-flex items-center gap-2 rounded-full border border-[var(--onboarding-border)] px-3 py-2 text-[11px] text-[var(--onboarding-muted)]">
-              <LockKeyhole size={13} /> Secure &amp; private
+              <LockKeyhole size={13} className="text-[var(--onboarding-mint)]" /> Secure &amp; private
             </span>
           </header>
 
@@ -90,18 +90,18 @@ export function StepBusinessInfo({ onNext }: StepProps) {
                     onClick={() => selectVertical("salon")}
                     className={`onboarding-choice flex min-h-20 items-center gap-4 p-4 text-left ${state.vertical === "salon" ? "is-selected" : ""}`}
                   >
-                    <span className="grid h-9 w-9 place-items-center rounded-lg bg-[rgba(91,14,38,.17)] text-[#9a3153]"><Scissors size={18} /></span>
+                    <span className="onboarding-icon-tile is-small"><Scissors size={18} /></span>
                     <span><strong className="block text-sm">Salon</strong><small className="mt-1 block text-[11px] text-[var(--onboarding-muted)]">Hair, nails and beauty</small></span>
-                    {state.vertical === "salon" ? <Check className="ml-auto text-[#a33a5d]" size={17} /> : null}
+                    {state.vertical === "salon" ? <Check className="ml-auto text-[var(--onboarding-mint)]" size={17} /> : null}
                   </button>
                   <button
                     type="button"
                     onClick={() => selectVertical("clinic")}
                     className={`onboarding-choice flex min-h-20 items-center gap-4 p-4 text-left ${state.vertical === "clinic" ? "is-selected" : ""}`}
                   >
-                    <span className="grid h-9 w-9 place-items-center rounded-lg bg-white/[.025] text-[#8f8990]"><Stethoscope size={18} /></span>
+                    <span className={`onboarding-icon-tile is-small ${state.vertical === "clinic" ? "" : "is-muted"}`}><Stethoscope size={18} /></span>
                     <span><strong className="block text-sm">Clinic</strong><small className="mt-1 block text-[11px] text-[var(--onboarding-muted)]">Medical and wellness</small></span>
-                    {state.vertical === "clinic" ? <Check className="ml-auto text-[#a33a5d]" size={17} /> : null}
+                    {state.vertical === "clinic" ? <Check className="ml-auto text-[var(--onboarding-mint)]" size={17} /> : null}
                   </button>
                 </div>
                 {errors.vertical ? <p className="onboarding-error">{errors.vertical}</p> : null}
@@ -117,8 +117,15 @@ export function StepBusinessInfo({ onNext }: StepProps) {
                 <div className="onboarding-field">
                   <label>Address</label>
                   <div className="relative">
-                    <MapPin size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--onboarding-muted)]" />
-                    <input value={state.address} onChange={(event) => patch({ address: event.target.value })} placeholder="e.g. 123 Street, Maadi" className="onboarding-input pl-10" />
+                    {!state.address ? (
+                      <MapPin size={16} aria-hidden="true" className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--onboarding-muted)]" />
+                    ) : null}
+                    <input
+                      value={state.address}
+                      onChange={(event) => patch({ address: event.target.value })}
+                      placeholder="e.g. 123 Street, Maadi"
+                      className={`onboarding-input ${state.address ? "pl-3.5" : "pl-10"}`}
+                    />
                   </div>
                 </div>
               </div>
