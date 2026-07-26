@@ -9,7 +9,7 @@ import {
 import type { SalonTemplateData } from "@/modules/templates/salon/salon.types";
 import hero from "../../../../images/hero.jpg";
 
-export function LivePreviewPane() {
+export function LivePreviewPane({ expanded = false }: { expanded?: boolean }) {
   const { state, patch } = useWizard();
   const vertical = (state.vertical ?? "salon") as "salon" | "clinic";
   const options = getTemplatesForVertical(vertical);
@@ -52,36 +52,36 @@ export function LivePreviewPane() {
   };
 
   return (
-    <div className="overflow-hidden rounded-lg border border-surfaceBorder bg-surface ">
+    <div className="overflow-hidden rounded-lg border border-[var(--onboarding-border)] bg-[#080a09]">
       {options.length > 1 && (
-        <div className="flex gap-2 border-b border-surfaceBorder px-3 py-2">
-          {options.map((t) => (
+        <div className="flex gap-2 border-b border-[var(--onboarding-border)] px-3 py-2">
+          {options.map((template) => (
             <button
-              key={t.id}
+              key={template.id}
               type="button"
-              onClick={() => patch({ template: t.id })}
+              onClick={() => patch({ template: template.id })}
               className={`rounded-md px-3 py-1 text-xs ${
-                state.template === t.id
-                  ? "bg-accent text-black"
-                  : "border border-surfaceBorder text-muted"
+                state.template === template.id
+                  ? "bg-[var(--onboarding-mint)] text-white"
+                  : "border border-[var(--onboarding-border)] text-[var(--onboarding-muted)]"
               }`}
             >
-              {t.label}
+              {template.label}
             </button>
           ))}
         </div>
       )}
 
-      <div className="flex items-center gap-1.5 border-b border-surfaceBorder px-3 py-2">
+      <div className="flex items-center gap-1.5 border-b border-[var(--onboarding-border)] px-3 py-2">
         <div className="h-2 w-2 rounded-full bg-red-400" />
         <div className="h-2 w-2 rounded-full bg-yellow-400" />
         <div className="h-2 w-2 rounded-full bg-green-400" />
-        <span className="ml-2 text-xs text-muted">
+        <span className="ml-2 text-xs text-[var(--onboarding-muted)]">
           hgezli.com/{state.slug || "your-business"}
         </span>
       </div>
 
-      <div className="max-h-[800px] w-full  overflow-y-auto">
+      <div className={`onboarding-live-preview-scroll ${expanded ? "is-expanded" : ""}`}>
         <ScaledPreview baseWidth={800}>
           {activeTemplate?.component(templateData)}
         </ScaledPreview>
