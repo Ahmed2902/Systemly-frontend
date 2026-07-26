@@ -1,32 +1,21 @@
-// src/modules/landing/components/LandingFooter.tsx
-
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 
-const footerLinks = [
-  { label: "Privacy Policy", href: "/privacy" },
-  { label: "Terms of Service", href: "/terms" },
-  { label: "Contact Us", href: "/contact" },
-];
+const columns = [
+  ["Product", [["Features","#features"],["Live demo","#demo"],["Pricing","#pricing"],["How it works","#how-it-works"]]],
+  ["Company", [["For salons","#audiences"],["For clinics","#audiences"],["Contact","/contact"]]],
+  ["Legal", [["Privacy Policy","/privacy"],["Terms of Service","/terms"]]],
+] as const;
 
 export function LandingFooter() {
   return (
-    <footer className="border-t border-surfaceBorder px-6 py-10">
-      <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 sm:flex-row">
-        <span className="text-sm text-muted">
-          © {new Date().getFullYear()} Hgezli. All rights reserved.
-        </span>
-
-        <div className="flex gap-6">
-          {footerLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="text-sm text-muted hover:text-foreground"
-            >
-              {link.label}
-            </Link>
-          ))}
+    <footer className="lp-footer">
+      <div className="lp-shell">
+        <div className="lp-footer-grid">
+          <div><div className="text-3xl font-semibold tracking-[-.05em]">Hgezli<span className="text-emerald-400">.</span></div><p className="mt-5 max-w-xs text-sm leading-6 text-[#7f8881]">All-in-one platform for salons and clinics. Build your website, accept bookings and run daily operations from one place.</p><Link href="/signup" className="lp-button lp-button-primary mt-6">Start with Hgezli <ArrowRight size={15}/></Link></div>
+          {columns.map(([heading,links]) => <div key={heading}><h4>{heading}</h4>{links.map(([label,href]) => <Link key={label} href={href}>{label}</Link>)}</div>)}
         </div>
+        <div className="lp-footer-bottom">© {new Date().getFullYear()} Hgezli. All rights reserved.</div>
       </div>
     </footer>
   );

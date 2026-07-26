@@ -1,37 +1,30 @@
-// src/modules/landing/components/PricingSection.tsx
+import Link from "next/link";
+import { ArrowRight, CheckCircle2 } from "lucide-react";
 
-import { Button } from "../../../shared/components/ui/button";
-import { pricing } from "../landing.data";
+const included = [
+  "Professional website and booking page",
+  "Online booking and calendar scheduling",
+  "Staff management and service catalogue",
+  "Invoices, reminders and customer records",
+  "Owner dashboard and performance insights",
+  "Arabic and English support",
+];
 
 export function PricingSection() {
   return (
-    <section className="px-6 py-24">
-      <h2 className="text-center text-2xl font-semibold text-foreground sm:text-3xl">
-        Simple, transparent pricing
-      </h2>
-      <p className="mx-auto mt-3 max-w-md text-center text-muted">
-        One plan. Everything included.
-      </p>
-
-      <div className="mx-auto mt-12 max-w-sm rounded-xl border border-accent bg-surface p-8">
-        <div className="text-4xl font-semibold text-foreground">
-          {pricing.price}{" "}
-          <span className="text-base font-normal text-muted">
-            {pricing.currency}
-          </span>
+    <section className="lp-section lp-fade-section">
+      <div className="lp-shell text-center">
+        <p className="lp-kicker">Pricing</p>
+        <h2 className="lp-title">Simple pricing for <span className="lp-accent-text">growing businesses.</span></h2>
+        <p className="lp-copy mx-auto max-w-xl">One clear plan for the website, booking experience and operational tools you use every day.</p>
+        <div className="lp-card lp-pricing text-left">
+          <div className="lp-pricing-top">
+            <div><span className="lp-kicker">Growth plan</span><div className="lp-price">300 <small>EGP / month</small></div><p className="mt-3 text-sm leading-6 text-[#919991]">Everything needed to run one salon or clinic from one organised workspace.</p></div>
+            <ul className="lp-price-list">{included.map(item => <li key={item} className="flex items-center gap-2"><CheckCircle2 size={15} className="text-emerald-400"/>{item}</li>)}</ul>
+          </div>
+          <Link href="/signup" className="lp-button lp-button-primary mt-8 w-full">Start with Hgezli <ArrowRight size={16}/></Link>
+          <p className="mt-4 text-center text-xs text-[#69716b]">14-day free trial. No credit card required.</p>
         </div>
-
-        <ul className="mt-6 space-y-3">
-          {pricing.features.map((f) => (
-            <li key={f} className="flex items-start gap-2 text-sm text-muted">
-              <span className="text-accent">✓</span> {f}
-            </li>
-          ))}
-        </ul>
-
-        <Button className="mt-8 w-full bg-accent text-black hover:bg-accent/90">
-          Start Free Trial
-        </Button>
       </div>
     </section>
   );
