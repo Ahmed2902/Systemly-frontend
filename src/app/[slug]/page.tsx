@@ -42,7 +42,7 @@ export default async function PublicBusinessPage({
       .filter((photo: { kind: string; url: string }) => photo.kind === "gallery")
       .map((photo: { url: string }) => photo.url),
     primaryColor: content?.primaryColor ?? (vertical === "clinic" ? "#0f766e" : "#8C5A3C"),
-    sectionOrder: content?.sectionOrder ?? ["hero", "about", "services", "gallery", "team", "contact", "faq"],
+    sectionOrder: content?.sectionOrder ?? ["hero", "services", "team", "gallery", "about", "faq", "contact"],
     showTeam: content?.showTeam ?? true,
     showFaq: content?.showFaq ?? true,
     services: business.services.map((service: any) => ({
