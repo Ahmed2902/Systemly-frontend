@@ -1,5 +1,6 @@
 // src/modules/wizard/wizard.api.ts
 import { WizardState } from "./wizard.types";
+import { api } from "@/shared/lib/api";
 import { apiUrl } from "@/shared/lib/api-url";
 
 export async function checkSlugAvailability(slug: string): Promise<boolean> {
@@ -103,13 +104,10 @@ export async function submitOnboarding(state: WizardState) {
     })),
   };
 
-  const res = await fetch(apiUrl("/onboarding/complete"), {
+  // Use the shared API client so the token comes from the auth store and an
+  // expired access token can be refreshed from the session cookie.
+  return api("/onboarding/complete", null, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
     body: JSON.stringify(payload),
   });
-  const json = await res.json();
-  if (!res.ok || json.success === false) throw json;
-  return json;
 }

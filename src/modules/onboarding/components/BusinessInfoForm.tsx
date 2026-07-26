@@ -24,13 +24,10 @@ export function BusinessInfoForm() {
     register,
     handleSubmit,
     control,
-    watch,
     formState: { errors, isSubmitting },
   } = useForm<CreateBusinessInput>({
     resolver: zodResolver(createBusinessSchema),
   });
-
-  const slugValue = watch("slug") ?? "";
 
   async function onSubmit(data: CreateBusinessInput) {
     setServerError(null);
