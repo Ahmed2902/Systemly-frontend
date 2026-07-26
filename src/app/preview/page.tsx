@@ -2,7 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { getTemplateById } from "@/modules/templates/template-registry";
-import { WIZARD_PREVIEW_STORAGE_KEY, wizardStateToTemplateData } from "@/modules/wizard/wizard.preview";
+import {
+  WIZARD_PREVIEW_STORAGE_KEY,
+  wizardStateToTemplateData,
+} from "@/modules/wizard/wizard.preview";
 import type { WizardState } from "@/modules/wizard/wizard.types";
 
 export default function PreviewPage() {
@@ -22,7 +25,9 @@ export default function PreviewPage() {
       <main className="grid min-h-screen place-items-center bg-[#090b0a] px-6 text-center text-[#e8e5dc]">
         <div>
           <h1 className="text-2xl font-semibold">Preview unavailable</h1>
-          <p className="mt-2 text-sm text-[#999d96]">Return to the website customizer and open Preview again.</p>
+          <p className="mt-2 text-sm text-[#999d96]">
+            Return to the website customizer and open Preview again.
+          </p>
         </div>
       </main>
     );
