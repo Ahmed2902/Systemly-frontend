@@ -3,6 +3,12 @@ import { WizardState } from "./wizard.types";
 import { api } from "@/shared/lib/api";
 import { apiUrl } from "@/shared/lib/api-url";
 
+function normalizeCategory(value: string) {
+  const trimmed = value.trim().replace(/\s+/g, " ");
+  if (!trimmed) return "";
+  return `${trimmed.charAt(0).toUpperCase()}${trimmed.slice(1).toLowerCase()}`;
+}
+
 export async function checkSlugAvailability(slug: string): Promise<boolean> {
   const res = await fetch(apiUrl(`/businesses/check-slug/${slug}`));
   if (!res.ok) return false;
@@ -18,7 +24,6 @@ export async function checkSlugAvailability(slug: string): Promise<boolean> {
 export async function uploadImage(
   file: File,
 ): Promise<{ url: string; publicId: string }> {
-  // Generate a clean target file path reference
   const fileExt = file.name.split(".").pop() || "jpg";
   const uniqueId =
     typeof crypto.randomUUID === "function"
@@ -26,11 +31,10 @@ export async function uploadImage(
       : Math.random().toString(36).slice(2);
   const storagePath = `gallery/${uniqueId}.${fileExt}`;
 
-  // Step 1: Request the secure signed upload token from your Express backend
   const presignRes = await fetch(apiUrl("/photos/gallery/presign"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    credentials: "include", // Cookie carries auth to authorize the signature generation
+    credentials: "include",
     body: JSON.stringify({
       filePath: storagePath,
       contentType: file.type,
@@ -42,24 +46,21 @@ export async function uploadImage(
     throw presignJson;
   }
 
-  // Expecting backend to return { uploadUrl, publicUrl } inside data wrapper
   const { uploadUrl, publicUrl } = presignJson.data;
 
-  // Step 2: Upload the compressed file BINARY directly to Supabase Storage
   const cloudRes = await fetch(uploadUrl, {
-    method: "PUT", // Supabase requires a binary HTTP PUT method for signed upload targets
+    method: "PUT",
     headers: { "Content-Type": file.type },
-    body: file, // Direct binary file buffer payload
+    body: file,
   });
 
   if (!cloudRes.ok) {
     throw new Error("Direct cloud storage delivery transaction failed.");
   }
 
-  // Return the data object expected by your frontend modules
   return {
     url: publicUrl,
-    publicId: storagePath, // Storing the inner path lets deleteFile work effortlessly later
+    publicId: storagePath,
   };
 }
 
@@ -83,29 +84,27 @@ export async function submitOnboarding(state: WizardState) {
     showFaq: state.showFaq,
     instagram: state.instagram || undefined,
     whatsapp: state.whatsapp || undefined,
-    services: state.services.map((s) => ({
-      clientId: s.clientId,
-      name: s.name,
-      category: s.category,
-      priceEgp: s.priceEgp,
-      durationMin: s.durationMin,
+    services: state.services.map((service) => ({
+      clientId: service.clientId,
+      name: service.name.trim(),
+      category: normalizeCategory(service.category || ""),
+      priceEgp: service.priceEgp,
+      durationMin: service.durationMin,
     })),
-    staff: state.staff.map((s) => ({
-      clientId: s.clientId,
-      name: s.name,
-      role: s.role,
-      photoUrl: s.photoUrl || undefined,
-      serviceClientIds: s.serviceIds,
-      availability: s.availability,
+    staff: state.staff.map((staffMember) => ({
+      clientId: staffMember.clientId,
+      name: staffMember.name,
+      role: staffMember.role,
+      photoUrl: staffMember.photoUrl || undefined,
+      serviceClientIds: staffMember.serviceIds,
+      availability: staffMember.availability,
     })),
-    faqs: state.faqs.map((f) => ({
-      question: f.question,
-      answer: f.answer,
+    faqs: state.faqs.map((faq) => ({
+      question: faq.question,
+      answer: faq.answer,
     })),
   };
 
-  // Use the shared API client so the token comes from the auth store and an
-  // expired access token can be refreshed from the session cookie.
   return api("/onboarding/complete", null, {
     method: "POST",
     body: JSON.stringify(payload),
