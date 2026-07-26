@@ -32,8 +32,11 @@ export function WizardShell() {
 
   return (
     <main className="onboarding-systerra">
-      <div className="onboarding-shell">
-        <header className="onboarding-topbar">
+      <div
+        className="onboarding-shell"
+        style={{ width: "min(1320px, calc(100% - 24px))", padding: "16px 0 26px" }}
+      >
+        <header className="onboarding-topbar" style={{ paddingBottom: 14 }}>
           <div className="onboarding-brand"><span className="onboarding-brand-mark">H</span>Hgezli</div>
           <div className="onboarding-top-actions">
             <button type="button" className="onboarding-ghost-button"><HelpCircle size={16} className="mr-2 inline" />Help</button>
@@ -41,7 +44,11 @@ export function WizardShell() {
           </div>
         </header>
 
-        <nav className="onboarding-progress" aria-label="Onboarding progress">
+        <nav
+          className="onboarding-progress"
+          aria-label="Onboarding progress"
+          style={{ maxWidth: 900, margin: "16px auto 18px" }}
+        >
           {steps.map((step, index) => {
             const status = index < stepIndex ? "is-complete" : index === stepIndex ? "is-active" : "";
             return (
