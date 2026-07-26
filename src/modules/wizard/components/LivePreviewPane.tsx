@@ -4,20 +4,21 @@ import { ScaledPreview } from "@/shared/components/ScaledPreview";
 import { useWizard } from "../wizard.context";
 import {
   getTemplatesForVertical,
-  getTemplateById,
+  resolveTemplateForVertical,
 } from "../../templates/template-registry";
 import { wizardStateToTemplateData } from "../wizard.preview";
 
 export function LivePreviewPane({ expanded = false }: { expanded?: boolean }) {
   const { state, patch } = useWizard();
-  const vertical = (state.vertical ?? "salon") as "salon" | "clinic";
+  const vertical = state.vertical ?? "salon";
   const options = getTemplatesForVertical(vertical);
-  const activeTemplate = getTemplateById(state.template) ?? options[0];
+  const activeTemplate = resolveTemplateForVertical(state.template, vertical);
   const templateData = wizardStateToTemplateData(state);
+  const ActiveTemplate = activeTemplate?.component;
 
   return (
     <div className="overflow-hidden rounded-lg border border-[var(--onboarding-border)] bg-[#080a09]">
-      {options.length > 1 && (
+      {options.length > 1 ? (
         <div className="flex gap-2 border-b border-[var(--onboarding-border)] px-3 py-2">
           {options.map((template) => (
             <button
@@ -34,7 +35,7 @@ export function LivePreviewPane({ expanded = false }: { expanded?: boolean }) {
             </button>
           ))}
         </div>
-      )}
+      ) : null}
 
       <div className="flex items-center gap-1.5 border-b border-[var(--onboarding-border)] px-3 py-2">
         <div className="h-2 w-2 rounded-full bg-red-400" />
@@ -47,7 +48,7 @@ export function LivePreviewPane({ expanded = false }: { expanded?: boolean }) {
 
       <div className={`onboarding-live-preview-scroll ${expanded ? "is-expanded" : ""}`}>
         <ScaledPreview baseWidth={1280}>
-          {activeTemplate?.component(templateData)}
+          {ActiveTemplate ? <ActiveTemplate {...templateData} /> : null}
         </ScaledPreview>
       </div>
     </div>
