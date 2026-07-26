@@ -24,7 +24,7 @@ export type WizardStaffMember = {
   id: string;
   clientId: string;
   name: string;
-  role: "Staff" | "Receptionist";
+  role: string;
   jobTitle?: string;
   bio?: string;
   yearsExperience?: number;
