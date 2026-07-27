@@ -13,13 +13,18 @@ export type TemplateDefinition = {
   theme: TemplateTheme;
 };
 
-const clinicTheme: TemplateTheme = {
-  background: "#f7fafc",
-  surface: "#ffffff",
-  text: "#0f172a",
-  muted: "#64748b",
-  border: "#e2e8f0",
-  accentTextOn: "#ffffff",
+export const clinicClarityTheme: TemplateTheme = {
+  primary: "#1677B8",
+  primaryDark: "#173B67",
+  background: "#F6FAFD",
+  surface: "#FFFFFF",
+  text: "#102A43",
+  muted: "#627D98",
+  border: "#D9E7F1",
+  soft: "#EEF6FB",
+  accentTextOn: "#FFFFFF",
+  headingStyle: "sans",
+  cardRadius: "soft",
 };
 
 export const TEMPLATE_REGISTRY = [
@@ -35,7 +40,7 @@ export const TEMPLATE_REGISTRY = [
     label: "Clinic Clarity",
     vertical: "clinic",
     component: ClinicTemplate,
-    theme: clinicTheme,
+    theme: clinicClarityTheme,
   },
 ] satisfies TemplateDefinition[];
 
