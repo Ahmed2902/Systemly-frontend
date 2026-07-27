@@ -13,9 +13,14 @@ import {
   getDefaultTemplateId,
   isTemplateValidForVertical,
 } from "@/modules/templates/template-registry";
+import { completePublicSectionOrder } from "@/modules/templates/section-order";
 import type { WizardState } from "./wizard.types";
 
 const DRAFT_STORAGE_KEY = "hgezli:onboarding-draft:v1";
+const VERTICAL_DEFAULT_COLOURS = {
+  salon: "#8C5A3C",
+  clinic: "#1677B8",
+} as const;
 
 const initialState: WizardState = {
   vertical: null,
@@ -34,8 +39,8 @@ const initialState: WizardState = {
   heroPhotoUrl: null,
   logoUrl: null,
   galleryPhotoUrls: [],
-  primaryColor: "#0E6B4D",
-  sectionOrder: ["hero", "services", "team", "gallery", "about", "faq", "contact"],
+  primaryColor: VERTICAL_DEFAULT_COLOURS.salon,
+  sectionOrder: completePublicSectionOrder([]),
   showTeam: true,
   showFaq: true,
   instagram: "",
@@ -48,7 +53,12 @@ function normalizeState(value: Partial<WizardState>): WizardState {
   const template = merged.vertical && isTemplateValidForVertical(merged.template, merged.vertical)
     ? merged.template
     : getDefaultTemplateId(merged.vertical);
-  return { ...merged, template };
+
+  return {
+    ...merged,
+    template,
+    sectionOrder: completePublicSectionOrder(merged.sectionOrder),
+  };
 }
 
 type Action =
@@ -58,8 +68,20 @@ type Action =
 
 function reducer(state: WizardState, action: Action): WizardState {
   switch (action.type) {
-    case "PATCH":
-      return normalizeState({ ...state, ...action.payload });
+    case "PATCH": {
+      const verticalChanged = action.payload.vertical && action.payload.vertical !== state.vertical;
+      return normalizeState({
+        ...state,
+        ...action.payload,
+        ...(verticalChanged
+          ? {
+              template: getDefaultTemplateId(action.payload.vertical ?? null),
+              primaryColor: VERTICAL_DEFAULT_COLOURS[action.payload.vertical as "salon" | "clinic"],
+              heroPhotoUrl: null,
+            }
+          : {}),
+      });
+    }
     case "RESTORE":
       return normalizeState(action.payload);
     case "RESET":
