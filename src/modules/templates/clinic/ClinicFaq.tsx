@@ -10,18 +10,16 @@ export function ClinicFaq({ faqs }: { faqs?: PublicFaq[] }) {
   if (!faqs?.length) return null;
 
   return (
-    <section id="faq" className="bg-white px-6 py-24 md:px-12 lg:px-16 lg:py-32">
+    <section id="faq" className="bg-[var(--surface)] px-6 py-24 text-center md:px-12 lg:px-16 lg:py-32">
       <div className="mx-auto max-w-4xl">
-        <div className="text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em]" style={{ color: "var(--accent)" }}>
-            Frequently asked questions
-          </p>
-          <h2 className="mt-3 text-4xl font-semibold tracking-tight text-slate-950 md:text-5xl">
-            Clear answers before your visit
-          </h2>
-        </div>
+        <p className="text-xs font-semibold uppercase tracking-[0.22em]" style={{ color: "var(--accent)" }}>
+          Frequently asked questions
+        </p>
+        <h2 className="mt-3 text-4xl font-semibold tracking-tight text-[var(--text)] md:text-5xl">
+          Clear answers before your visit
+        </h2>
 
-        <div className="mt-12 divide-y divide-slate-200 border-y border-slate-200">
+        <div className="mt-12 divide-y divide-[var(--border)] border-y border-[var(--border)]">
           {faqs.map((faq, index) => {
             const open = openIndex === index;
             return (
@@ -29,12 +27,13 @@ export function ClinicFaq({ faqs }: { faqs?: PublicFaq[] }) {
                 <button
                   type="button"
                   onClick={() => setOpenIndex(open ? null : index)}
-                  className="flex w-full items-center justify-between gap-6 py-6 text-left"
+                  className="grid w-full grid-cols-[1fr_auto_1fr] items-center gap-4 py-6 text-center"
                 >
-                  <span className="text-lg font-semibold text-slate-900 md:text-xl">{faq.question}</span>
+                  <span />
+                  <span className="text-lg font-semibold text-[var(--text)] md:text-xl">{faq.question}</span>
                   <Plus
                     size={21}
-                    className="shrink-0 text-slate-500 transition-transform"
+                    className="justify-self-end text-[var(--muted)] transition-transform"
                     style={{ transform: open ? "rotate(45deg)" : "rotate(0deg)" }}
                   />
                 </button>
@@ -43,7 +42,7 @@ export function ClinicFaq({ faqs }: { faqs?: PublicFaq[] }) {
                   style={{ gridTemplateRows: open ? "1fr" : "0fr" }}
                 >
                   <div className="overflow-hidden">
-                    <p className="max-w-3xl pb-6 text-sm leading-7 text-slate-600 md:text-base">
+                    <p className="mx-auto max-w-3xl pb-6 text-sm leading-7 text-[var(--muted)] md:text-base">
                       {faq.answer}
                     </p>
                   </div>

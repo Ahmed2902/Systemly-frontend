@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { resolveTemplateForVertical } from "@/modules/templates/template-registry";
+import { completePublicSectionOrder } from "@/modules/templates/section-order";
 import type { TemplateData, TemplateVertical } from "@/modules/templates/template.types";
 import { apiUrl } from "../../shared/lib/api-url";
 
@@ -41,8 +42,8 @@ export default async function PublicBusinessPage({
     galleryPhotoUrls: business.photos
       .filter((photo: { kind: string; url: string }) => photo.kind === "gallery")
       .map((photo: { url: string }) => photo.url),
-    primaryColor: content?.primaryColor ?? (vertical === "clinic" ? "#0f766e" : "#8C5A3C"),
-    sectionOrder: content?.sectionOrder ?? ["hero", "services", "team", "gallery", "about", "faq", "contact"],
+    primaryColor: content?.primaryColor ?? template.theme.primary,
+    sectionOrder: completePublicSectionOrder(content?.sectionOrder ?? []),
     showTeam: content?.showTeam ?? true,
     showFaq: content?.showFaq ?? true,
     services: business.services.map((service: any) => ({

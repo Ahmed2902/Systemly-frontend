@@ -14,12 +14,14 @@ import { useWizard } from "../wizard.context";
 
 const SECTION_LABELS: Record<string, string> = {
   hero: "Hero",
+  services: "Services / treatments",
+  team: "Artists / doctors",
+  gallery: "Our space",
+  why: "Why choose us",
+  process: "Booking process",
   about: "About",
-  services: "Services",
-  gallery: "Gallery",
-  team: "Team",
-  contact: "Contact",
   faq: "FAQ",
+  contact: "Contact",
 };
 
 function SortableItem({ id }: { id: string }) {
@@ -46,7 +48,7 @@ function SortableItem({ id }: { id: string }) {
       className="flex cursor-grab items-center gap-3 rounded-lg border border-surface-border bg-surface-1 px-3 py-2.5 transition-colors hover:border-surface-border-strong active:cursor-grabbing"
     >
       <GripVertical size={15} className="text-muted" />
-      <span className="text-sm text-foreground">{SECTION_LABELS[id]}</span>
+      <span className="text-sm text-foreground">{SECTION_LABELS[id] ?? id}</span>
     </div>
   );
 }
@@ -64,10 +66,7 @@ export function SectionOrderList() {
 
   return (
     <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-      <SortableContext
-        items={state.sectionOrder}
-        strategy={verticalListSortingStrategy}
-      >
+      <SortableContext items={state.sectionOrder} strategy={verticalListSortingStrategy}>
         <div className="space-y-2">
           {state.sectionOrder.map((key) => (
             <SortableItem key={key} id={key} />
