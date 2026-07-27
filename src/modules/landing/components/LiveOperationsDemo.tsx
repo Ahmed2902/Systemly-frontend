@@ -8,35 +8,21 @@ import {
   LayoutDashboard,
   Plus,
   Receipt,
+  Scissors,
   Search,
   Settings,
   Sparkles,
   UserRound,
   Users,
+  X,
 } from "lucide-react";
 import { CalendarGrid } from "@/modules/operations/components/CalendarGrid";
 import { StatusLegend } from "@/modules/operations/components/StatusLegend";
-import {
-  AppointmentsToolbar,
-  type SortMode,
-} from "@/modules/operations/components/appointments-list/AppointmentsToolbar";
-import { InvoiceListPanel } from "@/modules/invoices/components/InvoiceListPanel";
-import { InvoiceDetailPanel } from "@/modules/invoices/components/InvoiceDetailPanel";
-import { CustomerListPanel } from "@/modules/customers/components/CustomerListPanel";
-import { CustomerProfilePanel } from "@/modules/customers/components/CustomerProfilePanel";
 import type {
-  CalendarDayData,
+  AppointmentStatus,
   AppointmentSummary,
+  CalendarDayData,
 } from "@/modules/operations/appointment.types";
-import type {
-  InvoiceDetail,
-  InvoiceListItem,
-} from "@/modules/invoices/invoices.types";
-import type {
-  CustomerFilter,
-  CustomerListItem,
-  CustomerWorkspaceResponse,
-} from "@/modules/customers/customers.types";
 
 const DEMO_DATE = "2026-07-27";
 const TIMEZONE = "Africa/Cairo";
@@ -45,6 +31,42 @@ const staff = [
   { id: "staff-nour", name: "Nour Khalil", role: "Senior stylist" },
   { id: "staff-mona", name: "Mona Adel", role: "Nail technician" },
   { id: "staff-lina", name: "Dr. Lina Hassan", role: "Dermatologist" },
+  { id: "staff-omar", name: "Omar Salem", role: "Receptionist" },
+];
+
+const services = [
+  {
+    id: "service-1",
+    name: "Haircut & blow-dry",
+    category: "Hair",
+    duration: 60,
+    price: 45000,
+    staffNames: ["Nour Khalil"],
+  },
+  {
+    id: "service-2",
+    name: "Gel manicure",
+    category: "Nails",
+    duration: 45,
+    price: 32000,
+    staffNames: ["Mona Adel"],
+  },
+  {
+    id: "service-3",
+    name: "Nail art",
+    category: "Nails",
+    duration: 30,
+    price: 18000,
+    staffNames: ["Mona Adel"],
+  },
+  {
+    id: "service-4",
+    name: "Skin consultation",
+    category: "Clinic",
+    duration: 45,
+    price: 70000,
+    staffNames: ["Dr. Lina Hassan"],
+  },
 ];
 
 const appointments: AppointmentSummary[] = [
@@ -92,7 +114,7 @@ const appointments: AppointmentSummary[] = [
     isLocked: false,
     isPaid: false,
     discount: 5000,
-    customItems: [],
+    customItems: [{ id: "custom-1", description: "Nail repair", quantity: 1, price: 12000 }],
     segments: [
       {
         id: "segment-2a",
@@ -150,13 +172,75 @@ const appointments: AppointmentSummary[] = [
       },
     ],
   },
+  {
+    id: "appt-4",
+    date: DEMO_DATE,
+    customer: {
+      id: "customer-4",
+      name: "Farah Nabil",
+      phone: "+20 106 100 2200",
+      visits: 2,
+      noShows: 1,
+    },
+    status: "no_show",
+    isLocked: false,
+    isPaid: false,
+    discount: 0,
+    customItems: [],
+    segments: [
+      {
+        id: "segment-4",
+        appointmentId: "appt-4",
+        serviceId: "service-1",
+        serviceName: "Haircut & blow-dry",
+        staffId: "staff-nour",
+        startsAt: "2026-07-27T14:00:00.000Z",
+        endsAt: "2026-07-27T15:00:00.000Z",
+        price: 45000,
+        segmentIndex: 1,
+        segmentCount: 1,
+      },
+    ],
+  },
+  {
+    id: "appt-5",
+    date: DEMO_DATE,
+    customer: {
+      id: "customer-5",
+      name: "Dina Samir",
+      phone: "+20 115 440 5500",
+      visits: 5,
+      noShows: 0,
+    },
+    status: "cancelled_by_customer",
+    isLocked: false,
+    isPaid: false,
+    discount: 0,
+    customItems: [],
+    segments: [
+      {
+        id: "segment-5",
+        appointmentId: "appt-5",
+        serviceId: "service-2",
+        serviceName: "Gel manicure",
+        staffId: "staff-mona",
+        startsAt: "2026-07-27T15:00:00.000Z",
+        endsAt: "2026-07-27T15:45:00.000Z",
+        price: 32000,
+        segmentIndex: 1,
+        segmentCount: 1,
+      },
+    ],
+  },
 ];
 
 const calendarData: CalendarDayData = {
   date: DEMO_DATE,
   timezone: TIMEZONE,
   staff,
-  appointments,
+  appointments: appointments.filter(
+    (appointment) => !appointment.status.startsWith("cancelled_"),
+  ),
   breaks: [
     {
       id: "break-1",
@@ -168,166 +252,55 @@ const calendarData: CalendarDayData = {
   ],
 };
 
-const invoiceDetails: InvoiceDetail[] = [
-  makeInvoice(
-    "invoice-1",
-    "INV-2026-1047",
-    "customer-1",
-    "Mariam Adel",
-    "+20 100 555 0101",
-    "2026-07-27T08:12:00.000Z",
-    45000,
-    "CASH",
-    "Haircut & blow-dry",
-    "Nour Khalil",
-  ),
-  makeInvoice(
-    "invoice-2",
-    "INV-2026-1046",
-    "customer-2",
-    "Yasmine Ali",
-    "+20 111 222 0303",
-    "2026-07-27T10:55:00.000Z",
-    45000,
-    "CARD",
-    "Gel manicure · Nail art",
-    "Mona Adel",
-    5000,
-  ),
-  makeInvoice(
-    "invoice-3",
-    "INV-2026-1045",
-    "customer-3",
-    "Salma Tarek",
-    "+20 122 777 0404",
-    "2026-07-27T12:50:00.000Z",
-    70000,
-    "MOBILE_WALLET",
-    "Skin consultation",
-    "Dr. Lina Hassan",
-  ),
+const customers = appointments.map((appointment) => appointment.customer);
+const invoices = [
+  { id: "invoice-1", number: "INV-2026-1047", customer: "Mariam Adel", amount: 45000, method: "Cash" },
+  { id: "invoice-2", number: "INV-2026-1046", customer: "Yasmine Ali", amount: 57000, method: "Card" },
+  { id: "invoice-3", number: "INV-2026-1045", customer: "Salma Tarek", amount: 70000, method: "Mobile wallet" },
 ];
 
-const customerItems: CustomerListItem[] = [
-  makeCustomer(
-    "customer-1",
-    "Mariam Adel",
-    "+20 100 555 0101",
-    "mariam@example.com",
-    7,
-    0,
-    "Instagram",
-  ),
-  makeCustomer(
-    "customer-2",
-    "Yasmine Ali",
-    "+20 111 222 0303",
-    "yasmine@example.com",
-    11,
-    1,
-    "Referral",
-  ),
-  makeCustomer(
-    "customer-3",
-    "Salma Tarek",
-    "+20 122 777 0404",
-    "salma@example.com",
-    3,
-    0,
-    "Website",
-  ),
-];
+type DemoPage =
+  | "dashboard"
+  | "calendar"
+  | "appointments"
+  | "customers"
+  | "invoices"
+  | "staff"
+  | "services";
 
-const customerWorkspaces: Record<string, CustomerWorkspaceResponse> =
-  Object.fromEntries(
-    customerItems.map((customer) => [
-      customer.id,
-      {
-        customer: {
-          ...customer,
-          notes:
-            customer.id === "customer-2"
-              ? "Prefers afternoon appointments and neutral nail colours."
-              : "",
-        },
-        stats: {
-          visits: customer.visits,
-          noShows: customer.noShows,
-          lastVisitAt: "2026-06-18T12:00:00.000Z",
-          nextAppointmentAt: customer.nextAppointment?.startsAt ?? null,
-        },
-        upcoming: [],
-        history: [],
-      },
-    ]),
-  );
-
-type DemoPage = "calendar" | "appointments" | "customers" | "invoices";
+const navItems = [
+  ["dashboard", "Dashboard", LayoutDashboard],
+  ["calendar", "Calendar", CalendarDays],
+  ["appointments", "Appointments", ClipboardList],
+  ["customers", "Customers", Users],
+  ["invoices", "Invoices", Receipt],
+  ["staff", "Staff", UserRound],
+  ["services", "Services", Sparkles],
+] as const;
 
 export function LiveOperationsDemo() {
   const [page, setPage] = useState<DemoPage>("calendar");
-  const [selectedAppointmentId, setSelectedAppointmentId] = useState<
-    string | null
-  >(null);
+  const [selectedAppointmentId, setSelectedAppointmentId] = useState<string | null>(null);
+  const [selectedInvoiceId, setSelectedInvoiceId] = useState(invoices[0].id);
   const [query, setQuery] = useState("");
-  const [staffFilter, setStaffFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [sort, setSort] = useState<SortMode>("soonest");
-  const [selectedInvoiceId, setSelectedInvoiceId] = useState(
-    invoiceDetails[0].id,
-  );
-  const [customerSearch, setCustomerSearch] = useState("");
-  const [customerFilter, setCustomerFilter] = useState<CustomerFilter>("all");
-  const [selectedCustomerId, setSelectedCustomerId] = useState(
-    customerItems[0].id,
-  );
   const [notice, setNotice] = useState("");
 
-  const visibleAppointments = useMemo(() => {
+  const filteredAppointments = useMemo(() => {
     const needle = query.trim().toLowerCase();
-    return [...appointments]
-      .filter((appointment) => {
-        const text =
-          `${appointment.customer.name} ${appointment.customer.phone} ${appointment.segments.map((segment) => segment.serviceName).join(" ")}`.toLowerCase();
-        const matchesStaff =
-          staffFilter === "all" ||
-          appointment.segments.some(
-            (segment) => segment.staffId === staffFilter,
-          );
-        const matchesStatus =
-          statusFilter === "all" || appointment.status === statusFilter;
-        return (
-          (!needle || text.includes(needle)) && matchesStaff && matchesStatus
-        );
-      })
-      .sort((a, b) => {
-        if (sort === "customer")
-          return a.customer.name.localeCompare(b.customer.name);
-        if (sort === "status") return a.status.localeCompare(b.status);
-        const aTime = new Date(a.segments[0].startsAt).getTime();
-        const bTime = new Date(b.segments[0].startsAt).getTime();
-        return sort === "latest" ? bTime - aTime : aTime - bTime;
-      });
-  }, [query, sort, staffFilter, statusFilter]);
+    if (!needle) return appointments;
+    return appointments.filter((appointment) =>
+      `${appointment.customer.name} ${appointment.customer.phone} ${appointment.segments
+        .map((segment) => segment.serviceName)
+        .join(" ")}`
+        .toLowerCase()
+        .includes(needle),
+    );
+  }, [query]);
 
-  const visibleCustomers = useMemo(() => {
-    const needle = customerSearch.trim().toLowerCase();
-    return customerItems.filter((customer) => {
-      const matchesText =
-        !needle ||
-        `${customer.name} ${customer.phone} ${customer.email}`
-          .toLowerCase()
-          .includes(needle);
-      const matchesFilter =
-        customerFilter === "all" ||
-        (customerFilter === "no_shows" ? customer.noShows > 0 : true);
-      return matchesText && matchesFilter;
-    });
-  }, [customerFilter, customerSearch]);
-
-  const selectedInvoice =
-    invoiceDetails.find((invoice) => invoice.id === selectedInvoiceId) ?? null;
-  const selectedWorkspace = customerWorkspaces[selectedCustomerId] ?? null;
+  const selectedAppointment = appointments.find(
+    (appointment) => appointment.id === selectedAppointmentId,
+  );
+  const selectedInvoice = invoices.find((invoice) => invoice.id === selectedInvoiceId)!;
 
   function showNotice(message: string) {
     setNotice(message);
@@ -340,17 +313,15 @@ export function LiveOperationsDemo() {
         <div className="text-center">
           <p className="lp-kicker">Interactive operations demo</p>
           <h2 className="lp-title">
-            The same workspace your team will{" "}
-            <span className="lp-accent-text">actually use.</span>
+            The same workspace your team will <span className="lp-accent-text">actually use.</span>
           </h2>
           <p className="lp-copy mx-auto max-w-3xl">
-            This is a functional light-mode demo built from the same calendar,
-            appointment, invoice, and customer interfaces used inside Hgezli
-            Operations. Everything below runs on local dummy data.
+            Explore the calendar, owner dashboard, appointments, customers, invoices,
+            staff, and services using realistic local demo data.
           </p>
         </div>
 
-        <div className="lp-operations-frame  ">
+        <div className="lp-operations-frame">
           <aside className="lp-operations-sidebar">
             <div className="p-4">
               <div className="flex items-center gap-2.5">
@@ -358,124 +329,81 @@ export function LiveOperationsDemo() {
                   H
                 </span>
                 <div>
-                  <div className="text-lg font-bold tracking-tight text-slate-950">
-                    Hgezli
-                  </div>
-                  <p className="text-[11px] font-medium text-slate-400">
-                    Business operations
-                  </p>
+                  <div className="text-lg font-bold tracking-tight text-slate-950">Hgezli</div>
+                  <p className="text-[11px] font-medium text-slate-400">Business operations</p>
                 </div>
               </div>
               <button
                 type="button"
-                onClick={() =>
-                  showNotice(
-                    "New appointment modal opened in the real workspace.",
-                  )
-                }
+                onClick={() => showNotice("New appointment opened in the real workspace.")}
                 className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 px-3 py-2.5 text-sm font-semibold text-white shadow-md"
               >
                 <Plus size={16} /> New Appointment
               </button>
             </div>
+
             <nav className="flex-1 space-y-1 px-2.5 py-2">
-              <DemoNavButton
-                icon={LayoutDashboard}
-                label="Dashboard"
-                active={false}
-                onClick={() =>
-                  showNotice("Owner dashboard is restricted to owners.")
-                }
-              />
-              <DemoNavButton
-                icon={CalendarDays}
-                label="Calendar"
-                active={page === "calendar"}
-                onClick={() => setPage("calendar")}
-              />
-              <DemoNavButton
-                icon={ClipboardList}
-                label="Appointments"
-                active={page === "appointments"}
-                onClick={() => setPage("appointments")}
-              />
-              <DemoNavButton
-                icon={Users}
-                label="Customers"
-                active={page === "customers"}
-                onClick={() => setPage("customers")}
-              />
-              <DemoNavButton
-                icon={Receipt}
-                label="Invoices"
-                active={page === "invoices"}
-                onClick={() => setPage("invoices")}
-              />
-              <DemoNavButton
-                icon={UserRound}
-                label="Staff"
-                active={false}
-                onClick={() =>
-                  showNotice(
-                    "Staff page is available in the full operations workspace.",
-                  )
-                }
-              />
-              <DemoNavButton
-                icon={Sparkles}
-                label="Services"
-                active={false}
-                onClick={() =>
-                  showNotice(
-                    "Services page is available in the full operations workspace.",
-                  )
-                }
-              />
-              <DemoNavButton
-                icon={Settings}
-                label="Settings"
-                active={false}
-                onClick={() =>
-                  showNotice("Settings are owner-only in the full workspace.")
-                }
-              />
+              {navItems.map(([value, label, Icon]) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => {
+                    setPage(value);
+                    setSelectedAppointmentId(null);
+                  }}
+                  className={`flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-left text-sm font-medium transition ${
+                    page === value
+                      ? "bg-violet-50 text-violet-800 ring-1 ring-violet-100"
+                      : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                  }`}
+                >
+                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100">
+                    <Icon size={16} />
+                  </span>
+                  {label}
+                  {value === "dashboard" ? (
+                    <span className="ml-auto rounded-full bg-amber-100 px-2 py-0.5 text-[9px] font-bold uppercase text-amber-700">
+                      Owner
+                    </span>
+                  ) : null}
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={() => showNotice("Settings are owner-only in the full workspace.")}
+                className="flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-left text-sm font-medium text-slate-600 hover:bg-slate-50"
+              >
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100">
+                  <Settings size={16} />
+                </span>
+                Settings
+              </button>
             </nav>
           </aside>
 
           <main className="lp-operations-main">
+            {page === "dashboard" ? <DemoDashboard /> : null}
             {page === "calendar" ? (
               <div className="flex h-full flex-col bg-slate-50 p-4">
-                <div className="mb-3 flex items-center gap-3">
-                  <button className="rounded-md border bg-white px-2 py-1">
-                    ‹
-                  </button>
-                  <button className="rounded-md border bg-white px-3 py-1 text-sm font-medium">
-                    Today
-                  </button>
-                  <button className="rounded-md border bg-white px-2 py-1">
-                    ›
-                  </button>
-                  <h3 className="ml-2 text-xl font-bold text-slate-900">
-                    July 27, 2026
-                  </h3>
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-violet-600">Monday</p>
+                    <h3 className="text-xl font-bold text-slate-900">July 27, 2026</h3>
+                  </div>
+                  <span className="rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-500 shadow-sm">
+                    Africa/Cairo
+                  </span>
                 </div>
                 <div className="flex min-h-0 flex-1 gap-4 overflow-hidden">
                   <div className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-lg border border-slate-200 bg-white">
                     <StatusLegend />
                     <div className="min-h-0 flex-1 overflow-hidden">
-                      <CalendarGrid
-                        data={calendarData}
-                        onSelectAppointment={setSelectedAppointmentId}
-                      />
+                      <CalendarGrid data={calendarData} onSelectAppointment={setSelectedAppointmentId} />
                     </div>
                   </div>
-                  {selectedAppointmentId ? (
-                    <DemoAppointmentPanel
-                      appointment={
-                        appointments.find(
-                          (item) => item.id === selectedAppointmentId,
-                        )!
-                      }
+                  {selectedAppointment ? (
+                    <AppointmentPanel
+                      appointment={selectedAppointment}
                       onClose={() => setSelectedAppointmentId(null)}
                       onAction={showNotice}
                     />
@@ -483,204 +411,32 @@ export function LiveOperationsDemo() {
                 </div>
               </div>
             ) : null}
-
             {page === "appointments" ? (
-              <div className="h-full overflow-y-auto bg-slate-50 p-5">
-                <div className="mx-auto max-w-6xl">
-                  <p className="text-sm font-medium text-blue-600">
-                    Operations
-                  </p>
-                  <h3 className="mt-1 text-3xl font-bold text-slate-900">
-                    Appointments
-                  </h3>
-                  <p className="mt-1 text-sm text-slate-500">
-                    Review the queue, filter the day, and open any appointment
-                    for its full workspace.
-                  </p>
-                  <div className="mt-6">
-                    <AppointmentsToolbar
-                      query={query}
-                      date={DEMO_DATE}
-                      staffFilter={staffFilter}
-                      statusFilter={statusFilter}
-                      sort={sort}
-                      staff={staff}
-                      onQueryChange={setQuery}
-                      onDateChange={() => {}}
-                      onStaffFilterChange={setStaffFilter}
-                      onStatusFilterChange={setStatusFilter}
-                      onSortChange={setSort}
-                    />
-                  </div>
-                  <div className="mb-3 flex items-center justify-between">
-                    <h4 className="text-lg font-semibold text-slate-900">
-                      Monday, July 27
-                    </h4>
-                    <span className="text-sm text-slate-500">
-                      {visibleAppointments.length} appointments
-                    </span>
-                  </div>
-                  <div className="space-y-3">
-                    {visibleAppointments.map((appointment) => (
-                      <DemoAppointmentListItem
-                        key={appointment.id}
-                        appointment={appointment}
-                        onClick={() => setSelectedAppointmentId(appointment.id)}
-                      />
-                    ))}
-                  </div>
-                  {selectedAppointmentId ? (
-                    <div className="mt-4">
-                      <DemoAppointmentPanel
-                        appointment={
-                          appointments.find(
-                            (item) => item.id === selectedAppointmentId,
-                          )!
-                        }
-                        onClose={() => setSelectedAppointmentId(null)}
-                        onAction={showNotice}
-                      />
-                    </div>
-                  ) : null}
-                </div>
-              </div>
+              <DemoAppointments
+                items={filteredAppointments}
+                query={query}
+                onQueryChange={setQuery}
+                onSelect={setSelectedAppointmentId}
+                selected={selectedAppointment}
+                onClose={() => setSelectedAppointmentId(null)}
+                onAction={showNotice}
+              />
             ) : null}
-
+            {page === "customers" ? <DemoCustomers /> : null}
             {page === "invoices" ? (
-              <div className="h-full overflow-y-auto bg-gradient-to-br from-violet-50/60 via-slate-50 to-emerald-50/30 p-5">
-                <div className="mx-auto max-w-[1400px] space-y-5">
-                  <header>
-                    <div className="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
-                      <Receipt size={13} /> Payments and receipts
-                    </div>
-                    <h3 className="mt-3 text-3xl font-bold tracking-tight text-slate-950">
-                      Invoices
-                    </h3>
-                    <p className="mt-1.5 text-sm text-slate-500">
-                      Review completed payments, download receipts, and manage
-                      voided invoices.
-                    </p>
-                  </header>
-                  <section className="rounded-2xl border border-white/80 bg-white/90 p-3 shadow-sm">
-                    <div className="grid gap-3 lg:grid-cols-[1fr_11rem_13rem_auto]">
-                      <label className="relative block">
-                        <Search
-                          className="pointer-events-none absolute left-3.5 top-3 text-slate-400"
-                          size={17}
-                        />
-                        <input
-                          placeholder="Search invoice, customer, or phone..."
-                          className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-3 text-sm outline-none"
-                        />
-                      </label>
-                      <select className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm">
-                        <option>All statuses</option>
-                        <option>Paid</option>
-                      </select>
-                      <select className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm">
-                        <option>All payment methods</option>
-                        <option>Cash</option>
-                        <option>Card</option>
-                      </select>
-                      <button className="h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-600">
-                        Clear
-                      </button>
-                    </div>
-                  </section>
-                  <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_25rem]">
-                    <InvoiceListPanel
-                      invoices={invoiceDetails as InvoiceListItem[]}
-                      selectedId={selectedInvoiceId}
-                      onSelect={setSelectedInvoiceId}
-                    />
-                    <InvoiceDetailPanel
-                      invoice={selectedInvoice}
-                      loading={false}
-                      actionRunning={false}
-                      onDownload={() =>
-                        showNotice("Receipt download simulated.")
-                      }
-                      onVoid={() =>
-                        showNotice(
-                          "Void action simulated; demo data was not changed.",
-                        )
-                      }
-                    />
-                  </div>
-                </div>
-              </div>
+              <DemoInvoices
+                selectedId={selectedInvoiceId}
+                onSelect={setSelectedInvoiceId}
+                selected={selectedInvoice}
+                onAction={showNotice}
+              />
             ) : null}
-
-            {page === "customers" ? (
-              <div className="h-full overflow-y-auto bg-slate-50 p-5">
-                <div className="mx-auto flex min-h-full max-w-[1400px] flex-col">
-                  <header className="mb-6 flex items-end justify-between">
-                    <div>
-                      <p className="text-sm font-semibold text-blue-600">
-                        Operations
-                      </p>
-                      <h3 className="mt-1 text-3xl font-bold tracking-tight text-slate-950">
-                        Customers
-                      </h3>
-                      <p className="mt-1 text-sm text-slate-500">
-                        Manage customer profiles, notes, and appointment
-                        history.
-                      </p>
-                    </div>
-                    <button
-                      onClick={() =>
-                        showNotice(
-                          "New customer form opened in the real workspace.",
-                        )
-                      }
-                      className="rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white"
-                    >
-                      New customer
-                    </button>
-                  </header>
-                  <div className="grid min-h-0 flex-1 gap-4 xl:grid-cols-[22rem_minmax(0,1fr)]">
-                    <CustomerListPanel
-                      customers={visibleCustomers}
-                      selectedId={selectedCustomerId}
-                      total={visibleCustomers.length}
-                      search={customerSearch}
-                      filter={customerFilter}
-                      loading={false}
-                      onSearchChange={setCustomerSearch}
-                      onFilterChange={setCustomerFilter}
-                      onSelect={setSelectedCustomerId}
-                      onNewCustomer={() =>
-                        showNotice(
-                          "New customer form opened in the real workspace.",
-                        )
-                      }
-                    />
-                    {selectedWorkspace ? (
-                      <CustomerProfilePanel
-                        workspace={selectedWorkspace}
-                        timezone={TIMEZONE}
-                        savingNotes={false}
-                        onEdit={() => showNotice("Customer edit form opened.")}
-                        onSaveNotes={async () =>
-                          showNotice("Notes saved locally for the demo.")
-                        }
-                        onNewAppointment={() =>
-                          showNotice(
-                            "New appointment opened with this customer preselected.",
-                          )
-                        }
-                      />
-                    ) : null}
-                  </div>
-                </div>
-              </div>
-            ) : null}
+            {page === "staff" ? <DemoStaff /> : null}
+            {page === "services" ? <DemoServices /> : null}
           </main>
         </div>
-        <div
-          aria-live="polite"
-          className={`lp-demo-notice ${notice ? "is-visible" : ""}`}
-        >
+
+        <div aria-live="polite" className={`lp-demo-notice ${notice ? "is-visible" : ""}`}>
           {notice}
         </div>
       </div>
@@ -688,91 +444,294 @@ export function LiveOperationsDemo() {
   );
 }
 
-function DemoNavButton({
-  icon: Icon,
-  label,
-  active,
-  onClick,
-}: {
-  icon: typeof CalendarDays;
-  label: string;
-  active: boolean;
-  onClick: () => void;
-}) {
+function DemoDashboard() {
+  const metrics = [
+    ["Revenue", "EGP 1,720", "+12.4%"],
+    ["Appointments", "5", "Today"],
+    ["Customers", "10", "2 new"],
+    ["Utilisation", "71%", "Team average"],
+  ];
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`group flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-sm font-medium transition-all ${active ? "bg-violet-50 text-violet-800 shadow-sm ring-1 ring-violet-100" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"}`}
-    >
-      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
-        <Icon size={16} />
-      </span>
-      {label}
-    </button>
+    <div className="h-full overflow-y-auto bg-slate-50 p-5">
+      <div className="mx-auto max-w-6xl">
+        <p className="text-sm font-semibold text-violet-600">Owner analytics</p>
+        <h3 className="mt-1 text-3xl font-bold text-slate-950">Business overview</h3>
+        <p className="mt-1 text-sm text-slate-500">Revenue and performance stay restricted to the owner.</p>
+        <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {metrics.map(([label, value, hint]) => (
+            <div key={label} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{label}</p>
+              <p className="mt-3 text-2xl font-bold text-slate-950">{value}</p>
+              <p className="mt-1 text-xs font-medium text-emerald-600">{hint}</p>
+            </div>
+          ))}
+        </div>
+        <div className="mt-4 grid gap-4 xl:grid-cols-[1.5fr_1fr]">
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-semibold text-slate-900">Revenue this week</p>
+                <p className="text-xs text-slate-500">Paid invoices only</p>
+              </div>
+              <BarChart3 className="text-violet-600" size={20} />
+            </div>
+            <div className="mt-6 flex h-44 items-end gap-3">
+              {[35, 52, 46, 78, 64, 92, 70].map((height, index) => (
+                <div key={index} className="flex flex-1 flex-col items-center gap-2">
+                  <div className="w-full rounded-t-lg bg-gradient-to-t from-violet-600 to-indigo-400" style={{ height: `${height}%` }} />
+                  <span className="text-[10px] font-medium text-slate-400">{["M", "T", "W", "T", "F", "S", "S"][index]}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <p className="text-sm font-semibold text-slate-900">Top services</p>
+            <div className="mt-4 space-y-4">
+              {services.slice(0, 4).map((service, index) => (
+                <div key={service.id}>
+                  <div className="flex justify-between text-xs">
+                    <span className="font-medium text-slate-700">{service.name}</span>
+                    <span className="text-slate-400">{4 - index} bookings</span>
+                  </div>
+                  <div className="mt-2 h-2 rounded-full bg-slate-100">
+                    <div className="h-2 rounded-full bg-violet-500" style={{ width: `${92 - index * 17}%` }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
-function DemoAppointmentListItem({
-  appointment,
-  onClick,
+function DemoAppointments({
+  items,
+  query,
+  onQueryChange,
+  onSelect,
+  selected,
+  onClose,
+  onAction,
 }: {
-  appointment: AppointmentSummary;
-  onClick: () => void;
+  items: AppointmentSummary[];
+  query: string;
+  onQueryChange: (value: string) => void;
+  onSelect: (id: string) => void;
+  selected?: AppointmentSummary;
+  onClose: () => void;
+  onAction: (message: string) => void;
 }) {
-  const first = appointment.segments[0];
-  const total =
-    appointment.segments.reduce((sum, segment) => sum + segment.price, 0) -
-    appointment.discount;
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="group flex w-full flex-wrap items-center gap-4 rounded-2xl border border-slate-200 border-l-4 border-l-blue-500 bg-white p-4 text-left shadow-sm transition hover:border-blue-300 hover:shadow-md"
-    >
-      <div className="w-24 shrink-0 border-r border-slate-100 pr-4">
-        <div className="text-lg font-bold text-slate-900">
-          {new Date(first.startsAt).toLocaleTimeString("en-US", {
-            timeZone: TIMEZONE,
-            hour: "numeric",
-            minute: "2-digit",
-          })}
-        </div>
-        <div className="mt-1 text-xs text-slate-500">
-          {Math.round(
-            (new Date(appointment.segments.at(-1)!.endsAt).getTime() -
-              new Date(first.startsAt).getTime()) /
-              60000,
-          )}{" "}
-          min
+    <div className="h-full overflow-y-auto bg-slate-50 p-5">
+      <div className="mx-auto max-w-6xl">
+        <p className="text-sm font-semibold text-blue-600">Operations</p>
+        <h3 className="mt-1 text-3xl font-bold text-slate-900">Appointments</h3>
+        <label className="relative mt-5 block max-w-xl">
+          <Search className="absolute left-3 top-3 text-slate-400" size={17} />
+          <input
+            value={query}
+            onChange={(event) => onQueryChange(event.target.value)}
+            placeholder="Search customer, phone, or service..."
+            className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-3 text-sm outline-none"
+          />
+        </label>
+        <div className="mt-5 grid gap-4 xl:grid-cols-[minmax(0,1fr)_22rem]">
+          <div className="space-y-3">
+            {items.map((appointment) => (
+              <button
+                key={appointment.id}
+                type="button"
+                onClick={() => onSelect(appointment.id)}
+                className="flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm transition hover:border-violet-300"
+              >
+                <div>
+                  <p className="font-semibold text-slate-900">{appointment.customer.name}</p>
+                  <p className="mt-1 text-xs text-slate-500">{appointment.segments.map((segment) => segment.serviceName).join(" · ")}</p>
+                </div>
+                <StatusPill status={appointment.status} />
+              </button>
+            ))}
+          </div>
+          {selected ? (
+            <AppointmentPanel appointment={selected} onClose={onClose} onAction={onAction} />
+          ) : (
+            <div className="rounded-2xl border border-dashed border-slate-300 bg-white/70 p-6 text-center text-sm text-slate-500">
+              Select an appointment to open its workspace.
+            </div>
+          )}
         </div>
       </div>
-      <div className="min-w-56 flex-1">
-        <div className="font-semibold text-slate-900">
-          {appointment.customer.name}
-        </div>
-        <div className="text-sm text-slate-500">
-          {appointment.segments
-            .map((segment) => segment.serviceName)
-            .join(" · ")}
-        </div>
-        <div className="mt-1 text-xs text-slate-400">
-          {appointment.customer.phone} ·{" "}
-          {appointment.isPaid ? "Paid" : "Payment due"}
-        </div>
-      </div>
-      <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold capitalize text-emerald-700">
-        {appointment.status.replace("_", " ")}
-      </span>
-      <span className="text-sm font-semibold text-slate-700">
-        EGP {(total / 100).toFixed(0)}
-      </span>
-      <span className="text-slate-400">›</span>
-    </button>
+    </div>
   );
 }
 
-function DemoAppointmentPanel({
+function DemoCustomers() {
+  return (
+    <div className="h-full overflow-y-auto bg-slate-50 p-5">
+      <div className="mx-auto max-w-6xl">
+        <p className="text-sm font-semibold text-emerald-600">Customer records</p>
+        <h3 className="mt-1 text-3xl font-bold text-slate-950">Customers</h3>
+        <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {customers.map((customer) => (
+            <article key={customer.id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="flex items-center gap-3">
+                <span className="grid h-11 w-11 place-items-center rounded-full bg-emerald-100 font-bold text-emerald-700">
+                  {customer.name.charAt(0)}
+                </span>
+                <div>
+                  <h4 className="font-semibold text-slate-900">{customer.name}</h4>
+                  <p className="text-xs text-slate-500">{customer.phone}</p>
+                </div>
+              </div>
+              <div className="mt-5 grid grid-cols-2 gap-3 text-center">
+                <div className="rounded-xl bg-slate-50 p-3">
+                  <p className="text-lg font-bold text-slate-900">{customer.visits}</p>
+                  <p className="text-[10px] uppercase tracking-wide text-slate-400">Visits</p>
+                </div>
+                <div className="rounded-xl bg-slate-50 p-3">
+                  <p className="text-lg font-bold text-slate-900">{customer.noShows}</p>
+                  <p className="text-[10px] uppercase tracking-wide text-slate-400">No-shows</p>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DemoInvoices({
+  selectedId,
+  onSelect,
+  selected,
+  onAction,
+}: {
+  selectedId: string;
+  onSelect: (id: string) => void;
+  selected: (typeof invoices)[number];
+  onAction: (message: string) => void;
+}) {
+  return (
+    <div className="h-full overflow-y-auto bg-slate-50 p-5">
+      <div className="mx-auto max-w-6xl">
+        <p className="text-sm font-semibold text-amber-600">Payments and receipts</p>
+        <h3 className="mt-1 text-3xl font-bold text-slate-950">Invoices</h3>
+        <div className="mt-6 grid gap-4 xl:grid-cols-[minmax(0,1fr)_22rem]">
+          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            {invoices.map((invoice) => (
+              <button
+                key={invoice.id}
+                type="button"
+                onClick={() => onSelect(invoice.id)}
+                className={`grid w-full grid-cols-[1fr_1fr_auto] items-center gap-3 border-b border-slate-100 px-4 py-4 text-left last:border-0 ${
+                  selectedId === invoice.id ? "invoice-row-selected" : "hover:bg-slate-50"
+                }`}
+              >
+                <div>
+                  <p className="font-semibold text-slate-900">{invoice.number}</p>
+                  <p className="text-xs text-slate-500">{invoice.customer}</p>
+                </div>
+                <p className="text-sm text-slate-600">{invoice.method}</p>
+                <p className="font-semibold text-slate-900">{money(invoice.amount)}</p>
+              </button>
+            ))}
+          </div>
+          <aside className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Selected invoice</p>
+            <h4 className="mt-2 text-xl font-bold text-slate-950">{selected.number}</h4>
+            <dl className="mt-5 space-y-3 text-sm">
+              <div className="flex justify-between"><dt className="text-slate-500">Customer</dt><dd className="font-medium text-slate-900">{selected.customer}</dd></div>
+              <div className="flex justify-between"><dt className="text-slate-500">Method</dt><dd className="font-medium text-slate-900">{selected.method}</dd></div>
+              <div className="flex justify-between border-t border-slate-100 pt-3"><dt className="font-semibold text-slate-700">Total</dt><dd className="font-bold text-slate-950">{money(selected.amount)}</dd></div>
+            </dl>
+            <button
+              type="button"
+              onClick={() => onAction("Receipt download simulated.")}
+              className="mt-5 w-full rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white"
+            >
+              Download receipt
+            </button>
+          </aside>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DemoStaff() {
+  const assignments: Record<string, string[]> = {
+    "staff-nour": ["Haircut & blow-dry"],
+    "staff-mona": ["Gel manicure", "Nail art"],
+    "staff-lina": ["Skin consultation"],
+    "staff-omar": [],
+  };
+  return (
+    <div className="h-full overflow-y-auto bg-slate-50 p-5">
+      <div className="mx-auto max-w-6xl">
+        <p className="text-sm font-semibold text-rose-600">Team and availability</p>
+        <h3 className="mt-1 text-3xl font-bold text-slate-950">Staff Directory</h3>
+        <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {staff.map((member, index) => (
+            <article key={member.id} className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="flex items-start gap-3">
+                <span className="grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-violet-100 to-sky-100 text-lg font-bold text-violet-700">
+                  {member.name.split(" ").map((part) => part[0]).join("").slice(0, 2)}
+                </span>
+                <div>
+                  <h4 className="font-bold text-slate-950">{member.name}</h4>
+                  <p className="mt-1 text-sm text-slate-500">{member.role}</p>
+                  <span className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${index === 3 ? "bg-sky-100 text-sky-700" : "bg-emerald-100 text-emerald-700"}`}>
+                    {index === 3 ? "Front desk" : "Available today"}
+                  </span>
+                </div>
+              </div>
+              <div className="mt-5 flex min-h-8 flex-wrap gap-2">
+                {assignments[member.id].length ? assignments[member.id].map((name) => (
+                  <span key={name} className="rounded-full bg-violet-100 px-2.5 py-1 text-xs font-semibold text-violet-700">{name}</span>
+                )) : <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs text-slate-500">No service assignment</span>}
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DemoServices() {
+  const categories = [...new Set(services.map((service) => service.category))];
+  return (
+    <div className="h-full overflow-y-auto bg-slate-50 p-5">
+      <div className="mx-auto max-w-6xl">
+        <p className="text-sm font-semibold text-orange-600">Catalogue and pricing</p>
+        <h3 className="mt-1 text-3xl font-bold text-slate-950">Services</h3>
+        <div className="mt-5 flex flex-wrap gap-2">
+          {categories.map((category) => (
+            <span key={category} className="rounded-full border border-orange-200 bg-orange-50 px-3 py-1.5 text-xs font-semibold text-orange-700">{category}</span>
+          ))}
+        </div>
+        <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {services.map((service) => (
+            <article key={service.id} className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+              <span className="grid h-11 w-11 place-items-center rounded-2xl bg-orange-100 text-orange-700">
+                {service.category === "Hair" ? <Scissors size={19} /> : <Sparkles size={19} />}
+              </span>
+              <p className="mt-5 text-[10px] font-bold uppercase tracking-[.18em] text-orange-600">{service.category}</p>
+              <h4 className="mt-1 text-lg font-bold text-slate-950">{service.name}</h4>
+              <p className="mt-2 text-sm text-slate-500">{service.duration} min · {service.staffNames.join(", ")}</p>
+              <p className="mt-5 text-xl font-bold text-slate-950">{money(service.price)}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AppointmentPanel({
   appointment,
   onClose,
   onAction,
@@ -782,161 +741,65 @@ function DemoAppointmentPanel({
   onAction: (message: string) => void;
 }) {
   return (
-    <aside className="w-full shrink-0 rounded-2xl border border-slate-200 bg-white p-5 shadow-xl lg:w-80">
-      <div className="flex items-start justify-between">
+    <aside className="w-80 shrink-0 overflow-y-auto rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">
-            Appointment
-          </p>
-          <h4 className="mt-1 text-xl font-bold text-slate-950">
-            {appointment.customer.name}
-          </h4>
-          <p className="text-sm text-slate-500">{appointment.customer.phone}</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-violet-600">Appointment</p>
+          <h4 className="mt-1 text-xl font-bold text-slate-950">{appointment.customer.name}</h4>
         </div>
-        <button
-          onClick={onClose}
-          className="rounded-lg border px-2 py-1 text-slate-500"
-        >
-          ×
-        </button>
+        <button type="button" onClick={onClose} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100"><X size={17} /></button>
       </div>
+      <StatusPill status={appointment.status} />
       <div className="mt-5 space-y-3">
         {appointment.segments.map((segment) => (
-          <div
-            key={segment.id}
-            className="rounded-xl border border-slate-200 bg-slate-50 p-3"
-          >
-            <p className="font-semibold text-slate-900">
-              {segment.serviceName}
-            </p>
-            <p className="mt-1 text-xs text-slate-500">
-              {staff.find((member) => member.id === segment.staffId)?.name} ·
-              EGP {(segment.price / 100).toFixed(0)}
-            </p>
+          <div key={segment.id} className="rounded-xl bg-slate-50 p-3">
+            <p className="text-sm font-semibold text-slate-900">{segment.serviceName}</p>
+            <p className="mt-1 text-xs text-slate-500">{staff.find((member) => member.id === segment.staffId)?.name}</p>
+          </div>
+        ))}
+        {appointment.customItems.map((item) => (
+          <div key={item.id} className="rounded-xl border border-dashed border-amber-200 bg-amber-50 p-3">
+            <p className="text-xs font-semibold text-amber-800">Custom item · {item.description}</p>
           </div>
         ))}
       </div>
-      <div className="mt-5 grid gap-2">
-        <button
-          onClick={() =>
-            onAction("Appointment marked in progress in the demo.")
-          }
-          className="rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white"
-        >
-          Start appointment
-        </button>
-        <button
-          onClick={() => onAction("Payment collection opened in the demo.")}
-          className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700"
-        >
-          Collect payment
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={() => onAction("Appointment action simulated; demo data remains unchanged.")}
+        className="mt-5 w-full rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white"
+      >
+        Open full workspace
+      </button>
     </aside>
   );
 }
 
-function makeInvoice(
-  id: string,
-  invoiceNumber: string,
-  customerId: string,
-  customerName: string,
-  phone: string,
-  issuedAt: string,
-  totalCents: number,
-  paymentMethod: InvoiceDetail["paymentMethod"],
-  serviceName: string,
-  staffName: string,
-  discountCents = 0,
-): InvoiceDetail {
-  return {
-    id,
-    invoiceNumber,
-    status: "paid",
-    issuedAt,
-    paidAt: issuedAt,
-    voidedAt: null,
-    paymentMethod,
-    totalCents,
-    currency: "EGP",
-    customer: {
-      id: customerId,
-      name: customerName,
-      phone,
-      email: `${customerName.toLowerCase().replaceAll(" ", ".")}@example.com`,
-    },
-    appointment: {
-      id: `appt-${id}`,
-      startsAt: issuedAt,
-      endsAt: issuedAt,
-      status: "completed",
-      bookingChannel: "FRONT_DESK",
-    },
-    services: [serviceName],
-    subtotalCents: totalCents + discountCents,
-    discountCents,
-    taxCents: 0,
-    notes: null,
-    paymentReference: paymentMethod === "CASH" ? null : "DEMO-REF-1001",
-    voidReason: null,
-    business: {
-      id: "business-demo",
-      name: "Hgezli Demo Business",
-      logoUrl: null,
-      timezone: TIMEZONE,
-    },
-    paidBy: { id: "admin-demo", name: "Demo Admin" },
-    voidedBy: null,
-    lineItems: [
-      {
-        id: `${id}-line`,
-        description: serviceName,
-        quantity: 1,
-        unitPriceCents: totalCents + discountCents,
-        totalCents: totalCents + discountCents,
-        service: { id: `${id}-service`, name: serviceName },
-        staff: { id: `${id}-staff`, name: staffName },
-      },
-    ],
+function StatusPill({ status }: { status: AppointmentStatus }) {
+  const copy: Record<AppointmentStatus, string> = {
+    pending: "Pending",
+    confirmed: "Confirmed",
+    in_progress: "In progress",
+    completed: "Completed",
+    cancelled_by_business: "Cancelled",
+    cancelled_by_customer: "Cancelled",
+    no_show: "No-show",
   };
+  const tone: Record<AppointmentStatus, string> = {
+    pending: "bg-amber-100 text-amber-700",
+    confirmed: "bg-teal-100 text-teal-700",
+    in_progress: "bg-violet-100 text-violet-700",
+    completed: "bg-green-100 text-green-700",
+    cancelled_by_business: "bg-rose-100 text-rose-700",
+    cancelled_by_customer: "bg-rose-100 text-rose-700",
+    no_show: "bg-amber-100 text-amber-700",
+  };
+  return <span className={`mt-3 inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${tone[status]}`}>{copy[status]}</span>;
 }
 
-function makeCustomer(
-  id: string,
-  name: string,
-  phone: string,
-  email: string,
-  visits: number,
-  noShows: number,
-  source: string,
-): CustomerListItem {
-  return {
-    id,
-    businessId: "business-demo",
-    name,
-    phone,
-    email,
-    acquisitionSource: source,
-    notes: "",
-    createdAt: "2026-01-10T10:00:00.000Z",
-    updatedAt: "2026-07-20T10:00:00.000Z",
-    visits,
-    noShows,
-    lastVisitAt: "2026-06-18T12:00:00.000Z",
-    nextAppointment: appointments.find(
-      (appointment) => appointment.customer.id === id,
-    )
-      ? {
-          id: appointments.find(
-            (appointment) => appointment.customer.id === id,
-          )!.id,
-          startsAt: appointments.find(
-            (appointment) => appointment.customer.id === id,
-          )!.segments[0].startsAt,
-          status: appointments.find(
-            (appointment) => appointment.customer.id === id,
-          )!.status,
-        }
-      : null,
-  };
+function money(cents: number) {
+  return new Intl.NumberFormat("en-EG", {
+    style: "currency",
+    currency: "EGP",
+    maximumFractionDigits: 0,
+  }).format(cents / 100);
 }
