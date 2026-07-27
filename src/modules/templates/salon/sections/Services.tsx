@@ -23,15 +23,15 @@ export function Services({ services }: { services: SalonTemplateData["services"]
 
   return (
     <section id="services" className="px-6 py-24 md:px-12 lg:px-16 lg:py-32">
-      <div className="mx-auto max-w-7xl">
-        <div className="mx-auto max-w-2xl text-center">
+      <div className="mx-auto max-w-7xl text-center">
+        <div className="mx-auto max-w-2xl">
           <p className="text-xs font-medium uppercase tracking-[0.24em]" style={{ color: "var(--accent)" }}>
             Our services
           </p>
-          <h2 className="font-display mt-3 text-4xl leading-tight text-[#2B2420] md:text-5xl">
+          <h2 className="font-display mt-3 text-4xl leading-tight text-[var(--text)] md:text-5xl">
             Thoughtful care, without the clutter
           </h2>
-          <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-[#75695E]">
+          <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-[var(--muted)]">
             Explore the treatments available and choose the appointment that feels right for you.
           </p>
         </div>
@@ -43,30 +43,30 @@ export function Services({ services }: { services: SalonTemplateData["services"]
             return (
               <article
                 key={service.id}
-                className="group flex min-h-64 flex-col rounded-[1.75rem] border border-[#E8DFD3] bg-[#FBF8F4] p-7 transition duration-300 hover:-translate-y-1 hover:bg-white hover:shadow-[0_18px_45px_rgba(43,36,32,0.07)]"
+                className="group flex min-h-64 flex-col items-center rounded-[1.75rem] border border-[var(--border)] bg-[var(--soft)] p-7 text-center transition duration-300 hover:-translate-y-1 hover:bg-[var(--surface)] hover:shadow-[0_18px_45px_rgba(43,36,32,0.07)]"
               >
-                <span className="grid h-12 w-12 place-items-center rounded-2xl border border-[#E6DCCF] bg-white text-[#2B2420]">
+                <span className="grid h-12 w-12 place-items-center rounded-2xl border border-[var(--border)] bg-[var(--surface)]" style={{ color: "var(--accent)" }}>
                   <Icon size={19} strokeWidth={1.7} />
                 </span>
 
                 <div className="mt-7">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#9B8D80]">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--muted)]">
                     {service.category?.trim() || "Service"}
                   </p>
-                  <h3 className="font-display mt-2 text-2xl leading-snug text-[#2B2420]">
+                  <h3 className="font-display mt-2 text-2xl leading-snug text-[var(--text)]">
                     {service.name}
                   </h3>
-                  <p className="mt-3 line-clamp-3 text-sm leading-6 text-[#6F6358]">
+                  <p className="mx-auto mt-3 line-clamp-3 max-w-sm text-sm leading-6 text-[var(--muted)]">
                     {service.description || "A considered treatment delivered with care and attention to detail."}
                   </p>
                 </div>
 
-                <div className="mt-auto flex items-end justify-between gap-4 pt-8">
-                  <span className="flex items-center gap-2 text-xs uppercase tracking-[0.15em] text-[#8A7F73]">
+                <div className="mt-auto flex flex-wrap items-center justify-center gap-x-5 gap-y-2 pt-8">
+                  <span className="flex items-center gap-2 text-xs uppercase tracking-[0.15em] text-[var(--muted)]">
                     <Clock3 size={14} />
                     {service.durationMin} min
                   </span>
-                  <strong className="text-sm font-semibold text-[#4E463F]">
+                  <strong className="text-sm font-semibold text-[var(--text)]">
                     {service.priceEgp} EGP
                   </strong>
                 </div>
