@@ -2,18 +2,20 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
 import { loginSchema, LoginInput } from "../auth.schema";
 import { loginUser, ApiError } from "../auth.api";
 import { useAuth } from "../useAuth";
+import { safeNextPath, workspacePathForUser } from "../auth-redirect";
 import { Button } from "@/shared/components/ui/button";
 import { GoogleAuthButton } from "./GoogleAuthButton";
-import Link from "next/link";
 
 export function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { setSession } = useAuth();
   const [serverError, setServerError] = useState<string | null>(null);
 
@@ -28,10 +30,10 @@ export function LoginForm() {
     try {
       const res = await loginUser(data);
       const { accessToken, user } = res.data;
-
       setSession(user, accessToken);
-
-      router.push(user.businessId ? "/operations" : "/onboarding");
+      router.push(
+        safeNextPath(searchParams.get("next")) ?? workspacePathForUser(user),
+      );
     } catch (err) {
       const apiErr = err as ApiError;
       if (apiErr.code === "EMAIL_NOT_VERIFIED") {
@@ -41,6 +43,10 @@ export function LoginForm() {
       }
     }
   }
+
+  const signupHref = safeNextPath(searchParams.get("next"))
+    ? `/signup?next=${encodeURIComponent(searchParams.get("next")!)}`
+    : "/signup";
 
   return (
     <div className="space-y-6">
@@ -60,9 +66,9 @@ export function LoginForm() {
             type="email"
             className="mt-1 w-full rounded-md border border-surfaceBorder bg-background px-3 py-2 text-foreground"
           />
-          {errors.email && (
+          {errors.email ? (
             <p className="mt-1 text-sm text-red-400">{errors.email.message}</p>
-          )}
+          ) : null}
         </div>
 
         <div>
@@ -72,14 +78,12 @@ export function LoginForm() {
             type="password"
             className="mt-1 w-full rounded-md border border-surfaceBorder bg-background px-3 py-2 text-foreground"
           />
-          {errors.password && (
-            <p className="mt-1 text-sm text-red-400">
-              {errors.password.message}
-            </p>
-          )}
+          {errors.password ? (
+            <p className="mt-1 text-sm text-red-400">{errors.password.message}</p>
+          ) : null}
         </div>
 
-        {serverError && <p className="text-sm text-red-400">{serverError}</p>}
+        {serverError ? <p className="text-sm text-red-400">{serverError}</p> : null}
 
         <Button
           type="submit"
@@ -92,7 +96,7 @@ export function LoginForm() {
 
       <p className="text-center text-sm text-muted">
         Don&apos;t have an account?{" "}
-        <Link href="/signup" className="text-accent hover:underline">
+        <Link href={signupHref} className="text-accent hover:underline">
           Sign up
         </Link>
       </p>

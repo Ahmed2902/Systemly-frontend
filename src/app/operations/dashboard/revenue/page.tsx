@@ -18,15 +18,11 @@ import {
   MultiLineChart,
 } from "@/modules/analytics/components/AnalyticsCharts";
 import {
+  formatAnalyticsBucket,
   formatDateRange,
   formatEgp,
   WEEKDAYS,
 } from "@/modules/analytics/analytics.formatters";
-
-const shortDate = (value: string) =>
-  new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short" }).format(
-    new Date(value),
-  );
 
 export default function RevenueAnalyticsPage() {
   const { accessToken } = useAuth();
@@ -46,19 +42,27 @@ export default function RevenueAnalyticsPage() {
     };
   }, [accessToken, preset]);
 
+  const shortDate = (value: string) =>
+    formatAnalyticsBucket(value, data?.timezone ?? "Africa/Cairo");
+
   return (
     <AnalyticsShell
       title="Revenue Analytics"
-      subtitle="Revenue, invoice volume, category mix, and weekday performance"
+      subtitle="Revenue, invoice volume, category mix, custom items, and weekday performance"
     >
       {error ? <AnalyticsState message={error} /> : null}
       {!data && !error ? <AnalyticsState message="Loading revenue analytics…" /> : null}
       {data ? (
         <div className="space-y-3">
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
             <MetricCard label="Total revenue" value={formatEgp(data.summary.revenueCents)} />
             <MetricCard label="Paid invoices" value={String(data.summary.paidInvoiceCount)} />
             <MetricCard label="Average paid invoice" value={formatEgp(data.summary.averageInvoiceCents)} />
+            <MetricCard
+              label="Custom item revenue"
+              value={formatEgp(data.summary.customItemRevenueCents)}
+              hint={`${data.summary.customItemQuantity} items sold`}
+            />
             <MetricCard
               label="Top revenue category"
               value={data.summary.topCategory?.category ?? "—"}
@@ -72,7 +76,7 @@ export default function RevenueAnalyticsPage() {
           </div>
 
           <AnalyticsPanel
-            title={`Revenue over time · ${formatDateRange(data.range.from, data.range.to)}`}
+            title={`Revenue over time · ${formatDateRange(data.range.from, data.range.to, data.timezone)}`}
           >
             <AreaChart
               data={data.trend.map((row) => ({
@@ -125,6 +129,31 @@ export default function RevenueAnalyticsPage() {
           </div>
 
           <div className="grid gap-3 xl:grid-cols-2">
+            <AnalyticsPanel
+              title="Custom items"
+              action={
+                <span className="analytics-muted text-xs">
+                  Products and charges added outside the service catalogue
+                </span>
+              }
+            >
+              {data.customItems.length ? (
+                <LollipopChart
+                  items={data.customItems.map((row) => ({
+                    label: row.description,
+                    value: row.totalCents,
+                    tooltip: [
+                      { label: "Revenue", value: formatEgp(row.totalCents) },
+                      { label: "Quantity", value: String(row.quantity) },
+                    ],
+                  }))}
+                  formatValue={formatEgp}
+                />
+              ) : (
+                <AnalyticsState message="No custom items were sold in this period." />
+              )}
+            </AnalyticsPanel>
+
             <AnalyticsPanel title="Paid invoices by period">
               <MultiLineChart
                 labels={data.trend.map((row) => shortDate(row.bucket))}
@@ -142,21 +171,21 @@ export default function RevenueAnalyticsPage() {
                 height={285}
               />
             </AnalyticsPanel>
-
-            <AnalyticsPanel title="Revenue by weekday">
-              <LollipopChart
-                items={data.byWeekday.map((row) => ({
-                  label: WEEKDAYS[row.weekday],
-                  value: row.totalCents,
-                  tooltip: [
-                    { label: "Revenue", value: formatEgp(row.totalCents) },
-                    { label: "Paid invoices", value: String(row.invoiceCount) },
-                  ],
-                }))}
-                formatValue={formatEgp}
-              />
-            </AnalyticsPanel>
           </div>
+
+          <AnalyticsPanel title="Revenue by weekday">
+            <LollipopChart
+              items={data.byWeekday.map((row) => ({
+                label: WEEKDAYS[row.weekday],
+                value: row.totalCents,
+                tooltip: [
+                  { label: "Revenue", value: formatEgp(row.totalCents) },
+                  { label: "Paid invoices", value: String(row.invoiceCount) },
+                ],
+              }))}
+              formatValue={formatEgp}
+            />
+          </AnalyticsPanel>
         </div>
       ) : null}
     </AnalyticsShell>

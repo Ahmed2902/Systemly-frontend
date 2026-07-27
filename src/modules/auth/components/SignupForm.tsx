@@ -1,19 +1,21 @@
 // src/modules/auth/components/SignupForm.tsx
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signupSchema, SignupInput } from "../auth.schema";
 import { registerUser, ApiError } from "../auth.api";
 import { useAuth } from "../useAuth";
+import { safeNextPath } from "../auth-redirect";
 import { Button } from "@/shared/components/ui/button";
 import { GoogleAuthButton } from "./GoogleAuthButton";
-import { useState } from "react";
-import Link from "next/link";
 
 export function SignupForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { setSession } = useAuth();
   const [serverError, setServerError] = useState<string | null>(null);
 
@@ -29,12 +31,16 @@ export function SignupForm() {
       const res = await registerUser(data);
       const { accessToken, user } = res.data;
       setSession(user, accessToken);
-      router.push("/onboarding");
+      router.push(safeNextPath(searchParams.get("next")) ?? "/onboarding");
     } catch (err) {
       const apiErr = err as ApiError;
       setServerError(apiErr.error ?? "Something went wrong. Please try again.");
     }
   }
+
+  const loginHref = safeNextPath(searchParams.get("next"))
+    ? `/login?next=${encodeURIComponent(searchParams.get("next")!)}`
+    : "/login";
 
   return (
     <div className="space-y-6">
@@ -53,9 +59,9 @@ export function SignupForm() {
             {...register("name")}
             className="mt-1 w-full rounded-md border border-surfaceBorder bg-background px-3 py-2 text-foreground"
           />
-          {errors.name && (
+          {errors.name ? (
             <p className="mt-1 text-sm text-red-400">{errors.name.message}</p>
-          )}
+          ) : null}
         </div>
 
         <div>
@@ -65,9 +71,9 @@ export function SignupForm() {
             type="email"
             className="mt-1 w-full rounded-md border border-surfaceBorder bg-background px-3 py-2 text-foreground"
           />
-          {errors.email && (
+          {errors.email ? (
             <p className="mt-1 text-sm text-red-400">{errors.email.message}</p>
-          )}
+          ) : null}
         </div>
 
         <div>
@@ -77,9 +83,9 @@ export function SignupForm() {
             placeholder="01012345678"
             className="mt-1 w-full rounded-md border border-surfaceBorder bg-background px-3 py-2 text-foreground"
           />
-          {errors.phone && (
+          {errors.phone ? (
             <p className="mt-1 text-sm text-red-400">{errors.phone.message}</p>
-          )}
+          ) : null}
         </div>
 
         <div>
@@ -89,14 +95,12 @@ export function SignupForm() {
             type="password"
             className="mt-1 w-full rounded-md border border-surfaceBorder bg-background px-3 py-2 text-foreground"
           />
-          {errors.password && (
-            <p className="mt-1 text-sm text-red-400">
-              {errors.password.message}
-            </p>
-          )}
+          {errors.password ? (
+            <p className="mt-1 text-sm text-red-400">{errors.password.message}</p>
+          ) : null}
         </div>
 
-        {serverError && <p className="text-sm text-red-400">{serverError}</p>}
+        {serverError ? <p className="text-sm text-red-400">{serverError}</p> : null}
 
         <Button
           type="submit"
@@ -109,7 +113,7 @@ export function SignupForm() {
 
       <p className="text-center text-sm text-muted">
         Already have an account?{" "}
-        <Link href="/login" className="text-accent hover:underline">
+        <Link href={loginHref} className="text-accent hover:underline">
           Log in
         </Link>
       </p>

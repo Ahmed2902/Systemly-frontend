@@ -19,14 +19,10 @@ import {
   LollipopChart,
 } from "@/modules/analytics/components/AnalyticsCharts";
 import {
+  formatAnalyticsBucket,
   formatEgp,
   formatPercent,
 } from "@/modules/analytics/analytics.formatters";
-
-const shortDate = (value: string) =>
-  new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short" }).format(
-    new Date(value),
-  );
 
 export default function DashboardOverviewPage() {
   const { accessToken } = useAuth();
@@ -82,10 +78,7 @@ export default function DashboardOverviewPage() {
             />
             <MetricCard
               label="Customers"
-              value={String(
-                data.customers.summary.newCustomers +
-                  data.customers.summary.returningCustomers,
-              )}
+              value={String(data.customers.summary.activeCustomers)}
               hint={`${data.customers.summary.newCustomers} new · ${data.customers.summary.returningCustomers} returning`}
             />
           </div>
@@ -94,7 +87,7 @@ export default function DashboardOverviewPage() {
             <AnalyticsPanel title="Revenue over time">
               <AreaChart
                 data={data.revenue.trend.map((row) => ({
-                  label: shortDate(row.bucket),
+                  label: formatAnalyticsBucket(row.bucket, data.revenue.timezone),
                   value: row.totalCents,
                   tooltip: [
                     { label: "Paid invoices", value: String(row.invoiceCount) },
