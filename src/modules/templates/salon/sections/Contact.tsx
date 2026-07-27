@@ -1,107 +1,98 @@
-import { Phone } from "lucide-react";
+"use client";
+
+import Link from "next/link";
+import { CalendarDays, Instagram, MapPin, MessageCircle, Phone } from "lucide-react";
+
+function externalUrl(url: string) {
+  return url.startsWith("http://") || url.startsWith("https://") ? url : `https://${url}`;
+}
 
 export function Contact({
   phone,
+  address,
+  city,
   instagram,
   whatsapp,
+  bookingHref,
+  previewMode,
 }: {
   phone?: string;
+  address?: string;
+  city?: string;
   instagram?: string;
   whatsapp?: string;
+  bookingHref: string;
+  previewMode?: boolean;
 }) {
-  const hasContact = phone || instagram || whatsapp;
-  if (!hasContact) return null;
+  const location = [address, city].filter(Boolean).join(", ");
+  const items = [
+    phone ? { label: "Phone", value: phone, href: `tel:${phone}`, Icon: Phone } : null,
+    whatsapp
+      ? {
+          label: "WhatsApp",
+          value: whatsapp,
+          href: `https://wa.me/${whatsapp.replace(/\D/g, "")}`,
+          Icon: MessageCircle,
+        }
+      : null,
+    instagram
+      ? { label: "Instagram", value: "Visit our profile", href: externalUrl(instagram), Icon: Instagram }
+      : null,
+    location
+      ? {
+          label: "Location",
+          value: location,
+          href: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`,
+          Icon: MapPin,
+        }
+      : null,
+  ].filter(Boolean) as Array<{
+    label: string;
+    value: string;
+    href: string;
+    Icon: typeof Phone;
+  }>;
 
-  // Helper function to force absolute URLs so they don't prepend 'localhost:3000'
-  const formatExternalLink = (url: string) => {
-    if (!url) return "";
-    return url.startsWith("http://") || url.startsWith("https://")
-      ? url
-      : `https://${url}`;
-  };
-
-  const absoluteInstagramUrl = instagram ? formatExternalLink(instagram) : "";
-
-  // Format the WhatsApp API link safely by stripping out non-digits
-  const absoluteWhatsappUrl = whatsapp
-    ? `https://wa.me/${whatsapp.replace(/\D/g, "")}`
-    : "";
+  if (items.length === 0) return null;
 
   return (
-    <section id="contact" className="px-8 py-16 md:px-16">
-      <p className="text-xs font-medium uppercase tracking-[0.25em] text-[#7D6A5B]">
-        Contact Us
-      </p>
-      <h2 className="font-display mt-2 text-2xl text-[#2B2420] md:text-3xl">
-        Get in Touch
-      </h2>
+    <section id="contact" className="px-6 py-24 md:px-12 lg:px-16 lg:py-32">
+      <div className="mx-auto max-w-6xl rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-8 text-center shadow-[0_18px_55px_rgba(43,36,32,0.06)] md:p-12">
+        <p className="text-xs font-semibold uppercase tracking-[0.22em]" style={{ color: "var(--accent)" }}>
+          Contact us
+        </p>
+        <h2 className="font-display mx-auto mt-3 max-w-2xl text-4xl text-[var(--text)] md:text-5xl">
+          Ready when you are
+        </h2>
+        <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-[var(--muted)]">
+          Book online or use any of the details below to get in touch.
+        </p>
 
-      {/* --- Main Contact Box --- */}
-      <div className="mt-6 max-w-xl rounded-3xl border border-[#E8DFD3] bg-[#FBF8F4] p-5">
-        <div className="grid gap-4 text-sm text-[#2B2420]">
-          {/* Phone row */}
-          {phone && (
-            <div className="flex items-center gap-3">
-              <Phone className="h-4 w-4 text-[#8A7F73]" />
-              <span>{phone}</span>
-            </div>
-          )}
-
-          {/* WhatsApp row: Cleared the duplicates, now one clean link line */}
-          {whatsapp && (
-            <div className="flex items-center gap-3">
-              <svg
-                className="h-4 w-4 text-[#8A7F73]"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
-              </svg>
-              <a
-                href={absoluteWhatsappUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="hover:underline text-[#7D6A5B]"
-              >
-                WhatsApp ({whatsapp})
-              </a>
-            </div>
-          )}
-
-          {/* Instagram row: Brought inside the card block with its name */}
-          {instagram && (
-            <div className="flex items-center gap-3">
-              <svg
-                className="h-4 w-4 text-[#8A7F73]"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
-                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-                <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
-              </svg>
-              <a
-                href={absoluteInstagramUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="hover:underline text-[#7D6A5B]"
-              >
-                Instagram
-              </a>
-            </div>
-          )}
+        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {items.map(({ label, value, href, Icon }) => (
+            <a
+              key={label}
+              href={href}
+              target={href.startsWith("http") ? "_blank" : undefined}
+              rel={href.startsWith("http") ? "noreferrer" : undefined}
+              className="rounded-2xl border border-[var(--border)] bg-[var(--soft)] p-5 text-center transition hover:-translate-y-0.5 hover:bg-[var(--surface)]"
+            >
+              <Icon className="mx-auto h-5 w-5" style={{ color: "var(--accent)" }} />
+              <p className="mt-4 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">{label}</p>
+              <p className="mx-auto mt-2 max-w-[14rem] text-sm font-medium leading-6 text-[var(--text)]">{value}</p>
+            </a>
+          ))}
         </div>
-      </div>
 
-      {/* The empty/duplicate icon section at the bottom has been entirely removed */}
+        <Link
+          href={bookingHref}
+          onClick={previewMode ? (event) => event.preventDefault() : undefined}
+          className="mt-10 inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3.5 text-sm font-semibold text-white"
+          style={{ backgroundColor: "var(--accent)" }}
+        >
+          <CalendarDays size={17} /> Book appointment
+        </Link>
+      </div>
     </section>
   );
 }
