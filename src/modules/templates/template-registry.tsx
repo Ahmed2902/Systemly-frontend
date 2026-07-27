@@ -2,16 +2,33 @@ import type { ComponentType } from "react";
 import { ClinicTemplate } from "./clinic/ClinicTemplate";
 import { SalonTemplate } from "./salon/SalonTemplate";
 import { auraWellnessTheme } from "./salon/salon.theme";
-import type { TemplateData, TemplateVertical } from "./template.types";
+import type {
+  ClinicTemplateData,
+  SalonTemplateData,
+  TemplateData,
+  TemplateVertical,
+} from "./template.types";
 import type { TemplateTheme } from "./theme.types";
 
-export type TemplateDefinition = {
+type SharedTemplateDefinition = {
   id: string;
   label: string;
-  vertical: TemplateVertical;
-  component: ComponentType<any>;
   theme: TemplateTheme;
 };
+
+export type SalonTemplateDefinition = SharedTemplateDefinition & {
+  vertical: "salon";
+  component: ComponentType<SalonTemplateData>;
+};
+
+export type ClinicTemplateDefinition = SharedTemplateDefinition & {
+  vertical: "clinic";
+  component: ComponentType<ClinicTemplateData>;
+};
+
+export type TemplateDefinition =
+  | SalonTemplateDefinition
+  | ClinicTemplateDefinition;
 
 export const clinicClarityTheme: TemplateTheme = {
   primary: "#1677B8",
@@ -66,8 +83,20 @@ export function isTemplateValidForVertical(
 
 export function resolveTemplateForVertical(
   templateId: string,
+  vertical: "salon",
+): SalonTemplateDefinition | undefined;
+export function resolveTemplateForVertical(
+  templateId: string,
+  vertical: "clinic",
+): ClinicTemplateDefinition | undefined;
+export function resolveTemplateForVertical(
+  templateId: string,
   vertical: TemplateVertical,
-) {
+): TemplateDefinition | undefined;
+export function resolveTemplateForVertical(
+  templateId: string,
+  vertical: TemplateVertical,
+): TemplateDefinition | undefined {
   return (
     (isTemplateValidForVertical(templateId, vertical)
       ? getTemplateById(templateId)
@@ -76,7 +105,14 @@ export function resolveTemplateForVertical(
 }
 
 export function renderTemplate(data: TemplateData) {
-  const template = resolveTemplateForVertical(data.template, data.vertical);
+  if (data.vertical === "salon") {
+    const template = resolveTemplateForVertical(data.template, "salon");
+    if (!template) return null;
+    const Component = template.component;
+    return <Component {...data} />;
+  }
+
+  const template = resolveTemplateForVertical(data.template, "clinic");
   if (!template) return null;
   const Component = template.component;
   return <Component {...data} />;

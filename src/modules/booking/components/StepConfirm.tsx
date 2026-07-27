@@ -65,10 +65,10 @@ export function StepConfirm({ onBack }: StepProps) {
           ✓
         </div>
         <h2 className="text-2xl font-bold tracking-tight text-[var(--booking-text)]">
-          You're booked!
+          You&apos;re booked!
         </h2>
         <p className="text-sm text-[var(--booking-muted)] max-w-sm mx-auto">
-          We've reserved your slot. We look forward to seeing you at your
+          We&apos;ve reserved your slot. We look forward to seeing you at your
           appointment.
         </p>
       </div>

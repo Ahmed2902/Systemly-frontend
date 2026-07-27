@@ -21,7 +21,7 @@ export function StepSelectStaff({ onNext, onBack }: StepProps) {
           Choose your staff
         </h2>
         <p className="mt-1 text-sm text-[var(--booking-muted)]">
-          Pick who you'd like, or let us assign anyone available.
+          Pick who you&apos;d like, or let us assign anyone available.
         </p>
       </div>
 

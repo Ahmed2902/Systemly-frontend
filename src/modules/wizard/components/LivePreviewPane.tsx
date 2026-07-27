@@ -4,7 +4,7 @@ import { ScaledPreview } from "@/shared/components/ScaledPreview";
 import { useWizard } from "../wizard.context";
 import {
   getTemplatesForVertical,
-  resolveTemplateForVertical,
+  renderTemplate,
 } from "../../templates/template-registry";
 import { wizardStateToTemplateData } from "../wizard.preview";
 
@@ -12,9 +12,7 @@ export function LivePreviewPane({ expanded = false }: { expanded?: boolean }) {
   const { state, patch } = useWizard();
   const vertical = state.vertical ?? "salon";
   const options = getTemplatesForVertical(vertical);
-  const activeTemplate = resolveTemplateForVertical(state.template, vertical);
   const templateData = wizardStateToTemplateData(state);
-  const ActiveTemplate = activeTemplate?.component;
 
   return (
     <div className="overflow-hidden rounded-lg border border-[var(--onboarding-border)] bg-[#080a09]">
@@ -48,7 +46,7 @@ export function LivePreviewPane({ expanded = false }: { expanded?: boolean }) {
 
       <div className={`onboarding-live-preview-scroll ${expanded ? "is-expanded" : ""}`}>
         <ScaledPreview baseWidth={1280}>
-          {ActiveTemplate ? <ActiveTemplate {...templateData} /> : null}
+          {renderTemplate(templateData)}
         </ScaledPreview>
       </div>
     </div>
