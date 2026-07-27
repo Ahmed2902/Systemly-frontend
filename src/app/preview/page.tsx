@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { resolveTemplateForVertical } from "@/modules/templates/template-registry";
+import { renderTemplate } from "@/modules/templates/template-registry";
 import {
   WIZARD_PREVIEW_STORAGE_KEY,
   wizardStateToTemplateData,
@@ -34,9 +34,5 @@ export default function PreviewPage() {
   }
 
   const vertical = state.vertical ?? "salon";
-  const template = resolveTemplateForVertical(state.template, vertical);
-  if (!template) return null;
-  const Template = template.component;
-
-  return <Template {...wizardStateToTemplateData(state)} />;
+  return renderTemplate({ ...wizardStateToTemplateData(state), vertical });
 }

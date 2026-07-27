@@ -1,5 +1,8 @@
 import { notFound } from "next/navigation";
-import { resolveTemplateForVertical } from "@/modules/templates/template-registry";
+import {
+  renderTemplate,
+  resolveTemplateForVertical,
+} from "@/modules/templates/template-registry";
 import { completePublicSectionOrder } from "@/modules/templates/section-order";
 import type { TemplateData, TemplateVertical } from "@/modules/templates/template.types";
 import { apiUrl } from "../../shared/lib/api-url";
@@ -78,7 +81,6 @@ export default async function PublicBusinessPage({
   const templateData: TemplateData = vertical === "clinic"
     ? { ...commonData, vertical: "clinic" }
     : { ...commonData, vertical: "salon" };
-  const Template = template.component;
 
-  return <Template {...templateData} />;
+  return renderTemplate(templateData);
 }
