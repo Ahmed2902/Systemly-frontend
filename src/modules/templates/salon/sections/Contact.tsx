@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { CalendarDays, Instagram, MapPin, MessageCircle, Phone } from "lucide-react";
+import { CalendarDays, Camera, MapPin, MessageCircle, Phone } from "lucide-react";
 
 function externalUrl(url: string) {
   return url.startsWith("http://") || url.startsWith("https://") ? url : `https://${url}`;
@@ -36,7 +36,7 @@ export function Contact({
         }
       : null,
     instagram
-      ? { label: "Instagram", value: "Visit our profile", href: externalUrl(instagram), Icon: Instagram }
+      ? { label: "Instagram", value: "Visit our profile", href: externalUrl(instagram), Icon: Camera }
       : null,
     location
       ? {

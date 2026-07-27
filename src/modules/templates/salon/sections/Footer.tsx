@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Instagram } from "lucide-react";
+import { Camera } from "lucide-react";
 
 export function Footer({
   businessName,
@@ -46,7 +46,7 @@ export function Footer({
               rel="noreferrer"
               aria-label="Instagram"
             >
-              <Instagram size={18} />
+              <Camera size={18} />
             </a>
           ) : null}
         </div>
