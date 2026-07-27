@@ -1,4 +1,5 @@
 import "./operations-dark-fixes.css";
+import "./operations-production-polish.css";
 import { Sidebar } from "@/modules/operations/components/Sidebar";
 import { OperationsProvider } from "@/modules/operations/operations.context";
 import { NewAppointmentModal } from "@/modules/operations/components/NewAppointment";

@@ -1,0 +1,145 @@
+.operations-dark {
+  --operations-page: #080d17;
+  --operations-panel: #111827;
+  --operations-panel-muted: #162033;
+  --operations-panel-raised: #1b2638;
+  --operations-hover: #202d42;
+  --operations-text: #f8fafc;
+}
+
+.operations-dark [class~="bg-white"],
+.operations-dark [class~="bg-white/70"],
+.operations-dark [class~="bg-white/75"],
+.operations-dark [class~="bg-white/80"],
+.operations-dark [class~="bg-white/85"],
+.operations-dark [class~="bg-white/90"] {
+  background-color: var(--operations-panel) !important;
+}
+
+.operations-dark [class~="bg-slate-50"],
+.operations-dark [class~="bg-slate-50/80"],
+.operations-dark [class~="bg-slate-100"] {
+  background-color: var(--operations-panel-muted) !important;
+}
+
+.operations-dark [class*="from-white"][class*="to-"] {
+  background-image: linear-gradient(145deg, #162033, #111827) !important;
+}
+
+.operations-dark [class~="text-slate-950"],
+.operations-dark [class~="text-slate-900"],
+.operations-dark [class~="text-slate-800"] {
+  color: #f8fafc !important;
+}
+
+.operations-dark [class~="text-slate-700"],
+.operations-dark [class~="text-slate-600"] {
+  color: #cbd5e1 !important;
+}
+
+.operations-dark [class~="text-slate-500"],
+.operations-dark [class~="text-slate-400"] {
+  color: #94a3b8 !important;
+}
+
+.operations-dark [class~="border-white/80"],
+.operations-dark [class~="border-white/90"],
+.operations-dark [class~="border-slate-100"],
+.operations-dark [class~="border-slate-200"],
+.operations-dark [class~="border-slate-200/60"],
+.operations-dark [class~="border-slate-200/75"] {
+  border-color: #2a3850 !important;
+}
+
+.operations-dark section[aria-labelledby="service-categories-heading"] article[role="button"] {
+  background: linear-gradient(145deg, #162033, #111827) !important;
+  border-color: #34445f !important;
+}
+
+.operations-dark section[aria-labelledby="service-categories-heading"] article[role="button"]:hover,
+.operations-dark section[aria-labelledby="service-categories-heading"] article[aria-pressed="true"] {
+  background: linear-gradient(145deg, #1b2940, #141e30) !important;
+  border-color: #8b5cf6 !important;
+}
+
+.operations-dark section[aria-labelledby="service-categories-heading"] article[role="button"] [class~="divide-slate-200/60"] {
+  border-color: #314057 !important;
+}
+
+.operations-dark .invoice-row-selected {
+  background: #251d43 !important;
+  box-shadow: inset 4px 0 0 #8b5cf6 !important;
+}
+
+.operations-light .invoice-row-selected {
+  background: #f1edff !important;
+  box-shadow: inset 4px 0 0 #7c3aed !important;
+}
+
+.calendar-status-confirmed {
+  background: #d9f7f2;
+  border-color: #14b8a6;
+  color: #134e4a;
+}
+
+.calendar-status-in-progress {
+  background: #ede9fe;
+  border-color: #8b5cf6;
+  color: #4c1d95;
+}
+
+.calendar-status-cancelled {
+  background: #ffe4e6;
+  border-color: #fb7185;
+  color: #881337;
+  text-decoration: line-through;
+  text-decoration-color: #fb7185;
+}
+
+.calendar-status-completed {
+  background: #dcfce7;
+  border-color: #22c55e;
+  color: #14532d;
+}
+
+.calendar-status-locked {
+  background: #e2e8f0;
+  border-color: #64748b;
+  color: #334155;
+}
+
+.operations-dark .calendar-status-confirmed {
+  background: #0f3b3a;
+  border-color: #2dd4bf;
+  color: #ccfbf1;
+}
+
+.operations-dark .calendar-status-in-progress {
+  background: #35235f;
+  border-color: #a78bfa;
+  color: #f5f3ff;
+}
+
+.operations-dark .calendar-status-cancelled {
+  background: #4c1d2d;
+  border-color: #fb7185;
+  color: #ffe4e6;
+}
+
+.operations-dark .calendar-status-completed {
+  background: #123c2b;
+  border-color: #4ade80;
+  color: #dcfce7;
+}
+
+.operations-dark .calendar-status-locked {
+  background: #263244;
+  border-color: #64748b;
+  color: #e2e8f0;
+}
+
+.operations-dark .staff-directory-card,
+.operations-dark .service-catalog-card {
+  background: linear-gradient(145deg, #162033, #111827) !important;
+  border-color: #314057 !important;
+}
