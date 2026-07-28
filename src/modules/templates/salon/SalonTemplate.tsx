@@ -15,9 +15,8 @@ import {
   MobileBookingBar,
 } from "../shared/CenteredPublicSections";
 import { completePublicSectionOrder } from "../section-order";
-import hero from "../../../../images/hero.jpg";
 
-const defaultHero = hero.src;
+const defaultHero = "/images/salon-default.svg";
 
 export function SalonTemplate(data: SalonTemplateData) {
   const sectionMap: Record<string, React.ReactNode> = {
@@ -58,7 +57,6 @@ export function SalonTemplate(data: SalonTemplateData) {
       />
     ),
     about: <About businessName={data.businessName} aboutText={data.aboutText} />,
-    faq: data.showFaq ? <Faq faqs={data.faqs} /> : null,
     contact: (
       <Contact
         phone={data.phone}
@@ -66,51 +64,39 @@ export function SalonTemplate(data: SalonTemplateData) {
         city={data.city}
         instagram={data.instagram}
         whatsapp={data.whatsapp}
-        bookingHref={data.bookingHref}
-        previewMode={data.previewMode}
       />
     ),
+    faq: data.showFaq ? <Faq faqs={data.faqs} /> : null,
   };
 
-  const style = {
-    "--accent": data.primaryColor || "#8C5A3C",
-    "--background": "#F7F3EE",
-    "--surface": "#FFFFFF",
-    "--soft": "#FBF8F4",
-    "--text": "#2B2420",
-    "--muted": "#75695E",
-    "--border": "#E8DFD3",
-  } as CSSProperties;
+  const orderedSections = completePublicSectionOrder(data.sectionOrder);
 
   return (
     <div
-      className="min-h-screen bg-[var(--background)] pb-20 text-center text-[var(--text)] md:pb-0"
-      dir={data.language === "ar" ? "rtl" : "ltr"}
-      style={style}
+      className="min-h-screen bg-[var(--salon-bg)] text-[var(--salon-text)]"
+      style={
+        {
+          "--salon-primary": data.primaryColor,
+        } as CSSProperties
+      }
     >
       <Nav
         businessName={data.businessName}
         logoUrl={data.logoUrl}
         bookingHref={data.bookingHref}
-        previewMode={data.previewMode}
         showTeam={data.showTeam && data.staff.length > 0}
-        showGallery={data.galleryPhotoUrls.length > 0}
-        showFaq={Boolean(data.showFaq && data.faqs?.length)}
-        showContact={Boolean(data.phone || data.address || data.city || data.instagram || data.whatsapp)}
+        showFaq={data.showFaq && data.faqs.length > 0}
+        hasGallery={data.galleryPhotoUrls.length > 0}
       />
-      {completePublicSectionOrder(data.sectionOrder).map((key) => (
-        <div key={key}>{sectionMap[key] ?? null}</div>
-      ))}
-      <Footer
-        businessName={data.businessName}
-        phone={data.phone}
-        address={data.address}
-        city={data.city}
-        instagram={data.instagram}
-        bookingHref={data.bookingHref}
-        previewMode={data.previewMode}
-      />
-      <MobileBookingBar bookingHref={data.bookingHref} previewMode={data.previewMode} />
+
+      <main>
+        {orderedSections.map((section) => (
+          <div key={section}>{sectionMap[section] ?? null}</div>
+        ))}
+      </main>
+
+      <Footer businessName={data.businessName} phone={data.phone} />
+      <MobileBookingBar bookingHref={data.bookingHref} />
     </div>
   );
 }
