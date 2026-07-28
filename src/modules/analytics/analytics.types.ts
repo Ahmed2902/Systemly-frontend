@@ -26,12 +26,19 @@ export type RevenueAnalytics = AnalyticsMeta & {
     revenueCents: number;
     paidInvoiceCount: number;
     averageInvoiceCents: number;
+    customItemRevenueCents: number;
+    customItemQuantity: number;
     topCategory: { category: string; totalCents: number } | null;
     bestWeekday: { weekday: number; totalCents: number } | null;
   };
   trend: { bucket: string; totalCents: number; invoiceCount: number }[];
   byCategory: { category: string; totalCents: number; itemCount: number }[];
   byWeekday: { weekday: number; totalCents: number; invoiceCount: number }[];
+  customItems: {
+    description: string;
+    quantity: number;
+    totalCents: number;
+  }[];
   averageInvoiceValueTrend: {
     bucket: string;
     averageCents: number | null;
@@ -41,6 +48,7 @@ export type RevenueAnalytics = AnalyticsMeta & {
 
 export type CustomerAnalytics = AnalyticsMeta & {
   summary: {
+    activeCustomers: number;
     newCustomers: number;
     returningCustomers: number;
     lapsedCustomerCount: number;
