@@ -28,6 +28,15 @@ export function getAppointmentDetail(
   );
 }
 
+export async function getAppointmentSummary(
+  appointmentId: string,
+  accessToken: string,
+): Promise<AppointmentSummary> {
+  return mapBackendAppointment(
+    await getAppointmentDetail(appointmentId, accessToken),
+  );
+}
+
 export async function uploadAppointmentPhoto(
   appointmentId: string,
   file: File,
