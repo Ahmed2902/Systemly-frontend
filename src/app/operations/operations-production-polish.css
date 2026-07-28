@@ -66,18 +66,24 @@
   border-color: #314057 !important;
 }
 
+.invoice-row-selected {
+  background: #f1edff !important;
+  box-shadow: inset 4px 0 0 #7c3aed !important;
+}
+
 .operations-dark .invoice-row-selected {
   background: #251d43 !important;
   box-shadow: inset 4px 0 0 #8b5cf6 !important;
 }
 
-.operations-light .invoice-row-selected {
-  background: #f1edff !important;
-  box-shadow: inset 4px 0 0 #7c3aed !important;
+.calendar-status-pending {
+  background: #fef3c7;
+  border-color: #f59e0b;
+  color: #78350f;
 }
 
 .calendar-status-confirmed {
-  background: #d9f7f2;
+  background: #ccfbf1;
   border-color: #14b8a6;
   color: #134e4a;
 }
@@ -102,10 +108,23 @@
   color: #14532d;
 }
 
+.calendar-status-no-show {
+  background: #fef3c7;
+  border-color: #f59e0b;
+  color: #78350f;
+}
+
 .calendar-status-locked {
   background: #e2e8f0;
   border-color: #64748b;
   color: #334155;
+}
+
+.operations-dark .calendar-status-pending,
+.operations-dark .calendar-status-no-show {
+  background: #4a3512;
+  border-color: #fbbf24;
+  color: #fef3c7;
 }
 
 .operations-dark .calendar-status-confirmed {

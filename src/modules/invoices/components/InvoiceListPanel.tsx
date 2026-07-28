@@ -48,49 +48,51 @@ export function InvoiceListPanel({
         <span>Amount</span>
         <span>Status</span>
       </div>
-      {invoices.map((invoice) => (
-        <button
-          type="button"
-          key={invoice.id}
-          onClick={() => onSelect(invoice.id)}
-          className={`grid w-full gap-3 border-b border-slate-100 px-5 py-4 text-left transition last:border-b-0 lg:grid-cols-[1.05fr_1.3fr_.8fr_.9fr_.75fr_.65fr] lg:items-center ${
-            selectedId === invoice.id
-              ? "bg-violet-50/80 shadow-[inset_3px_0_0_#7c3aed]"
-              : "hover:bg-slate-50"
-          } ${invoice.status === "voided" ? "opacity-65" : ""}`}
-        >
-          <div>
-            <p className="font-semibold text-slate-900">{invoice.invoiceNumber}</p>
-            <p className="mt-1 text-xs text-slate-500 lg:hidden">
+      {invoices.map((invoice) => {
+        const selected = selectedId === invoice.id;
+        return (
+          <button
+            type="button"
+            key={invoice.id}
+            aria-pressed={selected}
+            onClick={() => onSelect(invoice.id)}
+            className={`grid w-full gap-3 border-b border-slate-100 px-5 py-4 text-left transition last:border-b-0 lg:grid-cols-[1.05fr_1.3fr_.8fr_.9fr_.75fr_.65fr] lg:items-center ${
+              selected ? "invoice-row-selected" : "hover:bg-slate-50"
+            } ${invoice.status === "voided" ? "opacity-65" : ""}`}
+          >
+            <div>
+              <p className="font-semibold text-slate-900">{invoice.invoiceNumber}</p>
+              <p className="mt-1 text-xs text-slate-500 lg:hidden">
+                {new Date(invoice.issuedAt).toLocaleDateString("en-GB")}
+              </p>
+            </div>
+            <div className="min-w-0">
+              <p className="truncate font-medium text-slate-800">
+                {invoice.customer.name}
+              </p>
+              <p className="truncate text-xs text-slate-500">
+                {invoice.services.join(" · ") || "Appointment payment"}
+              </p>
+            </div>
+            <p className="hidden text-sm text-slate-600 lg:block">
               {new Date(invoice.issuedAt).toLocaleDateString("en-GB")}
             </p>
-          </div>
-          <div className="min-w-0">
-            <p className="truncate font-medium text-slate-800">
-              {invoice.customer.name}
+            <p className="text-sm font-medium text-slate-700">
+              {paymentMethodLabel(invoice.paymentMethod)}
             </p>
-            <p className="truncate text-xs text-slate-500">
-              {invoice.services.join(" · ") || "Appointment payment"}
-            </p>
-          </div>
-          <p className="hidden text-sm text-slate-600 lg:block">
-            {new Date(invoice.issuedAt).toLocaleDateString("en-GB")}
-          </p>
-          <p className="text-sm font-medium text-slate-700">
-            {paymentMethodLabel(invoice.paymentMethod)}
-          </p>
-          <p className="font-semibold text-slate-900">{money(invoice.totalCents)}</p>
-          <span
-            className={`w-fit rounded-full px-2.5 py-1 text-xs font-semibold ${
-              invoice.status === "paid"
-                ? "bg-emerald-100 text-emerald-700"
-                : "bg-slate-200 text-slate-600"
-            }`}
-          >
-            {invoice.status === "paid" ? "Paid" : "Voided"}
-          </span>
-        </button>
-      ))}
+            <p className="font-semibold text-slate-900">{money(invoice.totalCents)}</p>
+            <span
+              className={`w-fit rounded-full px-2.5 py-1 text-xs font-semibold ${
+                invoice.status === "paid"
+                  ? "bg-emerald-100 text-emerald-700"
+                  : "bg-slate-200 text-slate-600"
+              }`}
+            >
+              {invoice.status === "paid" ? "Paid" : "Voided"}
+            </span>
+          </button>
+        );
+      })}
     </div>
   );
 }
