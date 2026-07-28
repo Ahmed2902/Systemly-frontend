@@ -1,4 +1,4 @@
-import hero from "../../../images/hero.jpg";
+import hero from "../../../images/salonHero.jpg";
 import type { TemplateData } from "../templates/template.types";
 import type { WizardState } from "./wizard.types";
 
