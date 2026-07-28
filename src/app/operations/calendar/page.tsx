@@ -19,8 +19,10 @@ import {
   uncancelAppointment,
   deleteAppointment,
   updateAppointmentStatus,
+  getAppointmentSummary,
 } from "../../../modules/operations/Calendar.api";
 import type {
+  AppointmentSummary,
   CalendarDayData,
   ServiceCatalogItem,
 } from "../../../modules/operations/appointment.types";
@@ -53,6 +55,46 @@ export default function CalendarPage() {
       setError(errorMessage(e, "Failed to load calendar"));
     }
   }, [date, businessId, accessToken]);
+
+  const removeLocalAppointment = useCallback((appointmentId: string) => {
+    setData((current) =>
+      current
+        ? {
+            ...current,
+            appointments: current.appointments.filter(
+              (appointment) => appointment.id !== appointmentId,
+            ),
+          }
+        : current,
+    );
+  }, []);
+
+  const applyLocalAppointment = useCallback(
+    (appointment: AppointmentSummary) => {
+      const belongsToSelectedDay = appointment.segments.some(
+        (segment) =>
+          dateKeyInTimezone(new Date(segment.startsAt), timezone) === date,
+      );
+
+      if (!belongsToSelectedDay) {
+        removeLocalAppointment(appointment.id);
+        setSelectedId(null);
+        return;
+      }
+
+      setData((current) => {
+        if (!current) return current;
+        const existingIndex = current.appointments.findIndex(
+          (item) => item.id === appointment.id,
+        );
+        const appointments = [...current.appointments];
+        if (existingIndex === -1) appointments.push(appointment);
+        else appointments[existingIndex] = appointment;
+        return { ...current, appointments };
+      });
+    },
+    [date, removeLocalAppointment, timezone],
+  );
 
   useOnAppointmentCreated(reload);
 
@@ -151,30 +193,34 @@ export default function CalendarPage() {
               businessTimezone={timezone}
               onClose={() => setSelectedId(null)}
               onSave={async (updated) => {
-                await saveAppointment(updated, String(accessToken));
-                await reload();
+                applyLocalAppointment(
+                  await saveAppointment(updated, String(accessToken)),
+                );
               }}
               onComplete={async (id) => {
-                await completeAppointment(id, String(accessToken));
-                await reload();
+                applyLocalAppointment(
+                  await completeAppointment(id, String(accessToken)),
+                );
               }}
               onCancelAppointment={async (id, reason) => {
-                await cancelAppointment(id, reason, String(accessToken));
+                applyLocalAppointment(
+                  await cancelAppointment(id, reason, String(accessToken)),
+                );
                 setSelectedId(null);
-                await reload();
               }}
               onDelete={async (id) => {
                 await deleteAppointment(id, String(accessToken));
+                removeLocalAppointment(id);
                 setSelectedId(null);
-                await reload();
               }}
               onStatusChange={async (status) => {
-                await updateAppointmentStatus(
-                  selected.id,
-                  status,
-                  String(accessToken),
+                applyLocalAppointment(
+                  await updateAppointmentStatus(
+                    selected.id,
+                    status,
+                    String(accessToken),
+                  ),
                 );
-                await reload();
               }}
               onCollectPayment={async (
                 id,
@@ -187,19 +233,32 @@ export default function CalendarPage() {
                   paymentMethod,
                   String(accessToken),
                 );
-                await reload();
+                applyLocalAppointment(
+                  await getAppointmentSummary(id, String(accessToken)),
+                );
               }}
               onRevert={async (id) => {
-                await revertAppointment(id, String(accessToken), businessId);
-                await reload();
+                applyLocalAppointment(
+                  await revertAppointment(
+                    id,
+                    String(accessToken),
+                    businessId,
+                  ),
+                );
               }}
               onUncancel={async (id) => {
-                await uncancelAppointment(id, String(accessToken), businessId);
-                await reload();
+                applyLocalAppointment(
+                  await uncancelAppointment(
+                    id,
+                    String(accessToken),
+                    businessId,
+                  ),
+                );
               }}
               onMarkNoShow={async (id) => {
-                await markNoShow(id, String(accessToken));
-                await reload();
+                applyLocalAppointment(
+                  await markNoShow(id, String(accessToken)),
+                );
               }}
             />
           )}
