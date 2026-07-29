@@ -19,8 +19,10 @@ import {
   uncancelAppointment,
   deleteAppointment,
   updateAppointmentStatus,
+  getAppointmentSummary,
 } from "../../../modules/operations/Calendar.api";
 import type {
+  AppointmentSummary,
   CalendarDayData,
   ServiceCatalogItem,
 } from "../../../modules/operations/appointment.types";
@@ -38,6 +40,7 @@ export default function CalendarPage() {
   const [data, setData] = useState<CalendarDayData | null>(null);
   const [catalog, setCatalog] = useState<ServiceCatalogItem[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [detailLoadedId, setDetailLoadedId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const businessId = user?.businessId ?? null;
@@ -49,10 +52,53 @@ export default function CalendarPage() {
       const workspace = await getCalendarWorkspace(date, accessToken);
       setData(workspace.day);
       setCatalog(workspace.services);
+      setSelectedId(null);
+      setDetailLoadedId(null);
     } catch (e: unknown) {
       setError(errorMessage(e, "Failed to load calendar"));
     }
   }, [date, businessId, accessToken]);
+
+  const removeLocalAppointment = useCallback((appointmentId: string) => {
+    setData((current) =>
+      current
+        ? {
+            ...current,
+            appointments: current.appointments.filter(
+              (appointment) => appointment.id !== appointmentId,
+            ),
+          }
+        : current,
+    );
+  }, []);
+
+  const applyLocalAppointment = useCallback(
+    (appointment: AppointmentSummary) => {
+      const belongsToSelectedDay = appointment.segments.some(
+        (segment) =>
+          dateKeyInTimezone(new Date(segment.startsAt), timezone) === date,
+      );
+
+      if (!belongsToSelectedDay) {
+        removeLocalAppointment(appointment.id);
+        setSelectedId(null);
+        setDetailLoadedId(null);
+        return;
+      }
+
+      setData((current) => {
+        if (!current) return current;
+        const existingIndex = current.appointments.findIndex(
+          (item) => item.id === appointment.id,
+        );
+        const appointments = [...current.appointments];
+        if (existingIndex === -1) appointments.push(appointment);
+        else appointments[existingIndex] = appointment;
+        return { ...current, appointments };
+      });
+    },
+    [date, removeLocalAppointment, timezone],
+  );
 
   useOnAppointmentCreated(reload);
 
@@ -73,7 +119,30 @@ export default function CalendarPage() {
     void reload();
   }, [authLoading, user, businessId, accessToken, reload]);
 
+  useEffect(() => {
+    if (!selectedId || !accessToken || detailLoadedId === selectedId) return;
+    let cancelled = false;
+
+    void getAppointmentSummary(selectedId, accessToken)
+      .then((appointment) => {
+        if (cancelled) return;
+        applyLocalAppointment(appointment);
+        setDetailLoadedId(selectedId);
+      })
+      .catch((cause: unknown) => {
+        if (!cancelled) {
+          setError(errorMessage(cause, "Failed to load appointment details"));
+          setSelectedId(null);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [accessToken, applyLocalAppointment, detailLoadedId, selectedId]);
+
   const selected = data?.appointments.find((a) => a.id === selectedId) ?? null;
+  const selectedDetail = selected && detailLoadedId === selected.id ? selected : null;
 
   if (authLoading) {
     return (
@@ -90,6 +159,11 @@ export default function CalendarPage() {
       </div>
     );
   }
+
+  const applyDetailedAppointment = (appointment: AppointmentSummary) => {
+    applyLocalAppointment(appointment);
+    setDetailLoadedId(appointment.id);
+  };
 
   return (
     <div className="flex h-screen flex-col bg-slate-50 p-4">
@@ -136,45 +210,66 @@ export default function CalendarPage() {
           <div className="flex flex-1 flex-col overflow-hidden rounded-lg border border-slate-200 bg-white">
             <StatusLegend />
             <div className="flex-1 overflow-hidden">
-              <CalendarGrid data={data} onSelectAppointment={setSelectedId} />
+              <CalendarGrid
+                data={data}
+                onSelectAppointment={(appointmentId) => {
+                  setSelectedId(appointmentId);
+                  setDetailLoadedId(null);
+                }}
+              />
             </div>
           </div>
 
-          {selected && (
+          {selected && !selectedDetail && (
+            <div className="flex w-[420px] items-center justify-center rounded-lg border border-slate-200 bg-white text-sm text-slate-400">
+              Loading appointment…
+            </div>
+          )}
+
+          {selectedDetail && (
             <AppointmentEditPanel
-              appointment={selected}
+              appointment={selectedDetail}
               allAppointments={data.appointments}
               staff={data.staff}
               breaks={data.breaks}
               serviceCatalog={catalog}
               isClinic={user.vertical === "clinic"}
               businessTimezone={timezone}
-              onClose={() => setSelectedId(null)}
+              onClose={() => {
+                setSelectedId(null);
+                setDetailLoadedId(null);
+              }}
               onSave={async (updated) => {
-                await saveAppointment(updated, String(accessToken));
-                await reload();
+                applyDetailedAppointment(
+                  await saveAppointment(updated, String(accessToken)),
+                );
               }}
               onComplete={async (id) => {
-                await completeAppointment(id, String(accessToken));
-                await reload();
+                applyDetailedAppointment(
+                  await completeAppointment(id, String(accessToken)),
+                );
               }}
               onCancelAppointment={async (id, reason) => {
-                await cancelAppointment(id, reason, String(accessToken));
+                applyDetailedAppointment(
+                  await cancelAppointment(id, reason, String(accessToken)),
+                );
                 setSelectedId(null);
-                await reload();
+                setDetailLoadedId(null);
               }}
               onDelete={async (id) => {
                 await deleteAppointment(id, String(accessToken));
+                removeLocalAppointment(id);
                 setSelectedId(null);
-                await reload();
+                setDetailLoadedId(null);
               }}
               onStatusChange={async (status) => {
-                await updateAppointmentStatus(
-                  selected.id,
-                  status,
-                  String(accessToken),
+                applyDetailedAppointment(
+                  await updateAppointmentStatus(
+                    selectedDetail.id,
+                    status,
+                    String(accessToken),
+                  ),
                 );
-                await reload();
               }}
               onCollectPayment={async (
                 id,
@@ -187,19 +282,32 @@ export default function CalendarPage() {
                   paymentMethod,
                   String(accessToken),
                 );
-                await reload();
+                applyDetailedAppointment(
+                  await getAppointmentSummary(id, String(accessToken)),
+                );
               }}
               onRevert={async (id) => {
-                await revertAppointment(id, String(accessToken), businessId);
-                await reload();
+                applyDetailedAppointment(
+                  await revertAppointment(
+                    id,
+                    String(accessToken),
+                    businessId,
+                  ),
+                );
               }}
               onUncancel={async (id) => {
-                await uncancelAppointment(id, String(accessToken), businessId);
-                await reload();
+                applyDetailedAppointment(
+                  await uncancelAppointment(
+                    id,
+                    String(accessToken),
+                    businessId,
+                  ),
+                );
               }}
               onMarkNoShow={async (id) => {
-                await markNoShow(id, String(accessToken));
-                await reload();
+                applyDetailedAppointment(
+                  await markNoShow(id, String(accessToken)),
+                );
               }}
             />
           )}

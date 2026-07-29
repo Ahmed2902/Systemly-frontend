@@ -15,7 +15,7 @@ import {
   MobileBookingBar,
 } from "../shared/CenteredPublicSections";
 import { completePublicSectionOrder } from "../section-order";
-import hero from "../../../../images/hero.jpg";
+import hero from "../../../../images/salonHero.jpg";
 
 const defaultHero = hero.src;
 
