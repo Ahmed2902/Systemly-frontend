@@ -25,8 +25,11 @@ type ApiEnvelope<T> = {
   details?: unknown;
 };
 
+const MAX_IN_FLIGHT_GETS = 100;
 const anonymousRequestScope = Symbol("anonymous-request-scope");
 const inFlightGets = new Map<string | symbol, Map<string, Promise<unknown>>>();
+let inFlightGetCount = 0;
+let mutationGeneration = 0;
 let refreshInFlight: Promise<string> | null = null;
 
 function headersFor(init: RequestInit, token: string | null) {
@@ -38,6 +41,10 @@ function headersFor(init: RequestInit, token: string | null) {
     headers.set("Content-Type", "application/json");
   }
   return headers;
+}
+
+function requestMethod(init: RequestInit) {
+  return (init.method ?? "GET").toUpperCase();
 }
 
 function send(path: string, token: string | null, init: RequestInit) {
@@ -94,9 +101,8 @@ async function parseEnvelope<T>(response: Response): Promise<T> {
 }
 
 function canDeduplicate(init: RequestInit) {
-  const method = (init.method ?? "GET").toUpperCase();
   return (
-    method === "GET" &&
+    requestMethod(init) === "GET" &&
     init.body === undefined &&
     init.signal === undefined &&
     init.headers === undefined
@@ -109,9 +115,11 @@ function deduplicatedGet<T>(
   retryOnUnauthorized: boolean,
   loader: () => Promise<T>,
 ): Promise<T> {
+  if (inFlightGetCount >= MAX_IN_FLIGHT_GETS) return loader();
+
   const token = getAccessToken() ?? accessToken;
   const scope = token ?? anonymousRequestScope;
-  const key = `${path}\u0000retry:${retryOnUnauthorized ? "1" : "0"}`;
+  const key = `${path}\u0000retry:${retryOnUnauthorized ? "1" : "0"}\u0000generation:${mutationGeneration}`;
   let requests = inFlightGets.get(scope);
 
   if (!requests) {
@@ -122,8 +130,10 @@ function deduplicatedGet<T>(
   const existing = requests.get(key) as Promise<T> | undefined;
   if (existing) return existing;
 
+  inFlightGetCount += 1;
   const promise = loader().finally(() => {
     requests?.delete(key);
+    inFlightGetCount = Math.max(0, inFlightGetCount - 1);
     if (requests?.size === 0) inFlightGets.delete(scope);
   });
 
@@ -137,7 +147,14 @@ export function api<T>(
   init: RequestInit = {},
   options: { retryOnUnauthorized?: boolean } = {},
 ): Promise<T> {
+  const method = requestMethod(init);
   const retryOnUnauthorized = options.retryOnUnauthorized !== false;
+
+  // A read started before a mutation may contain stale data. Advancing the
+  // generation before every mutation ensures any follow-up GET performs a new
+  // request instead of attaching to that older promise.
+  if (method !== "GET" && method !== "HEAD") mutationGeneration += 1;
+
   const execute = async () => {
     const response = await request(
       path,
