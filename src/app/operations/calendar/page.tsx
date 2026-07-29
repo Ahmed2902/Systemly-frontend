@@ -40,6 +40,7 @@ export default function CalendarPage() {
   const [data, setData] = useState<CalendarDayData | null>(null);
   const [catalog, setCatalog] = useState<ServiceCatalogItem[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [detailLoadedId, setDetailLoadedId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const businessId = user?.businessId ?? null;
@@ -51,6 +52,8 @@ export default function CalendarPage() {
       const workspace = await getCalendarWorkspace(date, accessToken);
       setData(workspace.day);
       setCatalog(workspace.services);
+      setSelectedId(null);
+      setDetailLoadedId(null);
     } catch (e: unknown) {
       setError(errorMessage(e, "Failed to load calendar"));
     }
@@ -79,6 +82,7 @@ export default function CalendarPage() {
       if (!belongsToSelectedDay) {
         removeLocalAppointment(appointment.id);
         setSelectedId(null);
+        setDetailLoadedId(null);
         return;
       }
 
@@ -115,7 +119,30 @@ export default function CalendarPage() {
     void reload();
   }, [authLoading, user, businessId, accessToken, reload]);
 
+  useEffect(() => {
+    if (!selectedId || !accessToken || detailLoadedId === selectedId) return;
+    let cancelled = false;
+
+    void getAppointmentSummary(selectedId, accessToken)
+      .then((appointment) => {
+        if (cancelled) return;
+        applyLocalAppointment(appointment);
+        setDetailLoadedId(selectedId);
+      })
+      .catch((cause: unknown) => {
+        if (!cancelled) {
+          setError(errorMessage(cause, "Failed to load appointment details"));
+          setSelectedId(null);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [accessToken, applyLocalAppointment, detailLoadedId, selectedId]);
+
   const selected = data?.appointments.find((a) => a.id === selectedId) ?? null;
+  const selectedDetail = selected && detailLoadedId === selected.id ? selected : null;
 
   if (authLoading) {
     return (
@@ -132,6 +159,11 @@ export default function CalendarPage() {
       </div>
     );
   }
+
+  const applyDetailedAppointment = (appointment: AppointmentSummary) => {
+    applyLocalAppointment(appointment);
+    setDetailLoadedId(appointment.id);
+  };
 
   return (
     <div className="flex h-screen flex-col bg-slate-50 p-4">
@@ -178,45 +210,62 @@ export default function CalendarPage() {
           <div className="flex flex-1 flex-col overflow-hidden rounded-lg border border-slate-200 bg-white">
             <StatusLegend />
             <div className="flex-1 overflow-hidden">
-              <CalendarGrid data={data} onSelectAppointment={setSelectedId} />
+              <CalendarGrid
+                data={data}
+                onSelectAppointment={(appointmentId) => {
+                  setSelectedId(appointmentId);
+                  setDetailLoadedId(null);
+                }}
+              />
             </div>
           </div>
 
-          {selected && (
+          {selected && !selectedDetail && (
+            <div className="flex w-[420px] items-center justify-center rounded-lg border border-slate-200 bg-white text-sm text-slate-400">
+              Loading appointment…
+            </div>
+          )}
+
+          {selectedDetail && (
             <AppointmentEditPanel
-              appointment={selected}
+              appointment={selectedDetail}
               allAppointments={data.appointments}
               staff={data.staff}
               breaks={data.breaks}
               serviceCatalog={catalog}
               isClinic={user.vertical === "clinic"}
               businessTimezone={timezone}
-              onClose={() => setSelectedId(null)}
+              onClose={() => {
+                setSelectedId(null);
+                setDetailLoadedId(null);
+              }}
               onSave={async (updated) => {
-                applyLocalAppointment(
+                applyDetailedAppointment(
                   await saveAppointment(updated, String(accessToken)),
                 );
               }}
               onComplete={async (id) => {
-                applyLocalAppointment(
+                applyDetailedAppointment(
                   await completeAppointment(id, String(accessToken)),
                 );
               }}
               onCancelAppointment={async (id, reason) => {
-                applyLocalAppointment(
+                applyDetailedAppointment(
                   await cancelAppointment(id, reason, String(accessToken)),
                 );
                 setSelectedId(null);
+                setDetailLoadedId(null);
               }}
               onDelete={async (id) => {
                 await deleteAppointment(id, String(accessToken));
                 removeLocalAppointment(id);
                 setSelectedId(null);
+                setDetailLoadedId(null);
               }}
               onStatusChange={async (status) => {
-                applyLocalAppointment(
+                applyDetailedAppointment(
                   await updateAppointmentStatus(
-                    selected.id,
+                    selectedDetail.id,
                     status,
                     String(accessToken),
                   ),
@@ -233,12 +282,12 @@ export default function CalendarPage() {
                   paymentMethod,
                   String(accessToken),
                 );
-                applyLocalAppointment(
+                applyDetailedAppointment(
                   await getAppointmentSummary(id, String(accessToken)),
                 );
               }}
               onRevert={async (id) => {
-                applyLocalAppointment(
+                applyDetailedAppointment(
                   await revertAppointment(
                     id,
                     String(accessToken),
@@ -247,7 +296,7 @@ export default function CalendarPage() {
                 );
               }}
               onUncancel={async (id) => {
-                applyLocalAppointment(
+                applyDetailedAppointment(
                   await uncancelAppointment(
                     id,
                     String(accessToken),
@@ -256,7 +305,7 @@ export default function CalendarPage() {
                 );
               }}
               onMarkNoShow={async (id) => {
-                applyLocalAppointment(
+                applyDetailedAppointment(
                   await markNoShow(id, String(accessToken)),
                 );
               }}
