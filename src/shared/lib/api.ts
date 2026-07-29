@@ -27,6 +27,7 @@ type ApiEnvelope<T> = {
 
 const anonymousRequestScope = Symbol("anonymous-request-scope");
 const inFlightGets = new Map<string | symbol, Map<string, Promise<unknown>>>();
+let refreshInFlight: Promise<string> | null = null;
 
 function headersFor(init: RequestInit, token: string | null) {
   const headers = new Headers(init.headers);
@@ -47,6 +48,17 @@ function send(path: string, token: string | null, init: RequestInit) {
   });
 }
 
+function refreshTokenOnce() {
+  if (!refreshInFlight) {
+    refreshInFlight = refreshAccessToken()
+      .then((response) => response.data.accessToken)
+      .finally(() => {
+        refreshInFlight = null;
+      });
+  }
+  return refreshInFlight;
+}
+
 async function request(
   path: string,
   fallbackToken: string | null,
@@ -64,8 +76,8 @@ async function request(
     return send(path, currentToken, init);
   }
 
-  const refreshed = await refreshAccessToken();
-  return send(path, refreshed.data.accessToken, init);
+  const refreshedToken = await refreshTokenOnce();
+  return send(path, refreshedToken, init);
 }
 
 async function parseEnvelope<T>(response: Response): Promise<T> {
@@ -146,5 +158,6 @@ export function apiFetch(
   accessToken: string | null,
   init: RequestInit = {},
 ) {
+  // Response bodies are streams and cannot safely be shared between callers.
   return request(path, accessToken, init, true);
 }
