@@ -86,6 +86,7 @@ export async function getStaffRoster(
     businessId,
     status: "active",
     view: "roster",
+    perPage: "100",
   });
   const staff = records(await api<unknown>(`/staff?${params.toString()}`, accessToken));
   return staff.map((member) => ({
