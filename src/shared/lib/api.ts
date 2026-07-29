@@ -44,12 +44,27 @@ function headersFor(init: RequestInit, token: string | null) {
   return headers;
 }
 
+function requestMethod(init: RequestInit) {
+  return (init.method ?? "GET").toUpperCase();
+}
+
 function send(path: string, token: string | null, init: RequestInit) {
   return fetch(apiUrl(path), {
     ...init,
     credentials: "include",
     headers: headersFor(init, token),
   });
+}
+
+function refreshTokenOnce() {
+  if (!refreshInFlight) {
+    refreshInFlight = refreshAccessToken()
+      .then((response) => response.data.accessToken)
+      .finally(() => {
+        refreshInFlight = null;
+      });
+  }
+  return refreshInFlight;
 }
 
 async function request(
@@ -69,8 +84,8 @@ async function request(
     return send(path, currentToken, init);
   }
 
-  const refreshed = await refreshAccessToken();
-  return send(path, refreshed.data.accessToken, init);
+  const refreshedToken = await refreshTokenOnce();
+  return send(path, refreshedToken, init);
 }
 
 async function parseEnvelope<T>(response: Response): Promise<T> {
