@@ -2,6 +2,9 @@ import { refreshAccessToken } from "@/modules/auth/auth.api";
 import { getAccessToken } from "@/modules/auth/auth.store";
 import { apiUrl } from "./api-url";
 
+const MAX_IN_FLIGHT_GETS = 100;
+const inFlightGets = new Map<string, Promise<unknown>>();
+
 export class ApiRequestError extends Error {
   status: number;
   code?: string;
@@ -61,6 +64,7 @@ async function request(
     return send(path, currentToken, init);
   }
 
+  // refreshAccessToken itself coalesces concurrent refresh attempts.
   const refreshed = await refreshAccessToken();
   return send(path, refreshed.data.accessToken, init);
 }
@@ -78,19 +82,51 @@ async function parseEnvelope<T>(response: Response): Promise<T> {
   return body.data !== undefined ? body.data : (body as T);
 }
 
-export async function api<T>(
+function canCoalesceGet(init: RequestInit, token: string | null) {
+  const method = (init.method ?? "GET").toUpperCase();
+  return (
+    method === "GET" &&
+    Boolean(token) &&
+    init.body === undefined &&
+    init.headers === undefined &&
+    init.signal === undefined
+  );
+}
+
+export function api<T>(
   path: string,
   accessToken: string | null,
   init: RequestInit = {},
   options: { retryOnUnauthorized?: boolean } = {},
 ): Promise<T> {
-  const response = await request(
-    path,
-    accessToken,
-    init,
-    options.retryOnUnauthorized !== false,
-  );
-  return parseEnvelope<T>(response);
+  const retryOnUnauthorized = options.retryOnUnauthorized !== false;
+  const effectiveToken = getAccessToken() ?? accessToken;
+
+  const execute = async () => {
+    const response = await request(
+      path,
+      accessToken,
+      init,
+      retryOnUnauthorized,
+    );
+    return parseEnvelope<T>(response);
+  };
+
+  if (!canCoalesceGet(init, effectiveToken)) return execute();
+
+  // Token scoping prevents data from one authenticated session being shared
+  // with another. The hard cap prevents an attacker-controlled path stream from
+  // growing this temporary map without bound.
+  const key = `${effectiveToken}\n${retryOnUnauthorized ? "1" : "0"}\n${path}`;
+  const existing = inFlightGets.get(key) as Promise<T> | undefined;
+  if (existing) return existing;
+  if (inFlightGets.size >= MAX_IN_FLIGHT_GETS) return execute();
+
+  const pending = execute().finally(() => {
+    if (inFlightGets.get(key) === pending) inFlightGets.delete(key);
+  });
+  inFlightGets.set(key, pending);
+  return pending;
 }
 
 export function apiFetch(
