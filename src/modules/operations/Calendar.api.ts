@@ -122,12 +122,14 @@ export async function saveAppointment(
         }
       : undefined,
   };
-  const raw = await api<BackendAppointment>(
+
+  await api<BackendAppointment>(
     `/appointments/${encodeURIComponent(appointment.id)}`,
     accessToken,
     { method: "PATCH", body: JSON.stringify(body) },
   );
-  return mapBackendAppointment(raw);
+
+  return getAppointmentSummary(appointment.id, accessToken);
 }
 
 async function appointmentAction(
@@ -136,7 +138,7 @@ async function appointmentAction(
   accessToken: string,
   body?: unknown,
 ) {
-  const raw = await api<BackendAppointment>(
+  await api<BackendAppointment>(
     `/appointments/${encodeURIComponent(appointmentId)}/${action}`,
     accessToken,
     {
@@ -144,7 +146,8 @@ async function appointmentAction(
       ...(body === undefined ? {} : { body: JSON.stringify(body) }),
     },
   );
-  return mapBackendAppointment(raw);
+
+  return getAppointmentSummary(appointmentId, accessToken);
 }
 
 export function completeAppointment(appointmentId: string, accessToken: string) {
@@ -164,12 +167,13 @@ export async function updateAppointmentStatus(
   status: AppointmentSummary["status"],
   accessToken: string,
 ): Promise<AppointmentSummary> {
-  const raw = await api<BackendAppointment>(
+  await api<BackendAppointment>(
     `/appointments/${encodeURIComponent(appointmentId)}/status`,
     accessToken,
     { method: "PATCH", body: JSON.stringify({ status }) },
   );
-  return mapBackendAppointment(raw);
+
+  return getAppointmentSummary(appointmentId, accessToken);
 }
 
 export function deleteAppointment(appointmentId: string, accessToken: string) {
