@@ -49,7 +49,12 @@ export async function getServiceCatalog(
   businessId: string,
   accessToken: string,
 ): Promise<ServiceCatalogItem[]> {
-  const raw = await api<unknown>(`/services?businessId=${businessId}`, accessToken);
+  const params = new URLSearchParams({
+    businessId,
+    status: "active",
+    view: "booking",
+  });
+  const raw = await api<unknown>(`/services?${params.toString()}`, accessToken);
   return records(raw)
     .filter((service) => service.isActive !== false)
     .map((service) => ({
@@ -77,9 +82,12 @@ export async function getStaffRoster(
   businessId: string,
   accessToken: string,
 ): Promise<StaffMember[]> {
-  const staff = records(
-    await api<unknown>(`/staff?businessId=${businessId}`, accessToken),
-  );
+  const params = new URLSearchParams({
+    businessId,
+    status: "active",
+    view: "roster",
+  });
+  const staff = records(await api<unknown>(`/staff?${params.toString()}`, accessToken));
   return staff.map((member) => ({
     id: String(member.id),
     name: String(member.name),
@@ -116,6 +124,7 @@ export function searchCustomers(
     search,
     page: String(page),
     perPage: String(perPage),
+    view: "search",
   });
   return api(`/customers?${params.toString()}`, accessToken);
 }
