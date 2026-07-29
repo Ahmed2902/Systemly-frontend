@@ -2,6 +2,9 @@ import { refreshAccessToken } from "@/modules/auth/auth.api";
 import { getAccessToken } from "@/modules/auth/auth.store";
 import { apiUrl } from "./api-url";
 
+const MAX_IN_FLIGHT_GETS = 200;
+const inFlightGets = new Map<string, Promise<unknown>>();
+
 export class ApiRequestError extends Error {
   status: number;
   code?: string;
@@ -78,19 +81,61 @@ async function parseEnvelope<T>(response: Response): Promise<T> {
   return body.data !== undefined ? body.data : (body as T);
 }
 
+function canCoalesce(init: RequestInit) {
+  const method = (init.method ?? "GET").toUpperCase();
+  return (
+    method === "GET" &&
+    init.body === undefined &&
+    init.signal === undefined &&
+    init.headers === undefined
+  );
+}
+
+function inFlightKey(
+  path: string,
+  token: string | null,
+  retryOnUnauthorized: boolean,
+) {
+  // The token is intentionally part of the key so data is never shared across
+  // authenticated sessions. The map is bounded and entries are removed as soon
+  // as the request settles.
+  return `${retryOnUnauthorized ? "retry" : "no-retry"}\n${token ?? "anonymous"}\n${path}`;
+}
+
 export async function api<T>(
   path: string,
   accessToken: string | null,
   init: RequestInit = {},
   options: { retryOnUnauthorized?: boolean } = {},
 ): Promise<T> {
-  const response = await request(
-    path,
-    accessToken,
-    init,
-    options.retryOnUnauthorized !== false,
-  );
-  return parseEnvelope<T>(response);
+  const retryOnUnauthorized = options.retryOnUnauthorized !== false;
+  const execute = async () => {
+    const response = await request(
+      path,
+      accessToken,
+      init,
+      retryOnUnauthorized,
+    );
+    return parseEnvelope<T>(response);
+  };
+
+  if (!canCoalesce(init)) return execute();
+
+  const token = getAccessToken() ?? accessToken;
+  const key = inFlightKey(path, token, retryOnUnauthorized);
+  const existing = inFlightGets.get(key) as Promise<T> | undefined;
+  if (existing) return existing;
+
+  // Do not allow attacker-controlled query strings to grow this client-side map
+  // without bound. Requests still work normally when the limit is reached.
+  if (inFlightGets.size >= MAX_IN_FLIGHT_GETS) return execute();
+
+  let pending!: Promise<T>;
+  pending = execute().finally(() => {
+    if (inFlightGets.get(key) === pending) inFlightGets.delete(key);
+  });
+  inFlightGets.set(key, pending);
+  return pending;
 }
 
 export function apiFetch(
