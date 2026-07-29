@@ -124,9 +124,10 @@ export function api<T>(
   // without limit. Requests still work normally when the cap is reached.
   if (!existing && pendingGets.size < MAX_PENDING_GETS) {
     pendingGets.set(key, { token, promise });
-    void promise.finally(() => {
+    const cleanup = () => {
       if (pendingGets.get(key)?.promise === promise) pendingGets.delete(key);
-    });
+    };
+    void promise.then(cleanup, cleanup);
   }
 
   return promise;
