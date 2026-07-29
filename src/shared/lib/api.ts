@@ -25,6 +25,13 @@ type ApiEnvelope<T> = {
   details?: unknown;
 };
 
+const MAX_IN_FLIGHT_GETS = 100;
+const anonymousRequestScope = Symbol("anonymous-request-scope");
+const inFlightGets = new Map<string | symbol, Map<string, Promise<unknown>>>();
+let inFlightGetCount = 0;
+let mutationGeneration = 0;
+let refreshInFlight: Promise<string> | null = null;
+
 function headersFor(init: RequestInit, token: string | null) {
   const headers = new Headers(init.headers);
   if (token) headers.set("Authorization", `Bearer ${token}`);
@@ -36,12 +43,27 @@ function headersFor(init: RequestInit, token: string | null) {
   return headers;
 }
 
+function requestMethod(init: RequestInit) {
+  return (init.method ?? "GET").toUpperCase();
+}
+
 function send(path: string, token: string | null, init: RequestInit) {
   return fetch(apiUrl(path), {
     ...init,
     credentials: "include",
     headers: headersFor(init, token),
   });
+}
+
+function refreshTokenOnce() {
+  if (!refreshInFlight) {
+    refreshInFlight = refreshAccessToken()
+      .then((response) => response.data.accessToken)
+      .finally(() => {
+        refreshInFlight = null;
+      });
+  }
+  return refreshInFlight;
 }
 
 async function request(
@@ -61,8 +83,8 @@ async function request(
     return send(path, currentToken, init);
   }
 
-  const refreshed = await refreshAccessToken();
-  return send(path, refreshed.data.accessToken, init);
+  const refreshedToken = await refreshTokenOnce();
+  return send(path, refreshedToken, init);
 }
 
 async function parseEnvelope<T>(response: Response): Promise<T> {
@@ -78,19 +100,82 @@ async function parseEnvelope<T>(response: Response): Promise<T> {
   return body.data !== undefined ? body.data : (body as T);
 }
 
-export async function api<T>(
+function canDeduplicate(init: RequestInit) {
+  return (
+    requestMethod(init) === "GET" &&
+    init.body === undefined &&
+    init.signal === undefined &&
+    init.headers === undefined
+  );
+}
+
+function deduplicatedGet<T>(
+  path: string,
+  accessToken: string | null,
+  retryOnUnauthorized: boolean,
+  loader: () => Promise<T>,
+): Promise<T> {
+  if (inFlightGetCount >= MAX_IN_FLIGHT_GETS) return loader();
+
+  const token = getAccessToken() ?? accessToken;
+  const scope = token ?? anonymousRequestScope;
+  const key = `${path}\u0000retry:${retryOnUnauthorized ? "1" : "0"}\u0000generation:${mutationGeneration}`;
+  let requests = inFlightGets.get(scope);
+
+  if (!requests) {
+    requests = new Map<string, Promise<unknown>>();
+    inFlightGets.set(scope, requests);
+  }
+
+  const existing = requests.get(key) as Promise<T> | undefined;
+  if (existing) return existing;
+
+  inFlightGetCount += 1;
+  const promise = loader().finally(() => {
+    requests?.delete(key);
+    inFlightGetCount = Math.max(0, inFlightGetCount - 1);
+    if (requests?.size === 0) inFlightGets.delete(scope);
+  });
+
+  requests.set(key, promise);
+  return promise;
+}
+
+export function api<T>(
   path: string,
   accessToken: string | null,
   init: RequestInit = {},
   options: { retryOnUnauthorized?: boolean } = {},
 ): Promise<T> {
-  const response = await request(
-    path,
-    accessToken,
-    init,
-    options.retryOnUnauthorized !== false,
-  );
-  return parseEnvelope<T>(response);
+  const method = requestMethod(init);
+  const isMutation = method !== "GET" && method !== "HEAD";
+  const retryOnUnauthorized = options.retryOnUnauthorized !== false;
+
+  // Separate reads from both sides of a mutation. Advancing before execution
+  // prevents attachment to older reads; advancing after settlement prevents a
+  // post-mutation reload from reusing a read that started during the mutation.
+  if (isMutation) mutationGeneration += 1;
+
+  const execute = async () => {
+    const response = await request(
+      path,
+      accessToken,
+      init,
+      retryOnUnauthorized,
+    );
+    return parseEnvelope<T>(response);
+  };
+
+  if (canDeduplicate(init)) {
+    return deduplicatedGet(path, accessToken, retryOnUnauthorized, execute);
+  }
+
+  const pending = execute();
+  return isMutation
+    ? pending.finally(() => {
+        mutationGeneration += 1;
+      })
+    : pending;
 }
 
 export function apiFetch(
@@ -98,5 +183,6 @@ export function apiFetch(
   accessToken: string | null,
   init: RequestInit = {},
 ) {
+  // Response bodies are streams and cannot safely be shared between callers.
   return request(path, accessToken, init, true);
 }
