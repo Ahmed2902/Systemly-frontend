@@ -25,6 +25,9 @@ type ApiEnvelope<T> = {
   details?: unknown;
 };
 
+const anonymousRequestScope = Symbol("anonymous-request-scope");
+const inFlightGets = new Map<string | symbol, Map<string, Promise<unknown>>>();
+
 function headersFor(init: RequestInit, token: string | null) {
   const headers = new Headers(init.headers);
   if (token) headers.set("Authorization", `Bearer ${token}`);
@@ -78,19 +81,64 @@ async function parseEnvelope<T>(response: Response): Promise<T> {
   return body.data !== undefined ? body.data : (body as T);
 }
 
-export async function api<T>(
+function canDeduplicate(init: RequestInit) {
+  const method = (init.method ?? "GET").toUpperCase();
+  return (
+    method === "GET" &&
+    init.body === undefined &&
+    init.signal === undefined &&
+    init.headers === undefined
+  );
+}
+
+function deduplicatedGet<T>(
+  path: string,
+  accessToken: string | null,
+  retryOnUnauthorized: boolean,
+  loader: () => Promise<T>,
+): Promise<T> {
+  const token = getAccessToken() ?? accessToken;
+  const scope = token ?? anonymousRequestScope;
+  const key = `${path}\u0000retry:${retryOnUnauthorized ? "1" : "0"}`;
+  let requests = inFlightGets.get(scope);
+
+  if (!requests) {
+    requests = new Map<string, Promise<unknown>>();
+    inFlightGets.set(scope, requests);
+  }
+
+  const existing = requests.get(key) as Promise<T> | undefined;
+  if (existing) return existing;
+
+  const promise = loader().finally(() => {
+    requests?.delete(key);
+    if (requests?.size === 0) inFlightGets.delete(scope);
+  });
+
+  requests.set(key, promise);
+  return promise;
+}
+
+export function api<T>(
   path: string,
   accessToken: string | null,
   init: RequestInit = {},
   options: { retryOnUnauthorized?: boolean } = {},
 ): Promise<T> {
-  const response = await request(
-    path,
-    accessToken,
-    init,
-    options.retryOnUnauthorized !== false,
-  );
-  return parseEnvelope<T>(response);
+  const retryOnUnauthorized = options.retryOnUnauthorized !== false;
+  const execute = async () => {
+    const response = await request(
+      path,
+      accessToken,
+      init,
+      retryOnUnauthorized,
+    );
+    return parseEnvelope<T>(response);
+  };
+
+  return canDeduplicate(init)
+    ? deduplicatedGet(path, accessToken, retryOnUnauthorized, execute)
+    : execute();
 }
 
 export function apiFetch(
