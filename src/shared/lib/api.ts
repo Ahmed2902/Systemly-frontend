@@ -148,12 +148,13 @@ export function api<T>(
   options: { retryOnUnauthorized?: boolean } = {},
 ): Promise<T> {
   const method = requestMethod(init);
+  const isMutation = method !== "GET" && method !== "HEAD";
   const retryOnUnauthorized = options.retryOnUnauthorized !== false;
 
-  // A read started before a mutation may contain stale data. Advancing the
-  // generation before every mutation ensures any follow-up GET performs a new
-  // request instead of attaching to that older promise.
-  if (method !== "GET" && method !== "HEAD") mutationGeneration += 1;
+  // Separate reads from both sides of a mutation. Advancing before execution
+  // prevents attachment to older reads; advancing after settlement prevents a
+  // post-mutation reload from reusing a read that started during the mutation.
+  if (isMutation) mutationGeneration += 1;
 
   const execute = async () => {
     const response = await request(
@@ -165,9 +166,16 @@ export function api<T>(
     return parseEnvelope<T>(response);
   };
 
-  return canDeduplicate(init)
-    ? deduplicatedGet(path, accessToken, retryOnUnauthorized, execute)
-    : execute();
+  if (canDeduplicate(init)) {
+    return deduplicatedGet(path, accessToken, retryOnUnauthorized, execute);
+  }
+
+  const pending = execute();
+  return isMutation
+    ? pending.finally(() => {
+        mutationGeneration += 1;
+      })
+    : pending;
 }
 
 export function apiFetch(
