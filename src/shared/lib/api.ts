@@ -2,6 +2,9 @@ import { refreshAccessToken } from "@/modules/auth/auth.api";
 import { getAccessToken } from "@/modules/auth/auth.store";
 import { apiUrl } from "./api-url";
 
+const MAX_IN_FLIGHT_GETS = 100;
+const inFlightGets = new Map<string, Promise<Response>>();
+
 export class ApiRequestError extends Error {
   status: number;
   code?: string;
@@ -36,12 +39,44 @@ function headersFor(init: RequestInit, token: string | null) {
   return headers;
 }
 
-function send(path: string, token: string | null, init: RequestInit) {
-  return fetch(apiUrl(path), {
-    ...init,
-    credentials: "include",
-    headers: headersFor(init, token),
-  });
+function canCoalesce(init: RequestInit) {
+  const method = (init.method ?? "GET").toUpperCase();
+  return method === "GET" && init.body === undefined && init.signal === undefined;
+}
+
+function removeInFlight(key: string, request: Promise<Response>) {
+  if (inFlightGets.get(key) === request) inFlightGets.delete(key);
+}
+
+async function send(path: string, token: string | null, init: RequestInit) {
+  const execute = () =>
+    fetch(apiUrl(path), {
+      ...init,
+      credentials: "include",
+      headers: headersFor(init, token),
+    });
+
+  if (!canCoalesce(init) || inFlightGets.size >= MAX_IN_FLIGHT_GETS) {
+    return execute();
+  }
+
+  // The token is used only in this short-lived in-memory key. It prevents two
+  // authenticated users from ever sharing a response and is removed as soon
+  // as the request settles. Nothing is persisted or logged.
+  const key = `${token ?? "anonymous"}\n${path}`;
+  let pending = inFlightGets.get(key);
+
+  if (!pending) {
+    pending = execute();
+    inFlightGets.set(key, pending);
+    void pending.then(
+      () => removeInFlight(key, pending!),
+      () => removeInFlight(key, pending!),
+    );
+  }
+
+  // Every caller gets its own body stream while sharing the same network call.
+  return (await pending).clone();
 }
 
 async function request(
