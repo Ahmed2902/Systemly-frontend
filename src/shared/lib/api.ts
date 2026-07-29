@@ -25,6 +25,14 @@ type ApiEnvelope<T> = {
   details?: unknown;
 };
 
+type PendingGet = {
+  token: string | null;
+  promise: Promise<unknown>;
+};
+
+const MAX_PENDING_GETS = 100;
+const pendingGets = new Map<string, PendingGet>();
+
 function headersFor(init: RequestInit, token: string | null) {
   const headers = new Headers(init.headers);
   if (token) headers.set("Authorization", `Bearer ${token}`);
@@ -78,19 +86,50 @@ async function parseEnvelope<T>(response: Response): Promise<T> {
   return body.data !== undefined ? body.data : (body as T);
 }
 
-export async function api<T>(
+function canDeduplicate(init: RequestInit) {
+  return (
+    (init.method ?? "GET").toUpperCase() === "GET" &&
+    init.body === undefined &&
+    init.headers === undefined &&
+    init.signal === undefined
+  );
+}
+
+export function api<T>(
   path: string,
   accessToken: string | null,
   init: RequestInit = {},
   options: { retryOnUnauthorized?: boolean } = {},
 ): Promise<T> {
-  const response = await request(
-    path,
-    accessToken,
-    init,
-    options.retryOnUnauthorized !== false,
+  const retryOnUnauthorized = options.retryOnUnauthorized !== false;
+
+  if (!canDeduplicate(init)) {
+    return request(path, accessToken, init, retryOnUnauthorized).then(
+      parseEnvelope<T>,
+    );
+  }
+
+  // Keep credentials out of the key. A token snapshot is compared separately
+  // so requests from different sessions can never share a promise.
+  const token = getAccessToken() ?? accessToken;
+  const key = `${retryOnUnauthorized ? "retry" : "no-retry"}:${path}`;
+  const existing = pendingGets.get(key);
+  if (existing?.token === token) return existing.promise as Promise<T>;
+
+  const promise = request(path, accessToken, init, retryOnUnauthorized).then(
+    parseEnvelope<T>,
   );
-  return parseEnvelope<T>(response);
+
+  // Bound the map so attacker-controlled query strings cannot grow memory
+  // without limit. Requests still work normally when the cap is reached.
+  if (!existing && pendingGets.size < MAX_PENDING_GETS) {
+    pendingGets.set(key, { token, promise });
+    void promise.finally(() => {
+      if (pendingGets.get(key)?.promise === promise) pendingGets.delete(key);
+    });
+  }
+
+  return promise;
 }
 
 export function apiFetch(
@@ -98,5 +137,7 @@ export function apiFetch(
   accessToken: string | null,
   init: RequestInit = {},
 ) {
+  // Raw Response bodies are single-consumer streams, so these requests are not
+  // deduplicated. Downloads and other callers retain their existing semantics.
   return request(path, accessToken, init, true);
 }
