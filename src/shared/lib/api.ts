@@ -130,11 +130,12 @@ export async function api<T>(
   // without bound. Requests still work normally when the limit is reached.
   if (inFlightGets.size >= MAX_IN_FLIGHT_GETS) return execute();
 
-  let pending!: Promise<T>;
-  pending = execute().finally(() => {
+  const pending = execute();
+  const clearPending = () => {
     if (inFlightGets.get(key) === pending) inFlightGets.delete(key);
-  });
+  };
   inFlightGets.set(key, pending);
+  pending.then(clearPending, clearPending);
   return pending;
 }
 
