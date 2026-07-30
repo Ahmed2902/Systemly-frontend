@@ -25,6 +25,7 @@ export function WizardShell() {
   const { saveDraft } = useWizard();
   const currentStep = steps[stepIndex];
   const StepComponent = currentStep.component;
+  const progress = ((stepIndex + 1) / steps.length) * 100;
 
   function handleSaveDraft() {
     saveDraft();
@@ -52,7 +53,12 @@ export function WizardShell() {
             <LogOut size={15} />
             Exit setup
           </Link>
-          <button type="button" onClick={handleSaveDraft} className="onboarding-primary-button onboarding-save-button">
+          <button
+            type="button"
+            onClick={handleSaveDraft}
+            className="onboarding-primary-button onboarding-save-button"
+            aria-live="polite"
+          >
             <CloudUpload size={15} />
             {saved ? "Draft saved" : "Save draft"}
           </button>
@@ -64,7 +70,15 @@ export function WizardShell() {
           <span>Step {stepIndex + 1} of {steps.length}</span>
           <strong>{currentStep.label}</strong>
           <small>{currentStep.hint}</small>
-          <div><span style={{ width: `${((stepIndex + 1) / steps.length) * 100}%` }} /></div>
+          <div
+            role="progressbar"
+            aria-label="Onboarding progress"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={Math.round(progress)}
+          >
+            <span style={{ width: `${progress}%` }} />
+          </div>
         </div>
 
         <div className="onboarding-progress-wrap">
