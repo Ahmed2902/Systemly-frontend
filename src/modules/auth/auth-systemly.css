@@ -1,0 +1,630 @@
+.systemly-auth {
+  --auth-ink: #202223;
+  --auth-charcoal: #0b0f19;
+  --auth-charcoal-soft: #111720;
+  --auth-green: #008060;
+  --auth-green-deep: #004c3f;
+  --auth-canvas: #f4f4f1;
+  --auth-surface: #ffffff;
+  --auth-muted: #6d7175;
+  --auth-border: #dfe1dd;
+  --auth-danger: #b42318;
+  display: grid;
+  min-height: 100vh;
+  grid-template-columns: minmax(420px, 0.94fr) minmax(520px, 1.06fr);
+  color: var(--auth-ink);
+  background: var(--auth-canvas);
+}
+
+.systemly-auth * {
+  box-sizing: border-box;
+}
+
+.systemly-auth-visual {
+  position: relative;
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 34px clamp(34px, 5vw, 76px) 40px;
+  color: #f7f8f6;
+  background:
+    radial-gradient(circle at 12% 88%, rgba(0, 128, 96, 0.2), transparent 34%),
+    linear-gradient(145deg, #0b0f19 0%, #111821 58%, #0a1111 100%);
+}
+
+.systemly-auth-visual::after {
+  position: absolute;
+  right: -18%;
+  bottom: -28%;
+  width: 70%;
+  aspect-ratio: 1;
+  border: 1px solid rgba(255, 255, 255, 0.055);
+  border-radius: 999px;
+  content: "";
+}
+
+.systemly-auth-brand,
+.systemly-auth-mobile-brand {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 11px;
+  color: inherit;
+  font-size: 22px;
+  font-weight: 760;
+  letter-spacing: -0.045em;
+  text-decoration: none;
+}
+
+.systemly-auth-brand-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: var(--auth-green);
+  box-shadow: 0 0 0 7px rgba(0, 128, 96, 0.12);
+}
+
+.systemly-auth-story {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  width: min(620px, 100%);
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  padding: 68px 0 48px;
+}
+
+.systemly-auth-eyebrow {
+  color: #9ba8a3;
+  font-size: 11px;
+  font-weight: 760;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.systemly-auth-story h2 {
+  max-width: 620px;
+  margin: 18px 0 0;
+  color: #ffffff;
+  font-size: clamp(44px, 5.4vw, 74px);
+  font-weight: 620;
+  line-height: 0.99;
+  letter-spacing: -0.065em;
+}
+
+.systemly-auth-story-copy {
+  max-width: 520px;
+  margin: 22px 0 0;
+  color: #aeb8b4;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.systemly-auth-product {
+  margin-top: clamp(34px, 6vh, 62px);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 26px;
+  background: #f4f4f1;
+  box-shadow: 0 34px 90px rgba(0, 0, 0, 0.35);
+}
+
+.systemly-auth-product-bar {
+  display: flex;
+  height: 44px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  color: #89928e;
+  font-size: 10px;
+  background: #0a0e0d;
+}
+
+.systemly-auth-product-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.systemly-auth-product-status::before {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--auth-green);
+  content: "";
+  box-shadow: 0 0 0 5px rgba(0, 128, 96, 0.12);
+}
+
+.systemly-auth-product-body {
+  display: grid;
+  grid-template-columns: 148px 1fr;
+  min-height: 232px;
+  color: var(--auth-ink);
+}
+
+.systemly-auth-product-nav {
+  padding: 22px 14px;
+  border-right: 1px solid var(--auth-border);
+  background: #ecece8;
+}
+
+.systemly-auth-product-wordmark {
+  padding: 0 9px 18px;
+  font-size: 14px;
+  font-weight: 760;
+  letter-spacing: -0.04em;
+}
+
+.systemly-auth-product-nav span {
+  display: block;
+  margin-top: 5px;
+  border-radius: 10px;
+  padding: 9px 10px;
+  color: #7a7e7b;
+  font-size: 11px;
+}
+
+.systemly-auth-product-nav span.is-active {
+  color: #202223;
+  background: #d8d9d5;
+  font-weight: 700;
+}
+
+.systemly-auth-product-main {
+  padding: 24px;
+  background: #fafaf8;
+}
+
+.systemly-auth-product-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.systemly-auth-product-heading small {
+  color: #7a7e7b;
+  font-size: 9px;
+  font-weight: 760;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.systemly-auth-product-heading strong {
+  display: block;
+  margin-top: 5px;
+  font-size: 18px;
+  letter-spacing: -0.04em;
+}
+
+.systemly-auth-product-heading em {
+  border: 1px solid #d8dad6;
+  border-radius: 999px;
+  padding: 6px 9px;
+  color: #656a67;
+  font-size: 8px;
+  font-style: normal;
+  font-weight: 760;
+  text-transform: uppercase;
+}
+
+.systemly-auth-product-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.systemly-auth-product-metric {
+  min-width: 0;
+  border: 1px solid #e1e2de;
+  border-radius: 13px;
+  padding: 12px;
+  background: #fff;
+}
+
+.systemly-auth-product-metric small {
+  display: block;
+  color: #7b7f7c;
+  font-size: 8px;
+}
+
+.systemly-auth-product-metric strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 14px;
+  letter-spacing: -0.035em;
+}
+
+.systemly-auth-product-schedule {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  gap: 10px;
+  margin-top: 12px;
+  border: 1px solid #e1e2de;
+  border-radius: 14px;
+  padding: 12px;
+  background: #fff;
+}
+
+.systemly-auth-product-times {
+  display: grid;
+  gap: 11px;
+  color: #8b8f8c;
+  font-size: 8px;
+}
+
+.systemly-auth-product-bookings {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 8px;
+}
+
+.systemly-auth-booking {
+  border: 1px solid #d9dcda;
+  border-radius: 10px;
+  padding: 10px;
+  background: #f4f4f1;
+}
+
+.systemly-auth-booking strong,
+.systemly-auth-booking small {
+  display: block;
+}
+
+.systemly-auth-booking strong {
+  font-size: 9px;
+}
+
+.systemly-auth-booking small {
+  margin-top: 4px;
+  color: #7c817e;
+  font-size: 7px;
+}
+
+.systemly-auth-trust {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  color: #98a39f;
+  font-size: 11px;
+}
+
+.systemly-auth-trust span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.systemly-auth-form-panel {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+  padding: 30px clamp(28px, 7vw, 104px) 36px;
+  background: var(--auth-canvas);
+}
+
+.systemly-auth-mobile-brand {
+  display: none;
+  color: var(--auth-ink);
+}
+
+.systemly-auth-form-wrap {
+  width: min(470px, 100%);
+  margin: auto;
+  padding: 48px 0;
+}
+
+.systemly-auth-form-heading h1 {
+  margin: 0;
+  color: var(--auth-ink);
+  font-size: clamp(36px, 4vw, 50px);
+  font-weight: 640;
+  line-height: 1.02;
+  letter-spacing: -0.055em;
+}
+
+.systemly-auth-form-heading p {
+  max-width: 430px;
+  margin: 14px 0 0;
+  color: var(--auth-muted);
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+.systemly-auth-form-content {
+  margin-top: 34px;
+}
+
+.systemly-auth-form-footer {
+  display: flex;
+  justify-content: center;
+  gap: 7px;
+  color: #8b8f8c;
+  font-size: 11px;
+}
+
+.auth-stack {
+  display: grid;
+  gap: 22px;
+}
+
+.auth-form {
+  display: grid;
+  gap: 18px;
+}
+
+.auth-field {
+  display: grid;
+  gap: 8px;
+}
+
+.auth-field-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.auth-label {
+  color: #3d423f;
+  font-size: 13px;
+  font-weight: 690;
+}
+
+.auth-input-wrap {
+  position: relative;
+}
+
+.auth-input {
+  width: 100%;
+  min-height: 52px;
+  border: 1px solid var(--auth-border);
+  border-radius: 14px;
+  padding: 0 15px;
+  color: var(--auth-ink);
+  outline: none;
+  background: var(--auth-surface);
+  box-shadow: 0 1px 0 rgba(32, 34, 35, 0.03);
+  transition: border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
+}
+
+.auth-input::placeholder {
+  color: #a3a7a4;
+}
+
+.auth-input:hover {
+  border-color: #c7cac6;
+}
+
+.auth-input:focus {
+  border-color: var(--auth-green);
+  box-shadow: 0 0 0 4px rgba(0, 128, 96, 0.12);
+}
+
+.auth-input.has-action {
+  padding-right: 50px;
+}
+
+.auth-input:-webkit-autofill,
+.auth-input:-webkit-autofill:hover,
+.auth-input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--auth-ink);
+  box-shadow: 0 0 0 1000px #fff inset;
+}
+
+.auth-password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  display: grid;
+  width: 38px;
+  height: 38px;
+  transform: translateY(-50%);
+  place-items: center;
+  border-radius: 10px;
+  color: #737875;
+  transition: color 140ms ease, background 140ms ease;
+}
+
+.auth-password-toggle:hover {
+  color: var(--auth-ink);
+  background: #efefec;
+}
+
+.auth-text-link {
+  width: fit-content;
+  color: var(--auth-green-deep);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.auth-text-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.auth-error,
+.auth-success {
+  border-radius: 13px;
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.auth-error {
+  color: #8a1c13;
+  border: 1px solid #f1c7c2;
+  background: #fff2f0;
+}
+
+.auth-success {
+  color: #09533f;
+  border: 1px solid #b9dfd4;
+  background: #edf8f4;
+}
+
+.auth-field-error {
+  color: var(--auth-danger);
+  font-size: 12px;
+}
+
+.auth-primary-button,
+.auth-secondary-button,
+.auth-google-button {
+  display: inline-flex;
+  min-height: 52px;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border-radius: 999px;
+  padding: 0 20px;
+  font-size: 14px;
+  font-weight: 720;
+  transition: transform 150ms ease, border-color 150ms ease, background 150ms ease, box-shadow 150ms ease;
+}
+
+.auth-primary-button {
+  color: #fff;
+  border: 1px solid #1c1f1e;
+  background: #202223;
+  box-shadow: 0 12px 28px rgba(32, 34, 35, 0.15);
+}
+
+.auth-primary-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: #111312;
+  box-shadow: 0 16px 34px rgba(32, 34, 35, 0.2);
+}
+
+.auth-primary-button:disabled,
+.auth-secondary-button:disabled,
+.auth-google-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.auth-secondary-button,
+.auth-google-button {
+  color: var(--auth-ink);
+  border: 1px solid var(--auth-border);
+  background: #fff;
+}
+
+.auth-secondary-button:hover:not(:disabled),
+.auth-google-button:hover:not(:disabled) {
+  border-color: #c8cbc7;
+  background: #f9f9f7;
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  color: #969a97;
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  height: 1px;
+  flex: 1;
+  background: var(--auth-border);
+  content: "";
+}
+
+.auth-switch-copy {
+  margin: 0;
+  color: var(--auth-muted);
+  text-align: center;
+  font-size: 13px;
+}
+
+.auth-state-card {
+  display: grid;
+  gap: 18px;
+  border: 1px solid var(--auth-border);
+  border-radius: 22px;
+  padding: 24px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 18px 50px rgba(32, 34, 35, 0.07);
+}
+
+.auth-state-icon {
+  display: grid;
+  width: 50px;
+  height: 50px;
+  place-items: center;
+  border-radius: 16px;
+  color: var(--auth-green-deep);
+  background: #e3f1df;
+}
+
+.auth-state-card h2 {
+  margin: 0;
+  color: var(--auth-ink);
+  font-size: 22px;
+  letter-spacing: -0.035em;
+}
+
+.auth-state-card p {
+  margin: 0;
+  color: var(--auth-muted);
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+@media (max-width: 980px) {
+  .systemly-auth {
+    grid-template-columns: 1fr;
+  }
+
+  .systemly-auth-visual {
+    display: none;
+  }
+
+  .systemly-auth-form-panel {
+    min-height: 100vh;
+    padding: 26px clamp(22px, 7vw, 64px) 30px;
+  }
+
+  .systemly-auth-mobile-brand {
+    display: inline-flex;
+  }
+}
+
+@media (max-width: 560px) {
+  .systemly-auth-form-panel {
+    padding-inline: 20px;
+  }
+
+  .systemly-auth-form-wrap {
+    padding: 52px 0 34px;
+  }
+
+  .systemly-auth-form-heading h1 {
+    font-size: 38px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .systemly-auth *,
+  .systemly-auth *::before,
+  .systemly-auth *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
