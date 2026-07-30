@@ -8,6 +8,7 @@ import { FinalCta } from "@/modules/landing/components/FinalCta";
 import { LandingFooter } from "@/modules/landing/components/LandingFooter";
 import "@/modules/landing/landing-premium.css";
 import "@/modules/landing/landing-operations-demo.css";
+import "@/modules/landing/systemly-landing-theme.css";
 
 export default function LandingPage() {
   return (
