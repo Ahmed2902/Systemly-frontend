@@ -34,20 +34,23 @@ export function SlugInput({
 
   return (
     <div className="onboarding-field">
-      <label>Website address <span className="font-normal text-[var(--onboarding-muted)]">(optional)</span></label>
-      <div className="onboarding-input flex items-center overflow-hidden p-0 focus-within:border-[rgba(123,29,58,.75)] focus-within:shadow-[0_0_0_3px_rgba(106,18,46,.11)]">
-        <span className="border-r border-[var(--onboarding-border)] px-3.5 text-sm text-[var(--onboarding-muted)]">hgezli.com/</span>
+      <label>Public website address</label>
+      <div className="onboarding-input flex items-center overflow-hidden p-0">
+        <span className="border-r border-[var(--onboarding-border)] bg-[#f6f6f3] px-3.5 text-sm text-[var(--onboarding-muted)]">systemly.app/</span>
         <input
           value={value}
-          onChange={(event) => onChange(event.target.value.toLowerCase())}
-          className="h-full min-w-0 flex-1 bg-transparent px-3.5 text-sm text-[var(--onboarding-text)] outline-none placeholder:text-[#4b474d]"
+          onChange={(event) => onChange(event.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
+          className="h-full min-w-0 flex-1 bg-transparent px-3.5 text-sm text-[var(--onboarding-text)] outline-none placeholder:text-[#a2a6a3]"
           placeholder="your-business"
+          aria-describedby="slug-status"
         />
       </div>
-      {error && <p className="onboarding-error">{error}</p>}
-      {!error && status === "checking" && <p className="text-xs text-[var(--onboarding-muted)]">Checking availability...</p>}
-      {!error && status === "available" && <p className="text-xs text-[#a44362]">Available</p>}
-      {!error && status === "taken" && <p className="onboarding-error">Already taken</p>}
+      <div id="slug-status" aria-live="polite">
+        {error ? <p className="onboarding-error">{error}</p> : null}
+        {!error && status === "checking" ? <p className="text-xs text-[var(--onboarding-muted)]">Checking availability…</p> : null}
+        {!error && status === "available" ? <p className="onboarding-success">Available</p> : null}
+        {!error && status === "taken" ? <p className="onboarding-error">Already taken</p> : null}
+      </div>
     </div>
   );
 }
