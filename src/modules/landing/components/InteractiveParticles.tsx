@@ -73,8 +73,8 @@ export function InteractiveParticles() {
           const b = points[j];
           const distance = Math.hypot(a.x - b.x, a.y - b.y);
           if (distance > 125) continue;
-          const alpha = (1 - distance / 125) * 0.24;
-          ctx.strokeStyle = `rgba(37, 201, 143, ${alpha})`;
+          const alpha = (1 - distance / 125) * 0.27;
+          ctx.strokeStyle = `rgba(181, 71, 116, ${alpha})`;
           ctx.lineWidth = 0.7;
           ctx.beginPath();
           ctx.moveTo(a.x, a.y);
@@ -85,11 +85,14 @@ export function InteractiveParticles() {
 
       for (const point of points) {
         const glow = Math.hypot(point.x - pointer.x, point.y - pointer.y) < 150;
-        ctx.fillStyle = glow ? "rgba(146, 255, 216, .95)" : "rgba(52, 207, 151, .72)";
+        ctx.shadowBlur = glow ? 14 : 6;
+        ctx.shadowColor = glow ? "rgba(216, 121, 158, .8)" : "rgba(181, 71, 116, .42)";
+        ctx.fillStyle = glow ? "rgba(232, 151, 184, .98)" : "rgba(181, 71, 116, .86)";
         ctx.beginPath();
-        ctx.arc(point.x, point.y, glow ? 2.1 : 1.4, 0, Math.PI * 2);
+        ctx.arc(point.x, point.y, glow ? 2.15 : 1.45, 0, Math.PI * 2);
         ctx.fill();
       }
+      ctx.shadowBlur = 0;
       frame = requestAnimationFrame(draw);
     };
 
