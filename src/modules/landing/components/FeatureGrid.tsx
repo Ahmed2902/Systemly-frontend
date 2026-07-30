@@ -41,7 +41,7 @@ export function FeatureGrid() {
             <span className="lp-accent-text">actually work.</span>
           </h2>
           <p className="lp-copy max-w-2xl">
-            Hgezli connects the customer-facing website to the same services,
+            Systemly connects the customer-facing website to the same services,
             staff, availability, appointments, customers, and invoices used by
             the front desk. No duplicate setup and no disconnected tools.
           </p>
@@ -51,12 +51,12 @@ export function FeatureGrid() {
           <article className="lp-card lp-feature-primary">
             <span className="lp-icon-box"><CalendarClock size={25} /></span>
             <h3 className="mt-6 text-2xl font-semibold">Calendar & daily operations</h3>
-            <p className="mt-3 max-w-2xl text-sm leading-7 text-[#929991]">
+            <p className="mt-3 max-w-2xl text-sm leading-7 text-[#a9a5a2]">
               Staff stay in rows, time stays in columns, and every service segment
               appears with the correct person. Multi-service appointments remain
               one customer journey without hiding who performs each part.
             </p>
-            <div className="lp-feature-primary-preview" aria-label="Small preview of the Hgezli operations calendar">
+            <div className="lp-feature-primary-preview" aria-label="Small preview of the Systemly operations calendar">
               <div className="mini-toolbar">
                 <span className="mini-chip">Monday, 27 July</span>
                 <span className="mini-chip">All staff</span>
@@ -81,7 +81,7 @@ export function FeatureGrid() {
             <article className="lp-card lp-feature-compact">
               <span className="lp-icon-box"><Globe2 size={22}/></span>
               <h3>Website builder</h3>
-              <p>Your site reads directly from the business content, services, team, and booking setup you manage in Hgezli.</p>
+              <p>Your site reads directly from the business content, services, team, and booking setup you manage in Systemly.</p>
             </article>
             {compactModules.map(({ icon: Icon, title, copy }) => (
               <article className="lp-card lp-feature-compact" key={title}>
