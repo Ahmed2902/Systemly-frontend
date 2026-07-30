@@ -2,18 +2,33 @@ import Link from "next/link";
 import { ArrowRight, Check } from "lucide-react";
 
 const included = [
-  "A connected business website and service catalogue",
-  "Online booking with real staff availability",
-  "Calendar, appointments, customers, invoices, staff, and services",
-  "Arabic and English customer experiences",
-  "Owner-only reporting and direct pilot feedback",
-];
+  {
+    title: "Website and service catalogue",
+    copy: "Publish the customer experience from the same services and content your team manages.",
+  },
+  {
+    title: "Real-time online booking",
+    copy: "Let customers choose from actual staff availability instead of a disconnected request form.",
+  },
+  {
+    title: "Operations workspace",
+    copy: "Run appointments, customers, invoices, staff, and services from one working system.",
+  },
+  {
+    title: "Arabic and English",
+    copy: "Prepare the public customer journey for both directions from the start.",
+  },
+  {
+    title: "Owner reporting",
+    copy: "Keep revenue and performance insight private while the team focuses on daily work.",
+  },
+] as const;
 
 export function PricingSection() {
   return (
     <section id="pricing" className="lp-green-cta">
       <div className="lp-shell lp-green-grid">
-        <div>
+        <div className="lp-green-copy">
           <p className="lp-green-kicker">Founding pilot</p>
           <h2>Your business already has a workflow. Put it on one system.</h2>
           <p>
@@ -29,11 +44,25 @@ export function PricingSection() {
         </div>
 
         <div className="lp-green-details">
-          <span>What the pilot includes</span>
+          <div className="lp-pilot-card-header">
+            <span className="lp-pilot-badge">Founding pilot</span>
+            <h3>Everything needed to run the first real workflow.</h3>
+            <p>Start with the connected product, not a stripped-down concept demo.</p>
+          </div>
           <ul>
-            {included.map((item) => <li key={item}><Check size={17}/><span>{item}</span></li>)}
+            {included.map((item) => (
+              <li key={item.title}>
+                <span className="lp-pilot-check"><Check size={15}/></span>
+                <div>
+                  <strong>{item.title}</strong>
+                  <small>{item.copy}</small>
+                </div>
+              </li>
+            ))}
           </ul>
-          <small>Exact pricing, trial length, payment support, custom-domain terms, and onboarding assistance will be confirmed before activation.</small>
+          <div className="lp-pilot-note">
+            Exact pricing, trial length, payment support, custom-domain terms, and onboarding assistance will be confirmed before activation.
+          </div>
         </div>
       </div>
     </section>
