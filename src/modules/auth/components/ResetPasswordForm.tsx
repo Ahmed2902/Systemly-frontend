@@ -1,0 +1,105 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { CheckCircle2, Link2Off } from "lucide-react";
+import {
+  resetPasswordSchema,
+  type ResetPasswordInput,
+} from "../auth.schema";
+import { ApiError, resetPassword } from "../auth.api";
+import { PasswordField } from "./PasswordField";
+
+export function ResetPasswordForm() {
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token")?.trim() ?? "";
+  const [completed, setCompleted] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<ResetPasswordInput>({ resolver: zodResolver(resetPasswordSchema) });
+
+  async function onSubmit(data: ResetPasswordInput) {
+    if (!token) return;
+    setServerError(null);
+    try {
+      await resetPassword(token, data.password);
+      setCompleted(true);
+    } catch (error) {
+      const apiError = error as ApiError;
+      setServerError(
+        apiError.error ?? apiError.message ?? "This reset link is invalid or has expired.",
+      );
+    }
+  }
+
+  if (!token) {
+    return (
+      <div className="auth-state-card">
+        <div className="auth-state-icon"><Link2Off size={24} /></div>
+        <div>
+          <h2>Reset link missing</h2>
+          <p>Request a new password-reset email to continue securely.</p>
+        </div>
+        <Link href="/forgot-password" className="auth-primary-button">Request a new link</Link>
+        <Link href="/login" className="auth-secondary-button">Back to login</Link>
+      </div>
+    );
+  }
+
+  if (completed) {
+    return (
+      <div className="auth-state-card">
+        <div className="auth-state-icon"><CheckCircle2 size={24} /></div>
+        <div>
+          <h2>Password updated</h2>
+          <p>Your new password is ready. Log in again to continue to Systemly.</p>
+        </div>
+        <Link href="/login" className="auth-primary-button">Log in</Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="auth-stack">
+      <form onSubmit={handleSubmit(onSubmit)} className="auth-form" noValidate>
+        <div className="auth-field">
+          <label htmlFor="reset-password" className="auth-label">New password</label>
+          <PasswordField
+            {...register("password")}
+            id="reset-password"
+            autoComplete="new-password"
+            placeholder="At least 8 characters"
+          />
+          {errors.password ? <p className="auth-field-error">{errors.password.message}</p> : null}
+        </div>
+
+        <div className="auth-field">
+          <label htmlFor="reset-confirm-password" className="auth-label">Confirm new password</label>
+          <PasswordField
+            {...register("confirmPassword")}
+            id="reset-confirm-password"
+            autoComplete="new-password"
+            placeholder="Repeat your new password"
+          />
+          {errors.confirmPassword ? <p className="auth-field-error">{errors.confirmPassword.message}</p> : null}
+        </div>
+
+        {serverError ? <div className="auth-error" role="alert">{serverError}</div> : null}
+
+        <button type="submit" disabled={isSubmitting} className="auth-primary-button">
+          {isSubmitting ? "Updating password…" : "Update password"}
+        </button>
+      </form>
+
+      <p className="auth-switch-copy">
+        <Link href="/login" className="auth-text-link">Back to login</Link>
+      </p>
+    </div>
+  );
+}
