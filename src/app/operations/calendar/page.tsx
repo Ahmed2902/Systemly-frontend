@@ -272,19 +272,18 @@ export default function CalendarPage() {
                 );
               }}
               onCollectPayment={async (
-                id,
-                discountCents,
+                appointment,
                 paymentMethod: PaymentMethod,
+                includeAppointmentUpdate,
               ) => {
-                await collectPayment(
-                  id,
-                  discountCents,
+                const updated = await collectPayment(
+                  appointment,
                   paymentMethod,
                   String(accessToken),
+                  includeAppointmentUpdate,
                 );
-                applyDetailedAppointment(
-                  await getAppointmentSummary(id, String(accessToken)),
-                );
+                applyDetailedAppointment(updated);
+                return updated;
               }}
               onRevert={async (id) => {
                 applyDetailedAppointment(

@@ -93,11 +93,8 @@ export async function getServiceCatalog(
   }));
 }
 
-export async function saveAppointment(
-  appointment: AppointmentSummary,
-  accessToken: string,
-): Promise<AppointmentSummary> {
-  const body = {
+function appointmentUpdateBody(appointment: AppointmentSummary) {
+  return {
     segments: appointment.segments.map((segment) => ({
       id: segment.id.startsWith("seg-new") ? undefined : segment.id,
       serviceId: segment.serviceId,
@@ -122,11 +119,19 @@ export async function saveAppointment(
         }
       : undefined,
   };
+}
 
+export async function saveAppointment(
+  appointment: AppointmentSummary,
+  accessToken: string,
+): Promise<AppointmentSummary> {
   await api<BackendAppointment>(
     `/appointments/${encodeURIComponent(appointment.id)}`,
     accessToken,
-    { method: "PATCH", body: JSON.stringify(body) },
+    {
+      method: "PATCH",
+      body: JSON.stringify(appointmentUpdateBody(appointment)),
+    },
   );
 
   return getAppointmentSummary(appointment.id, accessToken);
@@ -185,15 +190,57 @@ export function deleteAppointment(appointmentId: string, accessToken: string) {
 }
 
 export function collectPayment(
+  appointment: AppointmentSummary,
+  paymentMethod: PaymentMethod,
+  accessToken: string,
+  includeAppointmentUpdate?: boolean,
+): Promise<AppointmentSummary>;
+export function collectPayment(
   appointmentId: string,
   discountCents: number,
   paymentMethod: PaymentMethod,
   accessToken: string,
+): Promise<unknown>;
+export function collectPayment(
+  appointmentOrId: AppointmentSummary | string,
+  paymentMethodOrDiscount: PaymentMethod | number,
+  accessTokenOrPaymentMethod: string | PaymentMethod,
+  legacyAccessTokenOrIncludeUpdate?: string | boolean,
 ) {
-  return api<unknown>("/invoices/collect-payment", accessToken, {
+  const appointment =
+    typeof appointmentOrId === "string" ? null : appointmentOrId;
+  const paymentMethod = appointment
+    ? (paymentMethodOrDiscount as PaymentMethod)
+    : (accessTokenOrPaymentMethod as PaymentMethod);
+  const accessToken = appointment
+    ? (accessTokenOrPaymentMethod as string)
+    : (legacyAccessTokenOrIncludeUpdate as string);
+  const includeAppointmentUpdate =
+    appointment && typeof legacyAccessTokenOrIncludeUpdate === "boolean"
+      ? legacyAccessTokenOrIncludeUpdate
+      : true;
+
+  const request = api<{ updatedAppointment: BackendAppointment }>(
+    "/invoices/collect-payment",
+    accessToken,
+    {
     method: "POST",
-    body: JSON.stringify({ appointmentId, discountCents, paymentMethod }),
-  });
+    body: JSON.stringify({
+      appointmentId: appointment?.id ?? appointmentOrId,
+      discountCents: appointment?.discount ?? paymentMethodOrDiscount,
+      paymentMethod,
+      ...(appointment && includeAppointmentUpdate
+        ? { appointmentUpdate: appointmentUpdateBody(appointment) }
+        : {}),
+    }),
+    },
+  );
+
+  return appointment
+    ? request.then(({ updatedAppointment }) =>
+        mapBackendAppointment(updatedAppointment),
+      )
+    : request;
 }
 
 export function revertAppointment(

@@ -40,10 +40,10 @@ interface Props {
   onDelete: (appointmentId: string) => Promise<void>;
   onStatusChange: (status: AppointmentSummary["status"]) => Promise<void>;
   onCollectPayment: (
-    appointmentId: string,
-    discountCents: number,
+    appointment: AppointmentSummary,
     paymentMethod: PaymentMethod,
-  ) => Promise<void>;
+    includeAppointmentUpdate: boolean,
+  ) => Promise<AppointmentSummary>;
   onRevert: (appointmentId: string) => Promise<void>;
   onUncancel: (appointmentId: string) => Promise<void>;
   onMarkNoShow: (appointmentId: string) => Promise<void>;
@@ -84,6 +84,27 @@ const PAYMENT_METHOD_OPTIONS: Array<{
   { value: "BANK_TRANSFER", label: "Bank transfer" },
   { value: "MOBILE_WALLET", label: "Mobile wallet" },
 ];
+
+function editableAppointmentFingerprint(appointment: AppointmentSummary) {
+  return JSON.stringify({
+    segments: appointment.segments.map((segment) => ({
+      id: segment.id,
+      serviceId: segment.serviceId,
+      staffId: segment.staffId,
+      startsAt: segment.startsAt,
+      endsAt: segment.endsAt,
+    })),
+    customItems: appointment.customItems.map((item) => ({
+      id: item.id,
+      description: item.description,
+      quantity: item.quantity,
+      price: item.price,
+    })),
+    discount: appointment.discount,
+    notes: appointment.notes,
+    clinicVisitRecord: appointment.clinicVisitRecord,
+  });
+}
 
 interface StyledDropdownProps {
   value: string;
@@ -211,6 +232,9 @@ export function AppointmentEditPanel({
   }, [appointment]);
 
   const locked = draft.isLocked;
+  const hasPendingChanges =
+    editableAppointmentFingerprint(draft) !==
+    editableAppointmentFingerprint(appointment);
 
   const subtotal =
     draft.segments.reduce((sum, s) => sum + s.price, 0) +
@@ -484,6 +508,12 @@ export function AppointmentEditPanel({
   }
 
   async function handleCollectPayment() {
+    if (hasInvalidDraft || hasAnyConflict) {
+      setValidationError(
+        "Fix the availability or timing issues before collecting payment.",
+      );
+      return;
+    }
     const paymentMethodLabel =
       PAYMENT_METHOD_OPTIONS.find((option) => option.value === paymentMethod)
         ?.label ?? "selected method";
@@ -493,9 +523,14 @@ export function AppointmentEditPanel({
       )
     )
       return;
-    await runAction("Collecting payment…", () =>
-      onCollectPayment(draft.id, draft.discount, paymentMethod),
-    );
+    await runAction("Collecting payment…", async () => {
+      const updated = await onCollectPayment(
+        draft,
+        paymentMethod,
+        hasPendingChanges,
+      );
+      setDraft(updated);
+    });
   }
 
   async function handleRevert() {
@@ -1078,7 +1113,13 @@ export function AppointmentEditPanel({
             </button>
           ) : (
             <button
-              disabled={locked || draft.isPaid}
+              disabled={
+                locked ||
+                draft.isPaid ||
+                hasAnyConflict ||
+                hasInvalidDraft ||
+                Boolean(action)
+              }
               onClick={handleCollectPayment}
               className="rounded-2xl border border-blue-200 bg-white py-2.5 text-sm font-medium text-blue-600 transition hover:bg-blue-50 disabled:opacity-40"
             >
