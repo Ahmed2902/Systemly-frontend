@@ -1,11 +1,11 @@
 export const OPERATIONS_ACCENTS = [
   {
     card:
-      "border-zinc-200/70 bg-gradient-to-br from-zinc-50 via-white to-white",
-    icon: "bg-zinc-100 text-zinc-700",
-    badge: "bg-zinc-100 text-zinc-700",
-    link: "text-zinc-700 hover:text-zinc-900",
-    pill: "bg-zinc-50 text-zinc-700 ring-zinc-200/70",
+      "border-amber-200/70 bg-gradient-to-br from-amber-50 via-white to-white",
+    icon: "bg-amber-100 text-amber-700",
+    badge: "bg-amber-100 text-amber-700",
+    link: "text-amber-700 hover:text-amber-800",
+    pill: "bg-amber-50 text-amber-700 ring-amber-200/70",
   },
   {
     card:

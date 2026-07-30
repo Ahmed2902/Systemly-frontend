@@ -16,7 +16,11 @@ import { useEffect, useState, type ReactNode } from "react";
 
 const showcaseSlides = [
   { id: "calendar", label: "Calendar", context: "systemly / operations" },
-  { id: "dashboard", label: "Dashboard", context: "systemly / owner analytics" },
+  {
+    id: "dashboard",
+    label: "Dashboard",
+    context: "systemly / owner analytics",
+  },
   { id: "website", label: "Website", context: "systemly / public website" },
   { id: "booking", label: "Booking", context: "systemly / online booking" },
 ] as const;
@@ -28,8 +32,10 @@ export function LandingHero() {
     <section className="lp-hero">
       <div className="lp-shell lp-hero-grid">
         <div className="lp-hero-copy-block">
-          <p className="lp-kicker">The operating system for service businesses</p>
-          <h1 className="lp-hero-title">The system behind your service business.</h1>
+          <p className="lp-kicker">
+            The operating system for service businesses
+          </p>
+          <h1 className="lp-hero-title">The system behind your business.</h1>
           <p className="lp-hero-copy">
             Build the customer experience, take bookings, run the working day,
             and understand the business from one connected platform.
@@ -100,11 +106,20 @@ function HeroProductShowcase() {
         <span>{activeSlide.label}</span>
       </div>
 
-      <div className="lp-hero-product-body lp-showcase-stage" aria-live="polite">
-        <ShowcaseSlidePanel id="calendar" active={activeSlide.id === "calendar"}>
+      <div
+        className="lp-hero-product-body lp-showcase-stage"
+        aria-live="polite"
+      >
+        <ShowcaseSlidePanel
+          id="calendar"
+          active={activeSlide.id === "calendar"}
+        >
           <CalendarPreview />
         </ShowcaseSlidePanel>
-        <ShowcaseSlidePanel id="dashboard" active={activeSlide.id === "dashboard"}>
+        <ShowcaseSlidePanel
+          id="dashboard"
+          active={activeSlide.id === "dashboard"}
+        >
           <DashboardPreview />
         </ShowcaseSlidePanel>
         <ShowcaseSlidePanel id="website" active={activeSlide.id === "website"}>
@@ -115,7 +130,11 @@ function HeroProductShowcase() {
         </ShowcaseSlidePanel>
       </div>
 
-      <div className="lp-showcase-tabs" role="tablist" aria-label="Product preview">
+      <div
+        className="lp-showcase-tabs"
+        role="tablist"
+        aria-label="Product preview"
+      >
         {showcaseSlides.map((slide, index) => (
           <button
             key={slide.id}
@@ -147,7 +166,7 @@ function ShowcaseSlidePanel({
 }) {
   return (
     <div
-      className={`lp-showcase-slide lp-showcase-${id} ${active ? "is-active" : ""}`}
+      className={`lp-showcase-slide lp-showcase-slide-${id} ${active ? "is-active" : ""}`}
       aria-hidden={!active}
     >
       {children}
@@ -157,7 +176,10 @@ function ShowcaseSlidePanel({
 
 function ProductSidebar({ active }: { active: string }) {
   return (
-    <nav className="lp-showcase-sidebar" aria-label="Preview workspace navigation">
+    <nav
+      className="lp-showcase-sidebar"
+      aria-label="Preview workspace navigation"
+    >
       <div className="lp-showcase-wordmark">Systemly</div>
       <div className="lp-showcase-sidebar-links">
         {["Dashboard", "Calendar", "Appointments", "Customers", "Invoices"].map(
@@ -186,10 +208,22 @@ function CalendarPreview() {
         </div>
 
         <div className="lp-showcase-calendar-toolbar">
-          <div className="lp-showcase-status-key" aria-label="Appointment statuses">
-            <span><i className="is-confirmed" />Confirmed</span>
-            <span><i className="is-progress" />In progress</span>
-            <span><i className="is-completed" />Completed</span>
+          <div
+            className="lp-showcase-status-key"
+            aria-label="Appointment statuses"
+          >
+            <span>
+              <i className="is-confirmed" />
+              Confirmed
+            </span>
+            <span>
+              <i className="is-progress" />
+              In progress
+            </span>
+            <span>
+              <i className="is-completed" />
+              Completed
+            </span>
           </div>
           <span>Africa/Cairo</span>
         </div>
@@ -197,21 +231,55 @@ function CalendarPreview() {
         <div className="lp-showcase-calendar-board">
           <div className="lp-showcase-calendar-head">
             <span>Staff</span>
-            <div>{["9:00", "10:00", "11:00", "12:00"].map((time) => <b key={time}>{time}</b>)}</div>
+            <div>
+              {["9:00", "10:00", "11:00", "12:00"].map((time) => (
+                <b key={time}>{time}</b>
+              ))}
+            </div>
           </div>
 
           <CalendarRow name="Nour Khalil" role="Senior stylist">
-            <CalendarEvent left="8%" width="27%" tone="silver" title="Mariam Adel" detail="Haircut · 60 min" />
-            <CalendarEvent left="69%" width="16%" tone="break" title="Break" detail="30 min" />
+            <CalendarEvent
+              left="8%"
+              width="27%"
+              tone="silver"
+              title="Mariam Adel"
+              detail="Haircut · 60 min"
+            />
+            <CalendarEvent
+              left="69%"
+              width="16%"
+              tone="break"
+              title="Break"
+              detail="30 min"
+            />
           </CalendarRow>
 
           <CalendarRow name="Mona Adel" role="Nail technician">
-            <CalendarEvent left="34%" width="25%" tone="dark" title="Yasmine Ali" detail="Gel manicure · 1/2" />
+            <CalendarEvent
+              left="34%"
+              width="25%"
+              tone="dark"
+              title="Yasmine Ali"
+              detail="Gel manicure · 1/2"
+            />
           </CalendarRow>
 
           <CalendarRow name="Dr. Lina Hassan" role="Dermatologist">
-            <CalendarEvent left="59%" width="25%" tone="graphite" title="Yasmine Ali" detail="Consultation · 2/2" />
-            <CalendarEvent left="85%" width="14%" tone="silver" title="Salma" detail="Follow-up" />
+            <CalendarEvent
+              left="59%"
+              width="25%"
+              tone="graphite"
+              title="Yasmine Ali"
+              detail="Consultation · 2/2"
+            />
+            <CalendarEvent
+              left="85%"
+              width="14%"
+              tone="silver"
+              title="Salma"
+              detail="Follow-up"
+            />
           </CalendarRow>
         </div>
       </div>
@@ -253,7 +321,10 @@ function CalendarEvent({
   detail: string;
 }) {
   return (
-    <div className={`lp-showcase-calendar-event is-${tone}`} style={{ left, width }}>
+    <div
+      className={`lp-showcase-calendar-event is-${tone}`}
+      style={{ left, width }}
+    >
       <strong>{title}</strong>
       <span>{detail}</span>
     </div>
@@ -283,42 +354,80 @@ function DashboardPreview() {
         <div className="lp-showcase-dashboard-grid">
           <article className="lp-showcase-revenue-card">
             <div className="lp-showcase-card-heading">
-              <div><strong>Revenue this month</strong><span>Paid invoices</span></div>
-              <div><b>EGP 38,620</b><small><TrendingUp size={11} /> 12.4%</small></div>
+              <div>
+                <strong>Revenue this month</strong>
+                <span>Paid invoices</span>
+              </div>
+              <div>
+                <b>EGP 38,620</b>
+                <small>
+                  <TrendingUp size={11} /> 12.4%
+                </small>
+              </div>
             </div>
             <div className="lp-showcase-bars">
               {[42, 55, 48, 72, 64, 88, 76, 94, 82].map((height, index) => (
                 <i key={index} style={{ height: `${height}%` }} />
               ))}
             </div>
-            <div className="lp-showcase-chart-axis"><span>Jul 1</span><span>Jul 10</span><span>Jul 20</span><span>Jul 30</span></div>
+            <div className="lp-showcase-chart-axis">
+              <span>Jul 1</span>
+              <span>Jul 10</span>
+              <span>Jul 20</span>
+              <span>Jul 30</span>
+            </div>
           </article>
 
           <div className="lp-showcase-dashboard-side">
             <article className="lp-showcase-service-card">
-              <div className="lp-showcase-card-title"><strong>Top services</strong><BarChart3 size={15} /></div>
+              <div className="lp-showcase-card-title">
+                <strong>Top services</strong>
+                <BarChart3 size={15} />
+              </div>
               {[
                 ["Haircut & blow-dry", "EGP 12,480", 91],
                 ["Skin consultation", "EGP 9,800", 76],
                 ["Gel manicure", "EGP 6,240", 54],
               ].map(([service, amount, value]) => (
                 <div key={service as string}>
-                  <span><b>{service}</b><small>{amount}</small></span>
-                  <i><b style={{ width: `${value}%` }} /></i>
+                  <span>
+                    <b>{service}</b>
+                    <small>{amount}</small>
+                  </span>
+                  <i>
+                    <b style={{ width: `${value}%` }} />
+                  </i>
                 </div>
               ))}
             </article>
 
             <article className="lp-showcase-operations-card">
-              <div className="lp-showcase-card-title"><strong>Today</strong><UsersRound size={15} /></div>
+              <div className="lp-showcase-card-title">
+                <strong>Today</strong>
+                <UsersRound size={15} />
+              </div>
               <div className="lp-showcase-today-stats">
-                <span><strong>18</strong><small>Completed</small></span>
-                <span><strong>4</strong><small>Upcoming</small></span>
-                <span><strong>2</strong><small>No-shows</small></span>
+                <span>
+                  <strong>18</strong>
+                  <small>Completed</small>
+                </span>
+                <span>
+                  <strong>4</strong>
+                  <small>Upcoming</small>
+                </span>
+                <span>
+                  <strong>2</strong>
+                  <small>No-shows</small>
+                </span>
               </div>
               <div className="lp-showcase-utilization">
-                <span><b>Staff utilization</b><strong>76%</strong></span>
-                <i><b /></i>
+                <span>
+                  <b>Staff utilization</b>
+                  <strong>76%</strong>
+                </span>
+                <i>
+                  <b />
+                </i>
               </div>
             </article>
           </div>
@@ -328,8 +437,22 @@ function DashboardPreview() {
   );
 }
 
-function Metric({ label, value, note }: { label: string; value: string; note: string }) {
-  return <article><span>{label}</span><strong>{value}</strong><small>{note}</small></article>;
+function Metric({
+  label,
+  value,
+  note,
+}: {
+  label: string;
+  value: string;
+  note: string;
+}) {
+  return (
+    <article>
+      <span>{label}</span>
+      <strong>{value}</strong>
+      <small>{note}</small>
+    </article>
+  );
 }
 
 function WebsitePreview() {
@@ -342,17 +465,23 @@ function WebsitePreview() {
       <div className="lp-showcase-site-copy">
         <small>CAIRO · BY APPOINTMENT</small>
         <h3>Care, designed around you.</h3>
-        <p>Personal appointments, considered services, and a calm way to book.</p>
+        <p>
+          Personal appointments, considered services, and a calm way to book.
+        </p>
         <button type="button">Book an appointment</button>
       </div>
       <div className="lp-showcase-site-card">
         <Globe2 size={18} />
         <span>Live website</span>
         <strong>Arabic + English</strong>
-        <small>Built from the same services and availability your team manages.</small>
+        <small>
+          Built from the same services and availability your team manages.
+        </small>
       </div>
       <div className="lp-showcase-site-services" aria-hidden="true">
-        <span>Hair care</span><span>Skin treatments</span><span>Nail services</span>
+        <span>Hair care</span>
+        <span>Skin treatments</span>
+        <span>Nail services</span>
       </div>
     </div>
   );
@@ -366,7 +495,9 @@ function BookingPreview() {
         <span>Book your visit</span>
       </div>
       <div className="lp-showcase-booking-steps" aria-label="Booking progress">
-        <span className="is-active">1 Service</span><span>2 Time</span><span>3 Details</span>
+        <span className="is-active">1 Service</span>
+        <span>2 Time</span>
+        <span>3 Details</span>
       </div>
       <div className="lp-showcase-booking-content">
         <div className="lp-showcase-service-list">
@@ -376,8 +507,15 @@ function BookingPreview() {
             ["Skin treatment", "60 min", "EGP 700"],
             ["Gel manicure", "45 min", "EGP 320"],
           ].map(([name, duration, price], index) => (
-            <button key={name} type="button" className={index === 0 ? "is-selected" : ""}>
-              <span><strong>{name}</strong><small>{duration}</small></span>
+            <button
+              key={name}
+              type="button"
+              className={index === 0 ? "is-selected" : ""}
+            >
+              <span>
+                <strong>{name}</strong>
+                <small>{duration}</small>
+              </span>
               <b>{price}</b>
             </button>
           ))}
@@ -387,7 +525,9 @@ function BookingPreview() {
           <small>Your booking</small>
           <strong>Hair consultation</strong>
           <span>Monday, July 27 · 10:00 AM</span>
-          <div><Check size={14} /> Real staff availability</div>
+          <div>
+            <Check size={14} /> Real staff availability
+          </div>
           <button type="button">Continue</button>
         </div>
       </div>

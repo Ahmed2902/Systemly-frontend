@@ -13,16 +13,26 @@
 .landing-premium .lp-hero-product-showcase {
   width: 100%;
   max-width: none;
+  transform: none;
 }
 
 .landing-premium .lp-hero-product-body.lp-showcase-stage {
   min-height: 560px;
 }
 
+/* Keep absolutely positioned carousel panels tied to the full stage width.
+   Without an explicit inline size, the calendar's grid can shrink to its
+   intrinsic content width while the slide still visually fills the stage. */
+.landing-premium .lp-showcase-slide {
+  width: 100%;
+  min-width: 0;
+}
+
 /* The original hero used a bare aside. These component-scoped rules prevent
    those old selectors from corrupting the new preview navigation. */
 .landing-premium .lp-hero-product-showcase .lp-showcase-app-shell {
   width: 100%;
+  min-width: 0;
   height: 100%;
   grid-template-columns: 142px minmax(0, 1fr);
 }
@@ -72,9 +82,28 @@
 }
 
 .landing-premium .lp-showcase-app-main {
+  width: 100%;
   min-width: 0;
   overflow: hidden;
   padding: 24px 26px;
+}
+
+/* The four product highlights are a single compact line at every width. */
+.landing-premium .lp-hero-proof {
+  flex-wrap: nowrap;
+  gap: clamp(7px, 1vw, 18px);
+  white-space: nowrap;
+}
+
+.landing-premium .lp-hero-proof span {
+  min-width: 0;
+  font-size: clamp(8px, 0.72vw, 11px);
+}
+
+.landing-premium .lp-hero-proof span::before {
+  width: 3px;
+  height: 3px;
+  margin-right: clamp(4px, 0.45vw, 7px);
 }
 
 /* Calendar preview */

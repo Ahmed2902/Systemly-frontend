@@ -35,7 +35,7 @@ const NAV_ITEMS: NavItem[] = [
     href: "/operations/dashboard",
     label: "Dashboard",
     icon: LayoutDashboard,
-    accent: "bg-zinc-100 text-zinc-700",
+    accent: "bg-sky-100 text-sky-700",
     ownerOnly: true,
   },
   {
@@ -48,7 +48,7 @@ const NAV_ITEMS: NavItem[] = [
     href: "/operations/appointments",
     label: "Appointments",
     icon: ClipboardList,
-    accent: "bg-slate-200 text-slate-700",
+    accent: "bg-amber-100 text-amber-700",
   },
   {
     href: "/operations/customers",
@@ -73,7 +73,7 @@ const NAV_ITEMS: NavItem[] = [
     href: "/operations/staff/invite",
     label: "Invite team",
     icon: UserPlus,
-    accent: "bg-zinc-100 text-zinc-700",
+    accent: "bg-rose-100 text-rose-700",
     ownerOnly: true,
   },
   {
@@ -86,7 +86,7 @@ const NAV_ITEMS: NavItem[] = [
     href: "/operations/settings",
     label: "Settings",
     icon: Settings,
-    accent: "bg-slate-200 text-slate-700",
+    accent: "bg-emerald-100 text-emerald-700",
     ownerOnly: true,
   },
 ];
