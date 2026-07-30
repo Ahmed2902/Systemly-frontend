@@ -36,17 +36,20 @@ export function LandingMotion() {
   useLayoutEffect(() => {
     const root = document.querySelector<HTMLElement>(".landing-premium");
     if (!root) return;
+    const landingRoot = root;
 
     const reducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
-    const header = root.querySelector<HTMLElement>(".lp-nav-wrap");
+    const header = landingRoot.querySelector<HTMLElement>(".lp-nav-wrap");
     let activeAnimationFrame: number | null = null;
 
     const revealElements = new Set<HTMLElement>();
 
     REVEAL_GROUPS.forEach((selector) => {
-      const elements = Array.from(root.querySelectorAll<HTMLElement>(selector));
+      const elements = Array.from(
+        landingRoot.querySelectorAll<HTMLElement>(selector),
+      );
       elements.forEach((element, index) => {
         element.classList.add("lp-reveal");
         element.style.setProperty(
@@ -60,7 +63,7 @@ export function LandingMotion() {
       });
     });
 
-    root.classList.add("landing-motion-enabled");
+    landingRoot.classList.add("landing-motion-enabled");
 
     if (reducedMotion) {
       revealElements.forEach((element) => element.classList.add("is-revealed"));
@@ -166,7 +169,7 @@ export function LandingMotion() {
       const anchor = (event.target as Element | null)?.closest<HTMLAnchorElement>(
         'a[href^="#"]',
       );
-      if (!anchor || !root.contains(anchor)) return;
+      if (!anchor || !landingRoot.contains(anchor)) return;
 
       const url = new URL(anchor.href, window.location.href);
       const target = resolveHashTarget(url.hash);
@@ -209,7 +212,7 @@ export function LandingMotion() {
           delete element.dataset.motionTabindex;
         }
       });
-      root.classList.remove("landing-motion-enabled");
+      landingRoot.classList.remove("landing-motion-enabled");
     };
   }, []);
 
