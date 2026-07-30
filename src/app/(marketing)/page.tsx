@@ -6,8 +6,8 @@ import { HowItWorks } from "@/modules/landing/components/HowItWorks";
 import { PricingSection } from "@/modules/landing/components/PricingSection";
 import { FinalCta } from "@/modules/landing/components/FinalCta";
 import { LandingFooter } from "@/modules/landing/components/LandingFooter";
-import "@/modules/landing/landing-premium.css";
 import "@/modules/landing/landing-operations-demo.css";
+import "@/modules/landing/landing-premium.css";
 
 export default function LandingPage() {
   return (
@@ -15,9 +15,9 @@ export default function LandingPage() {
       <LandingNav />
       <LandingHero />
       <LiveOperationsDemo />
-      <div id="features"><FeatureGrid /></div>
-      <div id="how-it-works"><HowItWorks /></div>
-      <div id="pricing"><PricingSection /></div>
+      <FeatureGrid />
+      <HowItWorks />
+      <PricingSection />
       <FinalCta />
       <LandingFooter />
     </main>

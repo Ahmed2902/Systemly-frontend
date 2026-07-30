@@ -1,28 +1,61 @@
 import Link from "next/link";
-import { ArrowRight, BarChart3, CalendarCheck2, Globe2, MonitorSmartphone } from "lucide-react";
-import { InteractiveParticles } from "./InteractiveParticles";
-
-const highlights = [
-  { icon: CalendarCheck2, title: "Online Booking", copy: "Let clients book 24/7 from any device." },
-  { icon: MonitorSmartphone, title: "Website Builder", copy: "Build a polished site for your brand in minutes." },
-  { icon: BarChart3, title: "Operations", copy: "Manage staff, services, invoices and customers." },
-  { icon: Globe2, title: "Arabic + English", copy: "Built for your business, clients and team." },
-];
+import { ArrowRight, Play } from "lucide-react";
 
 export function LandingHero() {
   return (
     <section className="lp-hero">
-      <InteractiveParticles />
-      <div className="lp-hero-content">
-        <p className="lp-kicker">All-in-one platform for salons &amp; clinics</p>
-        <h1 className="lp-hero-title">Run your salon or clinic<br/><span className="lp-accent-text">from one system.</span></h1>
-        <p className="lp-hero-copy">Website builder, online booking, staff scheduling, services, reminders, customer management, invoices and front-desk operations — all in one calm, powerful platform.</p>
-        <div className="lp-hero-actions">
-          <Link href="/signup" className="lp-button lp-button-primary">Start with Hgezli <ArrowRight size={17}/></Link>
-          <a href="#demo" className="lp-button lp-button-secondary">See live demo <ArrowRight size={17}/></a>
+      <div className="lp-shell lp-hero-grid">
+        <div className="lp-hero-copy-block">
+          <p className="lp-kicker">The operating system for service businesses</p>
+          <h1 className="lp-hero-title">
+            The system behind your service business.
+          </h1>
+          <p className="lp-hero-copy">
+            Build the customer experience, take bookings, run the working day,
+            and understand the business from one connected platform.
+          </p>
+          <div className="lp-hero-actions">
+            <Link href="/signup" className="lp-button lp-button-primary">
+              Start free <ArrowRight size={17} />
+            </Link>
+            <a href="#demo" className="lp-button lp-button-secondary">
+              <Play size={16} fill="currentColor" /> Explore the product
+            </a>
+          </div>
+          <div className="lp-hero-proof" aria-label="Product highlights">
+            <span>Website + booking</span>
+            <span>Daily operations</span>
+            <span>Owner analytics</span>
+            <span>Arabic + English</span>
+          </div>
         </div>
-        <div className="lp-feature-strip">
-          {highlights.map(({ icon: Icon, title, copy }) => <div key={title}><span className="lp-feature-icon"><Icon size={22}/></span><h3>{title}</h3><p>{copy}</p></div>)}
+
+        <div className="lp-hero-product" aria-label="Systemly product preview">
+          <div className="lp-hero-product-bar">
+            <span className="lp-product-dot" />
+            <span>systemly / operations</span>
+            <span>Today</span>
+          </div>
+          <div className="lp-hero-product-body">
+            <aside>
+              <strong>S</strong>
+              {["Home", "Calendar", "Appointments", "Customers", "Invoices", "Staff"].map((item, index) => (
+                <span key={item} className={index === 1 ? "is-active" : ""}>{item}</span>
+              ))}
+            </aside>
+            <div className="lp-hero-calendar">
+              <div className="lp-calendar-heading">
+                <div><small>Monday</small><strong>July 27</strong></div>
+                <button type="button">+ New appointment</button>
+              </div>
+              <div className="lp-calendar-grid">
+                <span>Staff</span><span>9:00</span><span>10:00</span><span>11:00</span>
+                <strong>Nour Khalil</strong><i /><i className="booking booking-a">Mariam · Haircut</i><i />
+                <strong>Mona Adel</strong><i /><i /><i className="booking booking-b">Yasmine · Nails</i>
+                <strong>Dr. Lina</strong><i className="booking booking-c">Consultation</i><i /><i />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
