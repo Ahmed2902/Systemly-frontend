@@ -1,0 +1,779 @@
+/* Focused regression fixes for the product showcase and authenticated landing navigation. */
+
+/* Give the hero preview enough space to look like a product, not a thumbnail. */
+.landing-premium .lp-hero .lp-shell {
+  width: min(1460px, calc(100% - 56px));
+}
+
+.landing-premium .lp-hero-grid {
+  grid-template-columns: minmax(340px, 0.72fr) minmax(580px, 1.4fr);
+  gap: clamp(40px, 4.5vw, 72px);
+}
+
+.landing-premium .lp-hero-product-showcase {
+  width: 100%;
+  max-width: none;
+}
+
+.landing-premium .lp-hero-product-body.lp-showcase-stage {
+  min-height: 560px;
+}
+
+/* The original hero used a bare aside. These component-scoped rules prevent
+   those old selectors from corrupting the new preview navigation. */
+.landing-premium .lp-hero-product-showcase .lp-showcase-app-shell {
+  width: 100%;
+  height: 100%;
+  grid-template-columns: 142px minmax(0, 1fr);
+}
+
+.landing-premium .lp-hero-product-showcase .lp-showcase-sidebar {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 22px 13px;
+  border-right: 1px solid #dededa;
+  background: #f8f8f6;
+}
+
+.lp-showcase-wordmark {
+  padding: 0 9px 21px;
+  color: #1f211f;
+  font-size: 17px;
+  font-weight: 780;
+  letter-spacing: -0.045em;
+}
+
+.lp-showcase-sidebar-links {
+  display: grid;
+  gap: 5px;
+}
+
+.landing-premium .lp-hero-product-showcase .lp-showcase-sidebar-links span {
+  display: block;
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: #777a77;
+  font-size: 9px;
+  font-weight: 560;
+  line-height: 1.25;
+}
+
+.landing-premium .lp-hero-product-showcase .lp-showcase-sidebar-links span.is-active {
+  background: #dededa;
+  color: #202223;
+  font-weight: 720;
+}
+
+.landing-premium .lp-showcase-app-main {
+  min-width: 0;
+  overflow: hidden;
+  padding: 24px 26px;
+}
+
+/* Calendar preview */
+.lp-showcase-calendar-toolbar {
+  min-height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-top: 16px;
+  padding: 0 2px;
+  color: #7b7e7b;
+  font-size: 8px;
+}
+
+.lp-showcase-status-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.lp-showcase-status-key span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.lp-showcase-status-key i {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #8f928f;
+}
+
+.lp-showcase-status-key i.is-progress { background: #3f4240; }
+.lp-showcase-status-key i.is-completed { background: #008060; }
+
+.lp-showcase-calendar-board {
+  overflow: hidden;
+  border: 1px solid #dcdeda;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 12px 30px rgba(25, 28, 25, 0.035);
+}
+
+.lp-showcase-calendar-head,
+.lp-showcase-calendar-row {
+  display: grid;
+  grid-template-columns: 136px minmax(0, 1fr);
+}
+
+.lp-showcase-calendar-head {
+  min-height: 39px;
+  border-bottom: 1px solid #e1e2de;
+  background: #fafaf8;
+}
+
+.lp-showcase-calendar-head > span {
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  border-right: 1px solid #e1e2de;
+  color: #777a77;
+  font-size: 8px;
+  font-weight: 720;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.lp-showcase-calendar-head > div {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.lp-showcase-calendar-head b {
+  display: flex;
+  align-items: center;
+  padding-left: 10px;
+  border-right: 1px solid #ecece9;
+  color: #6e716e;
+  font-size: 8px;
+  font-weight: 620;
+}
+
+.lp-showcase-calendar-head b:last-child { border-right: 0; }
+
+.lp-showcase-calendar-row {
+  min-height: 103px;
+  border-bottom: 1px solid #e5e6e2;
+}
+
+.lp-showcase-calendar-row:last-child { border-bottom: 0; }
+
+.lp-showcase-calendar-staff {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  padding: 13px 14px;
+  border-right: 1px solid #e1e2de;
+  background: #fcfcfa;
+}
+
+.lp-showcase-calendar-staff strong {
+  color: #2d302d;
+  font-size: 9px;
+  font-weight: 720;
+}
+
+.lp-showcase-calendar-staff span {
+  color: #858985;
+  font-size: 7px;
+}
+
+.lp-showcase-calendar-timeline {
+  position: relative;
+  min-width: 0;
+  background:
+    linear-gradient(to right, transparent calc(25% - 1px), #ecece9 25%, transparent calc(25% + 1px)),
+    linear-gradient(to right, transparent calc(50% - 1px), #ecece9 50%, transparent calc(50% + 1px)),
+    linear-gradient(to right, transparent calc(75% - 1px), #ecece9 75%, transparent calc(75% + 1px));
+}
+
+.lp-showcase-calendar-event {
+  position: absolute;
+  top: 18px;
+  min-width: 52px;
+  display: grid;
+  gap: 5px;
+  overflow: hidden;
+  padding: 10px;
+  border: 1px solid #c7c9c5;
+  border-radius: 10px;
+  background: #eeeeeb;
+  color: #272a27;
+  box-shadow: 0 6px 16px rgba(25, 28, 25, 0.055);
+  white-space: nowrap;
+}
+
+.lp-showcase-calendar-event strong {
+  overflow: hidden;
+  font-size: 8px;
+  font-weight: 720;
+  text-overflow: ellipsis;
+}
+
+.lp-showcase-calendar-event span {
+  overflow: hidden;
+  color: inherit;
+  font-size: 7px;
+  opacity: 0.72;
+  text-overflow: ellipsis;
+}
+
+.lp-showcase-calendar-event.is-dark {
+  border-color: #2d302d;
+  background: #202321;
+  color: #ffffff;
+}
+
+.lp-showcase-calendar-event.is-graphite {
+  border-color: #696c69;
+  background: #6f726f;
+  color: #ffffff;
+}
+
+.lp-showcase-calendar-event.is-break {
+  top: 25px;
+  padding-block: 7px;
+  border-style: dashed;
+  background: #fafaf8;
+  color: #717571;
+  box-shadow: none;
+}
+
+/* Dashboard preview */
+.landing-premium .lp-showcase-dashboard-main {
+  padding-bottom: 20px;
+}
+
+.landing-premium .lp-showcase-metrics {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 9px;
+  margin-top: 17px;
+}
+
+.landing-premium .lp-showcase-metrics article {
+  min-width: 0;
+  padding: 12px 13px;
+}
+
+.landing-premium .lp-showcase-metrics strong {
+  overflow: hidden;
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.landing-premium .lp-showcase-dashboard-grid {
+  grid-template-columns: minmax(0, 1.55fr) minmax(220px, 0.82fr);
+  gap: 11px;
+  margin-top: 11px;
+}
+
+.landing-premium .lp-showcase-dashboard-grid article {
+  min-height: 0;
+  padding: 15px;
+}
+
+.landing-premium .lp-showcase-revenue-card {
+  min-height: 327px;
+}
+
+.lp-showcase-card-heading,
+.lp-showcase-card-title {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.lp-showcase-card-heading > div {
+  display: grid;
+  gap: 4px;
+}
+
+.lp-showcase-card-heading > div:last-child {
+  justify-items: end;
+}
+
+.lp-showcase-card-heading strong,
+.lp-showcase-card-title strong {
+  color: #303330;
+  font-size: 10px;
+}
+
+.lp-showcase-card-heading span,
+.lp-showcase-card-heading small {
+  color: #858985;
+  font-size: 7px;
+}
+
+.lp-showcase-card-heading b {
+  color: #202223;
+  font-size: 12px;
+}
+
+.lp-showcase-card-heading small {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: #007a5c;
+}
+
+.landing-premium .lp-showcase-bars {
+  height: 220px;
+  gap: 6px;
+  margin-top: 20px;
+}
+
+.lp-showcase-chart-axis {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 7px;
+  color: #939693;
+  font-size: 7px;
+}
+
+.lp-showcase-dashboard-side {
+  display: grid;
+  grid-template-rows: 1.08fr 0.92fr;
+  gap: 11px;
+}
+
+.landing-premium .lp-showcase-service-card > div:not(.lp-showcase-card-title) {
+  gap: 6px;
+  margin-top: 13px;
+}
+
+.lp-showcase-service-card > div > span {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.lp-showcase-service-card span b {
+  overflow: hidden;
+  color: #555955;
+  font-size: 7px;
+  font-weight: 620;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lp-showcase-service-card span small {
+  flex: 0 0 auto;
+  color: #898d89;
+  font-size: 6px;
+}
+
+.lp-showcase-today-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+  margin-top: 13px;
+}
+
+.lp-showcase-today-stats > span {
+  display: grid;
+  gap: 3px;
+  padding: 8px 6px;
+  border-radius: 8px;
+  background: #f5f5f3;
+}
+
+.lp-showcase-today-stats strong {
+  color: #303330;
+  font-size: 11px;
+}
+
+.lp-showcase-today-stats small {
+  color: #888c88;
+  font-size: 6px;
+}
+
+.lp-showcase-utilization {
+  display: grid;
+  gap: 7px;
+  margin-top: 13px;
+}
+
+.lp-showcase-utilization > span {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  color: #666a66;
+  font-size: 7px;
+}
+
+.lp-showcase-utilization > span strong { color: #303330; }
+
+.lp-showcase-utilization > i {
+  height: 5px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e6e7e3;
+}
+
+.lp-showcase-utilization > i b {
+  display: block;
+  width: 76%;
+  height: 100%;
+  border-radius: inherit;
+  background: #5b5e5b;
+}
+
+/* Website and booking previews */
+.landing-premium .lp-showcase-website-shell {
+  padding: 32px 36px;
+}
+
+.landing-premium .lp-showcase-site-copy {
+  width: min(460px, 72%);
+  margin-top: 82px;
+}
+
+.landing-premium .lp-showcase-site-card {
+  right: 30px;
+  bottom: 58px;
+  width: 228px;
+  padding: 18px;
+}
+
+.lp-showcase-site-services {
+  position: absolute;
+  right: 32px;
+  bottom: 22px;
+  left: 36px;
+  display: flex;
+  gap: 7px;
+}
+
+.lp-showcase-site-services span {
+  padding: 6px 9px;
+  border: 1px solid rgba(31, 27, 24, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.46);
+  color: #5c5149;
+  font-size: 7px;
+  backdrop-filter: blur(8px);
+}
+
+.landing-premium .lp-showcase-booking-shell {
+  padding: 26px 30px;
+}
+
+.lp-showcase-booking-steps {
+  display: flex;
+  gap: 7px;
+  margin-top: 16px;
+}
+
+.lp-showcase-booking-steps span {
+  padding: 6px 9px;
+  border-radius: 999px;
+  background: #e7e3dc;
+  color: #77716b;
+  font-size: 7px;
+  font-weight: 650;
+}
+
+.lp-showcase-booking-steps span.is-active {
+  background: #202223;
+  color: #ffffff;
+}
+
+.landing-premium .lp-showcase-booking-content {
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.landing-premium .lp-showcase-service-list,
+.landing-premium .lp-showcase-booking-summary {
+  box-shadow: 0 12px 30px rgba(46, 39, 32, 0.055);
+}
+
+/* Repair the first editorial website visual. A broad rule in the previous
+   polish pass was overriding its intended light tenant theme. */
+.landing-premium .lp-product-story .lp-website-visual {
+  background:
+    radial-gradient(circle at 82% 76%, rgba(49, 40, 34, 0.18), transparent 34%),
+    linear-gradient(145deg, #f2ece1 0%, #d7c8b6 52%, #87766a 100%) !important;
+  color: #17130f !important;
+}
+
+.landing-premium .lp-product-story .lp-website-visual .lp-site-nav,
+.landing-premium .lp-product-story .lp-website-visual .lp-site-hero h4 {
+  color: #17130f !important;
+}
+
+.landing-premium .lp-product-story .lp-website-visual .lp-site-hero small,
+.landing-premium .lp-product-story .lp-website-visual .lp-site-hero p {
+  color: #564c44 !important;
+}
+
+.landing-premium .lp-product-story .lp-website-visual .lp-booking-float {
+  background: rgba(255, 255, 255, 0.93);
+  color: #202223;
+}
+
+/* Authenticated navigation */
+.lp-nav-session-actions {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.lp-nav-public-site,
+.lp-nav-account-action {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 13px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  background: transparent;
+  color: #d9dcda !important;
+  font-size: 12px;
+  font-weight: 620;
+  cursor: pointer;
+  transition: border-color 180ms ease, background-color 180ms ease, color 180ms ease;
+}
+
+.lp-nav-public-site:hover,
+.lp-nav-account-action:hover {
+  border-color: rgba(255, 255, 255, 0.42);
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff !important;
+}
+
+.lp-nav-account-action {
+  min-height: auto;
+  padding: 8px 5px;
+  border-color: transparent;
+  color: #929693 !important;
+}
+
+.lp-nav-public-site.is-loading {
+  cursor: wait;
+  opacity: 0.62;
+}
+
+.lp-nav-public-site.is-loading > span {
+  width: 10px;
+  height: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #ffffff;
+  border-radius: 999px;
+  animation: lp-nav-spin 700ms linear infinite;
+}
+
+.lp-nav-session-loading {
+  width: 190px;
+  height: 40px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.05), rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+  background-size: 200% 100%;
+  animation: lp-nav-loading 1.2s linear infinite;
+}
+
+@keyframes lp-nav-spin { to { transform: rotate(360deg); } }
+@keyframes lp-nav-loading { to { background-position: -200% 0; } }
+
+.lp-mobile-nav-panel {
+  display: none;
+}
+
+@media (max-width: 1180px) {
+  .landing-premium .lp-hero-grid {
+    grid-template-columns: minmax(315px, 0.72fr) minmax(560px, 1.32fr);
+    gap: 36px;
+  }
+
+  .lp-nav-links { gap: 20px; }
+  .lp-nav-public-site,
+  .lp-nav-account-action { padding-inline: 10px; }
+}
+
+@media (max-width: 1050px) {
+  .landing-premium .lp-hero-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .landing-premium .lp-hero-product-showcase {
+    width: min(920px, 100%);
+    margin-inline: auto;
+    transform: none;
+  }
+}
+
+@media (max-width: 940px) {
+  .lp-nav-links,
+  .lp-nav-session-actions {
+    display: none;
+  }
+
+  .landing-premium .lp-mobile-menu {
+    display: inline-flex;
+    width: 42px;
+    height: 42px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  .lp-mobile-nav-panel {
+    position: absolute;
+    top: 100%;
+    right: 18px;
+    left: 18px;
+    display: grid;
+    gap: 18px;
+    max-height: 0;
+    overflow: hidden;
+    padding: 0 18px;
+    border: 1px solid transparent;
+    border-radius: 22px;
+    background: rgba(9, 12, 10, 0.98);
+    opacity: 0;
+    transform: translateY(-8px);
+    pointer-events: none;
+    transition: max-height 240ms ease, padding 240ms ease, opacity 180ms ease, transform 220ms ease;
+  }
+
+  .lp-mobile-nav-panel.is-open {
+    max-height: 560px;
+    padding: 20px 18px;
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.42);
+    opacity: 1;
+    transform: translateY(10px);
+    pointer-events: auto;
+  }
+
+  .lp-mobile-nav-links,
+  .lp-mobile-session-actions {
+    display: grid;
+    gap: 8px;
+  }
+
+  .lp-mobile-nav-links a {
+    padding: 11px 4px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    color: #d9dcda;
+    font-size: 14px;
+  }
+
+  .lp-mobile-session-actions .lp-button,
+  .lp-mobile-session-actions .lp-nav-public-site,
+  .lp-mobile-session-actions .lp-nav-account-action,
+  .lp-mobile-session-actions .lp-nav-login {
+    width: 100%;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .lp-mobile-session-actions .lp-nav-account-action {
+    border: 1px solid rgba(255, 255, 255, 0.12);
+  }
+}
+
+@media (max-width: 760px) {
+  .landing-premium .lp-hero .lp-shell {
+    width: min(calc(100% - 32px), 1220px);
+  }
+
+  .landing-premium .lp-hero-product-body.lp-showcase-stage {
+    min-height: 470px;
+  }
+
+  .landing-premium .lp-hero-product-showcase .lp-showcase-app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .landing-premium .lp-hero-product-showcase .lp-showcase-sidebar {
+    display: none;
+  }
+
+  .landing-premium .lp-showcase-app-main {
+    padding: 15px;
+  }
+
+  .lp-showcase-calendar-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .lp-showcase-calendar-head,
+  .lp-showcase-calendar-row {
+    grid-template-columns: 92px minmax(0, 1fr);
+  }
+
+  .lp-showcase-calendar-row { min-height: 86px; }
+  .lp-showcase-calendar-event { top: 14px; padding: 8px; }
+
+  .landing-premium .lp-showcase-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .landing-premium .lp-showcase-dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .lp-showcase-dashboard-side { display: none; }
+  .landing-premium .lp-showcase-revenue-card { min-height: 250px; }
+  .landing-premium .lp-showcase-bars { height: 145px; }
+
+  .landing-premium .lp-showcase-site-copy {
+    width: 88%;
+    margin-top: 50px;
+  }
+
+  .landing-premium .lp-showcase-site-card {
+    right: 14px;
+    bottom: 52px;
+    width: 176px;
+  }
+
+  .lp-showcase-site-services {
+    right: 14px;
+    bottom: 14px;
+    left: 14px;
+    overflow: hidden;
+  }
+
+  .landing-premium .lp-showcase-booking-shell {
+    padding: 16px;
+  }
+
+  .landing-premium .lp-showcase-booking-content {
+    grid-template-columns: 1fr;
+  }
+
+  .landing-premium .lp-showcase-booking-summary {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lp-nav-public-site.is-loading > span,
+  .lp-nav-session-loading {
+    animation: none;
+  }
+}

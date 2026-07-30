@@ -11,6 +11,7 @@ import "@/modules/landing/landing-operations-demo.css";
 import "@/modules/landing/landing-premium.css";
 import "@/modules/landing/systemly-shopify-overrides.css";
 import "@/modules/landing/systemly-polish.css";
+import "@/modules/landing/systemly-showcase-fixes.css";
 
 export default function LandingPage() {
   return (
