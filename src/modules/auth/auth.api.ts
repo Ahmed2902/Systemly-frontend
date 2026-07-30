@@ -1,5 +1,9 @@
-import type { SignupInput, LoginInput } from "./auth.schema";
-import type { AuthSessionResponse } from "./auth.types";
+import type {
+  EmailRequestInput,
+  LoginInput,
+  SignupInput,
+} from "./auth.schema";
+import type { AuthSessionResponse, AuthUser } from "./auth.types";
 import { apiUrl } from "../../shared/lib/api-url";
 import { clearCsrfToken, getCsrfToken } from "@/shared/lib/csrf";
 import { setAccessToken } from "./auth.store";
@@ -17,10 +21,38 @@ type RefreshResponse = {
   data: { accessToken: string };
 };
 
+type RegisterResponse = {
+  success: true;
+  data: { userId: string; message: string };
+};
+
+type MessageResponse = {
+  success: true;
+  data: { sent?: boolean; success?: boolean; message: string };
+};
+
+type CurrentUserResponse = {
+  success: true;
+  data: AuthUser;
+};
+
 async function handle<T>(res: Response): Promise<T> {
   const json = await res.json().catch(() => ({}));
   if (!res.ok || json.success === false) throw json as ApiError;
   return json as T;
+}
+
+async function publicRequest<T>(path: string, init: RequestInit = {}) {
+  const response = await fetch(apiUrl(path), {
+    ...init,
+    credentials: "include",
+    cache: "no-store",
+    headers: {
+      ...(init.body ? { "Content-Type": "application/json" } : {}),
+      ...init.headers,
+    },
+  });
+  return handle<T>(response);
 }
 
 function isInvalidCsrf(error: unknown): error is ApiError {
@@ -68,27 +100,56 @@ async function requestWithCsrf<T>(
 }
 
 export async function registerUser(payload: SignupInput) {
-  const res = await fetch(apiUrl("/auth/register"), {
+  const response = await publicRequest<RegisterResponse>("/auth/register", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
     body: JSON.stringify(payload),
   });
-  await handle(res);
   clearCsrfToken();
-  return loginUser({ email: payload.email, password: payload.password });
+  return response;
 }
 
 export async function loginUser(payload: LoginInput) {
-  const res = await fetch(apiUrl("/auth/login"), {
+  const session = await publicRequest<AuthSessionResponse>("/auth/login", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
     body: JSON.stringify(payload),
   });
-  const session = await handle<AuthSessionResponse>(res);
   clearCsrfToken();
   return session;
+}
+
+export async function verifyEmail(token: string) {
+  const session = await publicRequest<AuthSessionResponse>(
+    `/auth/verify-email?token=${encodeURIComponent(token)}`,
+  );
+  clearCsrfToken();
+  return session;
+}
+
+export async function getCurrentUser(accessToken: string) {
+  return publicRequest<CurrentUserResponse>("/auth/me", {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+}
+
+export function resendVerification(payload: EmailRequestInput) {
+  return publicRequest<MessageResponse>("/auth/resend-verification", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function requestPasswordReset(payload: EmailRequestInput) {
+  return publicRequest<MessageResponse>("/auth/forgot-password", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function resetPassword(token: string, password: string) {
+  return publicRequest<MessageResponse>("/auth/reset-password", {
+    method: "POST",
+    body: JSON.stringify({ token, password }),
+  });
 }
 
 let refreshPromise: Promise<RefreshResponse> | null = null;
