@@ -18,7 +18,7 @@ export function LandingHero() {
         <h1 className="lp-hero-title">Run your salon or clinic<br/><span className="lp-accent-text">from one system.</span></h1>
         <p className="lp-hero-copy">Website builder, online booking, staff scheduling, services, reminders, customer management, invoices and front-desk operations — all in one calm, powerful platform.</p>
         <div className="lp-hero-actions">
-          <Link href="/signup" className="lp-button lp-button-primary">Start with Hgezli <ArrowRight size={17}/></Link>
+          <Link href="/signup" className="lp-button lp-button-primary">Start with Systemly <ArrowRight size={17}/></Link>
           <a href="#demo" className="lp-button lp-button-secondary">See live demo <ArrowRight size={17}/></a>
         </div>
         <div className="lp-feature-strip">
