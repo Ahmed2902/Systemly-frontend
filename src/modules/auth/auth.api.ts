@@ -3,7 +3,7 @@ import type {
   LoginInput,
   SignupInput,
 } from "./auth.schema";
-import type { AuthSessionResponse } from "./auth.types";
+import type { AuthSessionResponse, AuthUser } from "./auth.types";
 import { apiUrl } from "../../shared/lib/api-url";
 import { clearCsrfToken, getCsrfToken } from "@/shared/lib/csrf";
 import { setAccessToken } from "./auth.store";
@@ -29,6 +29,11 @@ type RegisterResponse = {
 type MessageResponse = {
   success: true;
   data: { sent?: boolean; success?: boolean; message: string };
+};
+
+type CurrentUserResponse = {
+  success: true;
+  data: AuthUser;
 };
 
 async function handle<T>(res: Response): Promise<T> {
@@ -118,6 +123,12 @@ export async function verifyEmail(token: string) {
   );
   clearCsrfToken();
   return session;
+}
+
+export async function getCurrentUser(accessToken: string) {
+  return publicRequest<CurrentUserResponse>("/auth/me", {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
 }
 
 export function resendVerification(payload: EmailRequestInput) {
