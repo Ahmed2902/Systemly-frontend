@@ -66,29 +66,31 @@ export function LandingMotion() {
       revealElements.forEach((element) => element.classList.add("is-revealed"));
     }
 
-    const observer = reducedMotion
-      ? null
-      : new IntersectionObserver(
-          (entries) => {
-            entries.forEach((entry) => {
-              if (!entry.isIntersecting) return;
-              const element = entry.target as HTMLElement;
-              element.classList.add("is-revealed");
-              observer?.unobserve(element);
-            });
-          },
-          {
-            threshold: 0.12,
-            rootMargin: "0px 0px -8% 0px",
-          },
-        );
+    let observer: IntersectionObserver | null = null;
+
+    if (!reducedMotion) {
+      observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            const element = entry.target as HTMLElement;
+            element.classList.add("is-revealed");
+            observer?.unobserve(element);
+          });
+        },
+        {
+          threshold: 0.12,
+          rootMargin: "0px 0px -8% 0px",
+        },
+      );
+    }
 
     if (observer) {
       revealElements.forEach((element) => {
         if (element.getBoundingClientRect().top < window.innerHeight * 0.92) {
           element.classList.add("is-revealed");
         } else {
-          observer.observe(element);
+          observer?.observe(element);
         }
       });
     }
