@@ -1,5 +1,6 @@
 import "./operations-dark-fixes.css";
 import "./operations-production-polish.css";
+import "./operations-monochrome-palette.css";
 import { Suspense } from "react";
 import { Sidebar } from "@/modules/operations/components/Sidebar";
 import { OperationsProvider } from "@/modules/operations/operations.context";
