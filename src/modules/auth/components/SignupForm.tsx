@@ -8,15 +8,13 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signupSchema, SignupInput } from "../auth.schema";
 import { registerUser, ApiError } from "../auth.api";
-import { useAuth } from "../useAuth";
 import { safeNextPath } from "../auth-redirect";
-import { Button } from "@/shared/components/ui/button";
 import { GoogleAuthButton } from "./GoogleAuthButton";
+import { PasswordField } from "./PasswordField";
 
 export function SignupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { setSession } = useAuth();
   const [serverError, setServerError] = useState<string | null>(null);
 
   const {
@@ -28,13 +26,16 @@ export function SignupForm() {
   async function onSubmit(data: SignupInput) {
     setServerError(null);
     try {
-      const res = await registerUser(data);
-      const { accessToken, user } = res.data;
-      setSession(user, accessToken);
-      router.push(safeNextPath(searchParams.get("next")) ?? "/onboarding");
+      await registerUser(data);
+      const params = new URLSearchParams({ email: data.email, sent: "1" });
+      const nextPath = safeNextPath(searchParams.get("next"));
+      if (nextPath) params.set("next", nextPath);
+      router.push(`/resend-verification?${params.toString()}`);
     } catch (err) {
       const apiErr = err as ApiError;
-      setServerError(apiErr.error ?? "Something went wrong. Please try again.");
+      setServerError(
+        apiErr.error ?? apiErr.message ?? "Something went wrong. Please try again.",
+      );
     }
   }
 
@@ -44,42 +45,73 @@ export function SignupForm() {
     : "/login";
 
   return (
-    <div className="space-y-6">
+    <div className="auth-stack">
       <GoogleAuthButton label="Sign up with Google" />
-      <div className="flex items-center gap-3 text-xs text-muted">
-        <div className="h-px flex-1 bg-surfaceBorder" />
-        or
-        <div className="h-px flex-1 bg-surfaceBorder" />
-      </div>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div>
-          <label className="text-sm text-muted">Full name</label>
-          <input {...register("name")} className="mt-1 w-full rounded-md border border-surfaceBorder bg-background px-3 py-2 text-foreground" />
-          {errors.name ? <p className="mt-1 text-sm text-red-400">{errors.name.message}</p> : null}
+      <div className="auth-divider">or use email</div>
+
+      <form onSubmit={handleSubmit(onSubmit)} className="auth-form" noValidate>
+        <div className="auth-field">
+          <label htmlFor="signup-name" className="auth-label">Full name</label>
+          <input
+            {...register("name")}
+            id="signup-name"
+            autoComplete="name"
+            placeholder="Ahmed Hassan"
+            className="auth-input"
+          />
+          {errors.name ? <p className="auth-field-error">{errors.name.message}</p> : null}
         </div>
-        <div>
-          <label className="text-sm text-muted">Email</label>
-          <input {...register("email")} type="email" className="mt-1 w-full rounded-md border border-surfaceBorder bg-background px-3 py-2 text-foreground" />
-          {errors.email ? <p className="mt-1 text-sm text-red-400">{errors.email.message}</p> : null}
+
+        <div className="auth-field">
+          <label htmlFor="signup-email" className="auth-label">Email</label>
+          <input
+            {...register("email")}
+            id="signup-email"
+            type="email"
+            autoComplete="email"
+            placeholder="you@business.com"
+            className="auth-input"
+          />
+          {errors.email ? <p className="auth-field-error">{errors.email.message}</p> : null}
         </div>
-        <div>
-          <label className="text-sm text-muted">Phone</label>
-          <input {...register("phone")} placeholder="01012345678" className="mt-1 w-full rounded-md border border-surfaceBorder bg-background px-3 py-2 text-foreground" />
-          {errors.phone ? <p className="mt-1 text-sm text-red-400">{errors.phone.message}</p> : null}
+
+        <div className="auth-field">
+          <label htmlFor="signup-phone" className="auth-label">Egyptian mobile number</label>
+          <input
+            {...register("phone")}
+            id="signup-phone"
+            type="tel"
+            inputMode="tel"
+            autoComplete="tel"
+            placeholder="01012345678"
+            className="auth-input"
+          />
+          {errors.phone ? <p className="auth-field-error">{errors.phone.message}</p> : null}
         </div>
-        <div>
-          <label className="text-sm text-muted">Password</label>
-          <input {...register("password")} type="password" className="mt-1 w-full rounded-md border border-surfaceBorder bg-background px-3 py-2 text-foreground" />
-          {errors.password ? <p className="mt-1 text-sm text-red-400">{errors.password.message}</p> : null}
+
+        <div className="auth-field">
+          <label htmlFor="signup-password" className="auth-label">Password</label>
+          <PasswordField
+            {...register("password")}
+            id="signup-password"
+            autoComplete="new-password"
+            placeholder="At least 8 characters"
+          />
+          {errors.password ? <p className="auth-field-error">{errors.password.message}</p> : null}
         </div>
-        {serverError ? <p className="text-sm text-red-400">{serverError}</p> : null}
-        <Button type="submit" disabled={isSubmitting} className="w-full bg-accent text-black hover:bg-accent/90">
-          {isSubmitting ? "Creating account..." : "Create account"}
-        </Button>
+
+        {serverError ? <div className="auth-error" role="alert">{serverError}</div> : null}
+
+        <button type="submit" disabled={isSubmitting} className="auth-primary-button">
+          {isSubmitting ? "Creating account…" : "Create account"}
+        </button>
       </form>
-      <p className="text-center text-sm text-muted">
-        Already have an account?{" "}
-        <Link href={loginHref} className="text-accent hover:underline">Log in</Link>
+
+      <p className="auth-switch-copy">
+        By continuing, you agree to use Systemly responsibly and keep your account secure.
+      </p>
+      <p className="auth-switch-copy">
+        Already have an account? <Link href={loginHref} className="auth-text-link">Log in</Link>
       </p>
     </div>
   );
