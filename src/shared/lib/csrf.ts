@@ -26,9 +26,14 @@ export function getCsrfToken(): Promise<string> {
   });
 
   pendingToken = request;
-  request.finally(() => {
-    if (pendingToken === request) pendingToken = null;
-  });
+  void request.then(
+    () => {
+      if (pendingToken === request) pendingToken = null;
+    },
+    () => {
+      if (pendingToken === request) pendingToken = null;
+    },
+  );
 
   return request;
 }
