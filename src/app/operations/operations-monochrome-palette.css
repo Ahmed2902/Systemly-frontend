@@ -1,0 +1,170 @@
+/* Monochrome Operations palette.
+ *
+ * Purple remains available to data visualisations through their explicit chart
+ * palette. These overrides replace only the workspace's purple UI accents with
+ * graphite, black, white, and silver.
+ */
+
+.operations-light {
+  --analytics-accent: #17191d;
+  --analytics-accent-2: #8e949d;
+  --analytics-accent-soft: #eceef1;
+  --analytics-accent-contrast: #ffffff;
+  --operations-violet-soft: #eef0f3;
+  --operations-violet-border: #c7cbd1;
+}
+
+.operations-dark {
+  --analytics-accent: #d9dde3;
+  --analytics-accent-2: #8f98a5;
+  --analytics-accent-soft: rgb(217 221 227 / 0.12);
+  --analytics-accent-contrast: #0a0c0f;
+  --operations-violet-soft: #20252c;
+  --operations-violet-border: #626b76;
+}
+
+.analytics-preset button.is-active {
+  color: var(--analytics-accent-contrast);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--analytics-accent) 45%, transparent),
+    0 8px 24px color-mix(in srgb, var(--analytics-accent) 16%, transparent);
+}
+
+.analytics-nav a.is-active {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--analytics-accent) 22%, transparent);
+}
+
+.operations-light .analytics-chart-point.is-active,
+.operations-light .analytics-donut-segment.is-active,
+.operations-light .analytics-lollipop-row.is-active .analytics-lollipop-track i {
+  filter: drop-shadow(0 0 5px rgb(20 22 26 / 0.25));
+}
+
+/* Neutralise violet UI utilities without touching explicit SVG chart colours. */
+.operations-light [class~="bg-violet-50"],
+.operations-light [class~="bg-violet-50/50"],
+.operations-light [class~="bg-violet-50/70"] {
+  background-color: #f3f4f6 !important;
+}
+
+.operations-light [class~="bg-violet-100"] {
+  background-color: #e5e7eb !important;
+}
+
+.operations-light [class~="text-violet-800"],
+.operations-light [class~="text-violet-700"],
+.operations-light [class~="text-violet-600"] {
+  color: #1b1e23 !important;
+}
+
+.operations-light [class~="border-violet-100"],
+.operations-light [class~="border-violet-200"],
+.operations-light [class~="ring-violet-100"],
+.operations-light [class~="ring-violet-200/70"] {
+  border-color: #c9cdd3 !important;
+  --tw-ring-color: #c9cdd3 !important;
+}
+
+.operations-light [class~="hover:bg-violet-50"]:hover,
+.operations-light [class~="hover:bg-violet-100"]:hover {
+  background-color: #e4e7eb !important;
+}
+
+.operations-light [class~="hover:text-violet-800"]:hover,
+.operations-light [class~="hover:text-violet-700"]:hover {
+  color: #050607 !important;
+}
+
+.operations-dark [class~="bg-violet-50"],
+.operations-dark [class~="bg-violet-50/50"],
+.operations-dark [class~="bg-violet-50/70"] {
+  background-color: #1d2229 !important;
+}
+
+.operations-dark [class~="bg-violet-100"] {
+  background-color: #282e36 !important;
+}
+
+.operations-dark [class~="text-violet-800"],
+.operations-dark [class~="text-violet-700"],
+.operations-dark [class~="text-violet-600"] {
+  color: #e1e4e8 !important;
+}
+
+.operations-dark [class~="border-violet-100"],
+.operations-dark [class~="border-violet-200"] {
+  border-color: #5d6671 !important;
+}
+
+.operations-dark [class~="ring-violet-100"],
+.operations-dark [class~="ring-violet-200/70"] {
+  --tw-ring-color: #5d6671 !important;
+}
+
+.operations-dark [class~="hover:bg-violet-50"]:hover,
+.operations-dark [class~="hover:bg-violet-100"]:hover {
+  background-color: #303740 !important;
+}
+
+.operations-dark [class~="hover:text-violet-800"]:hover,
+.operations-dark [class~="hover:text-violet-700"]:hover {
+  color: #ffffff !important;
+}
+
+.operations-dark [class~="focus:ring-violet-100"]:focus,
+.operations-dark [class~="focus:ring-violet-100/70"]:focus {
+  --tw-ring-color: rgb(218 222 228 / 0.28) !important;
+}
+
+.operations-dark [class~="focus:border-violet-300"]:focus {
+  border-color: #aeb5bf !important;
+}
+
+/* Known purple/indigo brand gradients become black-to-silver gradients. */
+.operations-light [class*="from-violet-600"][class*="to-indigo-600"] {
+  background-image: linear-gradient(135deg, #0d0f12 0%, #343940 58%, #aeb4bd 145%) !important;
+}
+
+.operations-dark [class*="from-violet-600"][class*="to-indigo-600"] {
+  background-image: linear-gradient(135deg, #f2f4f6 0%, #b7bdc5 45%, #555e69 120%) !important;
+  color: #080a0d !important;
+}
+
+.operations-light [class*="from-violet-50"][class*="to-indigo-50"] {
+  background-image: linear-gradient(135deg, #fafafa 0%, #eef0f3 55%, #d9dde2 135%) !important;
+}
+
+.operations-dark [class*="from-violet-50"][class*="to-indigo-50"] {
+  background-image: linear-gradient(135deg, #171b20 0%, #222831 58%, #353d47 135%) !important;
+}
+
+/* Selected rows and selectable cards use graphite/silver rather than violet. */
+.operations-light .invoice-row-selected {
+  background: #eef0f3 !important;
+  box-shadow: inset 4px 0 0 #17191d !important;
+}
+
+.operations-dark .invoice-row-selected {
+  background: #20252c !important;
+  box-shadow: inset 4px 0 0 #d9dde3 !important;
+}
+
+.operations-dark section[aria-labelledby="service-categories-heading"] article[role="button"]:hover,
+.operations-dark section[aria-labelledby="service-categories-heading"] article[aria-pressed="true"] {
+  border-color: #aeb5bf !important;
+  box-shadow: 0 0 0 1px rgb(217 221 227 / 0.08), 0 10px 28px rgb(0 0 0 / 0.22);
+}
+
+.operations-light section[aria-labelledby="service-categories-heading"] article[aria-pressed="true"] {
+  border-color: #343940 !important;
+  box-shadow: 0 0 0 1px rgb(23 25 29 / 0.08), 0 10px 28px rgb(15 18 22 / 0.08);
+}
+
+.operations-light ::selection {
+  background: rgb(23 25 29 / 0.22);
+  color: #050607;
+}
+
+.operations-dark ::selection {
+  background: rgb(217 221 227 / 0.3);
+  color: #ffffff;
+}
