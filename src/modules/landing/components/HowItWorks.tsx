@@ -30,13 +30,13 @@ export function HowItWorks() {
           <div>
             <p className="lp-kicker">How it works</p>
             <h2 className="lp-title">From setup to the front desk, without <span className="lp-accent-text">re-entering everything.</span></h2>
-            <p className="lp-copy max-w-xl">The website is not a separate product bolted onto an admin panel. Both sides share the same business setup, so a service or schedule change reaches the booking experience and the operations team.</p>
+            <p className="lp-copy max-w-xl">Systemly is not a separate product bolted onto an admin panel. Both sides share the same business setup, so a service or schedule change reaches the booking experience and the operations team.</p>
           </div>
           <div className="lp-card lp-section-visual">
             {steps.map((step, index) => (
               <div className="process-row" key={step.title}>
                 <span className="process-number">{index + 1}</span>
-                <div><h3 className="font-semibold text-[#eeeae2]">{step.title}</h3><p className="mt-2 text-sm leading-6 text-[#929991]">{step.copy}</p></div>
+                <div><h3 className="font-semibold text-[#f5f3f0]">{step.title}</h3><p className="mt-2 text-sm leading-6 text-[#a9a5a2]">{step.copy}</p></div>
               </div>
             ))}
           </div>
@@ -58,13 +58,13 @@ export function HowItWorks() {
           <div className="order-1 lg:order-2">
             <p className="lp-kicker">Built for appointment businesses</p>
             <h2 className="lp-title">Different workflows. One clear <span className="lp-accent-text">operating model.</span></h2>
-            <p className="lp-copy max-w-xl">Hgezli starts with salons and clinics, but the core model is deliberately broader: customers book services delivered by eligible staff at specific times, and the team manages the resulting work.</p>
-            <div className="mt-7 space-y-3 text-sm text-[#b8c0b9]">
+            <p className="lp-copy max-w-xl">Systemly starts with salons and clinics, but the core model is deliberately broader: customers book services delivered by eligible staff at specific times, and the team manages the resulting work.</p>
+            <div className="mt-7 space-y-3 text-sm text-[#c9c6c1]">
               {[
                 "Multiple staff can contribute to one appointment.",
                 "Reception and staff share operational authority for now.",
                 "Revenue and performance analytics remain owner-only.",
-              ].map((item) => <div className="flex items-start gap-3" key={item}><Check size={17} className="mt-0.5 shrink-0 text-emerald-400"/><span>{item}</span></div>)}
+              ].map((item) => <div className="flex items-start gap-3" key={item}><Check size={17} className="mt-0.5 shrink-0 text-[#d8799e]"/><span>{item}</span></div>)}
             </div>
           </div>
         </div>
