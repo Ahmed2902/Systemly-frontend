@@ -6,13 +6,16 @@ import { HowItWorks } from "@/modules/landing/components/HowItWorks";
 import { PricingSection } from "@/modules/landing/components/PricingSection";
 import { FinalCta } from "@/modules/landing/components/FinalCta";
 import { LandingFooter } from "@/modules/landing/components/LandingFooter";
+import { LandingMotion } from "@/modules/landing/components/LandingMotion";
 import "@/modules/landing/landing-operations-demo.css";
 import "@/modules/landing/landing-premium.css";
 import "@/modules/landing/systemly-shopify-overrides.css";
+import "@/modules/landing/systemly-polish.css";
 
 export default function LandingPage() {
   return (
     <main className="landing-premium">
+      <LandingMotion />
       <LandingNav />
       <LandingHero />
       <LiveOperationsDemo />
