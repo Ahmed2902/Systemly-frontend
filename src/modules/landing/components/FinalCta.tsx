@@ -19,11 +19,11 @@ const principles = [
 ];
 
 const faqs = [
-  ["Is the operations demo the real product UI?", "Yes. It reuses the same light-mode calendar, appointment filtering, invoice list/detail, and customer workspace components as Hgezli Operations, but supplies local dummy data instead of calling the backend."],
+  ["Is the operations demo the real product UI?", "Yes. It reuses the same calendar, appointment filtering, invoice list/detail, and customer workspace components as Systemly Operations, but supplies local dummy data instead of calling the backend."],
   ["Does the demo contain real customer information?", "No. All names, phone numbers, appointments, invoices, notes, and payment references in the landing-page demo are fictional local examples."],
-  ["Can one appointment contain services from different staff?", "Yes. Hgezli models an appointment as service segments, so one customer journey can move between eligible staff while remaining one appointment."],
+  ["Can one appointment contain services from different staff?", "Yes. Systemly models an appointment as service segments, so one customer journey can move between eligible staff while remaining one appointment."],
   ["Can staff see revenue analytics?", "No. The owner dashboard and business analytics are restricted to the business owner. Staff and reception work from operational pages."],
-  ["Is Hgezli only for salons?", "The first verticals are salons and clinics. The underlying workflow also fits spas, wellness businesses, and other service businesses that schedule staff and appointments."],
+  ["Is Systemly only for salons?", "The first verticals are salons and clinics. The underlying workflow also fits spas, wellness businesses, and other service businesses that schedule staff and appointments."],
   ["What is the final price and trial period?", "They have not been finalised. Early-access businesses will receive the exact scope, price, trial terms, and onboarding support before choosing whether to activate."],
 ];
 
@@ -36,7 +36,7 @@ export function FinalCta() {
             <p className="lp-kicker">What we are building around</p>
             <h2 className="lp-title">Less admin theatre. More clarity for the people doing <span className="lp-accent-text">the actual work.</span></h2>
             <p className="lp-copy max-w-xl">We do not have public customer testimonials yet, so this section states the product decisions directly. The goal is a system that makes daily work easier to understand—not a dashboard full of claims.</p>
-            <div className="mt-7 flex items-center gap-3 text-sm text-[#b8c0b9]"><BarChart3 size={18} className="text-emerald-400"/><span>Real pilot feedback will replace this section when it exists.</span></div>
+            <div className="mt-7 flex items-center gap-3 text-sm text-[#c9c6c1]"><BarChart3 size={18} className="text-[#d8799e]"/><span>Real pilot feedback will replace this section when it exists.</span></div>
           </div>
           <div className="lp-trust-principles !mt-0 !grid-cols-1">
             {principles.map(({ icon: Icon, title, copy }) => (
