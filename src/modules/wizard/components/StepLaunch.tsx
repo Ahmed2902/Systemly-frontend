@@ -38,28 +38,71 @@ export function StepLaunch({ onBack }: StepProps) {
 
   return (
     <div>
-      <div className="onboarding-grid-two" style={{ gridTemplateColumns: "minmax(0,.9fr) minmax(0,1.1fr)", gap: 14 }}>
-        <section className="onboarding-card p-5">
-          <div className="flex items-start gap-3"><div className="grid h-10 w-10 place-items-center rounded-lg border border-[var(--onboarding-border)] text-[var(--onboarding-mint)]"><Rocket size={20} /></div><div><h1 className="text-[23px] font-semibold tracking-[-.03em]">Review & publish</h1><p className="mt-1 text-sm text-[var(--onboarding-muted)]">One compact final check before your business goes live.</p></div></div>
+      <div className="onboarding-page-intro">
+        <p className="onboarding-kicker">Launch</p>
+        <h1 className="onboarding-page-title">Everything in one final view.</h1>
+        <p className="onboarding-page-copy">Review the business, website, and booking setup before customers see it.</p>
+      </div>
 
-          <div className="mt-5 grid gap-4 lg:grid-cols-2">
-            <div><h2 className="text-base font-semibold">Setup checklist</h2><div className="onboarding-table mt-3">{checklist.map(([label, complete]) => <div key={label} className="onboarding-table-row grid-cols-[1fr_auto] !min-h-[50px] !py-2"><span>{label}</span><span className={complete ? "onboarding-success" : "text-amber-300"}>{complete ? "Complete" : "Needs attention"} {complete ? <Check size={14} className="ml-1 inline" /> : null}</span></div>)}</div></div>
-            <div><h2 className="text-base font-semibold">Review summary</h2><div className="onboarding-table mt-3"><SummaryRow label="Business URL" value={`hgezli.com/${state.slug || "your-business"}`} /><SummaryRow label="Industry" value={state.vertical || "Not selected"} /><SummaryRow label="Template" value={state.template || "Not selected"} /><SummaryRow label="Online booking" value="Enabled" /></div></div>
+      <div className="onboarding-grid-two" style={{ gridTemplateColumns: "minmax(0,.9fr) minmax(0,1.1fr)" }}>
+        <section className="onboarding-card p-5">
+          <div className="flex items-start gap-3">
+            <div className="onboarding-icon-tile"><Rocket size={20} /></div>
+            <div><h2 className="text-[23px] font-semibold tracking-[-.03em]">Review &amp; publish</h2><p className="mt-1 text-sm text-[var(--onboarding-muted)]">Complete every essential setup item before launch.</p></div>
           </div>
 
-          <div className="mt-4 rounded-xl border border-[var(--onboarding-border)] p-4"><h3 className="text-sm font-semibold">Publish settings</h3><div className="mt-3 grid gap-3 text-xs text-[var(--onboarding-muted)] sm:grid-cols-3"><p>SSL certificate<strong className="mt-1 block text-white">Automatic</strong></p><p>Search indexing<strong className="mt-1 block text-white">Enabled</strong></p><p>Booking page<strong className="mt-1 block text-white">Public</strong></p></div></div>
-          <div className="mt-4 flex items-center gap-3 rounded-xl border border-[var(--onboarding-border-strong)] bg-[rgba(47,111,98,.12)] p-4"><ShieldCheck className="shrink-0 text-[var(--onboarding-mint)]" size={27} /><div><strong className="text-sm">Your website is secure and ready</strong><p className="mt-1 text-xs text-[var(--onboarding-muted)]">SSL and sensible security defaults are applied automatically.</p></div></div>
+          <div className="mt-5 grid gap-4 lg:grid-cols-2">
+            <div>
+              <h3 className="text-base font-semibold">Setup checklist</h3>
+              <div className="onboarding-table mt-3">
+                {checklist.map(([label, complete]) => (
+                  <div key={label} className="onboarding-table-row grid-cols-[1fr_auto] !min-h-[50px] !py-2">
+                    <span>{label}</span>
+                    <span className={complete ? "onboarding-success" : "text-amber-700"}>{complete ? "Complete" : "Needs attention"} {complete ? <Check size={14} className="ml-1 inline" /> : null}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h3 className="text-base font-semibold">Review summary</h3>
+              <div className="onboarding-table mt-3">
+                <SummaryRow label="Business URL" value={`systemly.app/${state.slug || "your-business"}`} />
+                <SummaryRow label="Industry" value={state.vertical || "Not selected"} />
+                <SummaryRow label="Template" value={state.template || "Not selected"} />
+                <SummaryRow label="Online booking" value="Enabled" />
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 rounded-2xl border border-[var(--onboarding-border)] bg-[#fafaf8] p-4">
+            <h3 className="text-sm font-semibold">Publish settings</h3>
+            <div className="mt-3 grid gap-3 text-xs text-[var(--onboarding-muted)] sm:grid-cols-3">
+              <p>SSL certificate<strong className="mt-1 block text-[var(--onboarding-text)]">Automatic</strong></p>
+              <p>Search indexing<strong className="mt-1 block text-[var(--onboarding-text)]">Enabled</strong></p>
+              <p>Booking page<strong className="mt-1 block text-[var(--onboarding-text)]">Public</strong></p>
+            </div>
+          </div>
+          <div className="mt-4 flex items-center gap-3 rounded-2xl border border-[rgba(0,128,96,.25)] bg-[var(--onboarding-mint-soft)] p-4">
+            <ShieldCheck className="shrink-0 text-[var(--onboarding-mint-strong)]" size={27} />
+            <div><strong className="text-sm">Your website is secure and ready</strong><p className="mt-1 text-xs text-[var(--onboarding-muted)]">SSL and sensible security defaults are applied automatically.</p></div>
+          </div>
         </section>
 
         <section className="onboarding-card p-5">
-          <div className="flex items-center justify-between gap-4 rounded-xl border border-[var(--onboarding-border-strong)] bg-[linear-gradient(135deg,rgba(33,99,84,.32),rgba(8,23,22,.65))] p-4"><div className="flex items-center gap-3"><Rocket className="text-[var(--onboarding-mint)]" size={30} /><div><h2 className="text-xl font-semibold">You’re almost live</h2><p className="mt-1 text-xs text-[var(--onboarding-muted)]">Review the real site preview and launch with confidence.</p></div></div><div className="text-right"><strong className="text-2xl">{readiness}%</strong><span className="block text-[11px] text-[var(--onboarding-muted)]">Complete</span></div></div>
-          <div className="mt-4 overflow-hidden rounded-xl border border-[var(--onboarding-border)] bg-black p-2"><LivePreviewPane /></div>
+          <div className="flex items-center justify-between gap-4 rounded-2xl border border-[#20352f] bg-[#111a17] p-4 text-white">
+            <div className="flex items-center gap-3"><Rocket className="text-[#5cc9a7]" size={30} /><div><h2 className="text-xl font-semibold">You’re almost live</h2><p className="mt-1 text-xs text-[#aeb8b4]">Review the real site preview and launch with confidence.</p></div></div>
+            <div className="text-right"><strong className="text-2xl">{readiness}%</strong><span className="block text-[11px] text-[#aeb8b4]">Complete</span></div>
+          </div>
+          <div className="mt-4 overflow-hidden rounded-2xl border border-[var(--onboarding-border)] bg-[#111513] p-2"><LivePreviewPane /></div>
           <div className="mt-4 grid gap-2 sm:grid-cols-3"><NextCard icon={<CalendarCheck2 />} title="Test appointment" copy="Check the booking flow." /><NextCard icon={<Link2 />} title="Share booking link" copy="Send it to customers." /><NextCard icon={<BarChart3 />} title="Review analytics" copy="Track new activity." /></div>
         </section>
       </div>
 
       {error ? <p className="onboarding-error mt-3">{error}</p> : null}
-      <footer className="onboarding-footer !mt-3 !py-3"><button type="button" onClick={onBack} className="onboarding-secondary-button">← Back</button><div className="onboarding-footer-actions"><button type="button" className="onboarding-secondary-button">Save draft</button><button type="button" onClick={publish} disabled={publishing || readiness < 100} className="onboarding-primary-button disabled:cursor-not-allowed disabled:opacity-50">{publishing ? "Publishing…" : "Publish & go live →"}</button></div></footer>
+      <footer className="onboarding-footer">
+        <button type="button" onClick={onBack} className="onboarding-secondary-button">← Back</button>
+        <div className="onboarding-footer-actions"><button type="button" onClick={publish} disabled={publishing || readiness < 100} className="onboarding-primary-button disabled:cursor-not-allowed disabled:opacity-50">{publishing ? "Publishing…" : "Publish & go live →"}</button></div>
+      </footer>
     </div>
   );
 }
@@ -69,5 +112,5 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
 }
 
 function NextCard({ icon, title, copy }: { icon: React.ReactNode; title: string; copy: string }) {
-  return <div className="rounded-xl border border-[var(--onboarding-border)] p-3"><span className="text-[var(--onboarding-mint)]">{icon}</span><strong className="mt-2 block text-xs">{title}</strong><p className="mt-1 text-[11px] leading-4 text-[var(--onboarding-muted)]">{copy}</p></div>;
+  return <div className="rounded-2xl border border-[var(--onboarding-border)] bg-[#fafaf8] p-3"><span className="text-[var(--onboarding-mint)]">{icon}</span><strong className="mt-2 block text-xs">{title}</strong><p className="mt-1 text-[11px] leading-4 text-[var(--onboarding-muted)]">{copy}</p></div>;
 }
