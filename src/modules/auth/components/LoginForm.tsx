@@ -10,23 +10,26 @@ import { loginSchema, LoginInput } from "../auth.schema";
 import { loginUser, ApiError } from "../auth.api";
 import { useAuth } from "../useAuth";
 import { safeNextPath, workspacePathForUser } from "../auth-redirect";
-import { Button } from "@/shared/components/ui/button";
 import { GoogleAuthButton } from "./GoogleAuthButton";
+import { PasswordField } from "./PasswordField";
 
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { setSession } = useAuth();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [needsVerification, setNeedsVerification] = useState(false);
 
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<LoginInput>({ resolver: zodResolver(loginSchema) });
 
   async function onSubmit(data: LoginInput) {
     setServerError(null);
+    setNeedsVerification(false);
     try {
       const res = await loginUser(data);
       const { accessToken, user } = res.data;
@@ -37,9 +40,10 @@ export function LoginForm() {
     } catch (err) {
       const apiErr = err as ApiError;
       if (apiErr.code === "EMAIL_NOT_VERIFIED") {
-        setServerError("Please verify your email before logging in.");
+        setNeedsVerification(true);
+        setServerError("Verify your email before logging in.");
       } else {
-        setServerError(apiErr.error ?? "Invalid email or password.");
+        setServerError(apiErr.error ?? apiErr.message ?? "Invalid email or password.");
       }
     }
   }
@@ -48,34 +52,60 @@ export function LoginForm() {
   const signupHref = nextPath
     ? `/signup?next=${encodeURIComponent(nextPath)}`
     : "/signup";
+  const email = watch("email") ?? "";
+  const resendHref = email
+    ? `/resend-verification?email=${encodeURIComponent(email)}`
+    : "/resend-verification";
 
   return (
-    <div className="space-y-6">
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <GoogleAuthButton label="Log in with Google" />
-        <div className="flex items-center gap-3 text-xs text-muted">
-          <div className="h-px flex-1 bg-surfaceBorder" />
-          or
-          <div className="h-px flex-1 bg-surfaceBorder" />
+    <div className="auth-stack">
+      <GoogleAuthButton label="Continue with Google" />
+      <div className="auth-divider">or use email</div>
+
+      <form onSubmit={handleSubmit(onSubmit)} className="auth-form" noValidate>
+        <div className="auth-field">
+          <label htmlFor="login-email" className="auth-label">Email</label>
+          <input
+            {...register("email")}
+            id="login-email"
+            type="email"
+            autoComplete="email"
+            placeholder="you@business.com"
+            className="auth-input"
+          />
+          {errors.email ? <p className="auth-field-error">{errors.email.message}</p> : null}
         </div>
-        <div>
-          <label className="text-sm text-muted">Email</label>
-          <input {...register("email")} type="email" className="mt-1 w-full rounded-md border border-surfaceBorder bg-background px-3 py-2 text-foreground" />
-          {errors.email ? <p className="mt-1 text-sm text-red-400">{errors.email.message}</p> : null}
+
+        <div className="auth-field">
+          <div className="auth-field-row">
+            <label htmlFor="login-password" className="auth-label">Password</label>
+            <Link href="/forgot-password" className="auth-text-link">Forgot password?</Link>
+          </div>
+          <PasswordField
+            {...register("password")}
+            id="login-password"
+            autoComplete="current-password"
+            placeholder="Enter your password"
+          />
+          {errors.password ? <p className="auth-field-error">{errors.password.message}</p> : null}
         </div>
-        <div>
-          <label className="text-sm text-muted">Password</label>
-          <input {...register("password")} type="password" className="mt-1 w-full rounded-md border border-surfaceBorder bg-background px-3 py-2 text-foreground" />
-          {errors.password ? <p className="mt-1 text-sm text-red-400">{errors.password.message}</p> : null}
-        </div>
-        {serverError ? <p className="text-sm text-red-400">{serverError}</p> : null}
-        <Button type="submit" disabled={isSubmitting} className="w-full bg-accent text-black hover:bg-accent/90">
-          {isSubmitting ? "Logging in..." : "Log in"}
-        </Button>
+
+        {serverError ? (
+          <div className="auth-error" role="alert">
+            {serverError}
+            {needsVerification ? (
+              <> <Link href={resendHref} className="auth-text-link">Resend verification email</Link></>
+            ) : null}
+          </div>
+        ) : null}
+
+        <button type="submit" disabled={isSubmitting} className="auth-primary-button">
+          {isSubmitting ? "Logging in…" : "Log in"}
+        </button>
       </form>
-      <p className="text-center text-sm text-muted">
-        Don&apos;t have an account?{" "}
-        <Link href={signupHref} className="text-accent hover:underline">Sign up</Link>
+
+      <p className="auth-switch-copy">
+        New to Systemly? <Link href={signupHref} className="auth-text-link">Create an account</Link>
       </p>
     </div>
   );
