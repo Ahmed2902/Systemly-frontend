@@ -1,15 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Menu } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/modules/auth/useAuth";
+import { SystemlyBrand } from "./SystemlyBrand";
 
 const navLinks = [
+  { label: "Product", href: "#features" },
   { label: "How it works", href: "#how-it-works" },
-  { label: "Features", href: "#features" },
   { label: "Live demo", href: "#demo" },
-  { label: "Pricing", href: "#pricing" },
+  { label: "Early access", href: "#pricing" },
 ];
 
 export function LandingNav() {
@@ -22,14 +23,36 @@ export function LandingNav() {
   }
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-white/[.055] bg-[#040706]/80 backdrop-blur-xl">
-      <nav className="mx-auto flex min-h-20 max-w-[1180px] items-center justify-between px-6">
-        <Link href="/" className="text-2xl font-semibold tracking-[-.05em] text-[#eeeae2]">Hgezli<span className="text-emerald-400">.</span></Link>
-        <div className="hidden items-center gap-8 md:flex">
-          {navLinks.map((link) => <Link key={link.href} href={link.href} className="text-sm text-[#a0a7a0] transition-colors hover:text-white">{link.label}</Link>)}
+    <header className="lp-nav-wrap">
+      <nav className="lp-nav-shell" aria-label="Primary navigation">
+        <Link href="/" aria-label="Systemly home">
+          <SystemlyBrand className="text-[1.35rem]" />
+        </Link>
+
+        <div className="lp-nav-links">
+          {navLinks.map((link) => (
+            <Link key={link.href} href={link.href}>
+              {link.label}
+            </Link>
+          ))}
         </div>
-        <div className="flex items-center gap-3">
-          {user ? <button type="button" onClick={handleLogout} className="lp-button lp-button-secondary !min-h-10 !px-4">Log out</button> : <><Link href="/login" className="hidden text-sm text-[#9da49e] hover:text-white sm:block">Log in</Link><Link href="/signup" className="lp-button lp-button-primary !min-h-11">Start with Hgezli <ArrowRight size={15}/></Link></>}
+
+        <div className="lp-nav-actions">
+          {user ? (
+            <button type="button" onClick={handleLogout} className="lp-button lp-button-secondary lp-button-compact">
+              Log out
+            </button>
+          ) : (
+            <>
+              <Link href="/login" className="lp-nav-login">Log in</Link>
+              <Link href="/signup" className="lp-button lp-button-primary lp-button-compact">
+                Start free <ArrowRight size={15} />
+              </Link>
+            </>
+          )}
+          <button type="button" className="lp-mobile-menu" aria-label="Open navigation">
+            <Menu size={20} />
+          </button>
         </div>
       </nav>
     </header>
