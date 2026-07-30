@@ -68,7 +68,7 @@ function WebsiteVisual() {
   return (
     <div className="lp-story-visual lp-website-visual" aria-hidden="true">
       <div className="lp-site-nav"><b>NOIR STUDIO</b><span>Services&nbsp;&nbsp; About&nbsp;&nbsp; Book</span></div>
-      <div className="lp-site-hero"><small>CAIRO · BY APPOINTMENT</small><h4>Care, designed around you.</h4><button>Book an appointment</button></div>
+      <div className="lp-site-hero"><small>CAIRO · BY APPOINTMENT</small><h4>Care, designed around you.</h4><p>Personal appointments and a calm way to book.</p><button>Book an appointment</button></div>
       <div className="lp-booking-float"><span>Book online</span><strong>Choose a service</strong><i>Hair consultation · 45 min</i><i>Skin treatment · 60 min</i></div>
     </div>
   );
@@ -91,8 +91,21 @@ function OperationsVisual() {
 function AnalyticsVisual() {
   return (
     <div className="lp-story-visual lp-analytics-visual" aria-hidden="true">
-      <div className="lp-metrics"><span><small>Revenue</small><strong>EGP 38,620</strong></span><span><small>Bookings</small><strong>568</strong></span><span><small>Returning</small><strong>68%</strong></span></div>
-      <div className="lp-chart"><b>Revenue this month</b><svg viewBox="0 0 500 180" preserveAspectRatio="none"><path d="M0 155 C45 150 55 110 100 118 S165 65 210 82 S270 125 315 69 S390 40 500 17" fill="none" stroke="currentColor" strokeWidth="5" strokeLinecap="round"/></svg></div>
+      <div className="lp-metrics">
+        <span><small>Revenue</small><strong>EGP 38,620</strong><em>+12.4%</em></span>
+        <span><small>Bookings</small><strong>568</strong><em>This month</em></span>
+        <span><small>Returning</small><strong>68%</strong><em>Customers</em></span>
+      </div>
+      <div className="lp-chart">
+        <div className="lp-chart-heading">
+          <div><b>Revenue this month</b><small>Paid invoices only</small></div>
+          <strong>EGP 38,620</strong>
+        </div>
+        <div className="lp-chart-canvas">
+          <svg viewBox="0 0 500 180" preserveAspectRatio="none"><path d="M0 155 C45 150 55 110 100 118 S165 65 210 82 S270 125 315 69 S390 40 500 17" fill="none" stroke="currentColor" strokeWidth="5" strokeLinecap="round"/></svg>
+          <div className="lp-chart-axis"><span>Jul 1</span><span>Jul 10</span><span>Jul 20</span><span>Jul 30</span></div>
+        </div>
+      </div>
     </div>
   );
 }
