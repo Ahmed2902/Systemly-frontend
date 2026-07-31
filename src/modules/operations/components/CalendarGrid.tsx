@@ -17,9 +17,9 @@ import {
 } from "../../../shared/lib/Calendar/grid.utils";
 import { AppointmentSegmentBlock } from "./AppointmentSegmentBlock";
 
-const STAFF_COL_WIDTH = 210;
-const ROW_HEIGHT = 82;
-const HEADER_HEIGHT = 46;
+const STAFF_COL_WIDTH = 196;
+const ROW_HEIGHT = 86;
+const HEADER_HEIGHT = 48;
 
 interface Props {
   data: CalendarDayData;
@@ -29,7 +29,11 @@ interface Props {
 export function CalendarGrid({ data, onSelectAppointment }: Props) {
   const [search, setSearch] = useState("");
   const hours = useMemo(
-    () => Array.from({ length: DAY_END_HOUR - DAY_START_HOUR }, (_, index) => DAY_START_HOUR + index),
+    () =>
+      Array.from(
+        { length: DAY_END_HOUR - DAY_START_HOUR },
+        (_, index) => DAY_START_HOUR + index,
+      ),
     [],
   );
   const nowOffset = getNowLineOffset(data.date, data.timezone);
@@ -80,8 +84,8 @@ export function CalendarGrid({ data, onSelectAppointment }: Props) {
   }
 
   return (
-    <div className="op-calendar-shell">
-      <div className="op-calendar-toolbar">
+    <div className="op-calendar-shell bg-[var(--op-surface)]">
+      <div className="op-calendar-toolbar border-b border-[var(--op-border)] bg-[var(--op-surface)]">
         <label className="relative block w-full max-w-xs">
           <Search
             size={15}
@@ -95,76 +99,125 @@ export function CalendarGrid({ data, onSelectAppointment }: Props) {
             className="op-input h-9 min-h-9 pl-9"
           />
         </label>
-        <p className="text-xs text-[var(--op-text-muted)]">
-          {filteredStaff.length} of {data.staff.length} staff · {data.appointments.length} appointments
-        </p>
+        <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--op-text-muted)]">
+          <span className="rounded-full border border-[var(--op-border)] bg-[var(--op-surface-soft)] px-2.5 py-1">
+            {filteredStaff.length} staff
+          </span>
+          <span className="rounded-full border border-[var(--op-border)] bg-[var(--op-surface-soft)] px-2.5 py-1">
+            {data.appointments.length} appointments
+          </span>
+        </div>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-auto">
+      <div className="min-h-0 flex-1 overflow-auto overscroll-contain">
         <div style={{ width: STAFF_COL_WIDTH + GRID_WIDTH_PX, minWidth: "100%" }}>
           <div
-            className="op-calendar-time-header sticky top-0 z-40 grid border-b"
+            className="sticky top-0 z-40 grid border-b border-[var(--op-border)] bg-[var(--op-surface)] shadow-[0_1px_0_var(--op-border)]"
             style={{
               height: HEADER_HEIGHT,
               gridTemplateColumns: `${STAFF_COL_WIDTH}px ${GRID_WIDTH_PX}px`,
             }}
           >
-            <div className="sticky left-0 z-50 flex items-center border-r border-[var(--op-border)] bg-[var(--op-surface)] px-4 text-[10px] font-extrabold uppercase tracking-[0.1em] text-[var(--op-text-muted)]">
+            <div className="sticky left-0 z-50 flex items-center border-r border-[var(--op-border)] bg-[var(--op-surface)] px-4 text-[9px] font-extrabold uppercase tracking-[0.13em] text-[var(--op-text-faint)]">
               Team member
             </div>
             <div className="flex bg-[var(--op-surface)]">
               {hours.map((hour) => (
                 <div
                   key={hour}
-                  className="op-calendar-gridline flex-shrink-0 border-r px-2 pt-3 text-[10px] font-semibold text-[var(--op-text-muted)]"
+                  className="relative flex-shrink-0 border-r border-[var(--op-border)] px-2 pt-3 text-center text-[10px] font-semibold text-[var(--op-text-muted)]"
                   style={{ width: SLOT_WIDTH_PX * 4 }}
                 >
                   {formatHourLabel(hour)}
+                  <span className="absolute bottom-0 left-1/2 top-7 border-l border-dashed border-[var(--op-border)] opacity-55" />
                 </div>
               ))}
             </div>
           </div>
 
-          {filteredStaff.map((member) => {
+          {filteredStaff.map((member, rowIndex) => {
             const staffSegments = segmentsByStaff[member.id] ?? [];
-            const staffBreaks = data.breaks.filter((item) => item.staffId === member.id);
-            const closedRanges = getClosedRanges(member, data.date, data.timezone);
+            const staffBreaks = data.breaks.filter(
+              (item) => item.staffId === member.id,
+            );
+            const closedRanges = getClosedRanges(
+              member,
+              data.date,
+              data.timezone,
+            );
+            const appointmentCount = new Set(
+              staffSegments.map(({ segment }) => segment.appointmentId),
+            ).size;
 
             return (
               <div
                 key={member.id}
-                className="op-calendar-row grid border-b"
+                className="group grid border-b border-[var(--op-border)]"
                 style={{
                   height: ROW_HEIGHT,
                   gridTemplateColumns: `${STAFF_COL_WIDTH}px ${GRID_WIDTH_PX}px`,
+                  background:
+                    rowIndex % 2 === 0
+                      ? "var(--op-surface)"
+                      : "color-mix(in srgb, var(--op-surface-soft) 55%, var(--op-surface))",
                 }}
               >
-                <div className="op-calendar-staff-column sticky left-0 z-30 flex min-w-0 items-center gap-3 border-r px-4">
+                <div
+                  className="sticky left-0 z-30 flex min-w-0 items-center gap-3 border-r border-[var(--op-border)] px-4 transition group-hover:bg-[var(--op-hover)]"
+                  style={{
+                    background:
+                      rowIndex % 2 === 0
+                        ? "var(--op-surface)"
+                        : "color-mix(in srgb, var(--op-surface-soft) 55%, var(--op-surface))",
+                  }}
+                >
                   <span className="op-avatar">{initials(member.name)}</span>
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-[var(--op-text)]">{member.name}</p>
-                    <p className="mt-0.5 truncate text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--op-text-muted)]">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold text-[var(--op-text)]">
+                      {member.name}
+                    </p>
+                    <p className="mt-0.5 truncate text-[9px] font-semibold uppercase tracking-[0.08em] text-[var(--op-text-muted)]">
                       {member.role || "Staff"}
                     </p>
                   </div>
+                  <span className="rounded-full border border-[var(--op-border)] bg-[var(--op-surface-soft)] px-2 py-1 text-[9px] font-bold text-[var(--op-text-muted)]">
+                    {appointmentCount}
+                  </span>
                 </div>
 
-                <div className="relative">
+                <div className="relative transition group-hover:bg-[color-mix(in_srgb,var(--op-primary)_3%,transparent)]">
                   {hours.map((hour) => (
                     <div
                       key={hour}
-                      className="op-calendar-gridline absolute inset-y-0 border-r"
-                      style={{ left: (hour - DAY_START_HOUR) * 4 * SLOT_WIDTH_PX }}
-                    />
+                      className="absolute inset-y-0 border-r border-[var(--op-border)]"
+                      style={{
+                        left:
+                          (hour - DAY_START_HOUR) * 4 * SLOT_WIDTH_PX,
+                      }}
+                    >
+                      <span
+                        className="absolute inset-y-0 border-r border-dashed border-[var(--op-border)] opacity-45"
+                        style={{ left: SLOT_WIDTH_PX * 2 }}
+                      />
+                    </div>
                   ))}
 
                   {closedRanges.map((range, index) => {
-                    const { left, width } = getSegmentPosition(range.start, range.end, data.timezone);
+                    const { left, width } = getSegmentPosition(
+                      range.start,
+                      range.end,
+                      data.timezone,
+                    );
                     return (
                       <div
                         key={`${range.start}-${range.end}-${index}`}
-                        className="absolute inset-y-0 bg-[color-mix(in_srgb,var(--op-surface-soft)_72%,transparent)] opacity-75"
-                        style={{ left, width }}
+                        className="absolute inset-y-0 opacity-75"
+                        style={{
+                          left,
+                          width,
+                          background:
+                            "repeating-linear-gradient(135deg, color-mix(in srgb, var(--op-text-faint) 8%, transparent) 0 5px, transparent 5px 10px)",
+                        }}
                         aria-label="Outside working hours"
                       />
                     );
@@ -179,33 +232,43 @@ export function CalendarGrid({ data, onSelectAppointment }: Props) {
                     return (
                       <div
                         key={staffBreak.id}
-                        className="op-calendar-break absolute bottom-2 top-2 z-10 flex items-center justify-center rounded-md px-2 text-[10px] font-semibold"
-                        style={{ left, width }}
+                        className="absolute bottom-3 top-3 z-10 flex items-center justify-center rounded-[8px] border px-2 text-[9px] font-semibold text-[var(--op-text-muted)]"
+                        style={{
+                          left,
+                          width,
+                          borderColor: "var(--op-border-strong)",
+                          background:
+                            "repeating-linear-gradient(135deg, var(--op-surface-soft) 0 6px, var(--op-surface) 6px 12px)",
+                        }}
                         title={`${staffBreak.label ?? "Break"}: ${formatTime12Hour(staffBreak.startsAt, data.timezone)} – ${formatTime12Hour(staffBreak.endsAt, data.timezone)}`}
                       >
-                        <span className="truncate">{staffBreak.label ?? "Break"}</span>
+                        <span className="truncate">
+                          {staffBreak.label ?? "Break"}
+                        </span>
                       </div>
                     );
                   })}
 
-                  {staffSegments.map(({ segment, customerName, status, isLocked }) => (
-                    <AppointmentSegmentBlock
-                      key={segment.id}
-                      segment={segment}
-                      customerName={customerName}
-                      status={status}
-                      isLocked={isLocked}
-                      timezone={data.timezone}
-                      onClick={onSelectAppointment}
-                    />
-                  ))}
+                  {staffSegments.map(
+                    ({ segment, customerName, status, isLocked }) => (
+                      <AppointmentSegmentBlock
+                        key={segment.id}
+                        segment={segment}
+                        customerName={customerName}
+                        status={status}
+                        isLocked={isLocked}
+                        timezone={data.timezone}
+                        onClick={onSelectAppointment}
+                      />
+                    ),
+                  )}
 
                   {nowOffset !== null ? (
                     <div
-                      className="op-calendar-now pointer-events-none absolute inset-y-0 z-20 w-px"
+                      className="pointer-events-none absolute inset-y-0 z-30 w-px bg-[var(--op-danger)] shadow-[0_0_0_1px_color-mix(in_srgb,var(--op-danger)_20%,transparent)]"
                       style={{ left: nowOffset }}
                     >
-                      <span className="absolute -left-[3px] -top-1 h-[7px] w-[7px] rounded-full bg-[var(--op-danger)]" />
+                      <span className="absolute -left-[4px] -top-1 h-[9px] w-[9px] rounded-full border-2 border-[var(--op-surface)] bg-[var(--op-danger)]" />
                     </div>
                   ) : null}
                 </div>
@@ -242,11 +305,13 @@ function getClosedRanges(member: StaffMember, date: string, timezone: string) {
 
   if (override?.isDayOff) return [{ start: dayStart, end: dayEnd }];
 
-  const schedule = override?.startTime && override.endTime
-    ? { startTime: override.startTime, endTime: override.endTime }
-    : member.availability?.find(
-        (item) => item.dayOfWeek === weekdayInTimezone(date, timezone),
-      );
+  const schedule =
+    override?.startTime && override.endTime
+      ? { startTime: override.startTime, endTime: override.endTime }
+      : member.availability?.find(
+          (item) =>
+            item.dayOfWeek === weekdayInTimezone(date, timezone),
+        );
 
   if (!schedule) return [{ start: dayStart, end: dayEnd }];
 
