@@ -188,7 +188,7 @@ export function ServiceCategoryCards({
                   ? `0 0 0 2px color-mix(in srgb, ${accent.hex} 20%, transparent)`
                   : "var(--op-shadow)",
               }}
-              className="shrink-0 snap-start rounded-[14px] border p-4 text-[var(--op-text)] outline-none transition hover:-translate-y-0.5 hover:shadow-lg focus-visible:ring-2 focus-visible:ring-[var(--op-focus)]"
+              className="shrink-0 snap-start rounded-[14px] border p-4 text-[var(--op-text)] outline-none transition hover:brightness-[1.04] focus-visible:ring-2 focus-visible:ring-[var(--op-focus)]"
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex min-w-0 items-center gap-3">

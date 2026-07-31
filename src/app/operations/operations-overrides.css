@@ -20,11 +20,13 @@
   }
 }
 
-/* Category cards should remain inside their panel when hovered. */
+/* Category cards should remain inside their panel when hovered. Keep this as a
+   compatibility guard for cached builds that still include hover translation. */
 .operations-workspace
   [aria-labelledby="service-categories-heading"]
   article:hover {
   transform: none !important;
+  box-shadow: var(--op-shadow) !important;
 }
 
 /* Service rows now own semantic text and badge colours. Only the row surface
@@ -59,6 +61,19 @@
 .operations-dark .new-appointment-modal [class*="bg-slate-50"],
 .operations-dark .new-appointment-modal [class*="bg-slate-100"] {
   background-color: var(--op-surface-soft) !important;
+}
+
+/* Selected services and customer search results use light-blue utilities in the
+   legacy modal. Map those states to the dark information surface so their light
+   text remains readable instead of appearing on a near-white card. */
+.operations-dark .new-appointment-modal [class~="bg-blue-50"],
+.operations-dark .new-appointment-modal [class~="bg-blue-50/60"] {
+  background-color: var(--op-info-soft) !important;
+}
+
+.operations-dark .new-appointment-modal [class~="hover:bg-blue-50/60"]:hover,
+.operations-dark .new-appointment-modal [class~="hover:bg-blue-50"]:hover {
+  background-color: var(--op-info-soft) !important;
 }
 
 .operations-dark .new-appointment-modal [class*="border-slate-"],
