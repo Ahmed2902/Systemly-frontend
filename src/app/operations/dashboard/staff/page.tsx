@@ -11,8 +11,13 @@ import {
   MetricCard,
   useAnalyticsPreset,
 } from "@/modules/analytics/components/AnalyticsShell";
-import { DonutChart, LollipopChart } from "@/modules/analytics/components/AnalyticsCharts";
-import { formatEgp, formatMinutes, formatPercent } from "@/modules/analytics/analytics.formatters";
+import { LollipopChart } from "@/modules/analytics/components/AnalyticsCharts";
+import { SemanticDonutChart } from "@/modules/analytics/components/SemanticAnalyticsVisuals";
+import {
+  formatEgp,
+  formatMinutes,
+  formatPercent,
+} from "@/modules/analytics/analytics.formatters";
 
 export default function StaffAnalyticsPage() {
   const { accessToken } = useAuth();
@@ -27,41 +32,98 @@ export default function StaffAnalyticsPage() {
     getStaffAnalytics(preset, accessToken)
       .then((value) => !cancelled && setData(value))
       .catch((reason: Error) => !cancelled && setError(reason.message));
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [accessToken, preset]);
 
   const top = useMemo(
-    () => data?.staffPerformance.reduce((best, row) => row.totalCents > best.totalCents ? row : best, data.staffPerformance[0]) ?? null,
+    () =>
+      data?.staffPerformance.reduce(
+        (best, row) => (row.totalCents > best.totalCents ? row : best),
+        data.staffPerformance[0],
+      ) ?? null,
     [data],
   );
 
   return (
-    <AnalyticsShell title="Staff Analytics" subtitle="Revenue contribution, commission, booked time, and utilisation">
+    <AnalyticsShell
+      title="Staff Analytics"
+      subtitle="Service revenue contribution, commission, booked time, and utilisation"
+    >
       {error ? <AnalyticsState message={error} /> : null}
-      {!data && !error ? <AnalyticsState message="Loading staff analytics…" /> : null}
+      {!data && !error ? (
+        <AnalyticsState message="Loading staff analytics…" />
+      ) : null}
       {data ? (
         <div className="space-y-3">
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-            <MetricCard label="Revenue generated" value={formatEgp(data.summary.revenueCents)} />
-            <MetricCard label="Total commission" value={formatEgp(data.summary.commissionCents)} />
-            <MetricCard label="Average utilisation" value={formatPercent(data.summary.averageUtilizationRate)} />
-            <MetricCard label="Low-utilisation staff" value={String(data.summary.lowUtilizationCount)} tone="warning" />
-            <MetricCard label="Top performer" value={top?.name ?? "—"} hint={top ? formatEgp(top.totalCents) : undefined} />
+            <MetricCard
+              label="Service revenue generated"
+              value={formatEgp(data.summary.revenueCents)}
+              hint="Custom items stay in business revenue unless they are explicitly assigned to staff"
+            />
+            <MetricCard
+              label="Total commission"
+              value={formatEgp(data.summary.commissionCents)}
+              hint="Commission calculated from attributed service lines"
+            />
+            <MetricCard
+              label="Average utilisation"
+              value={formatPercent(data.summary.averageUtilizationRate)}
+            />
+            <MetricCard
+              label="Low-utilisation staff"
+              value={String(data.summary.lowUtilizationCount)}
+              tone="warning"
+            />
+            <MetricCard
+              label="Top performer"
+              value={top?.name ?? "—"}
+              hint={top ? `${formatEgp(top.totalCents)} in service revenue` : undefined}
+            />
           </div>
 
-          <AnalyticsPanel title="Staff performance">
+          <AnalyticsPanel
+            title="Staff performance"
+            action={
+              <span className="analytics-muted text-xs">
+                Revenue is attributed through service line items; unassigned custom items are excluded
+              </span>
+            }
+          >
             <div className="overflow-x-auto">
               <table className="analytics-table w-full min-w-[820px] text-left">
-                <thead><tr><th className="pb-2">Staff</th><th className="pb-2">Revenue</th><th className="pb-2">Commission</th><th className="pb-2">Jobs</th><th className="pb-2">Utilisation</th><th className="pb-2">Booked</th><th className="pb-2">Available</th></tr></thead>
-                <tbody>{data.staffPerformance.map((row) => (
-                  <tr key={row.id} className="border-t"><td className="py-3 font-semibold">{row.name}</td><td>{formatEgp(row.totalCents)}</td><td>{formatEgp(row.commissionEarnedCents)}</td><td>{row.lineItemCount}</td><td>{formatPercent(row.utilizationRate)}</td><td>{formatMinutes(row.bookedMinutes)}</td><td>{formatMinutes(row.availableMinutes)}</td></tr>
-                ))}</tbody>
+                <thead>
+                  <tr>
+                    <th className="pb-2">Staff</th>
+                    <th className="pb-2">Service revenue</th>
+                    <th className="pb-2">Commission</th>
+                    <th className="pb-2">Jobs</th>
+                    <th className="pb-2">Utilisation</th>
+                    <th className="pb-2">Booked</th>
+                    <th className="pb-2">Available</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.staffPerformance.map((row) => (
+                    <tr key={row.id} className="border-t">
+                      <td className="py-3 font-semibold">{row.name}</td>
+                      <td>{formatEgp(row.totalCents)}</td>
+                      <td>{formatEgp(row.commissionEarnedCents)}</td>
+                      <td>{row.lineItemCount}</td>
+                      <td>{formatPercent(row.utilizationRate)}</td>
+                      <td>{formatMinutes(row.bookedMinutes)}</td>
+                      <td>{formatMinutes(row.availableMinutes)}</td>
+                    </tr>
+                  ))}
+                </tbody>
               </table>
             </div>
           </AnalyticsPanel>
 
           <div className="grid gap-3 xl:grid-cols-3">
-            <AnalyticsPanel title="Revenue by staff">
+            <AnalyticsPanel title="Service revenue by staff">
               <LollipopChart
                 items={[...data.staffPerformance]
                   .sort((a, b) => b.totalCents - a.totalCents)
@@ -70,9 +132,12 @@ export default function StaffAnalyticsPage() {
                     label: row.name,
                     value: row.totalCents,
                     tooltip: [
-                      { label: "Revenue", value: formatEgp(row.totalCents) },
+                      { label: "Service revenue", value: formatEgp(row.totalCents) },
                       { label: "Jobs", value: String(row.lineItemCount) },
-                      { label: "Utilisation", value: formatPercent(row.utilizationRate) },
+                      {
+                        label: "Utilisation",
+                        value: formatPercent(row.utilizationRate),
+                      },
                     ],
                   }))}
                 formatValue={formatEgp}
@@ -80,13 +145,34 @@ export default function StaffAnalyticsPage() {
             </AnalyticsPanel>
 
             <AnalyticsPanel title="Utilisation distribution">
-              <DonutChart
-                centreLabel={formatPercent(data.summary.averageUtilizationRate)}
+              <SemanticDonutChart
                 items={[
-                  { label: "80% or more", value: data.staffPerformance.filter((row) => row.utilizationRate >= 80).length },
-                  { label: "60–79%", value: data.staffPerformance.filter((row) => row.utilizationRate >= 60 && row.utilizationRate < 80).length },
-                  { label: "40–59%", value: data.staffPerformance.filter((row) => row.utilizationRate >= 40 && row.utilizationRate < 60).length },
-                  { label: "Below 40%", value: data.staffPerformance.filter((row) => row.utilizationRate < 40).length },
+                  {
+                    label: "80% or more",
+                    value: data.staffPerformance.filter(
+                      (row) => row.utilizationRate >= 80,
+                    ).length,
+                  },
+                  {
+                    label: "60–79%",
+                    value: data.staffPerformance.filter(
+                      (row) =>
+                        row.utilizationRate >= 60 && row.utilizationRate < 80,
+                    ).length,
+                  },
+                  {
+                    label: "40–59%",
+                    value: data.staffPerformance.filter(
+                      (row) =>
+                        row.utilizationRate >= 40 && row.utilizationRate < 60,
+                    ).length,
+                  },
+                  {
+                    label: "Below 40%",
+                    value: data.staffPerformance.filter(
+                      (row) => row.utilizationRate < 40,
+                    ).length,
+                  },
                 ]}
               />
             </AnalyticsPanel>
@@ -94,11 +180,34 @@ export default function StaffAnalyticsPage() {
             <AnalyticsPanel title="Booked vs available time">
               <div className="space-y-4">
                 {data.staffPerformance.slice(0, 7).map((row) => {
-                  const total = Math.max(row.availableMinutes, row.bookedMinutes, 1);
+                  const total = Math.max(
+                    row.availableMinutes,
+                    row.bookedMinutes,
+                    1,
+                  );
                   return (
-                    <div key={row.id} title={`${row.name}: ${formatMinutes(row.bookedMinutes)} booked, ${formatMinutes(row.availableMinutes)} available, ${formatPercent(row.utilizationRate)} utilisation`}>
-                      <div className="mb-1.5 flex justify-between text-xs"><span className="analytics-muted">{row.name}</span><span>{formatMinutes(row.bookedMinutes)} / {formatMinutes(row.availableMinutes)}</span></div>
-                      <div className="relative h-2.5 overflow-hidden rounded-full bg-[var(--analytics-grid)]"><div className="absolute inset-y-0 left-0 rounded-full bg-violet-500 transition-all hover:brightness-125" style={{ width: `${Math.min((row.bookedMinutes / total) * 100, 100)}%` }} /></div>
+                    <div
+                      key={row.id}
+                      title={`${row.name}: ${formatMinutes(row.bookedMinutes)} booked, ${formatMinutes(row.availableMinutes)} available, ${formatPercent(row.utilizationRate)} utilisation`}
+                    >
+                      <div className="mb-1.5 flex justify-between text-xs">
+                        <span className="analytics-muted">{row.name}</span>
+                        <span>
+                          {formatMinutes(row.bookedMinutes)} /{" "}
+                          {formatMinutes(row.availableMinutes)}
+                        </span>
+                      </div>
+                      <div className="relative h-2.5 overflow-hidden rounded-full bg-[var(--analytics-grid)]">
+                        <div
+                          className="absolute inset-y-0 left-0 rounded-full bg-[var(--op-info)] transition-all hover:brightness-125"
+                          style={{
+                            width: `${Math.min(
+                              (row.bookedMinutes / total) * 100,
+                              100,
+                            )}%`,
+                          }}
+                        />
+                      </div>
                     </div>
                   );
                 })}
