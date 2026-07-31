@@ -1,10 +1,20 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Clock3, ImagePlus, Plus, Trash2, Upload, Users, X } from "lucide-react";
+import {
+  Clock3,
+  ImagePlus,
+  Plus,
+  Search,
+  Trash2,
+  Upload,
+  Users,
+  X,
+} from "lucide-react";
 import { useWizard } from "../wizard.context";
 import { StepProps, WizardService, WizardStaffMember } from "../wizard.types";
 import { uploadImage } from "../wizard.api";
+import "../onboarding-services-team.css";
 
 const STAFF_ROLE_OPTIONS = ["Staff", "Receptionist"];
 const uid = () => Math.random().toString(36).slice(2, 10);
@@ -18,30 +28,61 @@ function normalizeCategory(value: string) {
 export function StepServicesStaff({ onNext, onBack }: StepProps) {
   const { state, patch } = useWizard();
   const [error, setError] = useState<string | null>(null);
+  const [attemptedSubmit, setAttemptedSubmit] = useState(false);
   const [uploadingStaffId, setUploadingStaffId] = useState<string | null>(null);
+  const [serviceSearch, setServiceSearch] = useState<Record<string, string>>({});
 
   const categories = useMemo(
-    () => new Set(state.services.map((service) => normalizeCategory(service.category || "").toLowerCase()).filter(Boolean)).size,
+    () =>
+      new Set(
+        state.services
+          .map((service) =>
+            normalizeCategory(service.category || "").toLowerCase(),
+          )
+          .filter(Boolean),
+      ).size,
     [state.services],
   );
+
   const averagePrice = state.services.length
-    ? Math.round(state.services.reduce((sum, service) => sum + service.priceEgp, 0) / state.services.length)
+    ? Math.round(
+        state.services.reduce((sum, service) => sum + service.priceEgp, 0) /
+          state.services.length,
+      )
     : 0;
 
   function addService() {
-    const next: WizardService = { clientId: uid(), name: "", durationMin: 30, priceEgp: 0, category: "" };
+    const next: WizardService = {
+      clientId: uid(),
+      name: "",
+      durationMin: 30,
+      priceEgp: 0,
+      category: "",
+    };
     patch({ services: [...state.services, next] });
+    setError(null);
   }
 
   function updateService(clientId: string, updates: Partial<WizardService>) {
-    patch({ services: state.services.map((service) => service.clientId === clientId ? { ...service, ...updates } : service) });
+    patch({
+      services: state.services.map((service) =>
+        service.clientId === clientId ? { ...service, ...updates } : service,
+      ),
+    });
+    setError(null);
   }
 
   function removeService(clientId: string) {
     patch({
-      services: state.services.filter((service) => service.clientId !== clientId),
-      staff: state.staff.map((member) => ({ ...member, serviceIds: member.serviceIds.filter((id) => id !== clientId) })),
+      services: state.services.filter(
+        (service) => service.clientId !== clientId,
+      ),
+      staff: state.staff.map((member) => ({
+        ...member,
+        serviceIds: member.serviceIds.filter((id) => id !== clientId),
+      })),
     });
+    setError(null);
   }
 
   function addStaff() {
@@ -54,10 +95,23 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
       availability: [],
     };
     patch({ staff: [...state.staff, next] });
+    setError(null);
   }
 
   function updateStaff(clientId: string, updates: Partial<WizardStaffMember>) {
-    patch({ staff: state.staff.map((member) => member.clientId === clientId ? { ...member, ...updates } : member) });
+    patch({
+      staff: state.staff.map((member) =>
+        member.clientId === clientId ? { ...member, ...updates } : member,
+      ),
+    });
+    setError(null);
+  }
+
+  function removeStaff(clientId: string) {
+    patch({
+      staff: state.staff.filter((member) => member.clientId !== clientId),
+    });
+    setError(null);
   }
 
   async function uploadStaffPhoto(clientId: string, file?: File) {
@@ -85,115 +139,529 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
     });
   }
 
+  function selectAllStaffServices(staffId: string) {
+    updateStaff(staffId, {
+      serviceIds: state.services.map((service) => service.clientId),
+    });
+  }
+
+  function clearStaffServices(staffId: string) {
+    updateStaff(staffId, { serviceIds: [] });
+  }
+
+  function filteredServicesFor(staffId: string) {
+    const query = (serviceSearch[staffId] || "").trim().toLowerCase();
+    if (!query) return state.services;
+    return state.services.filter((service) =>
+      (service.name || "Untitled service").toLowerCase().includes(query),
+    );
+  }
+
+  function focusFirstInvalidField() {
+    window.setTimeout(() => {
+      const firstInvalid = document.querySelector<HTMLElement>(
+        "[data-onboarding-invalid='true']",
+      );
+      firstInvalid?.scrollIntoView({ behavior: "smooth", block: "center" });
+      firstInvalid?.focus({ preventScroll: true });
+    }, 0);
+  }
+
   function validateAndNext() {
-    if (!state.services.length) return setError("Add at least one service");
-    if (!state.staff.length) return setError("Add at least one staff member");
-    if (state.services.some((service) => !service.name.trim())) return setError("Every service needs a name");
-    if (state.staff.some((member) => !member.name.trim())) return setError("Every staff member needs a name");
-    if (state.staff.some((member) => member.serviceIds.length === 0)) return setError("Assign at least one service to every team member");
+    setAttemptedSubmit(true);
+
+    let nextError: string | null = null;
+    if (!state.services.length) nextError = "Add at least one service";
+    else if (state.services.some((service) => !service.name.trim()))
+      nextError = "Every service needs a name";
+    else if (!state.staff.length)
+      nextError = "Add at least one staff member";
+    else if (state.staff.some((member) => !member.name.trim()))
+      nextError = "Every staff member needs a name";
+    else if (state.staff.some((member) => member.serviceIds.length === 0))
+      nextError = "Assign at least one service to every team member";
+
+    if (nextError) {
+      setError(nextError);
+      focusFirstInvalidField();
+      return;
+    }
 
     patch({
-      services: state.services.map((service) => ({ ...service, name: service.name.trim(), category: normalizeCategory(service.category || "") })),
+      services: state.services.map((service) => ({
+        ...service,
+        name: service.name.trim(),
+        category: normalizeCategory(service.category || ""),
+      })),
     });
     setError(null);
     onNext();
   }
 
   return (
-    <div>
+    <div className="onboarding-services-step">
       <div className="onboarding-page-intro">
         <p className="onboarding-kicker">Services &amp; team</p>
-        <h1 className="onboarding-page-title">Define what happens—and who provides it.</h1>
-        <p className="onboarding-page-copy">Add the services customers can book, then connect each one to the eligible team members.</p>
+        <h1 className="onboarding-page-title">
+          Define what happens—and who provides it.
+        </h1>
+        <p className="onboarding-page-copy">
+          Add the services customers can book, then connect each one to the
+          eligible team members.
+        </p>
       </div>
 
-      <div className="onboarding-services-layout">
-        <section className="onboarding-card p-6">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div><h2 className="text-[24px] font-semibold tracking-[-.03em]">Services</h2><p className="mt-1 text-sm text-[var(--onboarding-muted)]">Set the name, duration, price, and category.</p></div>
-            <button type="button" onClick={addService} className="onboarding-secondary-button"><Plus size={16} />Add service</button>
-          </div>
-
-          <div className="onboarding-table onboarding-service-table mt-5">
-            <div className="onboarding-service-table-inner">
-              <div className="onboarding-table-row onboarding-table-head onboarding-service-row"><span>Service</span><span>Minutes</span><span>Price</span><span>Category</span><span /></div>
-              {state.services.map((service) => (
-                <div key={service.clientId} className="onboarding-table-row onboarding-service-row !min-h-[70px] !py-2.5">
-                  <input value={service.name} onChange={(event) => updateService(service.clientId, { name: event.target.value })} placeholder="Service name" className="onboarding-input" />
-                  <input type="number" min={5} step={5} value={service.durationMin} onChange={(event) => updateService(service.clientId, { durationMin: Math.max(5, Number(event.target.value) || 5) })} className="onboarding-input" aria-label="Service duration in minutes" />
-                  <input type="number" min={0} step={10} value={service.priceEgp} onChange={(event) => updateService(service.clientId, { priceEgp: Math.max(0, Number(event.target.value) || 0) })} className="onboarding-input" aria-label="Service price in EGP" />
-                  <input value={service.category || ""} onChange={(event) => updateService(service.clientId, { category: event.target.value })} onBlur={(event) => updateService(service.clientId, { category: normalizeCategory(event.target.value) })} placeholder="e.g. Hair" className="onboarding-input" />
-                  <button type="button" onClick={() => removeService(service.clientId)} className="grid h-10 w-10 place-items-center rounded-xl border border-red-200 text-red-600 hover:bg-red-50" aria-label={`Remove ${service.name || "service"}`}><Trash2 size={15} /></button>
-                </div>
-              ))}
-              {!state.services.length ? <div className="p-8 text-center text-sm text-[var(--onboarding-muted)]">No services yet. Add the first service customers can book.</div> : null}
+      <div className="onboarding-services-stack">
+        <section className="onboarding-card onboarding-services-section">
+          <div className="onboarding-section-heading">
+            <div className="onboarding-section-heading-main">
+              <div>
+                <p className="onboarding-section-number">01</p>
+                <h2>Services</h2>
+                <p>Set the name, duration, price, and optional category.</p>
+              </div>
+              <div className="onboarding-services-summary" aria-label="Service summary">
+                <span><strong>{state.services.length}</strong> services</span>
+                <span><strong>{categories}</strong> categories</span>
+                <span><strong>EGP {averagePrice}</strong> average</span>
+              </div>
             </div>
+            <button
+              type="button"
+              onClick={addService}
+              className="onboarding-secondary-button"
+              data-onboarding-invalid={
+                attemptedSubmit && !state.services.length ? "true" : undefined
+              }
+              aria-invalid={
+                attemptedSubmit && !state.services.length ? true : undefined
+              }
+            >
+              <Plus size={16} />
+              Add service
+            </button>
           </div>
 
-          <div className="onboarding-stat-grid mt-4">
-            <div className="onboarding-stat"><strong>{state.services.length}</strong><span>Services</span></div>
-            <div className="onboarding-stat"><strong>{categories}</strong><span>Categories</span></div>
-            <div className="onboarding-stat"><strong>EGP {averagePrice}</strong><span>Average price</span></div>
-          </div>
-        </section>
+          <div className="onboarding-service-list">
+            {state.services.map((service, index) => {
+              const missingName = attemptedSubmit && !service.name.trim();
+              return (
+                <article key={service.clientId} className="onboarding-service-editor">
+                  <span className="onboarding-service-row-number">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
 
-        <section className="onboarding-card p-6">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div><h2 className="text-[24px] font-semibold tracking-[-.03em]">Team</h2><p className="mt-1 text-sm text-[var(--onboarding-muted)]">Add staff and assign the services each person provides.</p></div>
-            <button type="button" onClick={addStaff} className="onboarding-secondary-button"><Plus size={16} />Add staff</button>
-          </div>
+                  <label className="onboarding-field onboarding-service-name-field">
+                    <span>Service name</span>
+                    <input
+                      value={service.name}
+                      onChange={(event) =>
+                        updateService(service.clientId, {
+                          name: event.target.value,
+                        })
+                      }
+                      placeholder="e.g. Hair consultation"
+                      className={`onboarding-input ${missingName ? "is-invalid" : ""}`}
+                      data-onboarding-invalid={missingName ? "true" : undefined}
+                      aria-invalid={missingName || undefined}
+                    />
+                    {missingName ? (
+                      <small className="onboarding-field-error">
+                        Add a service name.
+                      </small>
+                    ) : null}
+                  </label>
 
-          <div className="mt-5 space-y-3">
-            {state.staff.map((member) => (
-              <article key={member.clientId} className="onboarding-choice p-4">
-                <div className="grid gap-4 lg:grid-cols-[105px_minmax(170px,.9fr)_minmax(220px,1.1fr)_40px] lg:items-center">
-                  <div className="onboarding-field">
-                    <label>Photo</label>
-                    <div className="relative overflow-hidden rounded-2xl border border-dashed border-[var(--onboarding-border-strong)] bg-[#fafaf8]">
-                      {member.photoUrl ? <img src={member.photoUrl} alt={`${member.name || "Team member"} profile`} className="h-20 w-full object-cover" /> : null}
-                      <label className={`flex h-20 cursor-pointer flex-col items-center justify-center gap-1 text-center text-[11px] text-[var(--onboarding-muted)] ${member.photoUrl ? "absolute inset-0 bg-black/60 text-white opacity-0 hover:opacity-100" : ""}`}>
-                        {member.photoUrl ? <Upload size={16} /> : <ImagePlus size={19} />}
-                        {uploadingStaffId === member.clientId ? "Uploading…" : member.photoUrl ? "Replace" : "Add photo"}
-                        <input type="file" accept="image/*" className="hidden" disabled={uploadingStaffId === member.clientId} onChange={(event) => uploadStaffPhoto(member.clientId, event.target.files?.[0])} />
-                      </label>
-                      {member.photoUrl ? <button type="button" onClick={() => updateStaff(member.clientId, { photoUrl: undefined })} className="absolute right-1 top-1 grid h-6 w-6 place-items-center rounded-full bg-black/75 text-white" aria-label={`Remove ${member.name || "team member"} photo`}><X size={12} /></button> : null}
-                    </div>
-                  </div>
+                  <label className="onboarding-field">
+                    <span>Minutes</span>
+                    <input
+                      type="number"
+                      min={5}
+                      step={5}
+                      value={service.durationMin}
+                      onChange={(event) =>
+                        updateService(service.clientId, {
+                          durationMin: Math.max(
+                            5,
+                            Number(event.target.value) || 5,
+                          ),
+                        })
+                      }
+                      className="onboarding-input"
+                    />
+                  </label>
 
-                  <div>
-                    <input value={member.name} onChange={(event) => updateStaff(member.clientId, { name: event.target.value })} placeholder="Team member name" className="onboarding-input" />
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {STAFF_ROLE_OPTIONS.map((role) => <button type="button" key={role} onClick={() => updateStaff(member.clientId, { role })} className={`onboarding-chip ${member.role === role ? "is-selected" : ""}`}>{role}</button>)}
-                    </div>
-                  </div>
+                  <label className="onboarding-field">
+                    <span>Price (EGP)</span>
+                    <input
+                      type="number"
+                      min={0}
+                      step={10}
+                      value={service.priceEgp}
+                      onChange={(event) =>
+                        updateService(service.clientId, {
+                          priceEgp: Math.max(
+                            0,
+                            Number(event.target.value) || 0,
+                          ),
+                        })
+                      }
+                      className="onboarding-input"
+                    />
+                  </label>
 
-                  <div>
-                    <p className="mb-2 text-[11px] font-semibold text-[var(--onboarding-muted)]">Eligible services</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {state.services.map((service) => <button type="button" key={service.clientId} onClick={() => toggleStaffService(member.clientId, service.clientId)} className={`onboarding-chip ${member.serviceIds.includes(service.clientId) ? "is-selected" : ""}`}>{service.name || "Untitled"}</button>)}
-                    </div>
-                  </div>
+                  <label className="onboarding-field onboarding-service-category-field">
+                    <span>Category</span>
+                    <input
+                      value={service.category || ""}
+                      onChange={(event) =>
+                        updateService(service.clientId, {
+                          category: event.target.value,
+                        })
+                      }
+                      onBlur={(event) =>
+                        updateService(service.clientId, {
+                          category: normalizeCategory(event.target.value),
+                        })
+                      }
+                      placeholder="e.g. Hair"
+                      className="onboarding-input"
+                    />
+                  </label>
 
-                  <button type="button" onClick={() => patch({ staff: state.staff.filter((item) => item.clientId !== member.clientId) })} className="grid h-10 w-10 place-items-center rounded-xl border border-red-200 text-red-600 hover:bg-red-50" aria-label={`Remove ${member.name || "team member"}`}><Trash2 size={15} /></button>
+                  <button
+                    type="button"
+                    onClick={() => removeService(service.clientId)}
+                    className="onboarding-destructive-icon onboarding-service-remove"
+                    aria-label={`Remove ${service.name || "service"}`}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </article>
+              );
+            })}
+
+            {!state.services.length ? (
+              <div className="onboarding-empty-state">
+                <div className="onboarding-icon-tile is-muted">
+                  <Plus size={18} />
                 </div>
-              </article>
-            ))}
-            {!state.staff.length ? <div className="rounded-2xl border border-dashed border-[var(--onboarding-border)] p-8 text-center text-sm text-[var(--onboarding-muted)]">Your team will appear here.</div> : null}
+                <strong>Add your first bookable service</strong>
+                <p>
+                  Services appear on your public site and connect to eligible
+                  team members below.
+                </p>
+                <button
+                  type="button"
+                  onClick={addService}
+                  className="onboarding-secondary-button"
+                >
+                  <Plus size={16} />
+                  Add service
+                </button>
+              </div>
+            ) : null}
           </div>
         </section>
 
-        <aside className="onboarding-card p-6">
-          <Users className="text-[var(--onboarding-mint)]" />
-          <h3 className="mt-4 text-lg font-semibold">Service eligibility</h3>
-          <p className="mt-3 text-sm leading-6 text-[var(--onboarding-muted)]">Customers only see staff who provide the selected service. The next step sets each person’s booking hours.</p>
-          <div className="mt-5 flex items-center gap-2 rounded-2xl bg-[var(--onboarding-mint-soft)] p-3 text-xs text-[var(--onboarding-mint-strong)]"><Clock3 size={16} />Availability comes next</div>
-        </aside>
+        <section className="onboarding-card onboarding-services-section">
+          <div className="onboarding-section-heading">
+            <div>
+              <p className="onboarding-section-number">02</p>
+              <h2>Team &amp; service eligibility</h2>
+              <p>
+                Add each person, choose their role, and select the services they
+                can provide.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={addStaff}
+              className="onboarding-secondary-button"
+              data-onboarding-invalid={
+                attemptedSubmit && !state.staff.length ? "true" : undefined
+              }
+              aria-invalid={
+                attemptedSubmit && !state.staff.length ? true : undefined
+              }
+            >
+              <Plus size={16} />
+              Add staff
+            </button>
+          </div>
+
+          <div className="onboarding-inline-callout">
+            <Users size={20} />
+            <div>
+              <strong>Customers only see eligible staff.</strong>
+              <p>
+                Assign at least one service to every person. You will set their
+                working hours in the next step.
+              </p>
+            </div>
+            <span>
+              <Clock3 size={15} />
+              Availability comes next
+            </span>
+          </div>
+
+          <div className="onboarding-team-list">
+            {state.staff.map((member, index) => {
+              const missingName = attemptedSubmit && !member.name.trim();
+              const missingServices =
+                attemptedSubmit && member.serviceIds.length === 0;
+              const visibleServices = filteredServicesFor(member.clientId);
+
+              return (
+                <article key={member.clientId} className="onboarding-team-card">
+                  <div className="onboarding-team-card-top">
+                    <div className="onboarding-team-photo-field">
+                      <span>Photo</span>
+                      <div className="onboarding-team-photo">
+                        {member.photoUrl ? (
+                          <img
+                            src={member.photoUrl}
+                            alt={`${member.name || "Team member"} profile`}
+                          />
+                        ) : null}
+                        <label
+                          className={member.photoUrl ? "has-photo" : undefined}
+                        >
+                          {member.photoUrl ? (
+                            <Upload size={16} />
+                          ) : (
+                            <ImagePlus size={19} />
+                          )}
+                          {uploadingStaffId === member.clientId
+                            ? "Uploading…"
+                            : member.photoUrl
+                              ? "Replace"
+                              : "Add photo"}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            disabled={uploadingStaffId === member.clientId}
+                            onChange={(event) =>
+                              uploadStaffPhoto(
+                                member.clientId,
+                                event.target.files?.[0],
+                              )
+                            }
+                          />
+                        </label>
+                        {member.photoUrl ? (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              updateStaff(member.clientId, {
+                                photoUrl: undefined,
+                              })
+                            }
+                            className="onboarding-photo-remove"
+                            aria-label={`Remove ${member.name || "team member"} photo`}
+                          >
+                            <X size={12} />
+                          </button>
+                        ) : null}
+                      </div>
+                    </div>
+
+                    <div className="onboarding-team-identity">
+                      <div className="onboarding-team-index">
+                        Team member {String(index + 1).padStart(2, "0")}
+                      </div>
+                      <label className="onboarding-field">
+                        <span>Name</span>
+                        <input
+                          value={member.name}
+                          onChange={(event) =>
+                            updateStaff(member.clientId, {
+                              name: event.target.value,
+                            })
+                          }
+                          placeholder="Team member name"
+                          className={`onboarding-input ${missingName ? "is-invalid" : ""}`}
+                          data-onboarding-invalid={
+                            missingName ? "true" : undefined
+                          }
+                          aria-invalid={missingName || undefined}
+                        />
+                        {missingName ? (
+                          <small className="onboarding-field-error">
+                            Add this team member’s name.
+                          </small>
+                        ) : null}
+                      </label>
+
+                      <div className="onboarding-role-picker">
+                        <span>Role</span>
+                        <div>
+                          {STAFF_ROLE_OPTIONS.map((role) => (
+                            <button
+                              type="button"
+                              key={role}
+                              onClick={() =>
+                                updateStaff(member.clientId, { role })
+                              }
+                              className={`onboarding-chip ${member.role === role ? "is-selected" : ""}`}
+                            >
+                              {role}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => removeStaff(member.clientId)}
+                      className="onboarding-destructive-icon onboarding-team-remove"
+                      aria-label={`Remove ${member.name || "team member"}`}
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+
+                  <div
+                    className={`onboarding-eligibility-panel ${missingServices ? "is-invalid" : ""}`}
+                    data-onboarding-invalid={
+                      missingServices ? "true" : undefined
+                    }
+                    tabIndex={missingServices ? -1 : undefined}
+                  >
+                    <div className="onboarding-eligibility-heading">
+                      <div>
+                        <strong>Services this person provides</strong>
+                        <span>
+                          {member.serviceIds.length} of {state.services.length}
+                          {" "}selected
+                        </span>
+                      </div>
+                      <div className="onboarding-eligibility-actions">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            selectAllStaffServices(member.clientId)
+                          }
+                          disabled={!state.services.length}
+                        >
+                          Select all
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => clearStaffServices(member.clientId)}
+                          disabled={!member.serviceIds.length}
+                        >
+                          Clear
+                        </button>
+                      </div>
+                    </div>
+
+                    {state.services.length > 5 ? (
+                      <label className="onboarding-service-search">
+                        <Search size={16} />
+                        <input
+                          value={serviceSearch[member.clientId] || ""}
+                          onChange={(event) =>
+                            setServiceSearch((current) => ({
+                              ...current,
+                              [member.clientId]: event.target.value,
+                            }))
+                          }
+                          placeholder="Search services"
+                          aria-label={`Search services for ${member.name || "team member"}`}
+                        />
+                      </label>
+                    ) : null}
+
+                    <div className="onboarding-service-chip-list">
+                      {visibleServices.map((service) => (
+                        <button
+                          type="button"
+                          key={service.clientId}
+                          onClick={() =>
+                            toggleStaffService(
+                              member.clientId,
+                              service.clientId,
+                            )
+                          }
+                          className={`onboarding-chip ${member.serviceIds.includes(service.clientId) ? "is-selected" : ""}`}
+                          aria-pressed={member.serviceIds.includes(
+                            service.clientId,
+                          )}
+                        >
+                          {service.name || "Untitled service"}
+                        </button>
+                      ))}
+                      {!visibleServices.length ? (
+                        <p className="onboarding-search-empty">
+                          No services match that search.
+                        </p>
+                      ) : null}
+                      {!state.services.length ? (
+                        <p className="onboarding-search-empty">
+                          Add a service above before assigning eligibility.
+                        </p>
+                      ) : null}
+                    </div>
+
+                    {missingServices ? (
+                      <small className="onboarding-field-error">
+                        Select at least one service for this person.
+                      </small>
+                    ) : null}
+                  </div>
+                </article>
+              );
+            })}
+
+            {!state.staff.length ? (
+              <div className="onboarding-empty-state">
+                <div className="onboarding-icon-tile is-muted">
+                  <Users size={18} />
+                </div>
+                <strong>Add the people customers can book</strong>
+                <p>
+                  You can add staff and receptionists now, then set each
+                  person’s availability next.
+                </p>
+                <button
+                  type="button"
+                  onClick={addStaff}
+                  className="onboarding-secondary-button"
+                >
+                  <Plus size={16} />
+                  Add staff
+                </button>
+              </div>
+            ) : null}
+          </div>
+        </section>
       </div>
 
-      {error ? <p className="onboarding-error mt-3">{error}</p> : null}
+      {error ? (
+        <div className="onboarding-error-summary" role="alert">
+          {error}
+        </div>
+      ) : null}
+
       <footer className="onboarding-footer">
-        <button type="button" onClick={onBack} className="onboarding-secondary-button">← Back</button>
-        <div className="onboarding-footer-actions"><button type="button" onClick={validateAndNext} className="onboarding-primary-button">Continue →</button></div>
+        <button
+          type="button"
+          onClick={onBack}
+          className="onboarding-secondary-button"
+        >
+          ← Back
+        </button>
+        <div className="onboarding-footer-actions">
+          <button
+            type="button"
+            onClick={validateAndNext}
+            className="onboarding-primary-button"
+          >
+            Continue →
+          </button>
+        </div>
       </footer>
     </div>
   );
