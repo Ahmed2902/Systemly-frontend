@@ -1,10 +1,10 @@
 const ITEMS = [
-  { label: "Pending", color: "var(--op-warning)" },
-  { label: "Confirmed", color: "var(--op-info)" },
-  { label: "In progress", color: "var(--op-info)" },
-  { label: "Completed", color: "var(--op-success)" },
-  { label: "No-show", color: "var(--op-warning)" },
-  { label: "Cancelled", color: "var(--op-danger)" },
+  { label: "Pending", color: "#d97706" },
+  { label: "Confirmed", color: "#3b82f6" },
+  { label: "In progress", color: "#14b8a6" },
+  { label: "Completed", color: "#10b981" },
+  { label: "No-show", color: "#e11d48" },
+  { label: "Cancelled", color: "#ef4444" },
   { label: "Paid / locked", color: "var(--op-text-muted)" },
 ] as const;
 
