@@ -1,8 +1,8 @@
 import "./operations.css";
 import { Suspense } from "react";
-import { Sidebar } from "@/modules/operations/components/Sidebar";
 import { OperationsProvider } from "@/modules/operations/operations.context";
 import { NewAppointmentModal } from "@/modules/operations/components/NewAppointment";
+import { OperationsShell } from "@/modules/operations/components/OperationsShell";
 import { OperationsThemeProvider } from "@/modules/operations/operations-theme";
 
 const themeBootScript = `(() => {
@@ -32,11 +32,10 @@ export default function OperationsLayout({
       <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
       <OperationsThemeProvider>
         <OperationsProvider>
-          <div className="operations-workspace flex h-screen min-h-0 overflow-hidden">
-            <Sidebar />
-            <main className="min-w-0 flex-1 overflow-hidden">
+          <div className="operations-workspace h-screen min-h-0 overflow-hidden">
+            <OperationsShell>
               <Suspense fallback={<div className="h-full" />}>{children}</Suspense>
-            </main>
+            </OperationsShell>
           </div>
           <NewAppointmentModal />
         </OperationsProvider>
