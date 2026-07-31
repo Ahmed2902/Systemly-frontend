@@ -115,7 +115,7 @@ export function Sidebar({
       <div className="op-sidebar-header">
         <div className="op-wordmark">
           <div className="min-w-0">
-            <SystemlyWordmark className="op-wordmark-name" />
+            <div className="op-wordmark-name">Systemly</div>
             <p className="op-wordmark-meta">Business operations</p>
           </div>
           <button
