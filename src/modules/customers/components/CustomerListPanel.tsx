@@ -49,17 +49,17 @@ export function CustomerListPanel({
   onNewCustomer: () => void;
 }) {
   return (
-    <section className="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-      <div className="border-b border-slate-100 p-4">
+    <section className="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-[var(--op-border)] bg-[var(--op-surface)] shadow-[var(--op-shadow)]">
+      <div className="border-b border-[var(--op-border)] p-4">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <h2 className="font-semibold text-slate-950">Customers</h2>
-            <p className="mt-0.5 text-xs text-slate-500">{total} records</p>
+            <h2 className="font-semibold text-[var(--op-text)]">Customers</h2>
+            <p className="mt-0.5 text-xs text-[var(--op-text-muted)]">{total} records</p>
           </div>
           <button
             type="button"
             onClick={onNewCustomer}
-            className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-3.5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700"
+            className="op-button op-button-primary"
           >
             <UserRoundPlus size={16} />
             New
@@ -69,13 +69,13 @@ export function CustomerListPanel({
         <label className="relative mt-4 block">
           <Search
             size={16}
-            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--op-text-muted)]"
           />
           <input
             value={search}
             onChange={(event) => onSearchChange(event.target.value)}
             placeholder="Search name, phone, or email"
-            className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-3 text-sm outline-none transition focus:border-blue-300 focus:bg-white focus:ring-4 focus:ring-blue-100/60"
+            className="op-input w-full py-2.5 pl-10 pr-3"
           />
         </label>
 
@@ -85,10 +85,10 @@ export function CustomerListPanel({
               key={item.value}
               type="button"
               onClick={() => onFilterChange(item.value)}
-              className={`whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+              className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
                 filter === item.value
-                  ? "bg-blue-100 text-blue-700"
-                  : "bg-slate-100 text-slate-500 hover:text-slate-700"
+                  ? "border-[var(--op-border-strong)] bg-[var(--op-selected)] text-[var(--op-text)]"
+                  : "border-transparent bg-[var(--op-surface-soft)] text-[var(--op-text-muted)] hover:border-[var(--op-border)] hover:bg-[var(--op-hover)] hover:text-[var(--op-text)]"
               }`}
             >
               {item.label}
@@ -103,47 +103,56 @@ export function CustomerListPanel({
             {Array.from({ length: 5 }).map((_, index) => (
               <div
                 key={index}
-                className="h-20 animate-pulse rounded-xl bg-slate-100"
+                className="h-20 animate-pulse rounded-xl bg-[var(--op-surface-soft)]"
               />
             ))}
           </div>
         ) : customers.length === 0 ? (
           <div className="px-6 py-16 text-center">
-            <p className="font-semibold text-slate-800">No customers found</p>
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="font-semibold text-[var(--op-text)]">No customers found</p>
+            <p className="mt-1 text-sm text-[var(--op-text-muted)]">
               Try another search or create a new customer.
             </p>
           </div>
         ) : (
-          <div className="divide-y divide-slate-100">
-            {customers.map((customer) => (
-              <button
-                key={customer.id}
-                type="button"
-                onClick={() => onSelect(customer.id)}
-                className={`flex w-full items-center gap-3 px-4 py-4 text-left transition ${
-                  selectedId === customer.id
-                    ? "border-l-4 border-blue-600 bg-blue-50/70 pl-3"
-                    : "hover:bg-slate-50"
-                }`}
-              >
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-semibold text-slate-600">
-                  {initials(customer.name)}
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate font-semibold text-slate-900">
-                    {customer.name}
+          <div className="divide-y divide-[var(--op-border)]">
+            {customers.map((customer) => {
+              const selected = selectedId === customer.id;
+              return (
+                <button
+                  key={customer.id}
+                  type="button"
+                  onClick={() => onSelect(customer.id)}
+                  className={`group flex w-full items-center gap-3 px-4 py-4 text-left transition ${
+                    selected
+                      ? "border-l-4 border-[var(--op-text-secondary)] bg-[var(--op-selected)] pl-3"
+                      : "border-l-4 border-transparent hover:bg-[color-mix(in_srgb,var(--op-primary)_7%,var(--op-surface))]"
+                  }`}
+                >
+                  <span
+                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full border text-sm font-semibold transition ${
+                      selected
+                        ? "border-[var(--op-border-strong)] bg-[var(--op-primary)] text-[var(--op-primary-text)]"
+                        : "border-[var(--op-border)] bg-[var(--op-surface-soft)] text-[var(--op-text-secondary)] group-hover:bg-[var(--op-surface-raised)] group-hover:text-[var(--op-text)]"
+                    }`}
+                  >
+                    {initials(customer.name)}
                   </span>
-                  <span className="mt-1 block truncate text-sm text-slate-500">
-                    {customer.phone}
-                    {customer.email ? ` · ${customer.email}` : ""}
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate font-semibold text-[var(--op-text)]">
+                      {customer.name}
+                    </span>
+                    <span className="mt-1 block truncate text-sm text-[var(--op-text-muted)]">
+                      {customer.phone}
+                      {customer.email ? ` · ${customer.email}` : ""}
+                    </span>
+                    <span className="mt-1 block text-xs text-[var(--op-text-faint)]">
+                      {customer.visits} visits · {customer.noShows} no-shows
+                    </span>
                   </span>
-                  <span className="mt-1 block text-xs text-slate-400">
-                    {customer.visits} visits · {customer.noShows} no-shows
-                  </span>
-                </span>
-              </button>
-            ))}
+                </button>
+              );
+            })}
           </div>
         )}
       </div>

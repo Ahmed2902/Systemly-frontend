@@ -13,6 +13,7 @@ import {
 import type { StaffDirectoryItem } from "../staff.types";
 
 const DAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+const SERVICE_COLOURS = ["#4d9bd8", "#d69a45", "#3fae8a", "#d96c7b"];
 
 function initials(name: string) {
   return name
@@ -50,31 +51,44 @@ export function StaffCard({
 }) {
   const inactive = !member.isActive;
   const onLeave = Boolean(member.currentTimeOff);
-  const border = inactive
-    ? "border-slate-300 bg-slate-100/85"
+  const accent = inactive
+    ? "var(--op-text-faint)"
     : onLeave
-      ? "border-amber-200 bg-gradient-to-br from-white to-amber-50/70"
+      ? "var(--op-warning)"
       : member.availableToday
-        ? "border-emerald-200 bg-gradient-to-br from-white to-emerald-50/60"
-        : "border-violet-200 bg-gradient-to-br from-white to-violet-50/50";
+        ? "var(--op-success)"
+        : "var(--op-info)";
   const configuredCommissions = member.services.filter(
     (service) => service.commissionType && service.commissionType !== "NONE",
   ).length;
 
   return (
     <article
-      className={`group overflow-hidden rounded-3xl border shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg ${border} ${inactive ? "opacity-75" : ""}`}
+      className={`group overflow-hidden rounded-[16px] border bg-[var(--op-surface)] text-[var(--op-text)] shadow-[var(--op-shadow)] transition hover:-translate-y-0.5 hover:shadow-lg ${inactive ? "opacity-70" : ""}`}
+      style={{ borderColor: `color-mix(in srgb, ${accent} 45%, var(--op-border))` }}
     >
-      <div className="p-5">
+      <div
+        className="p-5"
+        style={{
+          background: `linear-gradient(135deg, color-mix(in srgb, ${accent} 10%, var(--op-surface)), var(--op-surface) 72%)`,
+        }}
+      >
         <div className="flex items-start gap-4">
           {member.photoUrl ? (
             <img
               src={member.photoUrl}
               alt=""
-              className={`h-16 w-16 rounded-2xl object-cover shadow-sm ${inactive ? "grayscale" : ""}`}
+              className={`h-16 w-16 rounded-2xl border border-[var(--op-border)] object-cover shadow-sm ${inactive ? "grayscale" : ""}`}
             />
           ) : (
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-100 to-sky-100 text-lg font-bold text-violet-700 shadow-sm">
+            <div
+              className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border text-lg font-bold shadow-sm"
+              style={{
+                background: `color-mix(in srgb, ${accent} 12%, var(--op-surface-soft))`,
+                borderColor: `color-mix(in srgb, ${accent} 38%, var(--op-border))`,
+                color: accent,
+              }}
+            >
               {initials(member.name)}
             </div>
           )}
@@ -82,11 +96,13 @@ export function StaffCard({
           <div className="min-w-0 flex-1">
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
-                <h2 className="truncate text-lg font-bold text-slate-950">
+                <h2 className="truncate text-lg font-bold text-[var(--op-text)]">
                   {member.name}
                 </h2>
-                <p className="mt-1 flex flex-wrap items-center gap-1.5 text-sm text-slate-500">
-                  <span className="font-semibold text-violet-700">{member.role}</span>
+                <p className="mt-1 flex flex-wrap items-center gap-1.5 text-sm text-[var(--op-text-muted)]">
+                  <span className="font-semibold" style={{ color: accent }}>
+                    {member.role}
+                  </span>
                   {member.jobTitle ? <span>· {member.jobTitle}</span> : null}
                 </p>
               </div>
@@ -94,7 +110,7 @@ export function StaffCard({
               <button
                 type="button"
                 onClick={() => onEdit(member)}
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-slate-400 transition hover:bg-white hover:text-violet-700"
+                className="op-icon-button h-9 w-9 shrink-0 border-0 bg-transparent"
                 aria-label={`Edit ${member.name}`}
               >
                 <MoreVertical size={18} />
@@ -103,7 +119,7 @@ export function StaffCard({
 
             {member.yearsExperience !== null &&
             member.yearsExperience !== undefined ? (
-              <p className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-slate-500">
+              <p className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-[var(--op-text-muted)]">
                 <BriefcaseBusiness size={13} />
                 {member.yearsExperience} years experience
               </p>
@@ -113,48 +129,46 @@ export function StaffCard({
 
         <div className="mt-5 flex min-h-8 flex-wrap gap-2">
           {member.services.slice(0, 3).map((service, index) => {
-            const tones = [
-              "bg-sky-100 text-sky-700",
-              "bg-orange-100 text-orange-700",
-              "bg-violet-100 text-violet-700",
-            ];
+            const colour = SERVICE_COLOURS[index % SERVICE_COLOURS.length];
             return (
               <span
                 key={service.id}
-                className={`rounded-full px-2.5 py-1 text-xs font-semibold ${tones[index % tones.length]}`}
+                className="rounded-full border px-2.5 py-1 text-xs font-semibold"
+                style={{
+                  background: `color-mix(in srgb, ${colour} 12%, var(--op-surface))`,
+                  borderColor: `color-mix(in srgb, ${colour} 38%, var(--op-border))`,
+                  color: colour,
+                }}
               >
                 {service.name}
               </span>
             );
           })}
           {member.services.length > 3 ? (
-            <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
+            <span className="rounded-full border border-[var(--op-border)] bg-[var(--op-surface-soft)] px-2.5 py-1 text-xs font-semibold text-[var(--op-text-secondary)]">
               +{member.services.length - 3} more
             </span>
           ) : null}
           {member.services.length === 0 ? (
-            <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-500">
+            <span className="rounded-full border border-[var(--op-border)] bg-[var(--op-surface-soft)] px-2.5 py-1 text-xs font-medium text-[var(--op-text-muted)]">
               No assigned services
             </span>
           ) : null}
         </div>
       </div>
 
-      <div className="border-y border-slate-200/75 bg-white/55 px-5 py-4">
+      <div className="border-y border-[var(--op-border)] bg-[var(--op-surface-soft)] px-5 py-4">
         <div className="flex items-center justify-between gap-3">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--op-text-muted)]">
             Weekly availability
           </p>
           <span
-            className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${
-              inactive
-                ? "bg-slate-200 text-slate-600"
-                : onLeave
-                  ? "bg-amber-100 text-amber-700"
-                  : member.availableToday
-                    ? "bg-emerald-100 text-emerald-700"
-                    : "bg-slate-100 text-slate-600"
-            }`}
+            className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold"
+            style={{
+              background: `color-mix(in srgb, ${accent} 11%, var(--op-surface))`,
+              borderColor: `color-mix(in srgb, ${accent} 34%, var(--op-border))`,
+              color: accent,
+            }}
           >
             {inactive ? (
               <UserRoundX size={13} />
@@ -175,11 +189,20 @@ export function StaffCard({
             return (
               <span
                 key={day}
-                className={`rounded-lg px-2 py-1 text-[10px] font-bold ${
+                className="rounded-lg border px-2 py-1 text-[10px] font-bold"
+                style={
                   working && member.isActive
-                    ? "bg-violet-600 text-white"
-                    : "bg-slate-200/80 text-slate-500"
-                }`}
+                    ? {
+                        background: "var(--op-primary)",
+                        borderColor: "var(--op-primary)",
+                        color: "var(--op-primary-text)",
+                      }
+                    : {
+                        background: "var(--op-surface)",
+                        borderColor: "var(--op-border)",
+                        color: "var(--op-text-faint)",
+                      }
+                }
               >
                 {day}
               </span>
@@ -188,10 +211,12 @@ export function StaffCard({
         </div>
 
         {canManageMoney ? (
-          <div className="mt-4 rounded-xl border border-white/90 bg-white/80 px-3 py-2.5">
+          <div className="mt-4 rounded-xl border border-[var(--op-border)] bg-[var(--op-surface)] px-3 py-2.5">
             <div className="flex items-center justify-between gap-3 text-xs">
-              <span className="font-medium text-slate-500">Commission settings</span>
-              <span className="font-semibold text-slate-800">
+              <span className="font-medium text-[var(--op-text-muted)]">
+                Commission settings
+              </span>
+              <span className="font-semibold text-[var(--op-text)]">
                 {configuredCommissions} of {member.services.length} configured
               </span>
             </div>
@@ -199,10 +224,10 @@ export function StaffCard({
         ) : null}
       </div>
 
-      <div className="flex items-center justify-between gap-3 bg-white/75 px-5 py-3.5">
+      <div className="flex items-center justify-between gap-3 bg-[var(--op-surface)] px-5 py-3.5">
         <Link
           href={`/operations/staff/${member.id}`}
-          className="text-sm font-semibold text-violet-700 transition hover:text-violet-900"
+          className="text-sm font-semibold text-[var(--op-info)] transition hover:opacity-75"
         >
           View profile
         </Link>
@@ -210,7 +235,7 @@ export function StaffCard({
           <button
             type="button"
             onClick={() => onEdit(member)}
-            className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-violet-50 hover:text-violet-700"
+            className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-[var(--op-text-secondary)] transition hover:bg-[var(--op-hover)] hover:text-[var(--op-text)]"
           >
             <Pencil size={13} />
             Edit
@@ -219,7 +244,7 @@ export function StaffCard({
             <button
               type="button"
               onClick={() => onDeactivate(member)}
-              className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-rose-600 transition hover:bg-rose-50"
+              className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-[var(--op-danger)] transition hover:bg-[var(--op-danger-soft)]"
             >
               Deactivate
             </button>

@@ -34,15 +34,15 @@ export function InvoiceDetailPanel({
 }) {
   if (loading) {
     return (
-      <div className="flex min-h-96 items-center justify-center rounded-3xl border border-white/80 bg-white/90 shadow-sm">
-        <Loader2 className="animate-spin text-violet-600" size={25} />
+      <div className="flex min-h-96 items-center justify-center rounded-3xl border border-[var(--op-border)] bg-[var(--op-surface)] shadow-[var(--op-shadow)]">
+        <Loader2 className="animate-spin text-[var(--op-info)]" size={25} />
       </div>
     );
   }
 
   if (!invoice) {
     return (
-      <div className="flex min-h-96 items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-white/70 p-8 text-center text-sm text-slate-500">
+      <div className="flex min-h-96 items-center justify-center rounded-3xl border border-dashed border-[var(--op-border)] bg-[var(--op-surface)] p-8 text-center text-sm text-[var(--op-text-muted)]">
         Select an invoice to review its receipt and payment details.
       </div>
     );
@@ -52,25 +52,25 @@ export function InvoiceDetailPanel({
   const customItems = invoice.lineItems.filter((item) => !item.service);
 
   return (
-    <aside className="overflow-hidden rounded-3xl border border-white/80 bg-white/95 shadow-xl shadow-slate-200/50">
-      <div className="border-b border-slate-200 bg-gradient-to-br from-violet-50 via-white to-emerald-50 px-5 py-5">
+    <aside className="overflow-hidden rounded-3xl border border-[var(--op-border)] bg-[var(--op-surface)] shadow-[var(--op-shadow)]">
+      <div className="border-b border-[var(--op-border)] bg-[var(--op-surface-soft)] px-5 py-5">
         <div className="flex items-start justify-between gap-4">
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <h2 className="text-xl font-bold text-slate-950">
+              <h2 className="text-xl font-bold text-[var(--op-text)]">
                 {invoice.invoiceNumber}
               </h2>
               <span
                 className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
                   invoice.status === "paid"
-                    ? "bg-emerald-100 text-emerald-700"
-                    : "bg-slate-200 text-slate-600"
+                    ? "bg-[var(--op-success-soft)] text-[var(--op-success)]"
+                    : "bg-[var(--op-surface-raised)] text-[var(--op-text-muted)]"
                 }`}
               >
                 {invoice.status === "paid" ? "Paid" : "Voided"}
               </span>
             </div>
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-1 text-xs text-[var(--op-text-muted)]">
               Issued {new Date(invoice.issuedAt).toLocaleString("en-GB")}
             </p>
           </div>
@@ -80,7 +80,7 @@ export function InvoiceDetailPanel({
               alt={`${invoice.business.name} logo`}
               width={44}
               height={44}
-              className="h-11 w-11 rounded-xl border border-white bg-white object-contain shadow-sm"
+              className="h-11 w-11 rounded-xl border border-[var(--op-border)] bg-white object-contain shadow-sm"
             />
           ) : null}
         </div>
@@ -89,7 +89,7 @@ export function InvoiceDetailPanel({
           type="button"
           disabled={actionRunning}
           onClick={onDownload}
-          className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-md shadow-violet-200 transition hover:from-violet-700 hover:to-indigo-700 disabled:opacity-50"
+          className="op-button op-button-primary mt-4 w-full py-3 disabled:opacity-50"
         >
           <Download size={16} />
           Download receipt
@@ -97,21 +97,21 @@ export function InvoiceDetailPanel({
       </div>
 
       <div className="space-y-5 p-5">
-        <section className="grid gap-3 rounded-2xl bg-slate-50 p-4 text-sm sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+        <section className="grid gap-3 rounded-2xl bg-[var(--op-surface-soft)] p-4 text-sm sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
           <div>
-            <p className="text-xs font-medium text-slate-500">Customer</p>
-            <p className="mt-1 font-semibold text-slate-900">
+            <p className="text-xs font-medium text-[var(--op-text-muted)]">Customer</p>
+            <p className="mt-1 font-semibold text-[var(--op-text)]">
               {invoice.customer.name}
             </p>
-            <p className="text-xs text-slate-500">{invoice.customer.phone}</p>
+            <p className="text-xs text-[var(--op-text-muted)]">{invoice.customer.phone}</p>
           </div>
           <div>
-            <p className="text-xs font-medium text-slate-500">Payment method</p>
-            <p className="mt-1 font-semibold text-slate-900">
+            <p className="text-xs font-medium text-[var(--op-text-muted)]">Payment method</p>
+            <p className="mt-1 font-semibold text-[var(--op-text)]">
               {paymentLabel(invoice.paymentMethod)}
             </p>
             {invoice.paymentReference ? (
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-[var(--op-text-muted)]">
                 {invoice.paymentReference}
               </p>
             ) : null}
@@ -121,7 +121,7 @@ export function InvoiceDetailPanel({
         {invoice.appointment ? (
           <Link
             href={`/operations/appointments/${invoice.appointment.id}`}
-            className="flex items-center justify-between rounded-2xl border border-sky-100 bg-sky-50/70 px-4 py-3 text-sm font-semibold text-sky-800 transition hover:bg-sky-100"
+            className="flex items-center justify-between rounded-2xl border border-white bg-[#f7f7f4] px-4 py-3 text-sm font-semibold text-[#111411] shadow-sm transition hover:bg-white hover:shadow-md"
           >
             Open appointment
             <ExternalLink size={15} />
@@ -130,23 +130,23 @@ export function InvoiceDetailPanel({
 
         {serviceItems.length > 0 ? (
           <section>
-            <h3 className="font-semibold text-slate-900">Services</h3>
-            <div className="mt-3 overflow-hidden rounded-2xl border border-slate-200">
+            <h3 className="font-semibold text-[var(--op-text)]">Services</h3>
+            <div className="mt-3 overflow-hidden rounded-2xl border border-[var(--op-border)]">
               {serviceItems.map((item) => (
                 <div
                   key={item.id}
-                  className="grid grid-cols-[1fr_auto] gap-4 border-b border-slate-100 px-4 py-3 text-sm last:border-b-0"
+                  className="grid grid-cols-[1fr_auto] gap-4 border-b border-[var(--op-border)] px-4 py-3 text-sm last:border-b-0"
                 >
                   <div>
-                    <p className="font-medium text-slate-800">
+                    <p className="font-medium text-[var(--op-text)]">
                       {item.description}
                     </p>
-                    <p className="mt-0.5 text-xs text-slate-500">
+                    <p className="mt-0.5 text-xs text-[var(--op-text-muted)]">
                       {item.quantity} × {money(item.unitPriceCents)}
                       {item.staff ? ` · ${item.staff.name}` : ""}
                     </p>
                   </div>
-                  <p className="font-semibold text-slate-900">
+                  <p className="font-semibold text-[var(--op-text)]">
                     {money(item.totalCents)}
                   </p>
                 </div>
@@ -157,24 +157,24 @@ export function InvoiceDetailPanel({
 
         {customItems.length > 0 ? (
           <section>
-            <h3 className="font-semibold text-slate-900">Custom items</h3>
-            <div className="mt-3 overflow-hidden rounded-2xl border border-slate-200">
+            <h3 className="font-semibold text-[var(--op-text)]">Custom items</h3>
+            <div className="mt-3 overflow-hidden rounded-2xl border border-[var(--op-border)]">
               {customItems.map((item) => {
                 const calculatedTotal = item.unitPriceCents * item.quantity;
                 return (
                   <div
                     key={item.id}
-                    className="grid grid-cols-[minmax(0,1fr)_auto] gap-4 border-b border-slate-100 px-4 py-3 text-sm last:border-b-0"
+                    className="grid grid-cols-[minmax(0,1fr)_auto] gap-4 border-b border-[var(--op-border)] px-4 py-3 text-sm last:border-b-0"
                   >
                     <div className="min-w-0">
-                      <p className="truncate font-medium text-slate-800">
+                      <p className="truncate font-medium text-[var(--op-text)]">
                         {item.description}
                       </p>
-                      <p className="mt-0.5 text-xs text-slate-500">
+                      <p className="mt-0.5 text-xs text-[var(--op-text-muted)]">
                         {item.quantity} × {money(item.unitPriceCents)}
                       </p>
                     </div>
-                    <p className="font-semibold text-slate-900">
+                    <p className="font-semibold text-[var(--op-text)]">
                       {money(calculatedTotal)}
                     </p>
                   </div>
@@ -184,35 +184,35 @@ export function InvoiceDetailPanel({
           </section>
         ) : null}
 
-        <section className="space-y-2 rounded-2xl bg-slate-50 p-4 text-sm">
-          <div className="flex justify-between text-slate-600">
+        <section className="space-y-2 rounded-2xl bg-[var(--op-surface-soft)] p-4 text-sm">
+          <div className="flex justify-between text-[var(--op-text-secondary)]">
             <span>Subtotal</span>
             <span>{money(invoice.subtotalCents)}</span>
           </div>
           {invoice.discountCents > 0 ? (
-            <div className="flex justify-between text-rose-600">
+            <div className="flex justify-between text-[var(--op-danger)]">
               <span>Discount</span>
               <span>-{money(invoice.discountCents)}</span>
             </div>
           ) : null}
-          <div className="flex justify-between border-t border-slate-200 pt-3 text-lg font-bold text-slate-950">
+          <div className="flex justify-between border-t border-[var(--op-border)] pt-3 text-lg font-bold text-[var(--op-text)]">
             <span>Total</span>
             <span>{money(invoice.totalCents)}</span>
           </div>
         </section>
 
         {invoice.notes ? (
-          <section className="rounded-2xl border border-amber-100 bg-amber-50/70 p-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-amber-700">
+          <section className="rounded-2xl border border-[var(--op-warning)] bg-[var(--op-warning-soft)] p-4">
+            <p className="text-xs font-semibold uppercase tracking-wide text-[var(--op-warning)]">
               Notes
             </p>
-            <p className="mt-2 text-sm text-slate-700">{invoice.notes}</p>
+            <p className="mt-2 text-sm text-[var(--op-text-secondary)]">{invoice.notes}</p>
           </section>
         ) : null}
 
         {invoice.status === "voided" ? (
-          <section className="rounded-2xl border border-slate-200 bg-slate-100 p-4 text-sm text-slate-600">
-            <p className="font-semibold text-slate-800">Invoice voided</p>
+          <section className="rounded-2xl border border-[var(--op-border)] bg-[var(--op-surface-soft)] p-4 text-sm text-[var(--op-text-secondary)]">
+            <p className="font-semibold text-[var(--op-text)]">Invoice voided</p>
             <p className="mt-1">
               {invoice.voidReason ?? "No reason recorded."}
             </p>
@@ -222,7 +222,7 @@ export function InvoiceDetailPanel({
             type="button"
             disabled={actionRunning}
             onClick={onVoid}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700 transition hover:bg-rose-100 disabled:opacity-50"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--op-danger)] bg-[var(--op-danger-soft)] px-4 py-3 text-sm font-semibold text-[var(--op-danger)] transition hover:brightness-105 disabled:opacity-50"
           >
             <RotateCcw size={16} />
             Void invoice and reopen appointment

@@ -111,17 +111,23 @@ export function ServiceCategoryCards({
 
   const cardWidth =
     visibleCount === 1
-      ? "min(85vw, 22rem)"
+      ? "min(84vw, 23rem)"
       : `calc((100% - ${(visibleCount - 1) * CATEGORY_GAP_PX}px) / ${visibleCount})`;
 
   return (
-    <section aria-labelledby="service-categories-heading" className="min-w-0">
-      <div className="mb-3 flex items-end justify-between gap-4">
-        <div>
-          <h2 id="service-categories-heading" className="text-lg font-semibold text-slate-900">
+    <section
+      aria-labelledby="service-categories-heading"
+      className="op-panel min-w-0 overflow-hidden p-4"
+    >
+      <div className="mb-4 flex items-end justify-between gap-4">
+        <div className="min-w-0">
+          <h2
+            id="service-categories-heading"
+            className="text-lg font-semibold text-[var(--op-text)]"
+          >
             Categories
           </h2>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-[var(--op-text-muted)]">
             {categories.length} {categories.length === 1 ? "category" : "categories"} in your catalog
           </p>
         </div>
@@ -132,30 +138,33 @@ export function ServiceCategoryCards({
             onClick={() => goToCategory(activeIndex - 1)}
             disabled={activeIndex === 0}
             aria-label="Previous categories"
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 shadow-sm transition hover:border-violet-200 hover:bg-violet-50 hover:text-violet-700 focus:outline-none focus:ring-4 focus:ring-violet-100 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-slate-200 disabled:hover:bg-white disabled:hover:text-slate-500"
+            className="op-icon-button disabled:cursor-not-allowed disabled:opacity-35"
           >
-            <ChevronLeft size={19} />
+            <ChevronLeft size={18} />
           </button>
           <button
             type="button"
             onClick={() => goToCategory(activeIndex + 1)}
             disabled={activeIndex >= maxIndex}
             aria-label="Next categories"
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 shadow-sm transition hover:border-violet-200 hover:bg-violet-50 hover:text-violet-700 focus:outline-none focus:ring-4 focus:ring-violet-100 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-slate-200 disabled:hover:bg-white disabled:hover:text-slate-500"
+            className="op-icon-button disabled:cursor-not-allowed disabled:opacity-35"
           >
-            <ChevronRight size={19} />
+            <ChevronRight size={18} />
           </button>
         </div>
       </div>
 
       <div
         ref={scrollerRef}
-        className="-mx-1 flex snap-x snap-mandatory gap-4 overflow-x-auto px-1 pb-2 scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-1 scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {categories.map((category, index) => {
           const accent = getOperationsAccent(category.name, index);
           const Icon = ICONS[index % ICONS.length];
           const selected = selectedCategory === category.value;
+          const softAccent = `color-mix(in srgb, ${accent.hex} 12%, var(--op-surface))`;
+          const softerAccent = `color-mix(in srgb, ${accent.hex} 8%, var(--op-surface))`;
+          const accentBorder = `color-mix(in srgb, ${accent.hex} 46%, var(--op-border))`;
 
           return (
             <article
@@ -171,33 +180,54 @@ export function ServiceCategoryCards({
                   onSelect(category.value);
                 }
               }}
-              style={{ width: cardWidth }}
-              className={`shrink-0 snap-start rounded-2xl border p-5 shadow-sm outline-none transition hover:-translate-y-0.5 hover:shadow-md focus:ring-4 focus:ring-violet-100 ${accent.card} ${selected ? "border-violet-400 ring-2 ring-violet-100" : ""}`}
+              style={{
+                width: cardWidth,
+                background: selected ? softAccent : softerAccent,
+                borderColor: selected ? accent.hex : accentBorder,
+                boxShadow: selected
+                  ? `0 0 0 2px color-mix(in srgb, ${accent.hex} 20%, transparent)`
+                  : "var(--op-shadow)",
+              }}
+              className="shrink-0 snap-start rounded-[14px] border p-4 text-[var(--op-text)] outline-none transition hover:-translate-y-0.5 hover:shadow-lg focus-visible:ring-2 focus-visible:ring-[var(--op-focus)]"
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex min-w-0 items-center gap-3">
-                  <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${accent.icon}`}>
-                    <Icon size={21} />
+                  <span
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+                    style={{ background: softAccent, color: accent.hex }}
+                  >
+                    <Icon size={20} />
                   </span>
                   <div className="min-w-0">
-                    <h3 className="truncate font-semibold text-slate-900">{category.name}</h3>
-                    <p className="mt-0.5 text-xs text-slate-500">
+                    <h3 className="truncate font-semibold text-[var(--op-text)]">
+                      {category.name}
+                    </h3>
+                    <p className="mt-0.5 text-xs text-[var(--op-text-muted)]">
                       {category.active} active of {category.total}
                     </p>
                   </div>
                 </div>
 
-                <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${accent.badge}`}>
+                <span
+                  className="shrink-0 rounded-full border px-2.5 py-1 text-xs font-semibold"
+                  style={{
+                    background: softAccent,
+                    borderColor: accentBorder,
+                    color: accent.hex,
+                  }}
+                >
                   {category.total} {category.total === 1 ? "service" : "services"}
                 </span>
               </div>
 
-              <div className="mt-5 divide-y divide-slate-200/60 border-y border-slate-200/60">
+              <div className="mt-4 divide-y divide-[var(--op-border)] border-y border-[var(--op-border)]">
                 {category.services.slice(0, 3).map((service) => (
                   <div key={service.id} className="flex items-center justify-between gap-3 py-3">
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-slate-800">{service.name}</p>
-                      <p className="mt-0.5 text-xs text-slate-500">
+                      <p className="truncate text-sm font-medium text-[var(--op-text)]">
+                        {service.name}
+                      </p>
+                      <p className="mt-0.5 text-xs text-[var(--op-text-muted)]">
                         {service.durationMin} min
                         {canManageMoney && service.priceEgp !== undefined
                           ? ` · ${formatPrice(service.priceEgp)}`
@@ -205,7 +235,12 @@ export function ServiceCategoryCards({
                       </p>
                     </div>
                     <span
-                      className={`h-2 w-2 shrink-0 rounded-full ${service.isActive ? "bg-emerald-500" : "bg-slate-300"}`}
+                      className="h-2 w-2 shrink-0 rounded-full"
+                      style={{
+                        backgroundColor: service.isActive
+                          ? "var(--op-success)"
+                          : "var(--op-text-faint)",
+                      }}
                       aria-label={service.isActive ? "Active" : "Inactive"}
                     />
                   </div>
@@ -219,7 +254,8 @@ export function ServiceCategoryCards({
                   onSelect(category.value);
                 }}
                 onKeyDown={(event) => event.stopPropagation()}
-                className={`mt-4 inline-flex items-center gap-1.5 text-sm font-semibold ${accent.link}`}
+                className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold transition hover:opacity-75"
+                style={{ color: accent.hex }}
               >
                 View all {category.name.toLowerCase()}
                 <ArrowRight size={15} />

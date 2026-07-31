@@ -1,5 +1,6 @@
 export const OPERATIONS_ACCENTS = [
   {
+    hex: "#d69a45",
     card:
       "border-amber-200/70 bg-gradient-to-br from-amber-50 via-white to-white",
     icon: "bg-amber-100 text-amber-700",
@@ -8,6 +9,7 @@ export const OPERATIONS_ACCENTS = [
     pill: "bg-amber-50 text-amber-700 ring-amber-200/70",
   },
   {
+    hex: "#3fae8a",
     card:
       "border-emerald-200/70 bg-gradient-to-br from-emerald-50 via-white to-white",
     icon: "bg-emerald-100 text-emerald-700",
@@ -16,6 +18,7 @@ export const OPERATIONS_ACCENTS = [
     pill: "bg-emerald-50 text-emerald-700 ring-emerald-200/70",
   },
   {
+    hex: "#d97842",
     card:
       "border-orange-200/70 bg-gradient-to-br from-orange-50 via-white to-white",
     icon: "bg-orange-100 text-orange-700",
@@ -24,6 +27,7 @@ export const OPERATIONS_ACCENTS = [
     pill: "bg-orange-50 text-orange-700 ring-orange-200/70",
   },
   {
+    hex: "#4d9bd8",
     card:
       "border-sky-200/70 bg-gradient-to-br from-sky-50 via-white to-white",
     icon: "bg-sky-100 text-sky-700",
@@ -32,6 +36,7 @@ export const OPERATIONS_ACCENTS = [
     pill: "bg-sky-50 text-sky-700 ring-sky-200/70",
   },
   {
+    hex: "#d96c7b",
     card:
       "border-rose-200/70 bg-gradient-to-br from-rose-50 via-white to-white",
     icon: "bg-rose-100 text-rose-700",

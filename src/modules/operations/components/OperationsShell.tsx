@@ -21,8 +21,8 @@ export function OperationsShell({ children }: { children: ReactNode }) {
         onClick={() => setSidebarOpen(false)}
       />
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-      <main className="op-main">
-        <header className="op-mobile-bar">
+      <main className="op-main flex min-h-0 flex-col">
+        <header className="op-mobile-bar flex-none">
           <button
             type="button"
             className="op-mobile-menu-button"
@@ -42,7 +42,9 @@ export function OperationsShell({ children }: { children: ReactNode }) {
             <Plus size={18} />
           </button>
         </header>
-        <div className="min-h-0 flex-1 overflow-hidden">{children}</div>
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+          {children}
+        </div>
       </main>
     </div>
   );

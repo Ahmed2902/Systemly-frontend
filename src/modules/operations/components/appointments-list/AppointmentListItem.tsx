@@ -5,6 +5,7 @@ import {
   formatMoneyEgp,
   formatTime12Hour,
 } from "@/shared/lib/Calendar/grid.utils";
+
 const STATUS_LABELS = {
   pending: "Pending",
   confirmed: "Confirmed",
@@ -14,47 +15,32 @@ const STATUS_LABELS = {
   cancelled_by_customer: "Cancelled",
   no_show: "No-show",
 } as const;
+
 const STATUS_STYLES = {
-  pending: "border-slate-200 bg-slate-50 text-slate-600",
-  confirmed: "border-emerald-200 bg-emerald-50 text-emerald-700",
-  in_progress: "border-violet-200 bg-violet-50 text-violet-700",
-  completed: "border-blue-200 bg-blue-50 text-blue-700",
-  cancelled_by_business: "border-red-200 bg-red-50 text-red-700",
-  cancelled_by_customer: "border-red-200 bg-red-50 text-red-700",
-  no_show: "border-amber-200 bg-amber-50 text-amber-700",
+  pending:
+    "border-[var(--op-warning)] bg-[var(--op-warning-soft)] text-[var(--op-warning)]",
+  confirmed:
+    "border-[var(--op-info)] bg-[var(--op-info-soft)] text-[var(--op-info)]",
+  in_progress:
+    "border-[var(--op-info)] bg-[var(--op-info-soft)] text-[var(--op-info)]",
+  completed:
+    "border-[var(--op-success)] bg-[var(--op-success-soft)] text-[var(--op-success)]",
+  cancelled_by_business:
+    "border-[var(--op-danger)] bg-[var(--op-danger-soft)] text-[var(--op-danger)]",
+  cancelled_by_customer:
+    "border-[var(--op-danger)] bg-[var(--op-danger-soft)] text-[var(--op-danger)]",
+  no_show:
+    "border-[var(--op-warning)] bg-[var(--op-warning-soft)] text-[var(--op-warning)]",
 } as const;
+
 const STAFF_COLORS = [
-  {
-    border: "border-l-blue-500",
-    avatar: "bg-blue-100 text-blue-700",
-    dot: "bg-blue-500",
-  },
-  {
-    border: "border-l-violet-500",
-    avatar: "bg-violet-100 text-violet-700",
-    dot: "bg-violet-500",
-  },
-  {
-    border: "border-l-emerald-500",
-    avatar: "bg-emerald-100 text-emerald-700",
-    dot: "bg-emerald-500",
-  },
-  {
-    border: "border-l-amber-500",
-    avatar: "bg-amber-100 text-amber-700",
-    dot: "bg-amber-500",
-  },
-  {
-    border: "border-l-rose-500",
-    avatar: "bg-rose-100 text-rose-700",
-    dot: "bg-rose-500",
-  },
-  {
-    border: "border-l-cyan-500",
-    avatar: "bg-cyan-100 text-cyan-700",
-    dot: "bg-cyan-500",
-  },
+  { border: "#4d9bd8", avatar: "#4d9bd8", dot: "#4d9bd8" },
+  { border: "#3fae8a", avatar: "#3fae8a", dot: "#3fae8a" },
+  { border: "#d69a45", avatar: "#d69a45", dot: "#d69a45" },
+  { border: "#d96c7b", avatar: "#d96c7b", dot: "#d96c7b" },
+  { border: "#58b7bd", avatar: "#58b7bd", dot: "#58b7bd" },
 ];
+
 function initials(name: string) {
   return name
     .split(" ")
@@ -63,17 +49,21 @@ function initials(name: string) {
     .slice(0, 2)
     .toUpperCase();
 }
+
 function colorForStaff(id: string) {
   let hash = 0;
-  for (let i = 0; i < id.length; i++)
+  for (let i = 0; i < id.length; i += 1) {
     hash = (hash * 31 + id.charCodeAt(i)) >>> 0;
+  }
   return STAFF_COLORS[hash % STAFF_COLORS.length];
 }
+
 interface Props {
   appointment: AppointmentSummary;
   staff: Array<{ id: string; name: string }>;
   timezone: string;
 }
+
 export function AppointmentListItem({ appointment, staff, timezone }: Props) {
   const first = appointment.segments[0];
   const last = appointment.segments.at(-1);
@@ -102,38 +92,49 @@ export function AppointmentListItem({ appointment, staff, timezone }: Props) {
       ) -
       appointment.discount,
   );
+
   return (
     <Link
       href={`/operations/appointments/${appointment.id}`}
-      className={`group flex flex-wrap items-center gap-4 rounded-2xl border border-slate-200 border-l-4 ${color.border} bg-white p-4 shadow-sm transition hover:border-blue-300 hover:shadow-md`}
+      className="group relative flex flex-wrap items-center gap-4 overflow-hidden rounded-2xl border border-[var(--op-border)] bg-[var(--op-surface)] p-4 pl-5 shadow-[var(--op-shadow)] transition hover:border-[var(--op-border-strong)] hover:bg-[color-mix(in_srgb,var(--op-primary)_7%,var(--op-surface))] hover:shadow-lg"
     >
-      <div className="w-24 shrink-0 border-r border-slate-100 pr-4">
-        <div className="text-lg font-bold text-slate-900">
-          {first
-            ? formatTime12Hour(first.startsAt, timezone)
-            : "—"}
+      <span
+        aria-hidden="true"
+        className="absolute inset-y-0 left-0 w-1"
+        style={{ backgroundColor: color.border }}
+      />
+
+      <div className="w-24 shrink-0 border-r border-[var(--op-border)] pr-4">
+        <div className="text-lg font-bold text-[var(--op-text)]">
+          {first ? formatTime12Hour(first.startsAt, timezone) : "—"}
         </div>
-        <div className="mt-1 flex items-center gap-1 text-xs text-slate-500">
-          <Clock3 size={13} />
+        <div className="mt-1 flex items-center gap-1 text-xs font-medium text-[var(--op-text-secondary)]">
+          <Clock3 size={13} className="text-[var(--op-text-faint)]" />
           {duration} min
         </div>
       </div>
+
       <div className="flex min-w-56 flex-1 items-center gap-3">
         <div
-          className={`flex h-11 w-11 items-center justify-center rounded-full font-semibold ${color.avatar}`}
+          className="flex h-11 w-11 items-center justify-center rounded-full border font-semibold"
+          style={{
+            background: `color-mix(in srgb, ${color.avatar} 12%, var(--op-surface))`,
+            borderColor: `color-mix(in srgb, ${color.avatar} 40%, var(--op-border))`,
+            color: color.avatar,
+          }}
         >
           {initials(appointment.customer.name)}
         </div>
         <div className="min-w-0 flex-1">
-          <div className="truncate font-semibold text-slate-900 group-hover:text-blue-700">
+          <div className="truncate font-semibold text-[var(--op-text)] transition group-hover:text-[var(--op-text)]">
             {appointment.customer.name}
           </div>
-          <div className="break-words text-sm text-slate-500">
+          <div className="break-words text-sm text-[var(--op-text-muted)]">
             {appointment.segments
               .map((segment) => segment.serviceName)
               .join(" · ")}
           </div>
-          <div className="mt-1 text-xs text-slate-400">
+          <div className="mt-1 text-xs text-[var(--op-text-faint)]">
             {appointment.customer.phone || "No phone"} ·{" "}
             {appointment.segments.length} service
             {appointment.segments.length === 1 ? "" : "s"} ·{" "}
@@ -141,21 +142,26 @@ export function AppointmentListItem({ appointment, staff, timezone }: Props) {
           </div>
         </div>
       </div>
-      <div className="flex min-w-44 max-w-full items-center gap-2 text-sm text-slate-600 md:max-w-56">
-        <span className={`h-2.5 w-2.5 rounded-full ${color.dot}`} />
-        <UserRound size={16} />
+
+      <div className="flex min-w-44 max-w-full items-center gap-2 text-sm text-[var(--op-text-secondary)] md:max-w-56">
+        <span
+          className="h-2.5 w-2.5 rounded-full"
+          style={{ backgroundColor: color.dot }}
+        />
+        <UserRound size={16} className="text-[var(--op-text-faint)]" />
         <span className="truncate">{staffNames || "Unassigned"}</span>
       </div>
+
       <div className="ml-auto flex items-center gap-3">
         <span
           className={`rounded-full border px-3 py-1 text-xs font-semibold ${STATUS_STYLES[appointment.status]}`}
         >
           {STATUS_LABELS[appointment.status]}
         </span>
-        <span className="text-sm font-semibold text-slate-700">
+        <span className="text-sm font-semibold text-[var(--op-text)]">
           {formatMoneyEgp(total)}
         </span>
-        <span className="text-slate-400">›</span>
+        <span className="text-[var(--op-text-faint)]">›</span>
       </div>
     </Link>
   );
