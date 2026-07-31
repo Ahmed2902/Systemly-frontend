@@ -87,6 +87,12 @@ export interface ClinicVisitRecord {
   diagnosisAssessment?: string | null;
   clinicalSessionNotes?: string | null;
   planAndPrescription?: string | null;
+  /** @deprecated Temporary aliases for the existing Calendar drawer. */
+  diagnosis?: string | null;
+  /** @deprecated Temporary aliases for the existing Calendar drawer. */
+  notes?: string | null;
+  /** @deprecated Temporary aliases for the existing Calendar drawer. */
+  prescriptionJson?: string | Record<string, unknown> | null;
 }
 
 export interface StaffBreak {
