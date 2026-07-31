@@ -15,12 +15,12 @@ import {
 } from "@/modules/analytics/components/AnalyticsShell";
 import {
   AreaChart,
-  BookingHeatmap,
   DonutChart,
   LollipopChart,
 } from "@/modules/analytics/components/AnalyticsCharts";
+import { AppointmentStartHeatmap } from "@/modules/analytics/components/AppointmentStartHeatmap";
 import {
-  formatAnalyticsBucket,
+  formatAnalyticsBucketForPreset,
   formatEgp,
   formatPercent,
 } from "@/modules/analytics/analytics.formatters";
@@ -54,7 +54,9 @@ export default function DashboardOverviewPage() {
       subtitle="Here are the latest financial, customer, and operational signals from your business."
     >
       {error ? <AnalyticsState message={error} /> : null}
-      {!data && !error ? <AnalyticsState message="Loading dashboard overview…" /> : null}
+      {!data && !error ? (
+        <AnalyticsState message="Loading dashboard overview…" />
+      ) : null}
       {data ? (
         <div className="space-y-3">
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
@@ -109,7 +111,11 @@ export default function DashboardOverviewPage() {
               </div>
               <AreaChart
                 data={data.revenue.trend.map((row) => ({
-                  label: formatAnalyticsBucket(row.bucket, data.revenue.timezone),
+                  label: formatAnalyticsBucketForPreset(
+                    row.bucket,
+                    data.revenue.timezone,
+                    preset,
+                  ),
                   value: row.totalCents,
                   tooltip: [
                     { label: "Paid invoices", value: String(row.invoiceCount) },
@@ -141,7 +147,10 @@ export default function DashboardOverviewPage() {
                   </Link>
                 ) : null}
                 {data.staff.summary.lowUtilizationCount > 0 ? (
-                  <Link href={`/operations/dashboard/staff?preset=${preset}`} className="block">
+                  <Link
+                    href={`/operations/dashboard/staff?preset=${preset}`}
+                    className="block"
+                  >
                     <Signal
                       icon={<AlertTriangle size={15} />}
                       label="Low utilisation"
@@ -164,16 +173,25 @@ export default function DashboardOverviewPage() {
           </div>
 
           <div className="grid gap-3 xl:grid-cols-[minmax(0,1.25fr)_minmax(260px,.75fr)]">
-            <AnalyticsPanel title="Peak booking times">
-              <BookingHeatmap rows={data.operations.heatmap} />
+            <AnalyticsPanel
+              title="Peak appointment start times"
+              action={
+                <span className="analytics-muted text-[11px]">
+                  Each appointment counts once at its first start time
+                </span>
+              }
+            >
+              <AppointmentStartHeatmap rows={data.operations.heatmap} />
             </AnalyticsPanel>
             <AnalyticsPanel title="Service mix">
               <DonutChart
                 compact
-                items={data.operations.mostBookedServices.slice(0, 6).map((row) => ({
-                  label: row.name,
-                  value: row.count,
-                }))}
+                items={data.operations.mostBookedServices
+                  .slice(0, 6)
+                  .map((row) => ({
+                    label: row.name,
+                    value: row.count,
+                  }))}
               />
             </AnalyticsPanel>
           </div>
@@ -196,7 +214,10 @@ export default function DashboardOverviewPage() {
                 tooltip: [
                   { label: "Revenue", value: formatEgp(row.totalCents) },
                   { label: "Jobs", value: String(row.lineItemCount) },
-                  { label: "Utilisation", value: formatPercent(row.utilizationRate) },
+                  {
+                    label: "Utilisation",
+                    value: formatPercent(row.utilizationRate),
+                  },
                 ],
               }))}
               formatValue={formatEgp}
