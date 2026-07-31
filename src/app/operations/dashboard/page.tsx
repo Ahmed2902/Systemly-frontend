@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { AlertTriangle, CheckCircle2, UsersRound } from "lucide-react";
 import { useAuth } from "@/modules/auth/useAuth";
 import { getDashboardAnalytics } from "@/modules/analytics/analytics.api";
@@ -44,6 +44,9 @@ export default function DashboardOverviewPage() {
   }, [accessToken, preset]);
 
   const firstName = user?.name?.trim().split(/\s+/)[0] || "there";
+  const growthPct = data?.growth.summary.monthOverMonthGrowthPct ?? null;
+  const growthTone =
+    growthPct == null ? "neutral" : growthPct >= 0 ? "positive" : "negative";
 
   return (
     <AnalyticsShell
@@ -58,8 +61,8 @@ export default function DashboardOverviewPage() {
             <MetricCard
               label="Total revenue"
               value={formatEgp(data.revenue.summary.revenueCents)}
-              trend={formatPercent(data.growth.summary.monthOverMonthGrowthPct)}
-              tone={data.growth.summary.monthOverMonthGrowthPct >= 0 ? "positive" : "negative"}
+              trend={formatPercent(growthPct)}
+              tone={growthTone}
               hint="Collected in the selected period"
             />
             <MetricCard
@@ -100,14 +103,8 @@ export default function DashboardOverviewPage() {
                 <strong className="analytics-title text-3xl tracking-[-0.045em]">
                   {formatEgp(data.revenue.summary.revenueCents)}
                 </strong>
-                <span
-                  className={`analytics-trend ${
-                    data.growth.summary.monthOverMonthGrowthPct >= 0
-                      ? "analytics-trend-positive"
-                      : "analytics-trend-negative"
-                  }`}
-                >
-                  {formatPercent(data.growth.summary.monthOverMonthGrowthPct)}
+                <span className={`analytics-trend analytics-trend-${growthTone}`}>
+                  {formatPercent(growthPct)}
                 </span>
               </div>
               <AreaChart
@@ -217,7 +214,7 @@ function Signal({
   detail,
   tone,
 }: {
-  icon: React.ReactNode;
+  icon: ReactNode;
   label: string;
   detail: string;
   tone: "success" | "info" | "warning";
