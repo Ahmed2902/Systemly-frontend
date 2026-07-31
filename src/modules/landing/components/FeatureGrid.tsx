@@ -1,4 +1,5 @@
 import { BarChart3, CalendarDays, Globe2, ReceiptText } from "lucide-react";
+import { LandingCalendarBoard } from "./LandingCalendarBoard";
 
 const chapters = [
   {
@@ -77,13 +78,12 @@ function WebsiteVisual() {
 function OperationsVisual() {
   return (
     <div className="lp-story-visual lp-operations-visual" aria-hidden="true">
-      <div className="lp-ops-toolbar"><b>Calendar</b><span>Monday, 27 July</span><button>New appointment</button></div>
-      <div className="lp-ops-grid">
-        <strong>Staff</strong><span>10:00</span><span>11:00</span><span>12:00</span>
-        <b>Nour Khalil</b><i className="visit visit-one">Mariam · Hair</i><i/><i/>
-        <b>Mona Adel</b><i/><i className="visit visit-two">Yasmine · Nails</i><i/>
-        <b>Dr. Lina</b><i/><i/><i className="visit visit-three">Salma · Consult</i>
+      <div className="lp-ops-toolbar">
+        <b>Calendar</b>
+        <span>Monday, 27 July</span>
+        <button type="button">New appointment</button>
       </div>
+      <LandingCalendarBoard variant="story" />
     </div>
   );
 }
