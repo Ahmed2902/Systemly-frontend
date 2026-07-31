@@ -84,9 +84,9 @@ export interface AppointmentSummary {
 }
 
 export interface ClinicVisitRecord {
-  notes?: string | null;
-  diagnosis?: string | null;
-  prescriptionJson?: Record<string, unknown> | null;
+  diagnosisAssessment?: string | null;
+  clinicalSessionNotes?: string | null;
+  planAndPrescription?: string | null;
 }
 
 export interface StaffBreak {
