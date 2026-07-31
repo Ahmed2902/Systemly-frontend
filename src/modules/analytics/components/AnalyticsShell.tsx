@@ -24,6 +24,21 @@ const LABELS: Record<AnalyticsPreset, string> = {
   all_time: "All time",
 };
 
+const METRIC_META: Array<{
+  match: RegExp;
+  emoji: string;
+  copy: string;
+}> = [
+  { match: /revenue|spend|value/i, emoji: "↗", copy: "Selected-period value" },
+  { match: /invoice/i, emoji: "🧾", copy: "Payment performance" },
+  { match: /booking|appointment|visit/i, emoji: "📅", copy: "Operational activity" },
+  { match: /customer/i, emoji: "👥", copy: "Customer movement" },
+  { match: /staff|team/i, emoji: "◎", copy: "Team performance" },
+  { match: /no-show|cancellation|inactive/i, emoji: "!", copy: "Needs attention" },
+  { match: /category|service/i, emoji: "✦", copy: "Service mix" },
+  { match: /weekday|day/i, emoji: "◷", copy: "Best-performing time" },
+];
+
 export function useAnalyticsPreset(): AnalyticsPreset {
   const search = useSearchParams();
   const raw = search.get("preset");
@@ -110,25 +125,41 @@ export function MetricCard({
   hint,
   trend,
   tone = "neutral",
+  emoji,
 }: {
   label: string;
   value: string;
   hint?: string;
   trend?: string;
   tone?: "neutral" | "positive" | "negative" | "warning";
+  emoji?: string;
 }) {
+  const meta = METRIC_META.find((item) => item.match.test(label));
+  const helper = hint ?? meta?.copy ?? "Selected-period summary";
+  const resolvedEmoji = emoji ?? meta?.emoji ?? "•";
+
   return (
     <article className="analytics-card analytics-metric-card rounded-[12px] px-4 py-3.5">
       <div className="flex items-start justify-between gap-3">
-        <p className="analytics-muted text-[11px] font-semibold">{label}</p>
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg border border-[var(--analytics-border)] bg-[var(--analytics-panel-soft)] text-[12px] font-bold text-[var(--analytics-text)]">
+            {resolvedEmoji}
+          </span>
+          <p className="analytics-muted truncate text-[11px] font-semibold">
+            {label}
+          </p>
+        </div>
         {trend ? (
           <span className={`analytics-trend analytics-trend-${tone}`}>{trend}</span>
         ) : null}
       </div>
-      <p className="analytics-title mt-2.5 text-[22px] font-bold tracking-[-0.04em]">
+      <p className="analytics-title mt-3 text-[22px] font-bold tracking-[-0.04em]">
         {value}
       </p>
-      {hint ? <p className="analytics-subtle mt-1 text-[11px]">{hint}</p> : null}
+      <p className="analytics-subtle mt-1 flex items-center gap-1.5 text-[11px]">
+        <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-[var(--analytics-accent-2)]" />
+        {helper}
+      </p>
     </article>
   );
 }
