@@ -6,7 +6,7 @@ export const WIZARD_PREVIEW_STORAGE_KEY = "hgezli:onboarding-preview:v1";
 
 export function wizardStateToTemplateData(state: WizardState): TemplateData {
   const vertical = state.vertical === "clinic" ? "clinic" : "salon";
-  const defaultHero = vertical === "clinic" ? "/images/clinic-default.svg" : hero.src;
+  const defaultHero = vertical === "clinic" ? null : hero.src;
 
   const commonData = {
     businessName: state.name,
@@ -37,7 +37,10 @@ export function wizardStateToTemplateData(state: WizardState): TemplateData {
       yearsExperience: staffMember.yearsExperience ?? null,
       photoUrl: staffMember.photoUrl ?? null,
     })),
-    faqs: state.faqs.map((faq) => ({ question: faq.question, answer: faq.answer })),
+    faqs: state.faqs.map((faq) => ({
+      question: faq.question,
+      answer: faq.answer,
+    })),
     phone: state.phone,
     address: state.address,
     city: state.city,
