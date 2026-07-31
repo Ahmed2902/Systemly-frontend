@@ -14,6 +14,7 @@ import type {
   CustomerWorkspaceResponse,
 } from "../customers.types";
 import { CustomerAppointments } from "./CustomerAppointments";
+import { CustomerClinicalHistory } from "./CustomerClinicalHistory";
 
 function initials(name: string) {
   return name
@@ -65,6 +66,7 @@ function MetricCard({
 export function CustomerProfilePanel({
   workspace,
   timezone,
+  isClinic,
   savingNotes,
   onEdit,
   onSaveNotes,
@@ -72,6 +74,7 @@ export function CustomerProfilePanel({
 }: {
   workspace: CustomerWorkspaceResponse;
   timezone: string;
+  isClinic: boolean;
   savingNotes: boolean;
   onEdit: (customer: CustomerProfile) => void;
   onSaveNotes: (notes: string) => Promise<void>;
@@ -246,6 +249,13 @@ export function CustomerProfilePanel({
         history={history}
         timezone={timezone}
       />
+
+      {isClinic ? (
+        <CustomerClinicalHistory
+          entries={workspace.clinicalHistory ?? []}
+          timezone={timezone}
+        />
+      ) : null}
     </div>
   );
 }
