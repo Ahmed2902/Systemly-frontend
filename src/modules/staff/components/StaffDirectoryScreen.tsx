@@ -2,19 +2,29 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  AlertCircle,
   BriefcaseBusiness,
   CalendarCheck2,
   CalendarOff,
-  Loader2,
   Plus,
   RefreshCw,
   Search,
-  Sparkles,
   UsersRound,
 } from "lucide-react";
 import { useAuth } from "@/modules/auth/useAuth";
 import { OperationsDropdown } from "@/modules/operations/components/OperationsDropdown";
+import {
+  OperationsAlert,
+  OperationsMetric,
+  OperationsPage,
+  OperationsPageHeader,
+  OperationsPageInner,
+  OperationsState,
+  OperationsToolbar,
+} from "@/modules/operations/components/OperationsUI";
+import {
+  useOnOperationsMutation,
+  useOperations,
+} from "@/modules/operations/operations.context";
 import {
   createStaff,
   deactivateStaff,
@@ -51,6 +61,7 @@ const roleOptions = [
 
 export default function StaffDirectoryScreen() {
   const { accessToken, loading: authLoading } = useAuth();
+  const { notifyMutation } = useOperations();
   const [data, setData] = useState<StaffDirectoryResponse | null>(null);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -59,6 +70,7 @@ export default function StaffDirectoryScreen() {
   const [serviceId, setServiceId] = useState("");
   const [availableToday, setAvailableToday] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<StaffDirectoryItem | null>(null);
@@ -70,30 +82,36 @@ export default function StaffDirectoryScreen() {
     return () => window.clearTimeout(timer);
   }, [search]);
 
-  const load = useCallback(async () => {
-    if (!accessToken) return;
-    setLoading(true);
-    setError(null);
-    try {
-      setData(
-        await getStaffDirectory(accessToken, {
-          search: debouncedSearch || undefined,
-          status,
-          role,
-          serviceId: serviceId || undefined,
-          availableToday,
-        }),
-      );
-    } catch (caught: unknown) {
-      setError(caught instanceof Error ? caught.message : "Unable to load staff");
-    } finally {
-      setLoading(false);
-    }
-  }, [accessToken, availableToday, debouncedSearch, role, serviceId, status]);
+  const load = useCallback(
+    async (background = false) => {
+      if (!accessToken) return;
+      if (background) setRefreshing(true);
+      else setLoading(true);
+      try {
+        setData(
+          await getStaffDirectory(accessToken, {
+            search: debouncedSearch || undefined,
+            status,
+            role,
+            serviceId: serviceId || undefined,
+            availableToday,
+          }),
+        );
+        setError(null);
+      } catch (caught: unknown) {
+        setError(caught instanceof Error ? caught.message : "Unable to load staff");
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
+      }
+    },
+    [accessToken, availableToday, debouncedSearch, role, serviceId, status],
+  );
 
   useEffect(() => {
     if (!authLoading) void load();
   }, [authLoading, load]);
+  useOnOperationsMutation(["staff", "service", "appointment"], () => void load(true));
 
   const serviceOptions = useMemo(
     () => [
@@ -129,9 +147,10 @@ export default function StaffDirectoryScreen() {
         await removeStaffPhoto(staffId, accessToken);
       }
 
+      notifyMutation({ scope: "staff", entityId: staffId });
       setModalOpen(false);
       setEditing(null);
-      await load();
+      await load(true);
     } catch (caught: unknown) {
       setFormError(
         caught instanceof Error ? caught.message : "Unable to save staff member",
@@ -142,11 +161,11 @@ export default function StaffDirectoryScreen() {
   };
 
   const deactivate = async (member: StaffDirectoryItem) => {
-    if (!accessToken) return;
-    if (!window.confirm(`Deactivate ${member.name}?`)) return;
+    if (!accessToken || !window.confirm(`Deactivate ${member.name}?`)) return;
     try {
       await deactivateStaff(member.id, accessToken);
-      await load();
+      notifyMutation({ scope: "staff", entityId: member.id });
+      await load(true);
     } catch (caught: unknown) {
       setError(caught instanceof Error ? caught.message : "Unable to deactivate staff");
     }
@@ -154,86 +173,62 @@ export default function StaffDirectoryScreen() {
 
   if (authLoading || (loading && !data)) {
     return (
-      <div className="flex h-full items-center justify-center bg-gradient-to-br from-violet-50 via-slate-50 to-emerald-50">
-        <div className="rounded-2xl border border-white bg-white/90 px-6 py-5 text-center shadow-sm">
-          <Loader2 className="mx-auto animate-spin text-violet-600" size={26} />
-          <p className="mt-3 text-sm font-medium text-slate-600">
-            Loading staff directory...
-          </p>
-        </div>
-      </div>
+      <OperationsPage>
+        <OperationsPageInner className="flex min-h-full items-center justify-center">
+          <OperationsState loading title="Loading staff directory" />
+        </OperationsPageInner>
+      </OperationsPage>
     );
   }
 
   return (
-    <div className="h-full overflow-y-auto bg-gradient-to-br from-violet-50/55 via-slate-50 to-sky-50/50">
-      <div className="mx-auto max-w-[1540px] space-y-6 px-5 py-7 lg:px-8">
-        <header className="flex flex-wrap items-start justify-between gap-5">
-          <div>
-            <div className="inline-flex items-center gap-2 rounded-full bg-violet-100 px-3 py-1 text-xs font-semibold text-violet-700">
-              <Sparkles size={13} /> Team & availability
-            </div>
-            <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-950">
-              Staff Directory
-            </h1>
-            <p className="mt-1.5 text-sm text-slate-500">
-              Manage profiles, specialties, schedules, time off, and service commissions.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={() => {
-              setEditing(null);
-              setFormError(null);
-              setModalOpen(true);
-            }}
-            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-violet-200/60 transition hover:-translate-y-0.5"
-          >
-            <Plus size={17} /> Add Staff
-          </button>
-        </header>
+    <OperationsPage>
+      <OperationsPageInner>
+        <OperationsPageHeader
+          eyebrow="Management / Staff"
+          title="Staff directory"
+          description="Manage profiles, roles, service eligibility, schedules, time off, and commissions."
+          actions={
+            <>
+              <button type="button" className="op-button" disabled={refreshing} onClick={() => void load(true)}>
+                <RefreshCw size={15} className={refreshing ? "animate-spin" : ""} /> Refresh
+              </button>
+              <button
+                type="button"
+                className="op-button op-button-primary"
+                onClick={() => {
+                  setEditing(null);
+                  setFormError(null);
+                  setModalOpen(true);
+                }}
+              >
+                <Plus size={15} /> Add staff
+              </button>
+            </>
+          }
+        />
 
         {data ? (
-          <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <Metric
-              icon={<UsersRound size={18} />}
-              label="Total team members"
-              value={data.metrics.total}
-              tone="violet"
-            />
-            <Metric
-              icon={<BriefcaseBusiness size={18} />}
-              label="Active staff"
-              value={data.metrics.active}
-              tone="sky"
-            />
-            <Metric
-              icon={<CalendarCheck2 size={18} />}
-              label="Available today"
-              value={data.metrics.availableToday}
-              tone="emerald"
-            />
-            <Metric
-              icon={<CalendarOff size={18} />}
-              label="On time off"
-              value={data.metrics.onTimeOff}
-              tone="amber"
-            />
+          <section className="op-metric-grid mb-4">
+            <OperationsMetric icon={<UsersRound size={17} />} label="Total team members" value={data.metrics.total} />
+            <OperationsMetric icon={<BriefcaseBusiness size={17} />} label="Active staff" value={data.metrics.active} tone="info" />
+            <OperationsMetric icon={<CalendarCheck2 size={17} />} label="Available today" value={data.metrics.availableToday} tone="success" />
+            <OperationsMetric icon={<CalendarOff size={17} />} label="On time off" value={data.metrics.onTimeOff} tone="warning" />
           </section>
         ) : null}
 
-        <section className="relative z-40 rounded-2xl border border-white/80 bg-white/90 p-3 shadow-sm backdrop-blur">
-          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-[minmax(16rem,1fr)_12rem_13rem_14rem_auto]">
+        <OperationsToolbar className="relative z-40 mb-4">
+          <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-[minmax(16rem,1fr)_12rem_13rem_14rem_auto]">
             <label className="relative block">
               <Search
-                size={17}
-                className="pointer-events-none absolute left-3.5 top-3 text-slate-400"
+                size={16}
+                className="pointer-events-none absolute left-3.5 top-3 text-[var(--op-text-muted)]"
               />
               <input
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search staff by name, title, phone, or email..."
-                className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-3 text-sm outline-none focus:border-violet-300 focus:ring-4 focus:ring-violet-100"
+                placeholder="Search staff by name, title, phone, or email"
+                className="op-input h-10 min-h-10 pl-10"
               />
             </label>
             <OperationsDropdown
@@ -257,35 +252,22 @@ export default function StaffDirectoryScreen() {
             <button
               type="button"
               onClick={() => setAvailableToday((current) => !current)}
-              className={`h-11 rounded-xl border px-4 text-sm font-semibold transition ${
-                availableToday
-                  ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                  : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-              }`}
+              aria-pressed={availableToday}
+              className={`op-button ${availableToday ? "op-status-success" : ""}`}
             >
               Available today
             </button>
           </div>
-        </section>
+        </OperationsToolbar>
 
         {error ? (
-          <div className="flex items-center justify-between gap-3 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-            <span className="inline-flex items-center gap-2">
-              <AlertCircle size={17} />
-              {error}
-            </span>
-            <button
-              type="button"
-              onClick={() => void load()}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 font-semibold"
-            >
-              <RefreshCw size={14} /> Retry
-            </button>
-          </div>
+          <OperationsAlert tone="danger" className="mb-4" action={<button className="op-button" onClick={() => void load(true)}>Retry</button>}>
+            {error}
+          </OperationsAlert>
         ) : null}
 
         {data?.items.length ? (
-          <section className="grid gap-5 md:grid-cols-2 2xl:grid-cols-3">
+          <section className="grid gap-3 md:grid-cols-2 2xl:grid-cols-3 [&>article]:border-[var(--op-border)] [&>article]:bg-[var(--op-surface)] [&>article]:shadow-[var(--op-shadow)]">
             {data.items.map((member) => (
               <StaffCard
                 key={member.id}
@@ -302,17 +284,13 @@ export default function StaffDirectoryScreen() {
             ))}
           </section>
         ) : (
-          <div className="rounded-3xl border border-dashed border-slate-300 bg-white/70 px-6 py-16 text-center">
-            <UsersRound className="mx-auto text-violet-400" size={38} />
-            <h2 className="mt-4 text-lg font-semibold text-slate-900">
-              No staff members found
-            </h2>
-            <p className="mt-1 text-sm text-slate-500">
-              Adjust the filters or add the first team member.
-            </p>
-          </div>
+          <OperationsState
+            title="No staff members found"
+            description="Adjust the filters or add the first team member."
+            action={<button className="op-button op-button-primary" onClick={() => setModalOpen(true)}>Add staff</button>}
+          />
         )}
-      </div>
+      </OperationsPageInner>
 
       <StaffFormModal
         open={modalOpen}
@@ -329,38 +307,6 @@ export default function StaffDirectoryScreen() {
         }}
         onSubmit={submit}
       />
-    </div>
-  );
-}
-
-function Metric({
-  icon,
-  label,
-  value,
-  tone,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: number;
-  tone: "violet" | "sky" | "emerald" | "amber";
-}) {
-  const tones = {
-    violet: "from-violet-100 to-violet-50 text-violet-700",
-    sky: "from-sky-100 to-sky-50 text-sky-700",
-    emerald: "from-emerald-100 to-emerald-50 text-emerald-700",
-    amber: "from-amber-100 to-amber-50 text-amber-700",
-  };
-  return (
-    <div className="flex items-center gap-3 rounded-2xl border border-white/80 bg-white/85 p-4 shadow-sm">
-      <span
-        className={`flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br ${tones[tone]}`}
-      >
-        {icon}
-      </span>
-      <div>
-        <p className="text-2xl font-bold text-slate-900">{value}</p>
-        <p className="text-xs font-medium text-slate-500">{label}</p>
-      </div>
-    </div>
+    </OperationsPage>
   );
 }

@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { ReactNode } from "react";
 import { Globe2, ShieldCheck } from "lucide-react";
+import { SystemlyWordmark } from "@/shared/components/SystemlyWordmark";
 import "../auth-systemly.css";
 
 export function AuthLayout({
@@ -16,9 +17,8 @@ export function AuthLayout({
   return (
     <main className="systemly-auth">
       <section className="systemly-auth-visual" aria-label="Systemly product overview">
-        <Link href="/" className="systemly-auth-brand">
-          <span className="systemly-auth-brand-dot" aria-hidden="true" />
-          Systemly
+        <Link href="/" className="systemly-auth-brand sys-focusable">
+          <SystemlyWordmark showDot dotClassName="systemly-auth-brand-dot" />
         </Link>
 
         <div className="systemly-auth-story">
@@ -93,9 +93,8 @@ export function AuthLayout({
       </section>
 
       <section className="systemly-auth-form-panel">
-        <Link href="/" className="systemly-auth-mobile-brand">
-          <span className="systemly-auth-brand-dot" aria-hidden="true" />
-          Systemly
+        <Link href="/" className="systemly-auth-mobile-brand sys-focusable">
+          <SystemlyWordmark showDot dotClassName="systemly-auth-brand-dot" />
         </Link>
 
         <div className="systemly-auth-form-wrap">

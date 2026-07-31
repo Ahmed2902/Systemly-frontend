@@ -1,0 +1,174 @@
+/*
+ * Shared Systemly product primitives
+ *
+ * Brand-independent tenant templates and the Operations workspace keep their own
+ * scoped themes. Landing, auth, onboarding, and small product states can reuse
+ * these stable tokens and primitives instead of redefining the same basics.
+ */
+
+:root {
+  --systemly-ink: #202223;
+  --systemly-charcoal: #0b0f19;
+  --systemly-charcoal-soft: #111720;
+  --systemly-canvas: #f4f4f1;
+  --systemly-surface: #ffffff;
+  --systemly-surface-soft: #efefec;
+  --systemly-muted: #6d7175;
+  --systemly-border: #dfe1dd;
+  --systemly-border-strong: #b9c0bb;
+  --systemly-green: #008060;
+  --systemly-green-deep: #004c3f;
+  --systemly-green-soft: #e3f1df;
+  --systemly-danger: #b42318;
+  --systemly-danger-soft: #fff2f0;
+  --systemly-radius-sm: 10px;
+  --systemly-radius-md: 14px;
+  --systemly-radius-lg: 24px;
+  --systemly-shadow-sm: 0 1px 2px rgb(32 34 35 / 0.04), 0 10px 28px rgb(32 34 35 / 0.055);
+  --systemly-shadow-lg: 0 24px 70px rgb(32 34 35 / 0.14);
+}
+
+.sys-wordmark {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 10px;
+  color: inherit;
+  font-size: 21px;
+  font-weight: 760;
+  letter-spacing: -0.045em;
+  line-height: 1;
+  text-decoration: none;
+}
+
+.sys-brand-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  flex: none;
+  border-radius: 999px;
+  background: var(--systemly-green);
+  box-shadow: 0 0 0 6px rgb(0 128 96 / 0.11);
+}
+
+.sys-card {
+  border: 1px solid var(--systemly-border);
+  border-radius: var(--systemly-radius-md);
+  background: var(--systemly-surface);
+  box-shadow: var(--systemly-shadow-sm);
+}
+
+.sys-field {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid var(--systemly-border);
+  border-radius: var(--systemly-radius-md);
+  background: var(--systemly-surface);
+  color: var(--systemly-ink);
+  padding: 10px 14px;
+  outline: none;
+  transition: border-color 140ms ease, box-shadow 140ms ease, background-color 140ms ease;
+}
+
+.sys-field::placeholder {
+  color: #9ba09d;
+}
+
+.sys-field:hover {
+  border-color: var(--systemly-border-strong);
+}
+
+.sys-field:focus {
+  border-color: var(--systemly-green);
+  box-shadow: 0 0 0 4px rgb(0 128 96 / 0.12);
+}
+
+.sys-button {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid var(--systemly-border);
+  border-radius: 999px;
+  background: var(--systemly-surface);
+  color: var(--systemly-ink);
+  padding: 9px 16px;
+  font-size: 13px;
+  font-weight: 720;
+  text-decoration: none;
+  transition: transform 140ms ease, border-color 140ms ease, background-color 140ms ease, box-shadow 140ms ease;
+}
+
+.sys-button:hover:not(:disabled) {
+  border-color: var(--systemly-border-strong);
+  background: #fafaf8;
+  transform: translateY(-1px);
+}
+
+.sys-button-primary {
+  border-color: var(--systemly-ink);
+  background: var(--systemly-ink);
+  color: #ffffff;
+  box-shadow: 0 10px 24px rgb(32 34 35 / 0.14);
+}
+
+.sys-button-primary:hover:not(:disabled) {
+  border-color: #111312;
+  background: #111312;
+  color: #ffffff;
+  box-shadow: 0 14px 30px rgb(32 34 35 / 0.2);
+}
+
+.sys-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.52;
+}
+
+.sys-alert {
+  border: 1px solid var(--systemly-border);
+  border-radius: var(--systemly-radius-md);
+  background: var(--systemly-surface);
+  color: var(--systemly-muted);
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.sys-alert-success {
+  border-color: #b9dfd4;
+  background: #edf8f4;
+  color: #09533f;
+}
+
+.sys-alert-danger {
+  border-color: #f1c7c2;
+  background: var(--systemly-danger-soft);
+  color: #8a1c13;
+}
+
+.sys-focusable:focus-visible,
+.sys-button:focus-visible,
+.sys-wordmark:focus-visible {
+  outline: 2px solid var(--systemly-green);
+  outline-offset: 3px;
+}
+
+.sys-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sys-button,
+  .sys-field {
+    transition-duration: 0.01ms;
+  }
+}

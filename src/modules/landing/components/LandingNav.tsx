@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/modules/auth/useAuth";
 import { getSettings } from "@/modules/settings/settings.api";
 import type { AuthUser } from "@/modules/auth/auth.types";
-import { SystemlyBrand } from "./SystemlyBrand";
+import { SystemlyWordmark } from "@/shared/components/SystemlyWordmark";
 
 const navLinks = [
   { label: "Product", href: "#features" },
@@ -64,7 +64,7 @@ export function LandingNav() {
     <header className="lp-nav-wrap">
       <nav className="lp-nav-shell" aria-label="Primary navigation">
         <Link href="/" aria-label="Systemly home" onClick={closeMobileMenu}>
-          <SystemlyBrand className="text-[1.35rem]" />
+          <SystemlyWordmark className="systemly-brand text-[1.35rem]" />
         </Link>
 
         <div className="lp-nav-links">

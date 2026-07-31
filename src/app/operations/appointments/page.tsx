@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Plus, RefreshCw } from "lucide-react";
 import { useAuth } from "@/modules/auth/useAuth";
 import { getCalendarWorkspace } from "@/modules/operations/CalendarWorkspace.api";
 import type { AppointmentSummary } from "@/modules/operations/appointment.types";
@@ -11,9 +11,22 @@ import {
   type SortMode,
 } from "@/modules/operations/components/appointments-list/AppointmentsToolbar";
 import { AppointmentListItem } from "@/modules/operations/components/appointments-list/AppointmentListItem";
+import {
+  OperationsAlert,
+  OperationsPage,
+  OperationsPageHeader,
+  OperationsPageInner,
+  OperationsState,
+} from "@/modules/operations/components/OperationsUI";
+import {
+  useOnAppointmentCreated,
+  useOnOperationsMutation,
+  useOperations,
+} from "@/modules/operations/operations.context";
 
 export default function AppointmentsPage() {
   const { user, accessToken, loading: authLoading } = useAuth();
+  const { openNewAppointment } = useOperations();
   const timezone = user?.timezone || "Africa/Cairo";
   const [date, setDate] = useState(() =>
     dateKeyInTimezone(new Date(), "Africa/Cairo"),
@@ -25,28 +38,36 @@ export default function AppointmentsPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [sort, setSort] = useState<SortMode>("soonest");
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
-    if (!user?.businessId || !accessToken) return;
-    setLoading(true);
-    try {
-      setError(null);
-      const workspace = await getCalendarWorkspace(date, accessToken);
-      setAppointments(workspace.day.appointments);
-      setStaff(workspace.day.staff.map(({ id, name }) => ({ id, name })));
-    } catch (error: unknown) {
-      setError(
-        error instanceof Error ? error.message : "Unable to load appointments",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [accessToken, date, user?.businessId]);
+  const load = useCallback(
+    async (background = false) => {
+      if (!user?.businessId || !accessToken) return;
+      if (background) setRefreshing(true);
+      else setLoading(true);
+      try {
+        const workspace = await getCalendarWorkspace(date, accessToken);
+        setAppointments(workspace.day.appointments);
+        setStaff(workspace.day.staff.map(({ id, name }) => ({ id, name })));
+        setError(null);
+      } catch (cause: unknown) {
+        setError(
+          cause instanceof Error ? cause.message : "Unable to load appointments",
+        );
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
+      }
+    },
+    [accessToken, date, user?.businessId],
+  );
 
   useEffect(() => {
     if (!authLoading) void load();
   }, [authLoading, load]);
+  useOnAppointmentCreated(() => void load(true));
+  useOnOperationsMutation("appointment", () => void load(true));
 
   const visible = useMemo(() => {
     const needle = query.trim().toLowerCase();
@@ -73,8 +94,7 @@ export default function AppointmentsPage() {
         return textMatch && staffMatch && statusMatch;
       })
       .sort((a, b) => {
-        if (sort === "customer")
-          return a.customer.name.localeCompare(b.customer.name);
+        if (sort === "customer") return a.customer.name.localeCompare(b.customer.name);
         if (sort === "status") return a.status.localeCompare(b.status);
         const aTime = new Date(a.segments[0]?.startsAt ?? 0).getTime();
         const bTime = new Date(b.segments[0]?.startsAt ?? 0).getTime();
@@ -84,97 +104,85 @@ export default function AppointmentsPage() {
 
   if (authLoading || !user) {
     return (
-      <div className="flex h-full items-center justify-center text-slate-400">
-        Loading…
-      </div>
+      <OperationsPage>
+        <OperationsPageInner className="flex min-h-full items-center justify-center">
+          <OperationsState loading title="Loading appointments" />
+        </OperationsPageInner>
+      </OperationsPage>
     );
   }
 
   return (
-    <div className="h-full overflow-y-auto bg-slate-50 p-5 lg:p-8">
-      <div className="mx-auto max-w-6xl">
-        <div className="mb-6">
-          <p className="text-sm font-medium text-blue-600">Operations</p>
-          <h1 className="mt-1 text-3xl font-bold text-slate-900">
-            Appointments
-          </h1>
-          <p className="mt-1 text-sm text-slate-500">
-            Review the queue, filter the day, and open any appointment for its
-            full workspace.
-          </p>
-        </div>
-
-        <AppointmentsToolbar
-          query={query}
-          date={date}
-          staffFilter={staffFilter}
-          statusFilter={statusFilter}
-          sort={sort}
-          staff={staff}
-          onQueryChange={setQuery}
-          onDateChange={setDate}
-          onStaffFilterChange={setStaffFilter}
-          onStatusFilterChange={setStatusFilter}
-          onSortChange={setSort}
+    <OperationsPage>
+      <OperationsPageInner className="max-w-[1320px]">
+        <OperationsPageHeader
+          eyebrow="Workspace / Appointments"
+          title="Appointments"
+          description="Review the daily queue, find any customer, and open the full appointment workspace."
+          actions={
+            <>
+              <button type="button" className="op-button" disabled={refreshing} onClick={() => void load(true)}>
+                <RefreshCw size={15} className={refreshing ? "animate-spin" : ""} /> Refresh
+              </button>
+              <button type="button" className="op-button op-button-primary" onClick={() => openNewAppointment()}>
+                <Plus size={15} /> New appointment
+              </button>
+            </>
+          }
         />
 
+        <div className="mb-4 [&>div]:border-[var(--op-border)] [&>div]:bg-[var(--op-surface)] [&>div]:shadow-[var(--op-shadow)]">
+          <AppointmentsToolbar
+            query={query}
+            date={date}
+            staffFilter={staffFilter}
+            statusFilter={statusFilter}
+            sort={sort}
+            staff={staff}
+            onQueryChange={setQuery}
+            onDateChange={setDate}
+            onStaffFilterChange={setStaffFilter}
+            onStatusFilterChange={setStatusFilter}
+            onSortChange={setSort}
+          />
+        </div>
+
         {error ? (
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            <span>{error}</span>
-            <button
-              type="button"
-              onClick={() => void load()}
-              className="rounded-lg border border-red-200 bg-white px-3 py-1.5 font-semibold text-red-700 hover:bg-red-100 focus:outline-none focus:ring-4 focus:ring-red-100"
-            >
-              Retry
-            </button>
-          </div>
+          <OperationsAlert tone="danger" className="mb-4" action={<button className="op-button" onClick={() => void load(true)}>Retry</button>}>
+            {error}
+          </OperationsAlert>
         ) : null}
 
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-slate-900">
-            {new Date(`${date}T12:00:00Z`).toLocaleDateString(undefined, {
-              weekday: "long",
-              month: "long",
-              day: "numeric",
-            })}
-          </h2>
-          <span className="text-sm text-slate-500">
-            {visible.length} appointment{visible.length === 1 ? "" : "s"}
-          </span>
+        <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="text-sm font-bold text-[var(--op-text)]">
+              {new Date(`${date}T12:00:00Z`).toLocaleDateString(undefined, {
+                weekday: "long",
+                month: "long",
+                day: "numeric",
+              })}
+            </p>
+            <p className="mt-1 text-xs text-[var(--op-text-muted)]">
+              {visible.length} appointment{visible.length === 1 ? "" : "s"} shown
+            </p>
+          </div>
+          {refreshing ? <span className="text-xs text-[var(--op-text-muted)]">Refreshing…</span> : null}
         </div>
 
         {loading ? (
-          <div className="space-y-3" aria-label="Loading appointments">
+          <div className="space-y-2" aria-label="Loading appointments">
             {[1, 2, 3].map((item) => (
-              <div
-                key={item}
-                className="h-28 animate-pulse rounded-2xl border border-slate-200 bg-white"
-              />
+              <div key={item} className="h-24 animate-pulse rounded-[12px] border border-[var(--op-border)] bg-[var(--op-surface)]" />
             ))}
           </div>
         ) : visible.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-12 text-center">
-            <p className="font-semibold text-slate-800">
-              No appointments for{" "}
-              {new Date(date + "T12:00:00Z").toLocaleDateString(undefined, {
-                month: "long",
-                day: "numeric",
-                year: "numeric",
-              })}
-            </p>
-            <p className="mt-1 text-sm text-slate-500">
-              Try another date or create a new appointment.
-            </p>
-            {/* <Link
-              href="/operations/appointments/new"
-              className="mt-5 inline-flex rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-100"
-            >
-              New Appointment
-            </Link> */}
-          </div>
+          <OperationsState
+            title="No appointments found"
+            description="Try another date or adjust the filters."
+            action={<button className="op-button op-button-primary" onClick={() => openNewAppointment()}>New appointment</button>}
+          />
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-2 [&>article]:border-[var(--op-border)] [&>article]:bg-[var(--op-surface)] [&>article]:shadow-[var(--op-shadow)]">
             {visible.map((appointment) => (
               <AppointmentListItem
                 key={appointment.id}
@@ -185,7 +193,7 @@ export default function AppointmentsPage() {
             ))}
           </div>
         )}
-      </div>
-    </div>
+      </OperationsPageInner>
+    </OperationsPage>
   );
 }

@@ -2,9 +2,19 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { AlertCircle, Loader2, RefreshCw, Users } from "lucide-react";
+import { Plus, RefreshCw } from "lucide-react";
 import { useAuth } from "@/modules/auth/useAuth";
-import { useOperations } from "@/modules/operations/operations.context";
+import {
+  useOnOperationsMutation,
+  useOperations,
+} from "@/modules/operations/operations.context";
+import {
+  OperationsAlert,
+  OperationsPage,
+  OperationsPageHeader,
+  OperationsPageInner,
+  OperationsState,
+} from "@/modules/operations/components/OperationsUI";
 import {
   createCustomer,
   getCustomerWorkspace,
@@ -29,7 +39,7 @@ export function CustomersWorkspace({
 }) {
   const router = useRouter();
   const { user, accessToken, loading: authLoading } = useAuth();
-  const { openNewAppointment } = useOperations();
+  const { openNewAppointment, notifyMutation } = useOperations();
   const timezone = user?.timezone || "Africa/Cairo";
 
   const [customers, setCustomers] = useState<CustomerListItem[]>([]);
@@ -37,17 +47,14 @@ export function CustomersWorkspace({
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [filter, setFilter] = useState<CustomerFilter>("all");
-  const [selectedId, setSelectedId] = useState<string | null>(
-    initialCustomerId,
-  );
-  const [workspace, setWorkspace] =
-    useState<CustomerWorkspaceResponse | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(initialCustomerId);
+  const [workspace, setWorkspace] = useState<CustomerWorkspaceResponse | null>(null);
   const [listLoading, setListLoading] = useState(true);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const [editingCustomer, setEditingCustomer] =
-    useState<CustomerProfile | null>(null);
+  const [editingCustomer, setEditingCustomer] = useState<CustomerProfile | null>(null);
   const [savingCustomer, setSavingCustomer] = useState(false);
   const [savingNotes, setSavingNotes] = useState(false);
 
@@ -56,49 +63,48 @@ export function CustomersWorkspace({
     return () => window.clearTimeout(timer);
   }, [search]);
 
-  const loadList = useCallback(async () => {
-    if (!accessToken) return;
-    setListLoading(true);
-    setError(null);
-
-    try {
-      const result = await listCustomers(accessToken, {
-        search: debouncedSearch || undefined,
-        filter,
-        perPage: 50,
-      });
-      setCustomers(result.items);
-      setTotal(result.total);
-
-      setSelectedId((current) => {
-        if (initialCustomerId) return initialCustomerId;
-        if (current && result.items.some((customer) => customer.id === current)) {
-          return current;
-        }
-        return result.items[0]?.id ?? null;
-      });
-    } catch (caught: unknown) {
-      setError(
-        caught instanceof Error ? caught.message : "Unable to load customers",
-      );
-    } finally {
-      setListLoading(false);
-    }
-  }, [accessToken, debouncedSearch, filter, initialCustomerId]);
+  const loadList = useCallback(
+    async (background = false) => {
+      if (!accessToken) return;
+      if (background) setRefreshing(true);
+      else setListLoading(true);
+      try {
+        const result = await listCustomers(accessToken, {
+          search: debouncedSearch || undefined,
+          filter,
+          perPage: 50,
+        });
+        setCustomers(result.items);
+        setTotal(result.total);
+        setSelectedId((current) => {
+          if (initialCustomerId) return initialCustomerId;
+          if (current && result.items.some((customer) => customer.id === current)) {
+            return current;
+          }
+          return result.items[0]?.id ?? null;
+        });
+        setError(null);
+      } catch (caught: unknown) {
+        setError(caught instanceof Error ? caught.message : "Unable to load customers");
+      } finally {
+        setListLoading(false);
+        setRefreshing(false);
+      }
+    },
+    [accessToken, debouncedSearch, filter, initialCustomerId],
+  );
 
   const loadWorkspace = useCallback(
     async (customerId: string) => {
       if (!accessToken) return;
       setDetailLoading(true);
-      setError(null);
       try {
         setWorkspace(await getCustomerWorkspace(customerId, accessToken));
+        setError(null);
       } catch (caught: unknown) {
         setWorkspace(null);
         setError(
-          caught instanceof Error
-            ? caught.message
-            : "Unable to load customer details",
+          caught instanceof Error ? caught.message : "Unable to load customer details",
         );
       } finally {
         setDetailLoading(false);
@@ -115,6 +121,11 @@ export function CustomersWorkspace({
     if (selectedId) void loadWorkspace(selectedId);
     else setWorkspace(null);
   }, [loadWorkspace, selectedId]);
+
+  useOnOperationsMutation(["appointment", "customer", "invoice"], () => {
+    void loadList(true);
+    if (selectedId) void loadWorkspace(selectedId);
+  });
 
   const selectedListCustomer = useMemo(
     () => customers.find((customer) => customer.id === selectedId) ?? null,
@@ -141,24 +152,24 @@ export function CustomersWorkspace({
     setSavingCustomer(true);
     try {
       if (editingCustomer) {
-        const updated = await updateCustomer(
-          editingCustomer.id,
-          input,
-          accessToken,
-        );
+        const updated = await updateCustomer(editingCustomer.id, input, accessToken);
         setWorkspace((current) =>
           current && current.customer.id === updated.id
             ? { ...current, customer: updated }
             : current,
         );
-        await loadList();
+        notifyMutation({ scope: "customer", entityId: updated.id });
+        await loadList(true);
       } else {
         const created = await createCustomer(input, accessToken);
-        await loadList();
+        notifyMutation({ scope: "customer", entityId: created.id });
+        await loadList(true);
         setSelectedId(created.id);
         router.push(`/operations/customers/${created.id}`);
       }
       setModalOpen(false);
+    } catch (caught: unknown) {
+      setError(caught instanceof Error ? caught.message : "Unable to save customer");
     } finally {
       setSavingCustomer(false);
     }
@@ -168,15 +179,12 @@ export function CustomersWorkspace({
     if (!accessToken || !workspace) return;
     setSavingNotes(true);
     try {
-      const updated = await updateCustomer(
-        workspace.customer.id,
-        { notes },
-        accessToken,
-      );
-      setWorkspace((current) =>
-        current ? { ...current, customer: updated } : current,
-      );
-      await loadList();
+      const updated = await updateCustomer(workspace.customer.id, { notes }, accessToken);
+      setWorkspace((current) => (current ? { ...current, customer: updated } : current));
+      notifyMutation({ scope: "customer", entityId: updated.id });
+      await loadList(true);
+    } catch (caught: unknown) {
+      setError(caught instanceof Error ? caught.message : "Unable to save notes");
     } finally {
       setSavingNotes(false);
     }
@@ -184,52 +192,40 @@ export function CustomersWorkspace({
 
   if (authLoading) {
     return (
-      <div className="flex h-full items-center justify-center text-slate-400">
-        <Loader2 size={22} className="animate-spin" />
-      </div>
+      <OperationsPage>
+        <OperationsPageInner className="flex min-h-full items-center justify-center">
+          <OperationsState loading title="Loading customers" />
+        </OperationsPageInner>
+      </OperationsPage>
     );
   }
 
   return (
-    <div className="h-full overflow-y-auto bg-slate-50 p-4 sm:p-5 lg:p-8">
-      <div className="mx-auto flex min-h-full max-w-[1500px] flex-col">
-        <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="text-sm font-semibold text-blue-600">Operations</p>
-            <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-950">
-              Customers
-            </h1>
-            <p className="mt-1 text-sm text-slate-500">
-              Manage customer profiles, notes, and appointment history.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={openCreate}
-            className="rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700"
-          >
-            New customer
-          </button>
-        </header>
+    <OperationsPage>
+      <OperationsPageInner>
+        <OperationsPageHeader
+          eyebrow="Management / Customers"
+          title="Customers"
+          description="Manage customer profiles, notes, visit history, and future appointments."
+          actions={
+            <>
+              <button type="button" className="op-button" disabled={refreshing} onClick={() => void loadList(true)}>
+                <RefreshCw size={15} className={refreshing ? "animate-spin" : ""} /> Refresh
+              </button>
+              <button type="button" className="op-button op-button-primary" onClick={openCreate}>
+                <Plus size={15} /> New customer
+              </button>
+            </>
+          }
+        />
 
         {error ? (
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            <span className="inline-flex items-center gap-2">
-              <AlertCircle size={17} />
-              {error}
-            </span>
-            <button
-              type="button"
-              onClick={() => void loadList()}
-              className="inline-flex items-center gap-2 rounded-lg bg-white px-3 py-2 font-semibold shadow-sm"
-            >
-              <RefreshCw size={15} />
-              Retry
-            </button>
-          </div>
+          <OperationsAlert tone="danger" className="mb-4" action={<button className="op-button" onClick={() => void loadList(true)}>Retry</button>}>
+            {error}
+          </OperationsAlert>
         ) : null}
 
-        <div className="grid min-h-0 flex-1 gap-4 xl:grid-cols-[22rem_minmax(0,1fr)]">
+        <div className="grid min-h-[620px] gap-3 xl:grid-cols-[21rem_minmax(0,1fr)] [&>section]:border-[var(--op-border)] [&>section]:bg-[var(--op-surface)] [&>section]:shadow-[var(--op-shadow)]">
           <CustomerListPanel
             customers={customers}
             selectedId={selectedId}
@@ -245,41 +241,34 @@ export function CustomersWorkspace({
 
           <div className="min-w-0">
             {detailLoading ? (
-              <div className="flex min-h-96 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-400 shadow-sm">
-                <Loader2 size={22} className="animate-spin" />
-              </div>
+              <OperationsState loading title="Loading customer profile" className="min-h-[420px]" />
             ) : workspace ? (
-              <CustomerProfilePanel
-                key={workspace.customer.id}
-                workspace={workspace}
-                timezone={timezone}
-                savingNotes={savingNotes}
-                onEdit={openEdit}
-                onSaveNotes={saveNotes}
-                onNewAppointment={() =>
-                  openNewAppointment({
-                    name: workspace.customer.name,
-                    phone: workspace.customer.phone,
-                  })
-                }
-              />
-            ) : (
-              <div className="flex min-h-96 flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-white px-6 text-center">
-                <Users size={26} className="text-blue-600" />
-                <p className="mt-3 font-semibold text-slate-800">
-                  {selectedListCustomer
-                    ? "Unable to load this customer"
-                    : "Select a customer"}
-                </p>
-                <p className="mt-1 max-w-sm text-sm text-slate-500">
-                  Choose a customer from the list to review contact information,
-                  notes, and appointments.
-                </p>
+              <div className="[&>section]:border-[var(--op-border)] [&>section]:bg-[var(--op-surface)] [&>section]:shadow-[var(--op-shadow)]">
+                <CustomerProfilePanel
+                  key={workspace.customer.id}
+                  workspace={workspace}
+                  timezone={timezone}
+                  savingNotes={savingNotes}
+                  onEdit={openEdit}
+                  onSaveNotes={saveNotes}
+                  onNewAppointment={() =>
+                    openNewAppointment({
+                      name: workspace.customer.name,
+                      phone: workspace.customer.phone,
+                    })
+                  }
+                />
               </div>
+            ) : (
+              <OperationsState
+                title={selectedListCustomer ? "Unable to load this customer" : "Select a customer"}
+                description="Choose a customer to review contact details, notes, and appointment history."
+                className="min-h-[420px]"
+              />
             )}
           </div>
         </div>
-      </div>
+      </OperationsPageInner>
 
       <CustomerFormModal
         open={modalOpen}
@@ -288,6 +277,6 @@ export function CustomersWorkspace({
         onClose={() => setModalOpen(false)}
         onSubmit={submitCustomer}
       />
-    </div>
+    </OperationsPage>
   );
 }
