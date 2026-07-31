@@ -32,7 +32,9 @@ function resolveInitialTheme(): OperationsTheme {
   if (typeof window === "undefined") return "light";
 
   const fromDocument = document.documentElement.dataset.operationsTheme;
-  if (isTheme(fromDocument ?? null)) return fromDocument;
+  if (fromDocument === "light" || fromDocument === "dark") {
+    return fromDocument;
+  }
 
   const stored =
     window.localStorage.getItem(STORAGE_KEY) ??
