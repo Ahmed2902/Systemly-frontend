@@ -123,9 +123,10 @@ export default function CalendarPage() {
     if (!selectedId || !accessToken || detailLoadedId === selectedId) return;
     let cancelled = false;
 
-    void getAppointmentSummary(selectedId, accessToken)
+    void getAppointmentSummary(selectedId, accessToken, timezone)
       .then((appointment) => {
         if (cancelled) return;
+        setError(null);
         applyLocalAppointment(appointment);
         setDetailLoadedId(selectedId);
       })
@@ -139,7 +140,7 @@ export default function CalendarPage() {
     return () => {
       cancelled = true;
     };
-  }, [accessToken, applyLocalAppointment, detailLoadedId, selectedId]);
+  }, [accessToken, applyLocalAppointment, detailLoadedId, selectedId, timezone]);
 
   const selected = data?.appointments.find((a) => a.id === selectedId) ?? null;
   const selectedDetail = selected && detailLoadedId === selected.id ? selected : null;
