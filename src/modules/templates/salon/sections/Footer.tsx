@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Camera } from "lucide-react";
+import { ArrowUpRight, Camera } from "lucide-react";
 
 export function Footer({
   businessName,
@@ -11,6 +11,10 @@ export function Footer({
   instagram,
   bookingHref,
   previewMode,
+  showTeam,
+  showGallery,
+  showFaq,
+  showContact,
 }: {
   businessName: string;
   phone?: string;
@@ -19,50 +23,69 @@ export function Footer({
   instagram?: string;
   bookingHref: string;
   previewMode?: boolean;
+  showTeam?: boolean;
+  showGallery?: boolean;
+  showFaq?: boolean;
+  showContact?: boolean;
 }) {
   return (
-    <footer className="border-t border-[var(--border)] bg-[var(--surface)] px-6 py-14 text-center md:px-12 lg:px-16">
-      <div className="mx-auto flex max-w-5xl flex-col items-center">
-        <p className="font-display text-2xl text-[var(--text)]">{businessName}</p>
-        <p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-[var(--muted)]">
-          Thoughtful services, a calm space, and simple online booking.
-        </p>
+    <footer className="bg-[#11110f] px-6 py-16 text-white md:px-12 lg:px-16 lg:py-20">
+      <div className="mx-auto max-w-7xl">
+        <div className="grid gap-12 border-b border-white/10 pb-14 lg:grid-cols-[1fr_auto] lg:items-end">
+          <div className="text-start">
+            <p className="font-display text-4xl font-normal tracking-[-0.035em] md:text-5xl">{businessName}</p>
+            <p className="mt-4 max-w-lg text-sm leading-7 text-white/52">
+              Thoughtful services, a considered space, and simple online booking.
+            </p>
+          </div>
 
-        <nav className="mt-7 flex flex-wrap justify-center gap-x-6 gap-y-3 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">
-          <a href="#services">Services</a>
-          <a href="#team">Artists</a>
-          <a href="#gallery">Our space</a>
-          <a href="#faq">FAQ</a>
-          <a href="#contact">Contact</a>
-        </nav>
-
-        <div className="mt-7 flex flex-wrap items-center justify-center gap-4 text-sm text-[var(--text)]">
-          {phone ? <a href={`tel:${phone}`}>{phone}</a> : null}
-          {address || city ? <span>{[address, city].filter(Boolean).join(", ")}</span> : null}
-          {instagram ? (
-            <a
-              href={instagram.startsWith("http") ? instagram : `https://${instagram}`}
-              target="_blank"
-              rel="noreferrer"
-              aria-label="Instagram"
-            >
-              <Camera size={18} />
-            </a>
-          ) : null}
+          <Link
+            href={bookingHref}
+            onClick={previewMode ? (event) => event.preventDefault() : undefined}
+            scroll={false}
+            className="inline-flex min-h-12 items-center justify-center gap-2 justify-self-start rounded-full bg-white px-6 text-sm font-semibold text-[#171513] transition hover:bg-[#f3f0eb] lg:justify-self-end"
+          >
+            Book appointment <ArrowUpRight size={16} />
+          </Link>
         </div>
 
-        <Link
-          href={bookingHref}
-          onClick={previewMode ? (event) => event.preventDefault() : undefined}
-          className="mt-8 rounded-xl px-5 py-3 text-sm font-semibold text-white"
-          style={{ backgroundColor: "var(--accent)" }}
-        >
-          Book appointment
-        </Link>
+        <div className="grid gap-10 py-12 md:grid-cols-3">
+          <div className="text-start">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/34">Visit</p>
+            {address || city ? <p className="mt-4 max-w-xs text-sm leading-7 text-white/66">{[address, city].filter(Boolean).join(", ")}</p> : <p className="mt-4 text-sm text-white/40">Location available when booking.</p>}
+          </div>
 
-        <p className="mt-10 text-xs text-[var(--muted)]">
-          © {new Date().getFullYear()} {businessName}. All rights reserved.
-        </p>
+          <div className="text-start">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/34">Connect</p>
+            <div className="mt-4 flex flex-col items-start gap-3 text-sm text-white/66">
+              {phone ? <a href={`tel:${phone}`} className="hover:text-white">{phone}</a> : null}
+              {instagram ? (
+                <a
+                  href={instagram.startsWith("http") ? instagram : `https://${instagram}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 hover:text-white"
+                >
+                  <Camera size={16} /> Instagram
+                </a>
+              ) : null}
+            </div>
+          </div>
+
+          <nav className="flex flex-wrap content-start gap-x-5 gap-y-3 text-start text-xs font-semibold text-white/52 md:justify-end">
+            <a href="#services" className="hover:text-white">Services</a>
+            {showTeam ? <a href="#team" className="hover:text-white">Artists</a> : null}
+            {showGallery ? <a href="#gallery" className="hover:text-white">Our space</a> : null}
+            <a href="#about" className="hover:text-white">About</a>
+            {showFaq ? <a href="#faq" className="hover:text-white">FAQ</a> : null}
+            {showContact ? <a href="#contact" className="hover:text-white">Contact</a> : null}
+          </nav>
+        </div>
+
+        <div className="flex flex-col gap-3 border-t border-white/10 pt-7 text-xs text-white/34 sm:flex-row sm:items-center sm:justify-between">
+          <p>© {new Date().getFullYear()} {businessName}. All rights reserved.</p>
+          <p>Powered by <span className="font-semibold text-white/62">Systemly</span></p>
+        </div>
       </div>
     </footer>
   );
