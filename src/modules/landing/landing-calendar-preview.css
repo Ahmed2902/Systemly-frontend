@@ -1,0 +1,440 @@
+/* Shared responsive calendar used by the landing product story and live demo.
+   It deliberately mirrors the Operations calendar without inheriting its fixed
+   production timeline dimensions. */
+
+.landing-calendar-preview {
+  --landing-calendar-staff-width: 132px;
+  --landing-calendar-row-height: 106px;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #dcdeda;
+  border-radius: 14px;
+  background: #ffffff;
+  color: #252825;
+  box-shadow: 0 12px 30px rgba(25, 28, 25, 0.04);
+}
+
+.landing-calendar-preview-head,
+.landing-calendar-preview-row {
+  display: grid;
+  grid-template-columns: var(--landing-calendar-staff-width) minmax(0, 1fr);
+  min-width: 0;
+}
+
+.landing-calendar-preview-head {
+  min-height: 43px;
+  border-bottom: 1px solid #dfe1dd;
+  background: #fafaf8;
+}
+
+.landing-calendar-preview-head > span {
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  border-right: 1px solid #dfe1dd;
+  color: #747874;
+  font-size: 8px;
+  font-weight: 750;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.landing-calendar-preview-head > div {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  min-width: 0;
+}
+
+.landing-calendar-preview-head b {
+  display: flex;
+  align-items: center;
+  padding-left: 11px;
+  border-right: 1px solid #e8e9e5;
+  color: #666a66;
+  font-size: 8px;
+  font-weight: 680;
+}
+
+.landing-calendar-preview-head b:last-child {
+  border-right: 0;
+}
+
+.landing-calendar-preview-row {
+  min-height: var(--landing-calendar-row-height);
+  border-bottom: 1px solid #e1e3df;
+}
+
+.landing-calendar-preview-row:last-child {
+  border-bottom: 0;
+}
+
+.landing-calendar-preview-staff {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px;
+  border-right: 1px solid #dfe1dd;
+  background: #fcfcfa;
+}
+
+.landing-calendar-preview-staff > span {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border: 1px solid #d7d9d5;
+  border-radius: 999px;
+  background: #f1f2ef;
+  color: #444844;
+  font-size: 9px;
+  font-weight: 720;
+}
+
+.landing-calendar-preview-staff > div {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.landing-calendar-preview-staff strong,
+.landing-calendar-preview-staff small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.landing-calendar-preview-staff strong {
+  color: #2c302c;
+  font-size: 10px;
+  font-weight: 730;
+}
+
+.landing-calendar-preview-staff small {
+  color: #848884;
+  font-size: 7px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.landing-calendar-preview-timeline {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  background:
+    linear-gradient(to right, transparent calc(12.5% - 0.5px), #eff0ed 12.5%, transparent calc(12.5% + 0.5px)),
+    linear-gradient(to right, transparent calc(25% - 0.5px), #e2e4e0 25%, transparent calc(25% + 0.5px)),
+    linear-gradient(to right, transparent calc(37.5% - 0.5px), #eff0ed 37.5%, transparent calc(37.5% + 0.5px)),
+    linear-gradient(to right, transparent calc(50% - 0.5px), #e2e4e0 50%, transparent calc(50% + 0.5px)),
+    linear-gradient(to right, transparent calc(62.5% - 0.5px), #eff0ed 62.5%, transparent calc(62.5% + 0.5px)),
+    linear-gradient(to right, transparent calc(75% - 0.5px), #e2e4e0 75%, transparent calc(75% + 0.5px)),
+    linear-gradient(to right, transparent calc(87.5% - 0.5px), #eff0ed 87.5%, transparent calc(87.5% + 0.5px)),
+    #ffffff;
+}
+
+.landing-calendar-preview-event {
+  position: absolute;
+  top: 17px;
+  bottom: 17px;
+  min-width: 0;
+  display: grid;
+  align-content: center;
+  gap: 3px;
+  overflow: hidden;
+  margin: 0;
+  padding: 8px 10px;
+  border: 1px solid #c7cac6;
+  border-radius: 10px;
+  background: #ebece9;
+  color: #292c29;
+  box-shadow: 0 5px 14px rgba(25, 28, 25, 0.055);
+  font: inherit;
+  text-align: left;
+}
+
+button.landing-calendar-preview-event {
+  cursor: pointer;
+  appearance: none;
+}
+
+button.landing-calendar-preview-event:hover,
+button.landing-calendar-preview-event:focus-visible,
+.landing-calendar-preview-event.is-selected {
+  z-index: 2;
+  border-color: #606560;
+  box-shadow: 0 0 0 2px rgba(76, 82, 77, 0.16), 0 8px 20px rgba(25, 28, 25, 0.1);
+  outline: 0;
+}
+
+.landing-calendar-preview-event > :is(span, strong, small) {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.landing-calendar-preview-event > span {
+  color: inherit;
+  font-size: 7px;
+  font-weight: 670;
+  opacity: 0.68;
+}
+
+.landing-calendar-preview-event > strong {
+  color: inherit;
+  font-size: 9px;
+  font-weight: 760;
+}
+
+.landing-calendar-preview-event > small {
+  color: inherit;
+  font-size: 8px;
+  opacity: 0.82;
+}
+
+.landing-calendar-preview-event > i {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  min-width: 24px;
+  padding: 2px 5px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-size: 6px;
+  font-style: normal;
+  font-weight: 760;
+  line-height: 1;
+  text-align: center;
+  opacity: 0.7;
+}
+
+.landing-calendar-preview-event.is-confirmed {
+  border-color: #aeb5b0;
+  background: #e9ece9;
+}
+
+.landing-calendar-preview-event.is-progress {
+  border-color: #57615c;
+  background: #303632;
+  color: #ffffff;
+}
+
+.landing-calendar-preview-event.is-completed {
+  border-color: #4b8d77;
+  background: #dcece6;
+  color: #075f48;
+}
+
+.landing-calendar-preview-event.is-locked {
+  border-color: #2a2d2a;
+  background: #202321;
+  color: #ffffff;
+}
+
+.landing-calendar-preview-event.is-break {
+  top: 25px;
+  bottom: 25px;
+  border-style: dashed;
+  background: #fafaf8;
+  color: #747874;
+  box-shadow: none;
+}
+
+/* Compact editorial card */
+.lp-operations-visual .landing-calendar-preview {
+  --landing-calendar-staff-width: 112px;
+  --landing-calendar-row-height: 82px;
+  margin-top: 24px;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.lp-operations-visual .landing-calendar-preview-head {
+  min-height: 38px;
+}
+
+.lp-operations-visual .landing-calendar-preview-staff {
+  gap: 7px;
+  padding: 9px;
+}
+
+.lp-operations-visual .landing-calendar-preview-staff > span {
+  width: 25px;
+  height: 25px;
+  font-size: 7px;
+}
+
+.lp-operations-visual .landing-calendar-preview-staff strong {
+  font-size: 8px;
+}
+
+.lp-operations-visual .landing-calendar-preview-staff small {
+  display: none;
+}
+
+.lp-operations-visual .landing-calendar-preview-event {
+  top: 14px;
+  bottom: 14px;
+  padding: 6px 8px;
+  border-radius: 999px;
+}
+
+.lp-operations-visual .landing-calendar-preview-event > span,
+.lp-operations-visual .landing-calendar-preview-event > small,
+.lp-operations-visual .landing-calendar-preview-event > i {
+  display: none;
+}
+
+.lp-operations-visual .landing-calendar-preview-event > strong {
+  font-size: 7px;
+}
+
+.lp-operations-visual .landing-calendar-preview-event.is-break {
+  top: 20px;
+  bottom: 20px;
+  border-radius: 8px;
+}
+
+/* Large interactive landing demo */
+.systemly-demo-calendar-layout {
+  height: auto !important;
+  min-height: 500px;
+  align-items: start;
+}
+
+.systemly-demo-calendar-layout.is-full {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+.systemly-demo-calendar-card {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.systemly-demo-calendar-key {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 9px 12px;
+  border-bottom: 1px solid #dfe1dd;
+  background: #fafaf8;
+  color: #6d7175;
+  font-size: 9px;
+}
+
+.systemly-demo-calendar-key > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.systemly-demo-calendar-key span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.systemly-demo-calendar-key span i {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #aeb5b0;
+}
+
+.systemly-demo-calendar-key span:nth-child(2) i {
+  background: #303632;
+}
+
+.systemly-demo-calendar-key span:nth-child(3) i {
+  background: #008060;
+}
+
+.systemly-demo-calendar-key > strong {
+  flex: 0 0 auto;
+  color: #555a56;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.systemly-demo-calendar-card .landing-calendar-preview {
+  flex: 1;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.systemly-demo-calendar-card .landing-calendar-preview-row:last-child {
+  border-bottom: 1px solid #e1e3df;
+}
+
+@media (max-width: 1120px) {
+  .systemly-demo-calendar-layout {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .systemly-demo-calendar-layout .systemly-demo-detail {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .landing-calendar-preview {
+    --landing-calendar-staff-width: 104px;
+    --landing-calendar-row-height: 94px;
+  }
+
+  .landing-calendar-preview-head > span,
+  .landing-calendar-preview-staff {
+    padding-inline: 10px;
+  }
+
+  .landing-calendar-preview-staff > span {
+    display: none;
+  }
+
+  .landing-calendar-preview-event {
+    padding-inline: 7px;
+  }
+
+  .landing-calendar-preview-event > span,
+  .landing-calendar-preview-event > small {
+    display: none;
+  }
+
+  .systemly-demo-calendar-key {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 520px) {
+  .landing-calendar-preview {
+    --landing-calendar-staff-width: 82px;
+  }
+
+  .landing-calendar-preview-head b {
+    justify-content: center;
+    padding-left: 0;
+    font-size: 7px;
+  }
+
+  .landing-calendar-preview-staff strong {
+    font-size: 8px;
+  }
+
+  .landing-calendar-preview-event > strong {
+    font-size: 7px;
+  }
+
+  .lp-operations-visual .landing-calendar-preview {
+    --landing-calendar-staff-width: 78px;
+  }
+}
