@@ -27,15 +27,10 @@
   transform: none !important;
 }
 
-/* Legacy table rows use a light-only hover utility. Keep hover readable in both
-   themes until those tables are fully migrated to semantic classes. */
-.operations-dark .operations-workspace table tbody tr:hover {
+/* Service rows now own semantic text and badge colours. Only the row surface
+   changes on hover; descendants keep their explicit colours. */
+.operations-dark .operations-workspace .services-table tbody tr:hover {
   background-color: var(--op-hover) !important;
-  color: var(--op-text) !important;
-}
-
-.operations-dark .operations-workspace table tbody tr:hover :is(td, p, span) {
-  color: inherit;
 }
 
 /* The invoice from-date field already has the browser's native calendar icon.
