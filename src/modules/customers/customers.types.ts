@@ -68,6 +68,18 @@ export interface CustomerAppointment {
   }>;
 }
 
+export interface CustomerClinicalHistoryEntry {
+  appointmentId: string;
+  startsAt: string;
+  endsAt: string;
+  status: "completed";
+  services: Array<{ id: string; name: string }>;
+  staff: Array<{ id: string; name: string }>;
+  diagnosisAssessment: string | null;
+  clinicalSessionNotes: string | null;
+  planAndPrescription: string | null;
+}
+
 export interface CustomerWorkspaceResponse {
   customer: CustomerProfile;
   stats: {
@@ -78,6 +90,8 @@ export interface CustomerWorkspaceResponse {
   };
   upcoming: CustomerAppointment[];
   history: CustomerAppointment[];
+  historyHasMore?: boolean;
+  clinicalHistory?: CustomerClinicalHistoryEntry[];
 }
 
 export interface CustomerInput {
