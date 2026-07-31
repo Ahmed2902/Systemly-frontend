@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import {
+  ArrowUpRight,
   CalendarCheck2,
   CheckCircle2,
   Clock3,
@@ -18,43 +19,53 @@ export type PublicFeature = {
   description: string;
 };
 
+type TemplateVariant = "salon" | "clinic";
+
 export function CenteredBenefits({
   eyebrow,
   title,
   description,
   items,
+  variant = "clinic",
 }: {
   eyebrow: string;
   title: string;
   description: string;
   items: PublicFeature[];
+  variant?: TemplateVariant;
 }) {
-  return (
-    <section id="why" className="px-6 py-24 md:px-12 lg:px-16 lg:py-32">
-      <div className="mx-auto max-w-7xl text-center">
-        <p className="text-xs font-semibold uppercase tracking-[0.22em]" style={{ color: "var(--accent)" }}>
-          {eyebrow}
-        </p>
-        <h2 className="mx-auto mt-3 max-w-3xl text-4xl font-semibold tracking-tight md:text-5xl">
-          {title}
-        </h2>
-        <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-[var(--muted)]">
-          {description}
-        </p>
+  const isSalon = variant === "salon";
 
-        <div className="mt-14 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+  return (
+    <section id="why" className={`px-6 py-24 md:px-12 lg:px-16 lg:py-32 ${isSalon ? "bg-[var(--surface)]" : "bg-[var(--surface)]"}`}>
+      <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.78fr_1.22fr] lg:items-start lg:gap-20">
+        <div className="text-start lg:sticky lg:top-32">
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-strong)]">
+            {eyebrow}
+          </p>
+          <h2 className={`${isSalon ? "font-display font-normal" : "font-semibold"} mt-4 max-w-xl text-4xl leading-[1.06] tracking-[-0.045em] text-[var(--text)] md:text-5xl lg:text-6xl`}>
+            {title}
+          </h2>
+          <p className="mt-6 max-w-lg text-base leading-8 text-[var(--muted)]">
+            {description}
+          </p>
+        </div>
+
+        <div className="grid gap-px overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--border)] sm:grid-cols-2">
           {items.map((item, index) => {
             const Icon = iconSet[index % iconSet.length];
             return (
-              <article key={item.title} className="text-center">
-                <span
-                  className="mx-auto grid h-14 w-14 place-items-center rounded-full border bg-[var(--surface)]"
-                  style={{ borderColor: "var(--border)", color: "var(--accent)" }}
-                >
-                  <Icon size={21} strokeWidth={1.8} />
+              <article key={item.title} className="min-h-64 bg-[var(--background)] p-7 text-start md:p-9">
+                <span className="grid h-12 w-12 place-items-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent-strong)]">
+                  <Icon size={20} strokeWidth={1.8} />
                 </span>
-                <h3 className="mt-5 text-lg font-semibold text-[var(--text)]">{item.title}</h3>
-                <p className="mx-auto mt-2 max-w-xs text-sm leading-6 text-[var(--muted)]">{item.description}</p>
+                <p className="mt-12 text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
+                  0{index + 1}
+                </p>
+                <h3 className={`${isSalon ? "font-display text-2xl font-normal" : "text-xl font-semibold"} mt-2 text-[var(--text)]`}>
+                  {item.title}
+                </h3>
+                <p className="mt-3 max-w-sm text-sm leading-7 text-[var(--muted)]">{item.description}</p>
               </article>
             );
           })}
@@ -68,40 +79,60 @@ export function CenteredBookingProcess({
   eyebrow,
   title,
   steps,
+  variant = "clinic",
 }: {
   eyebrow: string;
   title: string;
   steps: PublicFeature[];
+  variant?: TemplateVariant;
 }) {
+  const isSalon = variant === "salon";
   const stepIcons = [Sparkles, UserRoundCheck, Clock3, CalendarCheck2];
 
   return (
-    <section id="process" className="border-y px-6 py-24 md:px-12 lg:px-16 lg:py-28" style={{ borderColor: "var(--border)", backgroundColor: "var(--surface)" }}>
-      <div className="mx-auto max-w-7xl text-center">
-        <p className="text-xs font-semibold uppercase tracking-[0.22em]" style={{ color: "var(--accent)" }}>
-          {eyebrow}
-        </p>
-        <h2 className="mx-auto mt-3 max-w-3xl text-4xl font-semibold tracking-tight text-[var(--text)] md:text-5xl">
-          {title}
-        </h2>
+    <section
+      id="process"
+      className={`px-6 py-24 md:px-12 lg:px-16 lg:py-32 ${isSalon ? "bg-[#171513] text-white" : "bg-[var(--soft)] text-[var(--text)]"}`}
+    >
+      <div className="mx-auto max-w-7xl">
+        <div className="flex flex-col gap-7 text-start md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className={`text-xs font-semibold uppercase tracking-[0.22em] ${isSalon ? "text-white/48" : "text-[var(--accent-strong)]"}`}>
+              {eyebrow}
+            </p>
+            <h2 className={`${isSalon ? "font-display font-normal" : "font-semibold"} mt-4 max-w-3xl text-4xl leading-[1.05] tracking-[-0.045em] md:text-5xl lg:text-6xl`}>
+              {title}
+            </h2>
+          </div>
+          <p className={`max-w-sm text-sm leading-7 ${isSalon ? "text-white/58" : "text-[var(--muted)]"}`}>
+            Live availability keeps every step simple, from the first choice to the confirmed appointment.
+          </p>
+        </div>
 
-        <div className="relative mt-14 grid gap-10 md:grid-cols-4">
-          <div className="absolute left-[12.5%] right-[12.5%] top-7 hidden border-t border-dashed md:block" style={{ borderColor: "var(--border)" }} />
+        <div className={`mt-14 grid overflow-hidden rounded-[2rem] border md:grid-cols-2 xl:grid-cols-4 ${isSalon ? "border-white/10 bg-white/10" : "border-[var(--border)] bg-[var(--border)]"}`}>
           {steps.map((step, index) => {
             const Icon = stepIcons[index % stepIcons.length];
             return (
-              <article key={step.title} className="relative text-center">
-                <span
-                  className="relative z-10 mx-auto grid h-14 w-14 place-items-center rounded-full border-4 border-[var(--surface)] text-white"
-                  style={{ backgroundColor: "var(--accent)" }}
-                >
-                  <Icon size={20} />
-                </span>
-                <p className="mt-5 text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
-                  Step {index + 1}
+              <article
+                key={step.title}
+                className={`relative min-h-72 p-7 text-start md:p-8 ${
+                  isSalon ? "border-white/10 bg-[#1d1b19] text-white" : "border-[var(--border)] bg-[var(--surface)] text-[var(--text)]"
+                } ${index > 0 ? "border-t md:border-t-0 md:border-s" : ""}`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className={`grid h-11 w-11 place-items-center rounded-full ${isSalon ? "bg-white text-[#171513]" : "bg-[var(--accent-soft)] text-[var(--accent-strong)]"}`}>
+                    <Icon size={18} />
+                  </span>
+                  <span className={`text-xs font-semibold ${isSalon ? "text-white/34" : "text-[var(--muted)]"}`}>
+                    0{index + 1}
+                  </span>
+                </div>
+                <h3 className={`${isSalon ? "font-display text-2xl font-normal" : "text-xl font-semibold"} mt-16`}>
+                  {step.title}
+                </h3>
+                <p className={`mt-3 text-sm leading-7 ${isSalon ? "text-white/58" : "text-[var(--muted)]"}`}>
+                  {step.description}
                 </p>
-                <h3 className="mt-2 text-lg font-semibold text-[var(--text)]">{step.title}</h3>
-                <p className="mx-auto mt-2 max-w-[16rem] text-sm leading-6 text-[var(--muted)]">{step.description}</p>
               </article>
             );
           })}
@@ -115,20 +146,25 @@ export function MobileBookingBar({
   bookingHref,
   previewMode,
   label = "Book appointment",
+  variant = "clinic",
 }: {
   bookingHref: string;
   previewMode?: boolean;
   label?: string;
+  variant?: TemplateVariant;
 }) {
+  const isSalon = variant === "salon";
+
   return (
-    <div className="fixed inset-x-0 bottom-0 z-50 border-t bg-[var(--surface)]/95 p-3 pb-[calc(.75rem+env(safe-area-inset-bottom))] backdrop-blur md:hidden" style={{ borderColor: "var(--border)" }}>
+    <div className={`fixed inset-x-0 bottom-0 z-50 border-t p-3 pb-[calc(.75rem+env(safe-area-inset-bottom))] backdrop-blur-xl md:hidden ${isSalon ? "border-white/10 bg-[#171513]/95" : "border-[var(--border)] bg-white/95"}`}>
       <Link
         href={bookingHref}
         onClick={previewMode ? (event) => event.preventDefault() : undefined}
-        className="mx-auto flex max-w-md items-center justify-center gap-2 rounded-xl px-5 py-3.5 text-sm font-semibold text-white shadow-lg"
-        style={{ backgroundColor: "var(--accent)" }}
+        className={`mx-auto flex max-w-md items-center justify-center gap-2 rounded-full px-5 py-3.5 text-sm font-semibold shadow-lg ${
+          isSalon ? "bg-white text-[#171513]" : "bg-[var(--accent-strong)] text-white"
+        }`}
       >
-        <CheckCircle2 size={17} /> {label}
+        <CheckCircle2 size={17} /> {label} <ArrowUpRight size={15} />
       </Link>
     </div>
   );
