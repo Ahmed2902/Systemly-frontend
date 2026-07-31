@@ -14,15 +14,10 @@ import {
 import { MultiLineChart } from "@/modules/analytics/components/AnalyticsCharts";
 import { SemanticDonutChart } from "@/modules/analytics/components/SemanticAnalyticsVisuals";
 import {
+  formatAnalyticsBucketForPreset,
   formatEgp,
   formatPercent,
 } from "@/modules/analytics/analytics.formatters";
-
-const shortDate = (value: string) =>
-  new Intl.DateTimeFormat("en-GB", {
-    day: "numeric",
-    month: "short",
-  }).format(new Date(value));
 
 export default function CustomerAnalyticsPage() {
   const { accessToken } = useAuth();
@@ -41,6 +36,13 @@ export default function CustomerAnalyticsPage() {
       cancelled = true;
     };
   }, [accessToken, preset]);
+
+  const shortDate = (value: string) =>
+    formatAnalyticsBucketForPreset(
+      value,
+      data?.timezone ?? "Africa/Cairo",
+      preset,
+    );
 
   return (
     <AnalyticsShell
@@ -96,7 +98,7 @@ export default function CustomerAnalyticsPage() {
                   {
                     name: "New",
                     values: data.newVsReturning.map((row) => row.newCustomers),
-                    colour: "var(--op-info)",
+                    colour: "#2563eb",
                     formatValue: (value) => String(Math.round(value)),
                   },
                   {
@@ -104,7 +106,7 @@ export default function CustomerAnalyticsPage() {
                     values: data.newVsReturning.map(
                       (row) => row.returningCustomers,
                     ),
-                    colour: "var(--op-success)",
+                    colour: "#059669",
                     formatValue: (value) => String(Math.round(value)),
                   },
                 ]}
@@ -138,7 +140,7 @@ export default function CustomerAnalyticsPage() {
                   {
                     name: "No-shows",
                     values: data.noShowRate.map((row) => row.noShowCount),
-                    colour: "var(--op-warning)",
+                    colour: "#b45309",
                     formatValue: (value) => String(Math.round(value)),
                     tooltipValues: data.noShowRate.map(
                       (row) =>
@@ -150,7 +152,7 @@ export default function CustomerAnalyticsPage() {
                     values: data.cancellationRate.map(
                       (row) => row.totalCancelled,
                     ),
-                    colour: "var(--op-danger)",
+                    colour: "#e11d48",
                     formatValue: (value) => String(Math.round(value)),
                     tooltipValues: data.cancellationRate.map(
                       (row) =>

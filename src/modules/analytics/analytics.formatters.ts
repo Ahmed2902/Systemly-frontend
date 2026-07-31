@@ -1,3 +1,5 @@
+import type { AnalyticsPreset } from "./analytics.types";
+
 export function formatEgp(cents: number) {
   return `EGP ${new Intl.NumberFormat("en-GB", { maximumFractionDigits: 0 }).format(cents / 100)}`;
 }
@@ -25,6 +27,24 @@ export function formatAnalyticsBucket(
     ...options,
     timeZone: timezone,
   }).format(new Date(value));
+}
+
+export function formatAnalyticsBucketForPreset(
+  value: string,
+  timezone: string,
+  preset: AnalyticsPreset,
+) {
+  return formatAnalyticsBucket(
+    value,
+    timezone,
+    preset === "today"
+      ? {
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+        }
+      : { day: "numeric", month: "short" },
+  );
 }
 
 export function formatMinutes(minutes: number) {
