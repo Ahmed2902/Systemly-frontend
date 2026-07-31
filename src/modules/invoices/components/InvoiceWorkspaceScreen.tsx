@@ -1,9 +1,21 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { AlertCircle, CalendarDays, Loader2, Search, WalletCards } from "lucide-react";
+import { CalendarDays, RefreshCw, Search } from "lucide-react";
 import { useAuth } from "@/modules/auth/useAuth";
 import { OperationsDropdown } from "@/modules/operations/components/OperationsDropdown";
+import {
+  OperationsAlert,
+  OperationsPage,
+  OperationsPageHeader,
+  OperationsPageInner,
+  OperationsState,
+  OperationsToolbar,
+} from "@/modules/operations/components/OperationsUI";
+import {
+  useOnOperationsMutation,
+  useOperations,
+} from "@/modules/operations/operations.context";
 import {
   downloadInvoiceReceipt,
   getInvoice,
@@ -34,6 +46,7 @@ const paymentOptions = [
 
 export default function InvoiceWorkspaceScreen() {
   const { accessToken, loading: authLoading } = useAuth();
+  const { notifyMutation } = useOperations();
   const [catalog, setCatalog] = useState<InvoiceListResponse | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selected, setSelected] = useState<InvoiceDetail | null>(null);
@@ -44,6 +57,7 @@ export default function InvoiceWorkspaceScreen() {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [detailLoading, setDetailLoading] = useState(false);
   const [actionRunning, setActionRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -53,34 +67,40 @@ export default function InvoiceWorkspaceScreen() {
     return () => window.clearTimeout(timer);
   }, [search]);
 
-  const loadList = useCallback(async () => {
-    if (!accessToken) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await getInvoices(accessToken, {
-        search: debouncedSearch || undefined,
-        status,
-        paymentMethod,
-        from: from || undefined,
-        to: to || undefined,
-      });
-      setCatalog(response);
-      setSelectedId((current) =>
-        current && response.items.some((item) => item.id === current)
-          ? current
-          : response.items[0]?.id ?? null,
-      );
-    } catch (caught: unknown) {
-      setError(caught instanceof Error ? caught.message : "Unable to load invoices");
-    } finally {
-      setLoading(false);
-    }
-  }, [accessToken, debouncedSearch, from, paymentMethod, status, to]);
+  const loadList = useCallback(
+    async (background = false) => {
+      if (!accessToken) return;
+      if (background) setRefreshing(true);
+      else setLoading(true);
+      try {
+        const response = await getInvoices(accessToken, {
+          search: debouncedSearch || undefined,
+          status,
+          paymentMethod,
+          from: from || undefined,
+          to: to || undefined,
+        });
+        setCatalog(response);
+        setSelectedId((current) =>
+          current && response.items.some((item) => item.id === current)
+            ? current
+            : response.items[0]?.id ?? null,
+        );
+        setError(null);
+      } catch (caught: unknown) {
+        setError(caught instanceof Error ? caught.message : "Unable to load invoices");
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
+      }
+    },
+    [accessToken, debouncedSearch, from, paymentMethod, status, to],
+  );
 
   useEffect(() => {
     if (!authLoading) void loadList();
   }, [authLoading, loadList]);
+  useOnOperationsMutation(["invoice", "appointment"], () => void loadList(true));
 
   useEffect(() => {
     if (!selectedId || !accessToken) {
@@ -91,7 +111,10 @@ export default function InvoiceWorkspaceScreen() {
     setDetailLoading(true);
     void getInvoice(selectedId, accessToken)
       .then((invoice) => {
-        if (active) setSelected(invoice);
+        if (active) {
+          setSelected(invoice);
+          setError(null);
+        }
       })
       .catch((caught: unknown) => {
         if (active) {
@@ -137,7 +160,9 @@ export default function InvoiceWorkspaceScreen() {
     try {
       const updated = await voidInvoice(selected.id, reason.trim(), accessToken);
       setSelected(updated);
-      await loadList();
+      notifyMutation({ scope: "invoice", entityId: selected.id });
+      notifyMutation({ scope: "appointment", entityId: selected.appointmentId });
+      await loadList(true);
     } catch (caught: unknown) {
       setError(caught instanceof Error ? caught.message : "Unable to void invoice");
     } finally {
@@ -147,36 +172,37 @@ export default function InvoiceWorkspaceScreen() {
 
   if (authLoading || (loading && !catalog)) {
     return (
-      <div className="flex h-full items-center justify-center bg-gradient-to-br from-violet-50 via-slate-50 to-emerald-50/50">
-        <Loader2 size={27} className="animate-spin text-violet-600" />
-      </div>
+      <OperationsPage>
+        <OperationsPageInner className="flex min-h-full items-center justify-center">
+          <OperationsState loading title="Loading invoices" description="Preparing payments and receipts." />
+        </OperationsPageInner>
+      </OperationsPage>
     );
   }
 
   return (
-    <div className="h-full overflow-y-auto bg-gradient-to-br from-violet-50/60 via-slate-50 to-emerald-50/30">
-      <div className="mx-auto max-w-[1540px] space-y-5 px-5 py-7 lg:px-8">
-        <header>
-          <div className="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
-            <WalletCards size={13} /> Payments and receipts
-          </div>
-          <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-950">
-            Invoices
-          </h1>
-          <p className="mt-1.5 text-sm text-slate-500">
-            Review completed payments, download receipts, and manage voided invoices.
-          </p>
-        </header>
+    <OperationsPage>
+      <OperationsPageInner>
+        <OperationsPageHeader
+          eyebrow="Management / Invoices"
+          title="Invoices"
+          description="Review completed payments, download receipts, and safely void invoices."
+          actions={
+            <button type="button" className="op-button" disabled={refreshing} onClick={() => void loadList(true)}>
+              <RefreshCw size={15} className={refreshing ? "animate-spin" : ""} /> Refresh
+            </button>
+          }
+        />
 
-        <section className="relative z-40 rounded-2xl border border-white/80 bg-white/90 p-3 shadow-sm backdrop-blur">
-          <div className="grid gap-3 lg:grid-cols-[minmax(15rem,1fr)_11rem_13rem_10rem_10rem_auto]">
+        <OperationsToolbar className="relative z-40 mb-4">
+          <div className="grid gap-2 lg:grid-cols-[minmax(15rem,1fr)_11rem_13rem_10rem_10rem_auto]">
             <label className="relative block">
-              <Search className="pointer-events-none absolute left-3.5 top-3 text-slate-400" size={17} />
+              <Search className="pointer-events-none absolute left-3.5 top-3 text-[var(--op-text-muted)]" size={16} />
               <input
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search invoice, customer, or phone..."
-                className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-3 text-sm outline-none focus:border-violet-300 focus:ring-4 focus:ring-violet-100"
+                placeholder="Search invoice, customer, or phone"
+                className="op-input h-10 min-h-10 pl-10"
               />
             </label>
             <OperationsDropdown
@@ -192,13 +218,13 @@ export default function InvoiceWorkspaceScreen() {
               aria-label="Payment method"
             />
             <label className="relative">
-              <CalendarDays className="pointer-events-none absolute left-3 top-3 text-slate-400" size={16} />
+              <CalendarDays className="pointer-events-none absolute left-3 top-3 text-[var(--op-text-muted)]" size={15} />
               <input
                 type="date"
                 value={from}
                 onChange={(event) => setFrom(event.target.value)}
                 aria-label="Invoices from date"
-                className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-9 pr-2 text-sm outline-none focus:border-violet-300 focus:ring-4 focus:ring-violet-100"
+                className="op-input h-10 min-h-10 pl-9"
               />
             </label>
             <input
@@ -206,7 +232,7 @@ export default function InvoiceWorkspaceScreen() {
               value={to}
               onChange={(event) => setTo(event.target.value)}
               aria-label="Invoices to date"
-              className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:border-violet-300 focus:ring-4 focus:ring-violet-100"
+              className="op-input h-10 min-h-10"
             />
             <button
               type="button"
@@ -218,31 +244,27 @@ export default function InvoiceWorkspaceScreen() {
                 setFrom("");
                 setTo("");
               }}
-              className="h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-600 disabled:opacity-40"
+              className="op-button"
             >
               Clear
             </button>
           </div>
-        </section>
+        </OperationsToolbar>
 
-        {error ? (
-          <div className="flex items-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-            <AlertCircle size={17} /> {error}
-          </div>
-        ) : null}
+        {error ? <OperationsAlert tone="danger" className="mb-4">{error}</OperationsAlert> : null}
 
-        <div className="flex items-center justify-between text-sm text-slate-500">
-          <span>{visibleTotal} invoices</span>
-          {loading ? <Loader2 size={16} className="animate-spin" /> : null}
+        <div className="mb-3 flex items-center justify-between text-xs text-[var(--op-text-muted)]">
+          <span>{visibleTotal} invoice{visibleTotal === 1 ? "" : "s"}</span>
+          {loading || refreshing ? <span>Refreshing…</span> : null}
         </div>
 
-        <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_25rem]">
+        <div className="grid items-start gap-3 xl:grid-cols-[minmax(0,1fr)_25rem] [&>section]:border-[var(--op-border)] [&>section]:bg-[var(--op-surface)] [&>section]:shadow-[var(--op-shadow)]">
           <InvoiceListPanel
             invoices={catalog?.items ?? []}
             selectedId={selectedId}
             onSelect={setSelectedId}
           />
-          <div className="xl:sticky xl:top-5">
+          <div className="xl:sticky xl:top-5 [&>section]:border-[var(--op-border)] [&>section]:bg-[var(--op-surface)] [&>section]:shadow-[var(--op-shadow)]">
             <InvoiceDetailPanel
               invoice={selected}
               loading={detailLoading}
@@ -252,7 +274,7 @@ export default function InvoiceWorkspaceScreen() {
             />
           </div>
         </div>
-      </div>
-    </div>
+      </OperationsPageInner>
+    </OperationsPage>
   );
 }
