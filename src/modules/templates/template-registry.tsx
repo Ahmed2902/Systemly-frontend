@@ -31,14 +31,14 @@ export type TemplateDefinition =
   | ClinicTemplateDefinition;
 
 export const clinicClarityTheme: TemplateTheme = {
-  primary: "#1677B8",
-  primaryDark: "#173B67",
-  background: "#F6FAFD",
+  primary: "#0B6B68",
+  primaryDark: "#074743",
+  background: "#F4F7F5",
   surface: "#FFFFFF",
-  text: "#102A43",
-  muted: "#627D98",
-  border: "#D9E7F1",
-  soft: "#EEF6FB",
+  text: "#172723",
+  muted: "#64736E",
+  border: "#DCE5E1",
+  soft: "#EAF1EE",
   accentTextOn: "#FFFFFF",
   headingStyle: "sans",
   cardRadius: "soft",
