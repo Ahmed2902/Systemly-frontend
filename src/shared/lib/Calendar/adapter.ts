@@ -37,9 +37,14 @@ export interface BackendAppointment {
   discountCents?: number;
   notes?: string;
   clinicVisitRecord?: {
-    notes?: string;
-    diagnosis?: string;
-    prescriptionJson?: Record<string, unknown>;
+    diagnosisAssessment?: string | null;
+    clinicalSessionNotes?: string | null;
+    planAndPrescription?: string | null;
+    // Backward-compatible response aliases while backend and frontend deploy
+    // independently.
+    notes?: string | null;
+    diagnosis?: string | null;
+    prescriptionJson?: string | Record<string, unknown> | null;
   } | null;
   customItems?: BackendCustomItem[];
   appointmentServices?: BackendSegment[];
@@ -74,6 +79,13 @@ export interface BackendBreak {
   label?: string;
 }
 
+function prescriptionText(
+  value: string | Record<string, unknown> | null | undefined,
+) {
+  if (!value) return null;
+  return typeof value === "string" ? value : JSON.stringify(value, null, 2);
+}
+
 export function mapBackendAppointment(
   raw: BackendAppointment,
   timezone = "UTC",
@@ -99,9 +111,17 @@ export function mapBackendAppointment(
     notes: raw.notes ?? "",
     clinicVisitRecord: raw.clinicVisitRecord
       ? {
-          notes: raw.clinicVisitRecord.notes ?? null,
-          diagnosis: raw.clinicVisitRecord.diagnosis ?? null,
-          prescriptionJson: raw.clinicVisitRecord.prescriptionJson ?? null,
+          diagnosisAssessment:
+            raw.clinicVisitRecord.diagnosisAssessment ??
+            raw.clinicVisitRecord.diagnosis ??
+            null,
+          clinicalSessionNotes:
+            raw.clinicVisitRecord.clinicalSessionNotes ??
+            raw.clinicVisitRecord.notes ??
+            null,
+          planAndPrescription:
+            raw.clinicVisitRecord.planAndPrescription ??
+            prescriptionText(raw.clinicVisitRecord.prescriptionJson),
         }
       : null,
     customItems: (raw.customItems ?? []).map((c) => ({
