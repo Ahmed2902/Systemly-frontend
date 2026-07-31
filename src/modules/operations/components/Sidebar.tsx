@@ -19,6 +19,7 @@ import {
   X,
 } from "lucide-react";
 import { useAuth } from "@/modules/auth/useAuth";
+import { SystemlyWordmark } from "@/shared/components/SystemlyWordmark";
 import { useOperations } from "../operations.context";
 import { useOperationsTheme } from "../operations-theme";
 
@@ -114,7 +115,7 @@ export function Sidebar({
       <div className="op-sidebar-header">
         <div className="op-wordmark">
           <div className="min-w-0">
-            <div className="op-wordmark-name">Systemly</div>
+            <SystemlyWordmark className="op-wordmark-name" />
             <p className="op-wordmark-meta">Business operations</p>
           </div>
           <button
