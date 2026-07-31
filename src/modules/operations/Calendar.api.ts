@@ -158,7 +158,7 @@ async function appointmentAction(
 }
 
 export function completeAppointment(appointmentId: string, accessToken: string) {
-  return appointmentAction(appointmentId, "finish", accessToken);
+  return appointmentAction(appointmentId, "finish", accessToken, {});
 }
 
 export function cancelAppointment(
