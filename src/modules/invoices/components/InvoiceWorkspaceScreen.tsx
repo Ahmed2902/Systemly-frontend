@@ -161,7 +161,7 @@ export default function InvoiceWorkspaceScreen() {
       const updated = await voidInvoice(selected.id, reason.trim(), accessToken);
       setSelected(updated);
       notifyMutation({ scope: "invoice", entityId: selected.id });
-      notifyMutation({ scope: "appointment", entityId: selected.appointmentId });
+      notifyMutation({ scope: "appointment", entityId: selected.appointment?.id });
       await loadList(true);
     } catch (caught: unknown) {
       setError(caught instanceof Error ? caught.message : "Unable to void invoice");
