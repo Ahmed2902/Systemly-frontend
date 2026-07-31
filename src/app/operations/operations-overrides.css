@@ -20,6 +20,36 @@
   }
 }
 
+/* Category cards should remain inside their panel when hovered. */
+.operations-workspace
+  [aria-labelledby="service-categories-heading"]
+  article:hover {
+  transform: none !important;
+}
+
+/* Legacy table rows use a light-only hover utility. Keep hover readable in both
+   themes until those tables are fully migrated to semantic classes. */
+.operations-dark .operations-workspace table tbody tr:hover {
+  background-color: var(--op-hover) !important;
+  color: var(--op-text) !important;
+}
+
+.operations-dark .operations-workspace table tbody tr:hover :is(td, p, span) {
+  color: inherit;
+}
+
+/* The invoice from-date field already has the browser's native calendar icon.
+   Remove the decorative duplicate so the placeholder never overlaps. */
+.operations-workspace
+  label:has(input[aria-label="Invoices from date"])
+  > svg {
+  display: none;
+}
+
+.operations-workspace input[aria-label="Invoices from date"] {
+  padding-left: 12px !important;
+}
+
 /* New appointment modal theme parity. */
 .operations-dark .new-appointment-modal > div {
   border: 1px solid var(--op-border) !important;
@@ -135,6 +165,8 @@
   + form
   section:has([aria-label="Staff role"])
   > button {
+  border-color: var(--op-border-strong) !important;
+  background: var(--op-surface) !important;
   color: var(--op-text) !important;
 }
 
