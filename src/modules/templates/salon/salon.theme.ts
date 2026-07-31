@@ -1,14 +1,14 @@
 import type { TemplateTheme } from "../theme.types";
 
 export const auraWellnessTheme: TemplateTheme = {
-  primary: "#8C5A3C",
-  primaryDark: "#5F3928",
-  background: "#F7F3EE",
-  surface: "#FFFFFF",
-  text: "#2B2420",
-  muted: "#75695E",
-  border: "#E8DFD3",
-  soft: "#FBF8F4",
+  primary: "#6A3048",
+  primaryDark: "#3E1B2A",
+  background: "#F4F0EA",
+  surface: "#FFFDFA",
+  text: "#231F1C",
+  muted: "#746B63",
+  border: "#DED5CB",
+  soft: "#ECE4DB",
   accentTextOn: "#FFFFFF",
   headingStyle: "serif",
   cardRadius: "rounded",

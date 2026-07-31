@@ -1,4 +1,4 @@
-import type { CSSProperties } from "react";
+import type { ReactNode } from "react";
 import type { SalonTemplateData } from "./salon.types";
 import { Nav } from "./sections/Nav";
 import { Hero } from "./sections/Hero";
@@ -14,26 +14,41 @@ import {
   CenteredBookingProcess,
   MobileBookingBar,
 } from "../shared/CenteredPublicSections";
+import { createTemplatePalette } from "../shared/template-palette";
 import { completePublicSectionOrder } from "../section-order";
 import hero from "../../../../images/salonHero.jpg";
 
 const defaultHero = hero.src;
 
 export function SalonTemplate(data: SalonTemplateData) {
-  const sectionMap: Record<string, React.ReactNode> = {
+  const hasTeam = data.showTeam && data.staff.length > 0;
+  const hasGallery = data.galleryPhotoUrls.length > 0;
+  const hasFaq = Boolean(data.showFaq && data.faqs?.length);
+  const hasContact = Boolean(data.phone || data.address || data.city || data.instagram || data.whatsapp);
+
+  const sectionMap: Record<string, ReactNode> = {
     hero: (
       <Hero
+        businessName={data.businessName}
         tagline={data.tagline}
+        city={data.city}
         heroPhotoUrl={data.heroPhotoUrl || defaultHero}
         bookingHref={data.bookingHref}
         previewMode={data.previewMode}
       />
     ),
-    services: <Services services={data.services} />,
-    team: data.showTeam ? <Team staff={data.staff} /> : null,
+    services: (
+      <Services
+        services={data.services}
+        bookingHref={data.bookingHref}
+        previewMode={data.previewMode}
+      />
+    ),
+    team: hasTeam ? <Team staff={data.staff} /> : null,
     gallery: <Gallery photos={data.galleryPhotoUrls} />,
     why: (
       <CenteredBenefits
+        variant="salon"
         eyebrow="Why choose us"
         title="Personal care, thoughtfully delivered"
         description="A calm experience built around your preferences, comfort, and time."
@@ -47,6 +62,7 @@ export function SalonTemplate(data: SalonTemplateData) {
     ),
     process: (
       <CenteredBookingProcess
+        variant="salon"
         eyebrow="How it works"
         title="Your next appointment in four simple steps"
         steps={[
@@ -58,7 +74,7 @@ export function SalonTemplate(data: SalonTemplateData) {
       />
     ),
     about: <About businessName={data.businessName} aboutText={data.aboutText} />,
-    faq: data.showFaq ? <Faq faqs={data.faqs} /> : null,
+    faq: hasFaq ? <Faq faqs={data.faqs} /> : null,
     contact: (
       <Contact
         phone={data.phone}
@@ -72,19 +88,21 @@ export function SalonTemplate(data: SalonTemplateData) {
     ),
   };
 
-  const style = {
-    "--accent": data.primaryColor || "#8C5A3C",
-    "--background": "#F7F3EE",
-    "--surface": "#FFFFFF",
-    "--soft": "#FBF8F4",
-    "--text": "#2B2420",
-    "--muted": "#75695E",
-    "--border": "#E8DFD3",
-  } as CSSProperties;
+  const style = createTemplatePalette({
+    accent: data.primaryColor,
+    fallbackAccent: "#6A3048",
+    background: "#F4F0EA",
+    surface: "#FFFDFA",
+    soft: "#ECE4DB",
+    text: "#231F1C",
+    muted: "#746B63",
+    border: "#DED5CB",
+    dark: "#171513",
+  });
 
   return (
     <div
-      className="min-h-screen bg-[var(--background)] pb-20 text-center text-[var(--text)] md:pb-0"
+      className="min-h-screen scroll-smooth bg-[var(--background)] pb-20 text-[var(--text)] motion-reduce:scroll-auto md:pb-0"
       dir={data.language === "ar" ? "rtl" : "ltr"}
       style={style}
     >
@@ -93,14 +111,16 @@ export function SalonTemplate(data: SalonTemplateData) {
         logoUrl={data.logoUrl}
         bookingHref={data.bookingHref}
         previewMode={data.previewMode}
-        showTeam={data.showTeam && data.staff.length > 0}
-        showGallery={data.galleryPhotoUrls.length > 0}
-        showFaq={Boolean(data.showFaq && data.faqs?.length)}
-        showContact={Boolean(data.phone || data.address || data.city || data.instagram || data.whatsapp)}
+        showTeam={hasTeam}
+        showGallery={hasGallery}
+        showFaq={hasFaq}
+        showContact={hasContact}
       />
+
       {completePublicSectionOrder(data.sectionOrder).map((key) => (
         <div key={key}>{sectionMap[key] ?? null}</div>
       ))}
+
       <Footer
         businessName={data.businessName}
         phone={data.phone}
@@ -109,8 +129,16 @@ export function SalonTemplate(data: SalonTemplateData) {
         instagram={data.instagram}
         bookingHref={data.bookingHref}
         previewMode={data.previewMode}
+        showTeam={hasTeam}
+        showGallery={hasGallery}
+        showFaq={hasFaq}
+        showContact={hasContact}
       />
-      <MobileBookingBar bookingHref={data.bookingHref} previewMode={data.previewMode} />
+      <MobileBookingBar
+        variant="salon"
+        bookingHref={data.bookingHref}
+        previewMode={data.previewMode}
+      />
     </div>
   );
 }
