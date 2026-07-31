@@ -31,9 +31,11 @@ export function getAppointmentDetail(
 export async function getAppointmentSummary(
   appointmentId: string,
   accessToken: string,
+  timezone = "UTC",
 ): Promise<AppointmentSummary> {
   return mapBackendAppointment(
     await getAppointmentDetail(appointmentId, accessToken),
+    timezone,
   );
 }
 
@@ -224,15 +226,15 @@ export function collectPayment(
     "/invoices/collect-payment",
     accessToken,
     {
-    method: "POST",
-    body: JSON.stringify({
-      appointmentId: appointment?.id ?? appointmentOrId,
-      discountCents: appointment?.discount ?? paymentMethodOrDiscount,
-      paymentMethod,
-      ...(appointment && includeAppointmentUpdate
-        ? { appointmentUpdate: appointmentUpdateBody(appointment) }
-        : {}),
-    }),
+      method: "POST",
+      body: JSON.stringify({
+        appointmentId: appointment?.id ?? appointmentOrId,
+        discountCents: appointment?.discount ?? paymentMethodOrDiscount,
+        paymentMethod,
+        ...(appointment && includeAppointmentUpdate
+          ? { appointmentUpdate: appointmentUpdateBody(appointment) }
+          : {}),
+      }),
     },
   );
 
