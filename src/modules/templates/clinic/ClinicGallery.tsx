@@ -81,7 +81,7 @@ export function ClinicGallery({ photos }: { photos: string[] }) {
                   aria-label={`Show clinic image ${index + 1}`}
                   aria-current={currentIndex === index ? "true" : undefined}
                   className={`relative aspect-[4/3] overflow-hidden rounded-xl border transition ${
-                    currentIndex === index ? "border-[var(--accent-strong)] ring-2 ring-[var(--accent-soft)]" : "border-[var(--border)] opacity-62 hover:opacity-100"
+                    currentIndex === index ? "border-[var(--accent-strong)] ring-2 ring-[var(--accent-soft)]" : "border-[var(--border)] opacity-60 hover:opacity-100"
                   }`}
                 >
                   <img src={photo} alt="" className="h-full w-full object-cover" />
