@@ -3,6 +3,7 @@ const ITEMS = [
   { label: "Confirmed", color: "var(--op-info)" },
   { label: "In progress", color: "var(--op-info)" },
   { label: "Completed", color: "var(--op-success)" },
+  { label: "No-show", color: "var(--op-warning)" },
   { label: "Cancelled", color: "var(--op-danger)" },
   { label: "Paid / locked", color: "var(--op-text-muted)" },
 ] as const;
