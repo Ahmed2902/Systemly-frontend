@@ -1,5 +1,6 @@
 // src/app/layout.tsx
 import "./globals.css";
+import "./systemly-shared.css";
 import { AuthProvider } from "@/modules/auth/useAuth";
 import { Playfair_Display, Inter } from "next/font/google";
 

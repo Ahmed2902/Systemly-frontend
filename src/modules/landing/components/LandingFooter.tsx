@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
-import { SystemlyBrand } from "./SystemlyBrand";
+import { SystemlyWordmark } from "@/shared/components/SystemlyWordmark";
 
 const columns = [
   ["Product", [["Features", "#features"], ["Live demo", "#demo"], ["Early access", "#pricing"], ["How it works", "#how-it-works"]]],
@@ -13,7 +13,7 @@ export function LandingFooter() {
     <footer className="lp-footer">
       <div className="lp-shell">
         <div className="lp-footer-lead">
-          <SystemlyBrand className="text-3xl" />
+          <SystemlyWordmark className="systemly-brand text-3xl" />
           <h2>The operating system for service businesses.</h2>
           <Link href="/signup">Start free <ArrowUpRight size={18}/></Link>
         </div>

@@ -19,6 +19,7 @@ import {
   X,
 } from "lucide-react";
 import { useAuth } from "@/modules/auth/useAuth";
+import { SystemlyWordmark } from "@/shared/components/SystemlyWordmark";
 import { useOperations } from "../operations.context";
 import { useOperationsTheme } from "../operations-theme";
 
