@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Check, CloudUpload, LogOut } from "lucide-react";
+import { SystemlyWordmark } from "@/shared/components/SystemlyWordmark";
 import { StepBusinessInfo } from "./StepBusinessInfo";
 import { StepServicesStaff } from "./StepServiceStaff";
 import { StepAssignments } from "./StepAssignments";
@@ -37,9 +38,8 @@ export function WizardShell() {
     <main className="onboarding-systerra">
       <header className="onboarding-topbar">
         <div className="onboarding-topbar-left">
-          <Link href="/" className="onboarding-brand" aria-label="Systemly home">
-            <span className="onboarding-brand-dot" aria-hidden="true" />
-            <span>Systemly</span>
+          <Link href="/" className="onboarding-brand sys-focusable" aria-label="Systemly home">
+            <SystemlyWordmark showDot dotClassName="onboarding-brand-dot" />
           </Link>
           <span className="onboarding-topbar-divider" aria-hidden="true" />
           <div className="onboarding-topbar-context">
