@@ -114,10 +114,12 @@ function appointmentUpdateBody(appointment: AppointmentSummary) {
     notes: appointment.notes,
     clinical: appointment.clinicVisitRecord
       ? {
-          notes: appointment.clinicVisitRecord.notes ?? undefined,
-          diagnosis: appointment.clinicVisitRecord.diagnosis ?? undefined,
-          prescriptionJson:
-            appointment.clinicVisitRecord.prescriptionJson ?? undefined,
+          diagnosisAssessment:
+            appointment.clinicVisitRecord.diagnosisAssessment ?? undefined,
+          clinicalSessionNotes:
+            appointment.clinicVisitRecord.clinicalSessionNotes ?? undefined,
+          planAndPrescription:
+            appointment.clinicVisitRecord.planAndPrescription ?? undefined,
         }
       : undefined,
   };
