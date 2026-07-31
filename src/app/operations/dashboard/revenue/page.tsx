@@ -20,7 +20,7 @@ import {
   SemanticDonutChart,
 } from "@/modules/analytics/components/SemanticAnalyticsVisuals";
 import {
-  formatAnalyticsBucket,
+  formatAnalyticsBucketForPreset,
   formatDateRange,
   formatEgp,
   WEEKDAYS,
@@ -45,7 +45,13 @@ export default function RevenueAnalyticsPage() {
   }, [accessToken, preset]);
 
   const shortDate = (value: string) =>
-    formatAnalyticsBucket(value, data?.timezone ?? "Africa/Cairo");
+    formatAnalyticsBucketForPreset(
+      value,
+      data?.timezone ?? "Africa/Cairo",
+      preset,
+    );
+  const averageInvoicePoints =
+    data?.averageInvoiceValueTrend.filter((row) => row.invoiceCount > 0) ?? [];
 
   return (
     <AnalyticsShell
@@ -151,23 +157,20 @@ export default function RevenueAnalyticsPage() {
               }
             >
               <MultiLineChart
-                labels={data.averageInvoiceValueTrend.map((row) =>
-                  shortDate(row.bucket),
-                )}
+                labels={averageInvoicePoints.map((row) => shortDate(row.bucket))}
                 series={[
                   {
                     name: "Average paid invoice",
                     colour: "var(--op-info)",
-                    values: data.averageInvoiceValueTrend.map((row) =>
-                      row.invoiceCount > 0 ? row.averageCents : null,
+                    values: averageInvoicePoints.map(
+                      (row) => row.averageCents ?? 0,
                     ),
                     formatValue: formatEgp,
-                    tooltipValues: data.averageInvoiceValueTrend.map((row) =>
-                      row.invoiceCount > 0
-                        ? `${formatEgp(row.averageCents ?? 0)} · ${row.invoiceCount} paid ${
-                            row.invoiceCount === 1 ? "invoice" : "invoices"
-                          }`
-                        : null,
+                    tooltipValues: averageInvoicePoints.map(
+                      (row) =>
+                        `${formatEgp(row.averageCents ?? 0)} · ${row.invoiceCount} paid ${
+                          row.invoiceCount === 1 ? "invoice" : "invoices"
+                        }`,
                     ),
                   },
                 ]}

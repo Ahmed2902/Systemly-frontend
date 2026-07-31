@@ -1,0 +1,187 @@
+/* Follow-up compatibility fixes for legacy Operations components that still use
+   light-only utility classes. Keep these selectors scoped to the Operations
+   workspace and modal roots so public pages are unaffected. */
+
+/* Calendar appointment drawer: the panel itself was 620px while its parent was
+   capped at 430px, which made the right side impossible to reach. */
+.operations-workspace [class~="w-[620px]"] {
+  width: 100% !important;
+  max-width: 100%;
+}
+
+@media (min-width: 1280px) {
+  .operations-workspace [class~="xl:w-[430px]"],
+  .operations-workspace [class~="xl:w-[420px]"] {
+    width: min(620px, 44vw) !important;
+  }
+
+  .operations-workspace [class~="max-w-[470px]"] {
+    max-width: 100% !important;
+  }
+}
+
+/* Category cards should remain inside their panel when hovered. Keep this as a
+   compatibility guard for cached builds that still include hover translation. */
+.operations-workspace
+  [aria-labelledby="service-categories-heading"]
+  article:hover {
+  transform: none !important;
+  box-shadow: var(--op-shadow) !important;
+}
+
+/* Service rows now own semantic text and badge colours. Only the row surface
+   changes on hover; descendants keep their explicit colours. */
+.operations-dark .operations-workspace .services-table tbody tr:hover {
+  background-color: var(--op-hover) !important;
+}
+
+/* The invoice from-date field already has the browser's native calendar icon.
+   Remove the decorative duplicate so the placeholder never overlaps. */
+.operations-workspace
+  label:has(input[aria-label="Invoices from date"])
+  > svg {
+  display: none;
+}
+
+.operations-workspace input[aria-label="Invoices from date"] {
+  padding-left: 12px !important;
+}
+
+/* New appointment modal theme parity. */
+.operations-dark .new-appointment-modal > div {
+  border: 1px solid var(--op-border) !important;
+  background: var(--op-canvas) !important;
+  color: var(--op-text) !important;
+}
+
+.operations-dark .new-appointment-modal [class*="bg-white"] {
+  background-color: var(--op-surface) !important;
+}
+
+.operations-dark .new-appointment-modal [class*="bg-slate-50"],
+.operations-dark .new-appointment-modal [class*="bg-slate-100"] {
+  background-color: var(--op-surface-soft) !important;
+}
+
+/* Selected services and customer search results use light-blue utilities in the
+   legacy modal. Map those states to the dark information surface so their light
+   text remains readable instead of appearing on a near-white card. */
+.operations-dark .new-appointment-modal [class~="bg-blue-50"],
+.operations-dark .new-appointment-modal [class~="bg-blue-50/60"] {
+  background-color: var(--op-info-soft) !important;
+}
+
+.operations-dark .new-appointment-modal [class~="hover:bg-blue-50/60"]:hover,
+.operations-dark .new-appointment-modal [class~="hover:bg-blue-50"]:hover {
+  background-color: var(--op-info-soft) !important;
+}
+
+.operations-dark .new-appointment-modal [class*="border-slate-"],
+.operations-dark .new-appointment-modal [class*="ring-slate-"] {
+  border-color: var(--op-border) !important;
+  --tw-ring-color: var(--op-border) !important;
+}
+
+.operations-dark .new-appointment-modal [class*="text-slate-950"],
+.operations-dark .new-appointment-modal [class*="text-slate-900"],
+.operations-dark .new-appointment-modal [class*="text-slate-800"] {
+  color: var(--op-text) !important;
+}
+
+.operations-dark .new-appointment-modal [class*="text-slate-700"],
+.operations-dark .new-appointment-modal [class*="text-slate-600"] {
+  color: var(--op-text-secondary) !important;
+}
+
+.operations-dark .new-appointment-modal [class*="text-slate-500"],
+.operations-dark .new-appointment-modal [class*="text-slate-400"] {
+  color: var(--op-text-muted) !important;
+}
+
+.operations-dark .new-appointment-modal input,
+.operations-dark .new-appointment-modal textarea,
+.operations-dark .new-appointment-modal select {
+  border-color: var(--op-border) !important;
+  background: var(--op-surface) !important;
+  color: var(--op-text) !important;
+}
+
+.operations-dark .new-appointment-modal input::placeholder,
+.operations-dark .new-appointment-modal textarea::placeholder {
+  color: var(--op-text-faint) !important;
+}
+
+/* Staff form modal theme parity, including the permission-role section. */
+.operations-dark [aria-label="Close staff form"] + form {
+  border-color: var(--op-border) !important;
+  background: var(--op-surface) !important;
+  color: var(--op-text) !important;
+}
+
+.operations-dark [aria-label="Close staff form"] + form header,
+.operations-dark [aria-label="Close staff form"] + form footer {
+  border-color: var(--op-border) !important;
+  background: color-mix(in srgb, var(--op-surface) 96%, transparent) !important;
+}
+
+.operations-dark [aria-label="Close staff form"] + form [class*="bg-white"] {
+  background-color: var(--op-surface) !important;
+}
+
+.operations-dark [aria-label="Close staff form"] + form [class*="bg-slate-50"],
+.operations-dark [aria-label="Close staff form"] + form [class*="bg-slate-100"] {
+  background-color: var(--op-surface-soft) !important;
+}
+
+.operations-dark [aria-label="Close staff form"] + form [class*="border-slate-"],
+.operations-dark [aria-label="Close staff form"] + form [class*="border-white"] {
+  border-color: var(--op-border) !important;
+}
+
+.operations-dark [aria-label="Close staff form"] + form [class*="text-slate-950"],
+.operations-dark [aria-label="Close staff form"] + form [class*="text-slate-900"],
+.operations-dark [aria-label="Close staff form"] + form [class*="text-slate-800"] {
+  color: var(--op-text) !important;
+}
+
+.operations-dark [aria-label="Close staff form"] + form [class*="text-slate-700"],
+.operations-dark [aria-label="Close staff form"] + form [class*="text-slate-600"] {
+  color: var(--op-text-secondary) !important;
+}
+
+.operations-dark [aria-label="Close staff form"] + form [class*="text-slate-500"],
+.operations-dark [aria-label="Close staff form"] + form [class*="text-slate-400"] {
+  color: var(--op-text-muted) !important;
+}
+
+.operations-dark [aria-label="Close staff form"] + form input,
+.operations-dark [aria-label="Close staff form"] + form textarea,
+.operations-dark [aria-label="Close staff form"] + form select {
+  border-color: var(--op-border) !important;
+  background: var(--op-surface) !important;
+  color: var(--op-text) !important;
+}
+
+.operations-dark
+  [aria-label="Close staff form"]
+  + form
+  section:has([aria-label="Staff role"]) {
+  border-color: var(--op-border-strong) !important;
+  background: var(--op-surface-soft) !important;
+}
+
+.operations-dark
+  [aria-label="Close staff form"]
+  + form
+  section:has([aria-label="Staff role"])
+  > button {
+  border-color: var(--op-border-strong) !important;
+  background: var(--op-surface) !important;
+  color: var(--op-text) !important;
+}
+
+/* Native date controls should remain visible without introducing a second icon. */
+.operations-dark input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.72;
+}

@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
-import type { CalendarDayData, StaffMember } from "../appointment.types";
+import type { CalendarDayData } from "../appointment.types";
 import {
   DAY_END_HOUR,
   DAY_START_HOUR,
@@ -12,14 +12,12 @@ import {
   formatTime12Hour,
   getNowLineOffset,
   getSegmentPosition,
-  toTimeValue,
-  weekdayInTimezone,
 } from "../../../shared/lib/Calendar/grid.utils";
 import { AppointmentSegmentBlock } from "./AppointmentSegmentBlock";
 
-const STAFF_COL_WIDTH = 196;
-const ROW_HEIGHT = 86;
-const HEADER_HEIGHT = 48;
+const STAFF_COL_WIDTH = 205;
+const ROW_HEIGHT = 108;
+const HEADER_HEIGHT = 50;
 
 interface Props {
   data: CalendarDayData;
@@ -89,14 +87,15 @@ export function CalendarGrid({ data, onSelectAppointment }: Props) {
         <label className="relative block w-full max-w-xs">
           <Search
             size={15}
-            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--op-text-muted)]"
+            className="pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2 text-[var(--op-text-muted)]"
           />
           <input
             type="search"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Find staff member"
-            className="op-input h-9 min-h-9 pl-9"
+            className="op-input h-9 min-h-9"
+            style={{ paddingLeft: 40 }}
           />
         </label>
         <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--op-text-muted)]">
@@ -129,21 +128,16 @@ export function CalendarGrid({ data, onSelectAppointment }: Props) {
                   style={{ width: SLOT_WIDTH_PX * 4 }}
                 >
                   {formatHourLabel(hour)}
-                  <span className="absolute bottom-0 left-1/2 top-7 border-l border-dashed border-[var(--op-border)] opacity-55" />
+                  <span className="absolute bottom-0 left-1/2 top-7 border-l border-dashed border-[var(--op-border)] opacity-45" />
                 </div>
               ))}
             </div>
           </div>
 
-          {filteredStaff.map((member, rowIndex) => {
+          {filteredStaff.map((member) => {
             const staffSegments = segmentsByStaff[member.id] ?? [];
             const staffBreaks = data.breaks.filter(
               (item) => item.staffId === member.id,
-            );
-            const closedRanges = getClosedRanges(
-              member,
-              data.date,
-              data.timezone,
             );
             const appointmentCount = new Set(
               staffSegments.map(({ segment }) => segment.appointmentId),
@@ -152,25 +146,13 @@ export function CalendarGrid({ data, onSelectAppointment }: Props) {
             return (
               <div
                 key={member.id}
-                className="group grid border-b border-[var(--op-border)]"
+                className="group grid border-b border-[var(--op-border)] bg-[var(--op-surface)]"
                 style={{
                   height: ROW_HEIGHT,
                   gridTemplateColumns: `${STAFF_COL_WIDTH}px ${GRID_WIDTH_PX}px`,
-                  background:
-                    rowIndex % 2 === 0
-                      ? "var(--op-surface)"
-                      : "color-mix(in srgb, var(--op-surface-soft) 55%, var(--op-surface))",
                 }}
               >
-                <div
-                  className="sticky left-0 z-30 flex min-w-0 items-center gap-3 border-r border-[var(--op-border)] px-4 transition group-hover:bg-[var(--op-hover)]"
-                  style={{
-                    background:
-                      rowIndex % 2 === 0
-                        ? "var(--op-surface)"
-                        : "color-mix(in srgb, var(--op-surface-soft) 55%, var(--op-surface))",
-                  }}
-                >
+                <div className="sticky left-0 z-30 flex min-w-0 items-center gap-3 border-r border-[var(--op-border)] bg-[var(--op-surface)] px-4 transition group-hover:bg-[var(--op-hover)]">
                   <span className="op-avatar">{initials(member.name)}</span>
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-semibold text-[var(--op-text)]">
@@ -185,43 +167,21 @@ export function CalendarGrid({ data, onSelectAppointment }: Props) {
                   </span>
                 </div>
 
-                <div className="relative transition group-hover:bg-[color-mix(in_srgb,var(--op-primary)_3%,transparent)]">
+                <div className="relative bg-[var(--op-surface)] transition group-hover:bg-[color-mix(in_srgb,var(--op-primary)_2%,var(--op-surface))]">
                   {hours.map((hour) => (
                     <div
                       key={hour}
                       className="absolute inset-y-0 border-r border-[var(--op-border)]"
                       style={{
-                        left:
-                          (hour - DAY_START_HOUR) * 4 * SLOT_WIDTH_PX,
+                        left: (hour - DAY_START_HOUR) * 4 * SLOT_WIDTH_PX,
                       }}
                     >
                       <span
-                        className="absolute inset-y-0 border-r border-dashed border-[var(--op-border)] opacity-45"
+                        className="absolute inset-y-0 border-r border-dashed border-[var(--op-border)] opacity-40"
                         style={{ left: SLOT_WIDTH_PX * 2 }}
                       />
                     </div>
                   ))}
-
-                  {closedRanges.map((range, index) => {
-                    const { left, width } = getSegmentPosition(
-                      range.start,
-                      range.end,
-                      data.timezone,
-                    );
-                    return (
-                      <div
-                        key={`${range.start}-${range.end}-${index}`}
-                        className="absolute inset-y-0 opacity-75"
-                        style={{
-                          left,
-                          width,
-                          background:
-                            "repeating-linear-gradient(135deg, color-mix(in srgb, var(--op-text-faint) 8%, transparent) 0 5px, transparent 5px 10px)",
-                        }}
-                        aria-label="Outside working hours"
-                      />
-                    );
-                  })}
 
                   {staffBreaks.map((staffBreak) => {
                     const { left, width } = getSegmentPosition(
@@ -232,7 +192,7 @@ export function CalendarGrid({ data, onSelectAppointment }: Props) {
                     return (
                       <div
                         key={staffBreak.id}
-                        className="absolute bottom-3 top-3 z-10 flex items-center justify-center rounded-[8px] border px-2 text-[9px] font-semibold text-[var(--op-text-muted)]"
+                        className="absolute bottom-4 top-4 z-10 flex items-center justify-center rounded-[8px] border px-2 text-[9px] font-semibold text-[var(--op-text-muted)]"
                         style={{
                           left,
                           width,
@@ -294,31 +254,4 @@ function initials(name: string) {
     .slice(0, 2)
     .map((part) => part[0]?.toUpperCase())
     .join("");
-}
-
-function getClosedRanges(member: StaffMember, date: string, timezone: string) {
-  const dayStart = `${String(DAY_START_HOUR).padStart(2, "0")}:00`;
-  const dayEnd = `${String(DAY_END_HOUR).padStart(2, "0")}:00`;
-  const override = member.availabilityOverrides?.find((item) =>
-    item.overrideDate.startsWith(date),
-  );
-
-  if (override?.isDayOff) return [{ start: dayStart, end: dayEnd }];
-
-  const schedule =
-    override?.startTime && override.endTime
-      ? { startTime: override.startTime, endTime: override.endTime }
-      : member.availability?.find(
-          (item) =>
-            item.dayOfWeek === weekdayInTimezone(date, timezone),
-        );
-
-  if (!schedule) return [{ start: dayStart, end: dayEnd }];
-
-  const start = toTimeValue(schedule.startTime, timezone);
-  const end = toTimeValue(schedule.endTime, timezone);
-  const ranges: Array<{ start: string; end: string }> = [];
-  if (start > dayStart) ranges.push({ start: dayStart, end: start });
-  if (end < dayEnd) ranges.push({ start: end, end: dayEnd });
-  return ranges;
 }

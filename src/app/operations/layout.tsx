@@ -1,4 +1,5 @@
 import "./operations.css";
+import "./operations-overrides.css";
 import { Suspense } from "react";
 import { OperationsProvider } from "@/modules/operations/operations.context";
 import { NewAppointmentModal } from "@/modules/operations/components/NewAppointment";

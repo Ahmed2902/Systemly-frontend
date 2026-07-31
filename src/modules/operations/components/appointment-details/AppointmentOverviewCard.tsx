@@ -13,8 +13,10 @@ interface Props {
   onStartsAtChange: (value: string) => void;
   options: Array<{ value: string; label: string }>;
 }
+
 const inputClass =
-  "w-full rounded-xl border border-transparent bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 outline-none transition-colors duration-150 hover:bg-slate-100/80 focus:border-blue-300 focus:ring-4 focus:ring-blue-100/60 disabled:cursor-not-allowed disabled:bg-slate-50/60 disabled:text-slate-400";
+  "op-input w-full min-w-0 rounded-xl px-3.5 py-2.5 text-sm font-semibold";
+
 const TIME_OPTIONS = Array.from({ length: 96 }, (_, index) => {
   const minutes = index * 15;
   const hour = Math.floor(minutes / 60);
@@ -38,21 +40,22 @@ export function AppointmentOverviewCard({
   options,
 }: Props) {
   const [date, time = ""] = startsAt.split("T");
+
   return (
-    <section className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200/60">
+    <section className="rounded-2xl border border-[var(--op-border)] bg-[var(--op-surface)] p-5 text-[var(--op-text)] shadow-[var(--op-shadow)]">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-700">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--op-info-soft)] text-[var(--op-info)]">
             <CalendarClock size={19} />
           </span>
           <div>
-            <h2 className="font-semibold text-slate-900">Appointment</h2>
-            <p className="text-xs text-slate-500">
+            <h2 className="font-semibold text-[var(--op-text)]">Appointment</h2>
+            <p className="text-xs text-[var(--op-text-muted)]">
               Timing and appointment status
             </p>
           </div>
         </div>
-        <div className="min-w-36">
+        <div className="min-w-40 sm:min-w-44">
           <AppointmentDropdown
             align="center"
             value={status}
@@ -62,12 +65,13 @@ export function AppointmentOverviewCard({
           />
         </div>
       </div>
-      <div className="mt-5 grid min-w-0 gap-3 sm:grid-cols-[minmax(0,1fr)_7.5rem]">
-        <div className="min-w-0 rounded-xl bg-slate-50 p-2">
-          <p className="px-1.5 text-xs font-medium text-slate-500">
+
+      <div className="mt-5 space-y-3">
+        <div className="min-w-0 rounded-xl border border-[var(--op-border)] bg-[var(--op-surface-soft)] p-3">
+          <p className="text-xs font-medium text-[var(--op-text-muted)]">
             Appointment time
           </p>
-          <div className="mt-1 grid min-w-0 gap-2 sm:grid-cols-[minmax(0,1fr)_7rem]">
+          <div className="mt-2 grid min-w-0 gap-2 sm:grid-cols-[minmax(10.5rem,1.25fr)_minmax(9.5rem,1fr)]">
             <input
               aria-label="Appointment date"
               type="date"
@@ -76,7 +80,7 @@ export function AppointmentOverviewCard({
               onChange={(event) =>
                 onStartsAtChange(`${event.target.value}T${time}`)
               }
-              className={inputClass + " min-w-0"}
+              className={inputClass}
             />
             <AppointmentDropdown
               align="center"
@@ -87,15 +91,24 @@ export function AppointmentOverviewCard({
             />
           </div>
         </div>
-        <div className="min-w-0 rounded-xl bg-blue-50/60 px-3 py-3">
-          <p className="text-xs font-medium text-blue-700">Duration</p>
-          <p className="mt-1 flex items-center gap-2 text-sm font-semibold text-slate-800">
-            <Clock3 size={15} className="shrink-0 text-blue-600" />
+
+        <div className="flex min-w-0 items-center justify-between gap-4 rounded-xl border border-[var(--op-border)] bg-[var(--op-surface-soft)] px-4 py-3">
+          <div>
+            <p className="text-xs font-medium text-[var(--op-text-muted)]">
+              Duration
+            </p>
+            <p className="mt-1 text-xs text-[var(--op-text-faint)]">
+              From the first service start to the final service end
+            </p>
+          </div>
+          <p className="flex shrink-0 items-center gap-2 text-sm font-semibold text-[var(--op-text)]">
+            <Clock3 size={15} className="text-[var(--op-info)]" />
             <span className="whitespace-nowrap">{durationMinutes} min</span>
           </p>
         </div>
       </div>
-      <p className="mt-5 border-t border-slate-100 pt-4 text-xs text-slate-400">
+
+      <p className="mt-5 border-t border-[var(--op-border)] pt-4 text-xs text-[var(--op-text-faint)]">
         Created{" "}
         {new Date(createdAt).toLocaleString([], {
           dateStyle: "medium",

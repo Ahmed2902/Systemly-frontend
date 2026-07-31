@@ -42,16 +42,18 @@ export function ServicesTable({
   actionId: string | null;
 }) {
   return (
-    <section className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/80 px-5 py-4">
+    <section className="op-panel services-table overflow-hidden">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--op-border)] px-5 py-4">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-lg font-semibold text-slate-900">All Services</h2>
-            <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
+            <h2 className="text-lg font-semibold text-[var(--op-text)]">
+              All Services
+            </h2>
+            <span className="rounded-full bg-[var(--op-surface-soft)] px-2.5 py-1 text-xs font-semibold text-[var(--op-text-secondary)]">
               {services.length}
             </span>
           </div>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-[var(--op-text-muted)]">
             Manage availability, duration, staff eligibility, and categories.
           </p>
         </div>
@@ -59,31 +61,48 @@ export function ServicesTable({
 
       {services.length === 0 ? (
         <div className="flex min-h-72 flex-col items-center justify-center px-6 text-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-50 text-violet-600">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--op-surface-soft)] text-[var(--op-text-muted)]">
             <MoreHorizontal size={24} />
           </div>
-          <h3 className="mt-4 font-semibold text-slate-900">No services found</h3>
-          <p className="mt-1 max-w-sm text-sm text-slate-500">
-            Try another search or filter, or create the first service in this category.
+          <h3 className="mt-4 font-semibold text-[var(--op-text)]">
+            No services found
+          </h3>
+          <p className="mt-1 max-w-sm text-sm text-[var(--op-text-muted)]">
+            Try another search or filter, or create the first service in this
+            category.
           </p>
         </div>
       ) : (
         <div className="overflow-x-auto">
-          <table className="min-w-full text-left text-sm">
-            <thead className="bg-slate-50/80 text-xs uppercase tracking-wide text-slate-500">
+          <table className="min-w-full border-separate border-spacing-0 text-left text-sm">
+            <thead className="relative z-10 bg-[var(--op-surface-soft)] text-xs uppercase tracking-wide text-[var(--op-text-muted)]">
               <tr>
-                <th className="px-5 py-3 font-semibold">Service</th>
-                <th className="px-4 py-3 font-semibold">Category</th>
-                <th className="px-4 py-3 font-semibold">Duration</th>
+                <th className="border-b border-[var(--op-border)] px-5 py-3 font-semibold">
+                  Service
+                </th>
+                <th className="border-b border-[var(--op-border)] px-4 py-3 font-semibold">
+                  Category
+                </th>
+                <th className="border-b border-[var(--op-border)] px-4 py-3 font-semibold">
+                  Duration
+                </th>
                 {canManageMoney ? (
-                  <th className="px-4 py-3 font-semibold">Price</th>
+                  <th className="border-b border-[var(--op-border)] px-4 py-3 font-semibold">
+                    Price
+                  </th>
                 ) : null}
-                <th className="px-4 py-3 font-semibold">Eligible staff</th>
-                <th className="px-4 py-3 font-semibold">Status</th>
-                <th className="px-5 py-3 text-right font-semibold">Actions</th>
+                <th className="border-b border-[var(--op-border)] px-4 py-3 font-semibold">
+                  Eligible staff
+                </th>
+                <th className="border-b border-[var(--op-border)] px-4 py-3 font-semibold">
+                  Status
+                </th>
+                <th className="border-b border-[var(--op-border)] px-5 py-3 text-right font-semibold">
+                  Actions
+                </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody>
               {services.map((service, index) => {
                 const accent = getOperationsAccent(
                   service.category ?? "Uncategorized",
@@ -94,18 +113,23 @@ export function ServicesTable({
                   service.eligibleStaff.length - visibleStaff.length,
                   0,
                 );
+                const accentSoft = `color-mix(in srgb, ${accent.hex} 14%, var(--op-surface))`;
+                const accentBorder = `color-mix(in srgb, ${accent.hex} 48%, var(--op-border))`;
 
                 return (
                   <tr
                     key={service.id}
-                    className={`transition hover:bg-slate-50/80 ${
-                      service.isActive ? "" : "bg-slate-50/40"
+                    className={`group relative transition-colors hover:bg-[var(--op-hover)] ${
+                      service.isActive
+                        ? "bg-[var(--op-surface)]"
+                        : "bg-[var(--op-surface-soft)]"
                     }`}
                   >
-                    <td className="px-5 py-4">
+                    <td className="relative z-0 border-b border-[var(--op-border)] px-5 py-4 align-middle">
                       <div className="flex items-center gap-3">
                         <span
-                          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl font-semibold ${accent.icon}`}
+                          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl font-semibold"
+                          style={{ background: accentSoft, color: accent.hex }}
                         >
                           {service.name.charAt(0).toUpperCase()}
                         </span>
@@ -113,39 +137,47 @@ export function ServicesTable({
                           <p
                             className={`truncate font-semibold ${
                               service.isActive
-                                ? "text-slate-900"
-                                : "text-slate-500"
+                                ? "text-[var(--op-text)]"
+                                : "text-[var(--op-text-muted)]"
                             }`}
                           >
                             {service.name}
                           </p>
-                          <p className="mt-0.5 max-w-xs truncate text-xs text-slate-500">
+                          <p className="mt-0.5 max-w-xs truncate text-xs text-[var(--op-text-muted)]">
                             {service.description || "No description added"}
                           </p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-4">
+                    <td className="relative z-0 border-b border-[var(--op-border)] px-4 py-4 align-middle">
                       <span
-                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset ${accent.pill}`}
+                        className="relative z-10 inline-flex whitespace-nowrap rounded-full border px-2.5 py-1 text-xs font-semibold"
+                        style={{
+                          background: accentSoft,
+                          borderColor: accentBorder,
+                          color: accent.hex,
+                        }}
                       >
                         {service.category || "Uncategorized"}
                       </span>
                     </td>
-                    <td className="px-4 py-4 text-slate-700">
-                      <span className="inline-flex items-center gap-1.5">
-                        <Clock3 size={14} className="text-slate-400" />
+                    <td className="border-b border-[var(--op-border)] px-4 py-4 align-middle text-[var(--op-text-secondary)]">
+                      <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
+                        <Clock3
+                          size={14}
+                          className="text-[var(--op-text-muted)]"
+                        />
                         {service.durationMin} min
                       </span>
                     </td>
                     {canManageMoney ? (
-                      <td className="px-4 py-4 font-medium text-slate-800">
+                      <td className="border-b border-[var(--op-border)] px-4 py-4 align-middle font-medium text-[var(--op-text)]">
                         {formatPrice(service.priceEgp)}
                       </td>
                     ) : null}
-                    <td className="px-4 py-4">
+                    <td className="border-b border-[var(--op-border)] px-4 py-4 align-middle">
                       {service.eligibleStaff.length === 0 ? (
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-500">
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--op-surface-soft)] px-2.5 py-1 text-xs font-medium text-[var(--op-text-muted)]">
                           <UserRoundX size={13} />
                           No active staff
                         </span>
@@ -155,7 +187,7 @@ export function ServicesTable({
                             <span
                               key={staff.id}
                               title={staff.name}
-                              className={`flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-slate-100 text-[10px] font-semibold text-slate-600 ${
+                              className={`flex h-8 w-8 items-center justify-center rounded-full border-2 border-[var(--op-surface)] bg-[var(--op-surface-soft)] text-[10px] font-semibold text-[var(--op-text-secondary)] ${
                                 staffIndex > 0 ? "-ml-2" : ""
                               }`}
                             >
@@ -163,35 +195,37 @@ export function ServicesTable({
                             </span>
                           ))}
                           {remaining > 0 ? (
-                            <span className="-ml-2 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-violet-50 text-[10px] font-semibold text-violet-700">
+                            <span className="-ml-2 flex h-8 w-8 items-center justify-center rounded-full border-2 border-[var(--op-surface)] bg-[var(--op-info-soft)] text-[10px] font-semibold text-[var(--op-info)]">
                               +{remaining}
                             </span>
                           ) : null}
                         </div>
                       )}
                     </td>
-                    <td className="px-4 py-4">
+                    <td className="border-b border-[var(--op-border)] px-4 py-4 align-middle">
                       <span
                         className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${
                           service.isActive
-                            ? "bg-emerald-50 text-emerald-700"
-                            : "bg-slate-100 text-slate-500"
+                            ? "bg-[var(--op-success-soft)] text-[var(--op-success)]"
+                            : "bg-[var(--op-surface-soft)] text-[var(--op-text-muted)]"
                         }`}
                       >
                         <span
                           className={`h-1.5 w-1.5 rounded-full ${
-                            service.isActive ? "bg-emerald-500" : "bg-slate-400"
+                            service.isActive
+                              ? "bg-[var(--op-success)]"
+                              : "bg-[var(--op-text-faint)]"
                           }`}
                         />
                         {service.isActive ? "Active" : "Inactive"}
                       </span>
                     </td>
-                    <td className="px-5 py-4">
+                    <td className="border-b border-[var(--op-border)] px-5 py-4 align-middle">
                       <div className="flex items-center justify-end gap-2">
                         <button
                           type="button"
                           onClick={() => onEdit(service)}
-                          className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-violet-200 hover:bg-violet-50 hover:text-violet-700 focus:outline-none focus:ring-4 focus:ring-violet-100"
+                          className="op-icon-button h-9 w-9"
                           aria-label={`Edit ${service.name}`}
                         >
                           <Edit3 size={15} />
@@ -200,10 +234,10 @@ export function ServicesTable({
                           type="button"
                           disabled={actionId === service.id}
                           onClick={() => onToggleActive(service)}
-                          className={`flex h-9 w-9 items-center justify-center rounded-lg border transition focus:outline-none focus:ring-4 disabled:cursor-wait disabled:opacity-50 ${
+                          className={`op-icon-button h-9 w-9 disabled:cursor-wait disabled:opacity-50 ${
                             service.isActive
-                              ? "border-slate-200 text-slate-500 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700 focus:ring-rose-100"
-                              : "border-slate-200 text-slate-500 hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700 focus:ring-emerald-100"
+                              ? "hover:!border-[var(--op-danger)] hover:!bg-[var(--op-danger-soft)] hover:!text-[var(--op-danger)]"
+                              : "hover:!border-[var(--op-success)] hover:!bg-[var(--op-success-soft)] hover:!text-[var(--op-success)]"
                           }`}
                           aria-label={
                             service.isActive
