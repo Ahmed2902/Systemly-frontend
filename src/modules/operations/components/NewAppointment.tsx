@@ -271,7 +271,7 @@ export function NewAppointmentModal() {
       notifyAppointmentCreated();
       closeNewAppointment();
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Failed to create appointment");
+      setError(e instanceof Error ? e.message : text("Failed to create appointment"));
     } finally {
       setSubmitting(false);
     }
@@ -301,18 +301,17 @@ export function NewAppointmentModal() {
             </button>
             <div>
               <div className="text-sm font-semibold uppercase tracking-[0.18em] text-blue-700">
-                <h2 className="text-2xl font-semibold ">New Appointment</h2>
+                <h2 className="text-2xl font-semibold ">{text("New Appointment")}</h2>
               </div>
 
               <p className="text-sm text-slate-500">
-                Keep everything in the modal while you build the booking step by
-                step.
+                {text("Keep everything in the modal while you build the booking step by step.")}
               </p>
             </div>
           </div>
 
           <div className="text-sm font-medium text-slate-500">
-            Step {activeStep} of 5
+            Step {activeStep} {text("of 5")}
           </div>
         </div>
 
@@ -348,7 +347,7 @@ export function NewAppointmentModal() {
                         : "text-slate-400"
                     }`}
                   >
-                    {step.label}
+                    {text(step.label)}
                   </span>
                   {index < stepItems.length - 1 && (
                     <div className="hidden h-px w-16 bg-slate-200 sm:block" />
@@ -368,7 +367,7 @@ export function NewAppointmentModal() {
 
           {loadingCatalog && activeStep <= 2 && (
             <div className="mb-4 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-500">
-              Loading services and staff…
+              {text("Loading services and staff…")}
             </div>
           )}
 
@@ -377,17 +376,17 @@ export function NewAppointmentModal() {
               <section className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
                 <div className="mb-5">
                   <h3 className="text-xl font-semibold text-slate-950">
-                    Select or Add Customer
+                    {text("Select or Add Customer")}
                   </h3>
                   <p className="mt-1 text-sm text-slate-500">
-                    Search an existing customer or create a fresh profile.
+                    {text("Search an existing customer or create a fresh profile.")}
                   </p>
                 </div>
 
                 <div className="space-y-4">
                   <div>
                     <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                      Search existing
+                      {text("Search existing")}
                     </div>
                     <div className="relative">
                       <Search
@@ -398,13 +397,13 @@ export function NewAppointmentModal() {
                         type="tel"
                         value={customerPhone}
                         onChange={(e) => setCustomerPhone(e.target.value)}
-                        placeholder="Search by name or phone…"
+                        placeholder={text("Search by name or phone…")}
                         className="w-full rounded-2xl border border-slate-300 bg-white py-3 pl-10 pr-4 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                       />
                     </div>
                     {searchingPhone && (
                       <div className="mt-2 text-xs text-slate-400">
-                        Searching…
+                        {text("Searching…")}
                       </div>
                     )}
                     {phoneMatches.length > 0 && (
@@ -430,7 +429,7 @@ export function NewAppointmentModal() {
                               </div>
                             </div>
                             <div className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
-                              Use
+                              {text("Use")}
                             </div>
                           </button>
                         ))}
@@ -443,7 +442,7 @@ export function NewAppointmentModal() {
               <section className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
                 <div className="mb-5">
                   <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                    Or add new customer
+                    {text("Or add new customer")}
                   </div>
                   <h3 className="mt-1 text-xl font-semibold text-slate-950">
                     {text("Customer details")}
@@ -459,7 +458,7 @@ export function NewAppointmentModal() {
                       type="text"
                       value={customerName}
                       onChange={(e) => setCustomerName(e.target.value)}
-                      placeholder="e.g. Sarah Jenkins"
+                      placeholder={text("e.g. Sarah Jenkins")}
                       className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                     />
                   </div>
@@ -484,7 +483,7 @@ export function NewAppointmentModal() {
                     <textarea
                       value={notes}
                       onChange={(e) => setNotes(e.target.value)}
-                      placeholder="Optional booking notes"
+                      placeholder={text("Optional booking notes")}
                       rows={4}
                       className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                     />
@@ -506,10 +505,10 @@ export function NewAppointmentModal() {
               <div className="mb-5 flex items-start justify-between gap-4">
                 <div>
                   <h3 className="text-xl font-semibold text-slate-950">
-                    Choose services
+                    {text("Choose services")}
                   </h3>
                   <p className="mt-1 text-sm text-slate-500">
-                    Select the services this appointment should include.
+                    {text("Select the services this appointment should include.")}
                   </p>
                 </div>
                 <div className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-600">
@@ -560,9 +559,9 @@ export function NewAppointmentModal() {
                         <span>
                           {hasEligibleStaff
                             ? `${eligible.length} eligible staff`
-                            : "No staff assigned to this service"}
+                            : text("No staff assigned to this service")}
                         </span>
-                        <span>{checked ? "Selected" : "Tap to add"}</span>
+                        <span>{checked ? text("Selected") : text("Tap to add")}</span>
                       </div>
                     </button>
                   );
@@ -575,10 +574,10 @@ export function NewAppointmentModal() {
             <section className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
               <div className="mb-5">
                 <h3 className="text-xl font-semibold text-slate-950">
-                  Assign staff
+                  {text("Assign staff")}
                 </h3>
                 <p className="mt-1 text-sm text-slate-500">
-                  Pick an eligible staff member for each selected service.
+                  {text("Pick an eligible staff member for each selected service.")}
                 </p>
               </div>
 
@@ -608,7 +607,7 @@ export function NewAppointmentModal() {
 
                       {eligible.length === 0 ? (
                         <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                          No staff assigned to this service
+                          {text("No staff assigned to this service")}
                         </div>
                       ) : (
                         <div className="flex flex-wrap gap-2">
@@ -626,7 +625,7 @@ export function NewAppointmentModal() {
                                 : "border-slate-300 bg-white text-slate-600 hover:border-blue-300"
                             }`}
                           >
-                            Any available
+                            {text("Any available")}
                           </button>
                           {eligible.map((member) => (
                             <button
@@ -661,10 +660,10 @@ export function NewAppointmentModal() {
               <div className="mb-5 flex items-center justify-between gap-4">
                 <div>
                   <h3 className="text-xl font-semibold text-slate-950">
-                    Pick a time
+                    {text("Pick a time")}
                   </h3>
                   <p className="mt-1 text-sm text-slate-500">
-                    Available slots for the selected services.
+                    {text("Available slots for the selected services.")}
                   </p>
                 </div>
                 <input
@@ -677,15 +676,15 @@ export function NewAppointmentModal() {
 
               {selectedServiceIds.length === 0 ? (
                 <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-500">
-                  Select at least one service first.
+                  {text("Select at least one service first.")}
                 </div>
               ) : loadingSlots ? (
                 <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-500">
-                  Loading slots…
+                  {text("Loading slots…")}
                 </div>
               ) : slots.length === 0 ? (
                 <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-500">
-                  No available slots for this date.
+                  {text("No available slots for this date.")}
                 </div>
               ) : (
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
@@ -713,10 +712,10 @@ export function NewAppointmentModal() {
               <div className="space-y-5">
                 <div className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
                   <h3 className="text-xl font-semibold text-slate-950">
-                    Review appointment
+                    {text("Review appointment")}
                   </h3>
                   <p className="mt-1 text-sm text-slate-500">
-                    Check the summary before creating the booking.
+                    {text("Check the summary before creating the booking.")}
                   </p>
 
                   <div className="mt-5 grid gap-3 sm:grid-cols-2">
@@ -733,7 +732,7 @@ export function NewAppointmentModal() {
                     </div>
                     <div className="rounded-2xl bg-slate-50 px-4 py-3">
                       <div className="text-xs uppercase tracking-wide text-slate-500">
-                        Date & time
+                        {text("Date & time")}
                       </div>
                       <div className="mt-1 font-medium text-slate-950">
                         {date}
@@ -796,11 +795,10 @@ export function NewAppointmentModal() {
 
                 <div className="rounded-[24px] border border-blue-200 bg-blue-50 p-5">
                   <div className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-700">
-                    Ready to book
+                    {text("Ready to book")}
                   </div>
                   <div className="mt-2 text-sm text-blue-900/80">
-                    You can submit the appointment now or go back and change any
-                    step.
+                    {text("You can submit the appointment now or go back and change any step.")}
                   </div>
                 </div>
               </div>
@@ -830,9 +828,9 @@ export function NewAppointmentModal() {
           >
             {activeStep === 5
               ? submitting
-                ? "Booking…"
-                : "Book appointment"
-              : "Next step"}
+                ? text("Booking…")
+                : text("Book appointment")
+              : text("Next step")}
           </button>
         </div>
       </div>

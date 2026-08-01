@@ -28,7 +28,7 @@ export default function OwnerAnalyticsLayout({ children }: { children: ReactNode
     return (
       <OperationsPage>
         <OperationsPageInner className="flex min-h-full items-center justify-center">
-          <OperationsState loading title="Checking analytics access" />
+          <OperationsState loading title={text("Checking analytics access")} />
         </OperationsPageInner>
       </OperationsPage>
     );
@@ -39,8 +39,8 @@ export default function OwnerAnalyticsLayout({ children }: { children: ReactNode
       <OperationsPage>
         <OperationsPageInner className="flex min-h-full items-center justify-center">
           <OperationsState
-            title="Owner access required"
-            description="Financial and owner analytics are restricted to the business owner. Redirecting to the calendar…"
+            title={text("Owner access required")}
+            description={text("Financial and owner analytics are restricted to the business owner. Redirecting to the calendar…")}
           />
         </OperationsPageInner>
       </OperationsPage>

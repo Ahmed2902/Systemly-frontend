@@ -77,7 +77,7 @@ export function CustomerListPanel({
           <input
             value={search}
             onChange={(event) => onSearchChange(event.target.value)}
-            placeholder="Search name, phone, or email"
+            placeholder={text("Search name, phone, or email")}
             className="op-input w-full py-2.5 pl-10 pr-3"
           />
         </label>
@@ -94,7 +94,7 @@ export function CustomerListPanel({
                   : "border-transparent bg-[var(--op-surface-soft)] text-[var(--op-text-muted)] hover:border-[var(--op-border)] hover:bg-[var(--op-hover)] hover:text-[var(--op-text)]"
               }`}
             >
-              {item.label}
+              {text(item.label)}
             </button>
           ))}
         </div>
@@ -112,9 +112,9 @@ export function CustomerListPanel({
           </div>
         ) : customers.length === 0 ? (
           <div className="px-6 py-16 text-center">
-            <p className="font-semibold text-[var(--op-text)]">No customers found</p>
+            <p className="font-semibold text-[var(--op-text)]">{text("No customers found")}</p>
             <p className="mt-1 text-sm text-[var(--op-text-muted)]">
-              Try another search or create a new customer.
+              {text("Try another search or create a new customer.")}
             </p>
           </div>
         ) : (
@@ -150,7 +150,7 @@ export function CustomerListPanel({
                       {customer.email ? ` · ${customer.email}` : ""}
                     </span>
                     <span className="mt-1 block text-xs text-[var(--op-text-faint)]">
-                      {customer.visits} visits · {customer.noShows} no-shows
+                      {customer.visits} {text("visits ·")} {customer.noShows} no-shows
                     </span>
                   </span>
                 </button>

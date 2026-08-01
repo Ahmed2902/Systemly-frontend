@@ -51,15 +51,15 @@ export function StepAssignments({ onNext, onBack }: StepProps) {
     <div>
       <div className="onboarding-page-intro">
         <p className="onboarding-kicker">{text("Availability")}</p>
-        <h1 className="onboarding-page-title">Set the rhythm of the week.</h1>
-        <p className="onboarding-page-copy">Choose each team member and define the hours customers can book with them.</p>
+        <h1 className="onboarding-page-title">{text("Set the rhythm of the week.")}</h1>
+        <p className="onboarding-page-copy">{text("Choose each team member and define the hours customers can book with them.")}</p>
       </div>
 
       <div className="onboarding-grid-two" style={{ gridTemplateColumns: "minmax(0,1.15fr) minmax(330px,.85fr)" }}>
         <section className="onboarding-card p-5">
           <div className="flex items-start gap-3">
             <div className="onboarding-icon-tile"><CalendarDays size={20} /></div>
-            <div><h2 className="text-[23px] font-semibold tracking-[-.03em]">Regular working hours</h2><p className="mt-1 text-sm text-[var(--onboarding-muted)]">Choose a team member, then configure their week.</p></div>
+            <div><h2 className="text-[23px] font-semibold tracking-[-.03em]">{text("Regular working hours")}</h2><p className="mt-1 text-sm text-[var(--onboarding-muted)]">{text("Choose a team member, then configure their week.")}</p></div>
           </div>
 
           <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
@@ -72,13 +72,13 @@ export function StepAssignments({ onNext, onBack }: StepProps) {
           </div>
 
           <div className="onboarding-table mt-4">
-            <div className="onboarding-table-row onboarding-table-head grid-cols-[1fr_90px_1.8fr]"><span>Day</span><span>Working</span><span>Working hours</span></div>
+            <div className="onboarding-table-row onboarding-table-head grid-cols-[1fr_90px_1.8fr]"><span>{text("Day")}</span><span>{text("Working")}</span><span>{text("Working hours")}</span></div>
             {DAYS.map((day, dayOfWeek) => {
               const slot = selectedStaff?.availability.find((item) => item.dayOfWeek === dayOfWeek);
               return (
                 <div key={day} className="onboarding-table-row grid-cols-[1fr_90px_1.8fr] gap-3 !min-h-[58px] !py-2">
                   <span className="text-sm font-medium">{day}</span>
-                  <button type="button" onClick={() => toggleDay(dayOfWeek)} className={`relative h-7 w-12 rounded-full transition-colors ${slot ? "bg-[var(--onboarding-mint-strong)]" : "bg-[#d7d9d5]"}`} aria-label={`${slot ? "Disable" : "Enable"} ${day}`} aria-pressed={Boolean(slot)}>
+                  <button type="button" onClick={() => toggleDay(dayOfWeek)} className={`relative h-7 w-12 rounded-full transition-colors ${slot ? "bg-[var(--onboarding-mint-strong)]" : "bg-[#d7d9d5]"}`} aria-label={`${slot ? text("Disable") : text("Enable")} ${day}`} aria-pressed={Boolean(slot)}>
                     <span className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${slot ? "translate-x-6" : "translate-x-1"}`} />
                   </button>
                   {slot ? (
@@ -95,32 +95,32 @@ export function StepAssignments({ onNext, onBack }: StepProps) {
         </section>
 
         <section className="onboarding-card p-5">
-          <h2 className="text-[22px] font-semibold tracking-[-.03em]">Availability summary</h2>
-          <p className="mt-1 text-sm text-[var(--onboarding-muted)]">A live summary of the schedule you configured.</p>
+          <h2 className="text-[22px] font-semibold tracking-[-.03em]">{text("Availability summary")}</h2>
+          <p className="mt-1 text-sm text-[var(--onboarding-muted)]">{text("A live summary of the schedule you configured.")}</p>
 
           <div className="mt-5 grid grid-cols-2 gap-3">
-            <div className="rounded-2xl border border-[var(--onboarding-border)] bg-[#fafaf8] p-4"><UserRoundCheck className="text-[var(--onboarding-mint)]" size={20} /><strong className="mt-3 block text-2xl">{workingDays}</strong><span className="mt-1 block text-xs text-[var(--onboarding-muted)]">Working days</span></div>
+            <div className="rounded-2xl border border-[var(--onboarding-border)] bg-[#fafaf8] p-4"><UserRoundCheck className="text-[var(--onboarding-mint)]" size={20} /><strong className="mt-3 block text-2xl">{workingDays}</strong><span className="mt-1 block text-xs text-[var(--onboarding-muted)]">{text("Working days")}</span></div>
             <div className="rounded-2xl border border-[var(--onboarding-border)] bg-[#fafaf8] p-4"><Clock3 className="text-[var(--onboarding-mint)]" size={20} /><strong className="mt-3 block text-2xl">{weeklyHours.toFixed(1)}</strong><span className="mt-1 block text-xs text-[var(--onboarding-muted)]">Weekly hours</span></div>
           </div>
 
           <div className="mt-4 rounded-2xl border border-[var(--onboarding-border)] p-4">
-            <h3 className="font-semibold">Configured schedule</h3>
+            <h3 className="font-semibold">{text("Configured schedule")}</h3>
             <div className="mt-3 space-y-2 text-sm">
               {selectedStaff?.availability.slice().sort((a, b) => a.dayOfWeek - b.dayOfWeek).map((slot) => <div key={slot.dayOfWeek} className="flex justify-between gap-3 border-b border-[var(--onboarding-border)] pb-2"><span>{DAYS[slot.dayOfWeek]}</span><span className="text-[var(--onboarding-muted)]">{slot.startTime} – {slot.endTime}</span></div>)}
-              {!selectedStaff?.availability.length ? <p className="text-[var(--onboarding-muted)]">No working days configured yet.</p> : null}
+              {!selectedStaff?.availability.length ? <p className="text-[var(--onboarding-muted)]">{text("No working days configured yet.")}</p> : null}
             </div>
           </div>
 
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <div className="rounded-2xl border border-[var(--onboarding-border)] p-4"><Clock3 className="text-[var(--onboarding-mint)]" size={18} /><h3 className="mt-2 text-sm font-semibold">Booking policies</h3><div className="mt-2 space-y-1.5 text-xs text-[var(--onboarding-muted)]"><p>Minimum notice <span className="float-right font-semibold text-[var(--onboarding-text)]">2 hours</span></p><p>Advance booking <span className="float-right font-semibold text-[var(--onboarding-text)]">30 days</span></p></div></div>
-            <div className="rounded-2xl border border-[var(--onboarding-border)] p-4"><Globe2 className="text-[var(--onboarding-mint)]" size={18} /><h3 className="mt-2 text-sm font-semibold">{text("Timezone")}</h3><p className="mt-2 text-xs">Cairo, Egypt (GMT+2)</p><p className="mt-1 text-[11px] text-[var(--onboarding-muted)]">All booking times use this timezone.</p></div>
+            <div className="rounded-2xl border border-[var(--onboarding-border)] p-4"><Clock3 className="text-[var(--onboarding-mint)]" size={18} /><h3 className="mt-2 text-sm font-semibold">{text("Booking policies")}</h3><div className="mt-2 space-y-1.5 text-xs text-[var(--onboarding-muted)]"><p>{text("Minimum notice")} <span className="float-right font-semibold text-[var(--onboarding-text)]">{text("2 hours")}</span></p><p>{text("Advance booking")} <span className="float-right font-semibold text-[var(--onboarding-text)]">{text("30 days")}</span></p></div></div>
+            <div className="rounded-2xl border border-[var(--onboarding-border)] p-4"><Globe2 className="text-[var(--onboarding-mint)]" size={18} /><h3 className="mt-2 text-sm font-semibold">{text("Timezone")}</h3><p className="mt-2 text-xs">{text("Cairo, Egypt (GMT+2)")}</p><p className="mt-1 text-[11px] text-[var(--onboarding-muted)]">{text("All booking times use this timezone.")}</p></div>
           </div>
         </section>
       </div>
 
       <footer className="onboarding-footer">
-        <button type="button" onClick={onBack} className="onboarding-secondary-button">← Back</button>
-        <div className="onboarding-footer-actions"><button type="button" onClick={onNext} className="onboarding-primary-button">Continue →</button></div>
+        <button type="button" onClick={onBack} className="onboarding-secondary-button">{text("← Back")}</button>
+        <div className="onboarding-footer-actions"><button type="button" onClick={onNext} className="onboarding-primary-button">{text("Continue →")}</button></div>
       </footer>
     </div>
   );

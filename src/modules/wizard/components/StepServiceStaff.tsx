@@ -394,7 +394,7 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
               }
             >
               <Plus size={16} />
-              Add staff
+              {text("Add staff")}
             </button>
           </div>
 
@@ -445,10 +445,10 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
                             <ImagePlus size={19} />
                           )}
                           {uploadingStaffId === member.clientId
-                            ? "Uploading…"
+                            ? text("Uploading…")
                             : member.photoUrl
-                              ? "Replace"
-                              : "Add photo"}
+                              ? text("Replace")
+                              : text("Add photo")}
                           <input
                             type="file"
                             accept="image/*"
@@ -480,7 +480,7 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
 
                     <div className="onboarding-team-identity">
                       <div className="onboarding-team-index">
-                        Team member {String(index + 1).padStart(2, "0")}
+                        {text("Team member")} {String(index + 1).padStart(2, "0")}
                       </div>
                       <label className="onboarding-field">
                         <span>Name</span>
@@ -567,7 +567,7 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
                           onClick={() => clearStaffServices(member.clientId)}
                           disabled={!member.serviceIds.length}
                         >
-                          Clear
+                          {text("Clear")}
                         </button>
                       </div>
                     </div>
@@ -646,7 +646,7 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
                   className="onboarding-secondary-button"
                 >
                   <Plus size={16} />
-                  Add staff
+                  {text("Add staff")}
                 </button>
               </div>
             ) : null}
@@ -666,7 +666,7 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
           onClick={onBack}
           className="onboarding-secondary-button"
         >
-          ← Back
+          {text("← Back")}
         </button>
         <div className="onboarding-footer-actions">
           <button
@@ -674,7 +674,7 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
             onClick={validateAndNext}
             className="onboarding-primary-button"
           >
-            Continue →
+            {text("Continue →")}
           </button>
         </div>
       </footer>

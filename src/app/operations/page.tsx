@@ -30,7 +30,7 @@ export default function OperationsIndexPage() {
 
   return (
     <div className="flex h-full items-center justify-center bg-[var(--operations-page)] text-sm text-[var(--operations-text)]">
-      Opening your workspace…
+      {text("Opening your workspace…")}
     </div>
   );
 }

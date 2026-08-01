@@ -55,7 +55,7 @@ export function OAuthCallbackPanel() {
     <div className="auth-state-card" aria-live="polite">
       <div className="auth-state-icon">{icon}</div>
       <div>
-        <h2>{state === "error" ? "Google sign-in failed" : "Connecting your account"}</h2>
+        <h2>{state === "error" ? text("Google sign-in failed") : text("Connecting your account")}</h2>
         <p>{message}</p>
       </div>
       {state === "error" ? (

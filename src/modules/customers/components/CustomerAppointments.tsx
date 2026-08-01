@@ -59,9 +59,9 @@ function AppointmentRows({
     return (
       <div className="flex flex-col items-center rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 px-6 py-12 text-center">
         <CalendarClock size={22} className="text-blue-600" />
-        <p className="mt-3 font-semibold text-slate-800">No appointments here</p>
+        <p className="mt-3 font-semibold text-slate-800">{text("No appointments here")}</p>
         <p className="mt-1 text-sm text-slate-500">
-          This customer has no appointments in this section.
+          {text("This customer has no appointments in this section.")}
         </p>
       </div>
     );
@@ -70,10 +70,10 @@ function AppointmentRows({
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-200">
       <div className="hidden grid-cols-[1.05fr_1.35fr_1fr_.8fr_.8fr_auto] gap-3 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-400 lg:grid">
-        <span>Date</span>
+        <span>{text("Date")}</span>
         <span>{text("Services")}</span>
         <span>{text("Staff")}</span>
-        <span>Source</span>
+        <span>{text("Source")}</span>
         <span>{text("Status")}</span>
         <span />
       </div>
@@ -118,7 +118,7 @@ function AppointmentRows({
               </span>
               <Link
                 href={`/operations/appointments/${appointment.id}`}
-                aria-label="Open appointment"
+                aria-label={text("Open appointment")}
                 className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-blue-50 hover:text-blue-700"
               >
                 <ExternalLink size={15} />
@@ -149,7 +149,7 @@ export function CustomerAppointments({
         <div>
           <h2 className="font-semibold text-slate-950">{text("Appointments")}</h2>
           <p className="mt-1 text-sm text-slate-500">
-            Review upcoming bookings and the complete appointment history.
+            {text("Review upcoming bookings and the complete appointment history.")}
           </p>
         </div>
         <div className="flex rounded-xl bg-slate-100 p-1">
@@ -162,7 +162,7 @@ export function CustomerAppointments({
                 : "text-slate-500"
             }`}
           >
-            Upcoming ({upcoming.length})
+            {text("Upcoming (")}{upcoming.length})
           </button>
           <button
             type="button"
@@ -173,7 +173,7 @@ export function CustomerAppointments({
                 : "text-slate-500"
             }`}
           >
-            History ({history.length})
+            {text("History (")}{history.length})
           </button>
         </div>
       </div>

@@ -1,3 +1,5 @@
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 // src/modules/auth/components/SignupForm.tsx
 "use client";
 
@@ -14,6 +16,7 @@ import { GoogleAuthButton } from "./GoogleAuthButton";
 import { PasswordField } from "./PasswordField";
 
 export function SignupForm() {
+  const text = usePlatformText();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { t } = useLocale();
@@ -60,7 +63,7 @@ export function SignupForm() {
             className="auth-input"
             dir="auto"
           />
-          {errors.name ? <p className="auth-field-error">{errors.name.message}</p> : null}
+          {errors.name ? <p className="auth-field-error">{text(errors.name.message)}</p> : null}
         </div>
 
         <div className="auth-field">
@@ -74,7 +77,7 @@ export function SignupForm() {
             className="auth-input"
             dir="ltr"
           />
-          {errors.email ? <p className="auth-field-error">{errors.email.message}</p> : null}
+          {errors.email ? <p className="auth-field-error">{text(errors.email.message)}</p> : null}
         </div>
 
         <div className="auth-field">
@@ -89,7 +92,7 @@ export function SignupForm() {
             className="auth-input"
             dir="ltr"
           />
-          {errors.phone ? <p className="auth-field-error">{errors.phone.message}</p> : null}
+          {errors.phone ? <p className="auth-field-error">{text(errors.phone.message)}</p> : null}
         </div>
 
         <div className="auth-field">
@@ -100,7 +103,7 @@ export function SignupForm() {
             autoComplete="new-password"
             placeholder={t("auth.signup.passwordPlaceholder")}
           />
-          {errors.password ? <p className="auth-field-error">{errors.password.message}</p> : null}
+          {errors.password ? <p className="auth-field-error">{text(errors.password.message)}</p> : null}
         </div>
 
         {serverError ? <div className="auth-error" role="alert">{serverError}</div> : null}

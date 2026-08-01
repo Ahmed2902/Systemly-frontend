@@ -1,5 +1,7 @@
 "use client";
 
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { Check, ChevronDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
@@ -12,6 +14,7 @@ interface Props {
 }
 
 export function AppointmentDropdown({ value, options, disabled, onChange, align = "left" }: Props) {
+  const text = usePlatformText();
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const selected = options.find((option) => option.value === value);
@@ -30,7 +33,7 @@ export function AppointmentDropdown({ value, options, disabled, onChange, align 
       </button>
       {open && !disabled ? <div role="listbox" className="absolute left-0 right-0 top-[calc(100%+8px)] z-50 max-h-60 overflow-y-auto rounded-2xl bg-white p-2 shadow-lg ring-1 ring-slate-200/60">
         {options.map((option) => <button key={option.value} type="button" role="option" aria-selected={option.value === value} onClick={() => { onChange(option.value); setOpen(false); }} className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm transition-colors ${option.value === value ? "bg-blue-50 font-medium text-blue-700" : "text-slate-700 hover:bg-slate-50 hover:text-blue-700"}`}>
-          {option.label}{option.value === value ? <Check size={14} /> : null}
+          {text(option.label)}{option.value === value ? <Check size={14} /> : null}
         </button>)}
       </div> : null}
     </div>

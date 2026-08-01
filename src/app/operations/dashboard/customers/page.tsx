@@ -49,7 +49,7 @@ export default function CustomerAnalyticsPage() {
 
   return (
     <AnalyticsShell
-      title="Customer Analytics"
+      title={text("Customer Analytics")}
       subtitle="Acquisition, appointment behaviour, repeat booking retention, and lifetime value"
     >
       {error ? <AnalyticsState message={error} /> : null}
@@ -60,7 +60,7 @@ export default function CustomerAnalyticsPage() {
         <div className="space-y-3">
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
             <MetricCard
-              label="New customers"
+              label={text("New customers")}
               value={String(data.summary.newCustomers)}
               hint="First-time customers acquired"
               emoji="＋"
@@ -72,21 +72,21 @@ export default function CustomerAnalyticsPage() {
               emoji="↻"
             />
             <MetricCard
-              label="No-show rate"
+              label={text("No-show rate")}
               value={formatPercent(data.summary.noShowRate)}
               hint={`${data.summary.noShowCount} no-shows · ${data.summary.completedCount} completed`}
               tone="warning"
               emoji="!"
             />
             <MetricCard
-              label="Cancellation rate"
+              label={text("Cancellation rate")}
               value={formatPercent(data.summary.cancellationRate)}
               hint={`${data.summary.cancellationCount} cancellations · ${data.summary.appointmentOutcomeCount} outcomes`}
               tone="negative"
               emoji="×"
             />
             <MetricCard
-              label="Inactive customers"
+              label={text("Inactive customers")}
               value={String(data.summary.lapsedCustomerCount)}
               hint={`No completed visit in ${data.lapsedCustomers.thresholdDays}+ days`}
               emoji="◷"
@@ -94,7 +94,7 @@ export default function CustomerAnalyticsPage() {
           </div>
 
           <div className="grid gap-3 xl:grid-cols-[1.6fr_.7fr]">
-            <AnalyticsPanel title="New vs returning customers">
+            <AnalyticsPanel title={text("New vs returning customers")}>
               <MultiLineChart
                 labels={data.newVsReturning.map((row) => shortDate(row.bucket))}
                 series={[
@@ -118,7 +118,7 @@ export default function CustomerAnalyticsPage() {
               />
             </AnalyticsPanel>
 
-            <AnalyticsPanel title="Acquisition sources">
+            <AnalyticsPanel title={text("Acquisition sources")}>
               <SemanticDonutChart
                 items={data.acquisitionSources.map((row) => ({
                   label: row.source.replaceAll("_", " "),
@@ -130,10 +130,10 @@ export default function CustomerAnalyticsPage() {
 
           <div className="grid gap-3 xl:grid-cols-2">
             <AnalyticsPanel
-              title="Appointment behaviour"
+              title={text("Appointment behaviour")}
               action={
                 <span className="analytics-muted text-xs">
-                  Counts shown on the chart; rates shown in the tooltip
+                  {text("Counts shown on the chart; rates shown in the tooltip")}
                 </span>
               }
             >
@@ -169,10 +169,10 @@ export default function CustomerAnalyticsPage() {
             </AnalyticsPanel>
 
             <AnalyticsPanel
-              title="Repeat booking retention"
+              title={text("Repeat booking retention")}
               action={
                 <span className="analytics-muted text-xs">
-                  Customers who booked again after joining
+                  {text("Customers who booked again after joining")}
                 </span>
               }
             >
@@ -204,7 +204,7 @@ export default function CustomerAnalyticsPage() {
                       </p>
                       {!available ? (
                         <p className="analytics-subtle mt-1 text-[11px]">
-                          Not enough {String(days)}-day history
+                          {text("Not enough")} {String(days)}{text("-day history")}
                         </p>
                       ) : null}
                     </div>
@@ -215,15 +215,15 @@ export default function CustomerAnalyticsPage() {
           </div>
 
           <div className="grid gap-3 xl:grid-cols-[1.4fr_.8fr]">
-            <AnalyticsPanel title="Top customers by lifetime value">
+            <AnalyticsPanel title={text("Top customers by lifetime value")}>
               <div className="overflow-x-auto">
                 <table className="analytics-table w-full min-w-[560px] text-left">
                   <thead>
                     <tr>
                       <th className="pb-2">{text("Customer")}</th>
-                      <th className="pb-2">Spend</th>
+                      <th className="pb-2">{text("Spend")}</th>
                       <th className="pb-2">{text("Invoices")}</th>
-                      <th className="pb-2">Average</th>
+                      <th className="pb-2">{text("Average")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -247,10 +247,10 @@ export default function CustomerAnalyticsPage() {
             </AnalyticsPanel>
 
             <AnalyticsPanel
-              title="Inactive customers"
+              title={text("Inactive customers")}
               action={
                 <span className="analytics-muted text-xs">
-                  No completed visit in {data.lapsedCustomers.thresholdDays}+ days
+                  {text("No completed visit in")} {data.lapsedCustomers.thresholdDays}{text("+ days")}
                 </span>
               }
             >
@@ -268,7 +268,7 @@ export default function CustomerAnalyticsPage() {
                 ))}
                 {data.lapsedCustomers.items.length === 0 ? (
                   <p className="analytics-muted text-sm">
-                    No inactive customers.
+                    {text("No inactive customers.")}
                   </p>
                 ) : null}
               </div>

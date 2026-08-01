@@ -1,5 +1,7 @@
 "use client";
 
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { Check, ChevronDown } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 
@@ -41,6 +43,7 @@ export function OperationsDropdown({
   className = "",
   "aria-label": ariaLabel,
 }: Props) {
+  const text = usePlatformText();
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(() => {
     const selectedIndex = options.findIndex((option) => option.value === value);
@@ -195,7 +198,7 @@ export function OperationsDropdown({
                     : `${toneClass[option.tone ?? "default"]} hover:bg-slate-50`
               } disabled:cursor-not-allowed disabled:opacity-40`}
             >
-              <span>{option.label}</span>
+              <span>{text(option.label)}</span>
               {isSelected ? <Check size={15} className="shrink-0 text-violet-600" /> : null}
             </button>
           );

@@ -1,3 +1,5 @@
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 // src/modules/wizard/components/FaqEditor.tsx
 "use client";
 
@@ -9,6 +11,7 @@ function uid() {
 }
 
 export function FaqEditor() {
+  const text = usePlatformText();
   const { state, patch } = useWizard();
 
   function addFaq() {
@@ -46,7 +49,7 @@ export function FaqEditor() {
               onChange={(e) =>
                 updateFaq(faq.clientId, "question", e.target.value)
               }
-              placeholder="Question"
+              placeholder={text("Question")}
               className="flex-1 rounded-md border border-surface-border bg-surface-2 px-3 py-1.5 text-sm text-foreground"
             />
             <button
@@ -59,7 +62,7 @@ export function FaqEditor() {
           <textarea
             value={faq.answer}
             onChange={(e) => updateFaq(faq.clientId, "answer", e.target.value)}
-            placeholder="Answer"
+            placeholder={text("Answer")}
             rows={2}
             className="w-full rounded-md border border-surface-border bg-surface-2 px-3 py-1.5 text-sm text-foreground"
           />
@@ -70,7 +73,7 @@ export function FaqEditor() {
         onClick={addFaq}
         className="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-surface-border py-2.5 text-sm text-muted transition-colors hover:border-surface-border-strong hover:text-foreground"
       >
-        <Plus size={15} /> Add question
+        <Plus size={15} /> {text("Add question")}
       </button>
     </div>
   );

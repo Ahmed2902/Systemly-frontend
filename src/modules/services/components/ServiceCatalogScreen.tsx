@@ -189,7 +189,7 @@ export default function ServiceCatalogScreen() {
     return (
       <OperationsPage>
         <OperationsPageInner className="flex min-h-full items-center justify-center">
-          <OperationsState loading title="Loading service catalog" />
+          <OperationsState loading title={text("Loading service catalog")} />
         </OperationsPageInner>
       </OperationsPage>
     );
@@ -200,8 +200,8 @@ export default function ServiceCatalogScreen() {
       <OperationsPageInner>
         <OperationsPageHeader
           eyebrow={text("Management / Services")}
-          title="Service catalog"
-          description="Manage services, categories, duration, price, and staff eligibility."
+          title={text("Service catalog")}
+          description={text("Manage services, categories, duration, price, and staff eligibility.")}
           actions={
             <>
               <button type="button" className="op-button" disabled={refreshing} onClick={() => void load(true)}>
@@ -221,7 +221,7 @@ export default function ServiceCatalogScreen() {
               <input
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search services, descriptions, or categories"
+                placeholder={text("Search services, descriptions, or categories")}
                 className="op-input h-10 min-h-10 pl-10"
               />
             </label>
@@ -230,17 +230,17 @@ export default function ServiceCatalogScreen() {
               onChange={setCategory}
               options={categoryOptions}
               icon={<Layers3 size={16} />}
-              aria-label="Filter by category"
+              aria-label={text("Filter by category")}
             />
             <OperationsDropdown
               value={status}
               onChange={(value) => setStatus(value as ServiceStatusFilter)}
               options={statusOptions}
               icon={<Activity size={16} />}
-              aria-label="Filter by status"
+              aria-label={text("Filter by status")}
             />
             <button type="button" disabled={!hasFilters} onClick={clearFilters} className="op-button">
-              <SlidersHorizontal size={15} /> Clear
+              <SlidersHorizontal size={15} /> {text("Clear")}
             </button>
           </div>
         </OperationsToolbar>
@@ -254,9 +254,9 @@ export default function ServiceCatalogScreen() {
         {catalog ? (
           <>
             <section className="op-metric-grid mb-4">
-              <OperationsMetric icon={<Layers3 size={17} />} label="Total services" value={catalog.total} />
-              <OperationsMetric icon={<Sparkles size={17} />} label="Active & bookable" value={catalog.activeTotal} tone="success" />
-              <OperationsMetric icon={<SlidersHorizontal size={17} />} label="Categories" value={catalog.categories.length} tone="warning" />
+              <OperationsMetric icon={<Layers3 size={17} />} label={text("Total services")} value={catalog.total} />
+              <OperationsMetric icon={<Sparkles size={17} />} label={text("Active & bookable")} value={catalog.activeTotal} tone="success" />
+              <OperationsMetric icon={<SlidersHorizontal size={17} />} label={text("Categories")} value={catalog.categories.length} tone="warning" />
             </section>
 
             <div className="mb-4 [&>section]:border-[var(--op-border)] [&>section]:bg-[var(--op-surface)] [&>section]:shadow-[var(--op-shadow)]">

@@ -1,5 +1,7 @@
 "use client";
 
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { ImagePlus, Loader2, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -22,6 +24,7 @@ export function AppointmentProgressPhotos({
   photos,
   disabled,
 }: Props) {
+  const text = usePlatformText();
   const inputRef = useRef<HTMLInputElement>(null);
   const [visiblePhotos, setVisiblePhotos] = useState(photos);
   const [uploading, setUploading] = useState(false);
@@ -44,7 +47,7 @@ export function AppointmentProgressPhotos({
       );
       setVisiblePhotos((current) => [...current, created as Photo]);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Unable to upload photo");
+      setError(err instanceof Error ? err.message : text("Unable to upload photo"));
     } finally {
       setUploading(false);
       if (inputRef.current) inputRef.current.value = "";
@@ -68,7 +71,7 @@ export function AppointmentProgressPhotos({
       await deleteAppointmentPhoto(appointmentId, photoId, accessToken);
     } catch (err: unknown) {
       setVisiblePhotos(previousPhotos);
-      setError(err instanceof Error ? err.message : "Unable to remove photo");
+      setError(err instanceof Error ? err.message : text("Unable to remove photo"));
     } finally {
       setDeletingId(null);
     }
@@ -78,9 +81,9 @@ export function AppointmentProgressPhotos({
     <section className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200/60">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="font-semibold text-slate-900">Progress photos</h2>
+          <h2 className="font-semibold text-slate-900">{text("Progress photos")}</h2>
           <p className="mt-1 text-sm text-slate-500">
-            Document the appointment as it happens.
+            {text("Document the appointment as it happens.")}
           </p>
         </div>
         <input
@@ -104,7 +107,7 @@ export function AppointmentProgressPhotos({
           ) : (
             <ImagePlus size={16} />
           )}
-          {uploading ? "Uploading…" : "Add photo"}
+          {uploading ? text("Uploading…") : text("Add photo")}
         </button>
       </div>
 
@@ -129,7 +132,7 @@ export function AppointmentProgressPhotos({
                 />
                 <button
                   type="button"
-                  aria-label="Delete photo"
+                  aria-label={text("Delete photo")}
                   disabled={disabled || deletingId === item.id}
                   onClick={() => void remove(item.id)}
                   className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-slate-600 opacity-0 shadow-sm transition-all duration-150 hover:bg-red-50 hover:text-red-600 focus:opacity-100 disabled:cursor-not-allowed disabled:opacity-50 group-hover:opacity-100"
@@ -156,10 +159,10 @@ export function AppointmentProgressPhotos({
         >
           <ImagePlus size={22} className="text-blue-600" />
           <span className="mt-2 text-sm font-semibold text-slate-700">
-            Add the first progress photo
+            {text("Add the first progress photo")}
           </span>
           <span className="mt-1 text-xs text-slate-500">
-            JPG, PNG, or WebP up to 5 MB
+            {text("JPG, PNG, or WebP up to 5 MB")}
           </span>
         </button>
       )}

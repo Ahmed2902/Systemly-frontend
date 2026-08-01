@@ -219,7 +219,7 @@ export function LiveOperationsDemo() {
               <div className="systemly-demo-wordmark">Systemly</div>
               <p>{text("Business operations")}</p>
               <button type="button" className="systemly-demo-new-button">
-                <Plus size={16} /> New Appointment
+                <Plus size={16} /> {text("New Appointment")}
               </button>
             </div>
 
@@ -360,7 +360,7 @@ export function LiveOperationsDemo() {
                 <div className="systemly-demo-table">
                   <div className="systemly-demo-table-head">
                     <span>{text("Customer")}</span>
-                    <span>Phone</span>
+                    <span>{text("Phone")}</span>
                     <span>Visits</span>
                     <span>{text("No-shows")}</span>
                   </div>
@@ -452,7 +452,7 @@ function AppointmentPreview({
       </div>
       <dl>
         <div>
-          <dt>Time</dt>
+          <dt>{text("Time")}</dt>
           <dd>{appointmentTime(appointment)}</dd>
         </div>
         <div>
@@ -461,7 +461,7 @@ function AppointmentPreview({
         </div>
         <div>
           <dt>{text("Payment")}</dt>
-          <dd>{appointment.isPaid ? "Paid in cash" : "Not collected"}</dd>
+          <dd>{appointment.isPaid ? text("Paid in cash") : text("Not collected")}</dd>
         </div>
       </dl>
     </aside>

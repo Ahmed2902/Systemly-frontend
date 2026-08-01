@@ -1,5 +1,7 @@
 "use client";
 
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { ScaledPreview } from "@/shared/components/ScaledPreview";
 import { useWizard } from "../wizard.context";
 import {
@@ -9,6 +11,7 @@ import {
 import { wizardStateToTemplateData } from "../wizard.preview";
 
 export function LivePreviewPane({ expanded = false }: { expanded?: boolean }) {
+  const text = usePlatformText();
   const { state, patch } = useWizard();
   const vertical = state.vertical ?? "salon";
   const options = getTemplatesForVertical(vertical);
@@ -29,7 +32,7 @@ export function LivePreviewPane({ expanded = false }: { expanded?: boolean }) {
                   : "border border-[var(--onboarding-border)] text-[var(--onboarding-muted)]"
               }`}
             >
-              {template.label}
+              {text(template.label)}
             </button>
           ))}
         </div>

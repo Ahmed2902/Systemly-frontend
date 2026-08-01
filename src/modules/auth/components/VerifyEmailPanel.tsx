@@ -60,13 +60,13 @@ export function VerifyEmailPanel() {
     <div className="auth-state-card" aria-live="polite">
       <div className="auth-state-icon">{icon}</div>
       <div>
-        <h2>{state === "error" ? "Verification link unavailable" : "Verifying your email"}</h2>
+        <h2>{state === "error" ? text("Verification link unavailable") : text("Verifying your email")}</h2>
         <p>{message}</p>
       </div>
 
       {state === "error" ? (
         <>
-          <Link href="/resend-verification" className="auth-primary-button">Send a new verification link</Link>
+          <Link href="/resend-verification" className="auth-primary-button">{text("Send a new verification link")}</Link>
           <Link href="/login" className="auth-secondary-button">{text("Back to login")}</Link>
         </>
       ) : null}

@@ -40,8 +40,7 @@ export function LandingHero() {
           </p>
           <h1 className="lp-hero-title">{text("The system behind your business.")}</h1>
           <p className="lp-hero-copy">
-            Build the customer experience, take bookings, run the working day,
-            and understand the business from one connected platform.
+            {text("Build the customer experience, take bookings, run the working day, and understand the business from one connected platform.")}
           </p>
           <div className="lp-hero-actions">
             <Link href="/signup" className="lp-button lp-button-primary">
@@ -51,7 +50,7 @@ export function LandingHero() {
               <Play size={16} fill="currentColor" /> {text("Explore the product")}
             </a>
           </div>
-          <div className="lp-hero-proof" aria-label="Product highlights">
+          <div className="lp-hero-proof" aria-label={text("Product highlights")}>
             <span>{text("Website + booking")}</span>
             <span>{text("Daily operations")}</span>
             <span>{text("Owner analytics")}</span>
@@ -66,6 +65,7 @@ export function LandingHero() {
 }
 
 function HeroProductShowcase() {
+  const text = usePlatformText();
   const [activeIndex, setActiveIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
@@ -93,7 +93,7 @@ function HeroProductShowcase() {
   return (
     <div
       className={`lp-hero-product lp-hero-product-showcase ${paused ? "is-paused" : ""}`}
-      aria-label="Systemly product showcase"
+      aria-label={text("Systemly product showcase")}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocusCapture={() => setPaused(true)}
@@ -106,7 +106,7 @@ function HeroProductShowcase() {
       <div className="lp-hero-product-bar">
         <span className="lp-product-dot" />
         <span>{activeSlide.context}</span>
-        <span>{activeSlide.label}</span>
+        <span>{text(activeSlide.label)}</span>
       </div>
 
       <div
@@ -136,7 +136,7 @@ function HeroProductShowcase() {
       <div
         className="lp-showcase-tabs"
         role="tablist"
-        aria-label="Product preview"
+        aria-label={text("Product preview")}
       >
         {showcaseSlides.map((slide, index) => (
           <button
@@ -147,7 +147,7 @@ function HeroProductShowcase() {
             className={activeIndex === index ? "is-active" : ""}
             onClick={() => setActiveIndex(index)}
           >
-            <span>{slide.label}</span>
+            <span>{text(slide.label)}</span>
             {activeIndex === index ? (
               <i key={`${slide.id}-${activeIndex}`} aria-hidden="true" />
             ) : null}
@@ -182,7 +182,7 @@ function ProductSidebar({ active }: { active: string }) {
   return (
     <nav
       className="lp-showcase-sidebar"
-      aria-label="Preview workspace navigation"
+      aria-label={text("Preview workspace navigation")}
     >
       <div className="lp-showcase-wordmark">Systemly</div>
       <div className="lp-showcase-sidebar-links">

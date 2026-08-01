@@ -24,7 +24,7 @@ export function AuthLayout({
 
   return (
     <main className="systemly-auth">
-      <section className="systemly-auth-visual" aria-label="Systemly product overview">
+      <section className="systemly-auth-visual" aria-label={text("Systemly product overview")}>
         <Link href="/" className="systemly-auth-brand sys-focusable">
           <SystemlyWordmark showDot dotClassName="systemly-auth-brand-dot" />
         </Link>

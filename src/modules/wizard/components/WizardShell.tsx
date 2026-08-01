@@ -71,7 +71,7 @@ export function WizardShell() {
       <div className="onboarding-shell">
         <div className="onboarding-mobile-progress">
           <span>Step {stepIndex + 1} of {steps.length}</span>
-          <strong>{currentStep.label}</strong>
+          <strong>{text(currentStep.label)}</strong>
           <small>{currentStep.hint}</small>
           <div
             role="progressbar"
@@ -91,7 +91,7 @@ export function WizardShell() {
               return (
                 <button
                   type="button"
-                  key={step.label}
+                  key={text(step.label)}
                   disabled={index > stepIndex}
                   onClick={() => index <= stepIndex && setStepIndex(index)}
                   className={`onboarding-progress-step ${status}`}
@@ -101,7 +101,7 @@ export function WizardShell() {
                   <span className="onboarding-progress-number">
                     {index < stepIndex ? <Check size={13} /> : index + 1}
                   </span>
-                  <span className="onboarding-progress-label">{step.label}</span>
+                  <span className="onboarding-progress-label">{text(step.label)}</span>
                   <span className="onboarding-progress-hint">{step.hint}</span>
                 </button>
               );

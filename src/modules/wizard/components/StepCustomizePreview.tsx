@@ -105,7 +105,7 @@ export function StepCustomizePreview({ onNext, onBack }: StepProps) {
               >
                 {templates.map((template) => (
                   <option key={template.id} value={template.id}>
-                    {template.label}
+                    {text(template.label)}
                   </option>
                 ))}
               </select>
@@ -256,7 +256,7 @@ export function StepCustomizePreview({ onNext, onBack }: StepProps) {
             </label>
 
             <div className="onboarding-field">
-              <label>WhatsApp number</label>
+              <label>{text("WhatsApp number")}</label>
               <input
                 value={state.whatsapp || ""}
                 onChange={(event) => patch({ whatsapp: event.target.value })}
@@ -276,7 +276,7 @@ export function StepCustomizePreview({ onNext, onBack }: StepProps) {
             </div>
 
             <div className="onboarding-field">
-              <label>Instagram URL</label>
+              <label>{text("Instagram URL")}</label>
               <input
                 value={state.instagram || ""}
                 onChange={(event) => patch({ instagram: event.target.value })}
@@ -372,7 +372,7 @@ export function StepCustomizePreview({ onNext, onBack }: StepProps) {
           onClick={onBack}
           className="onboarding-secondary-button"
         >
-          ← Back
+          {text("← Back")}
         </button>
         <div className="onboarding-footer-actions">
           <button
@@ -380,7 +380,7 @@ export function StepCustomizePreview({ onNext, onBack }: StepProps) {
             onClick={onNext}
             className="onboarding-primary-button"
           >
-            Continue →
+            {text("Continue →")}
           </button>
         </div>
       </footer>
@@ -418,7 +418,7 @@ function UploadTile({
         >
           <Upload size={17} />
           {uploading
-            ? "Uploading…"
+            ? text("Uploading…")
             : value
               ? text("Replace image")
               : `Upload ${label.toLowerCase()}`}

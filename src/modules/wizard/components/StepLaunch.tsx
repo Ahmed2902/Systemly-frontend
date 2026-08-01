@@ -61,7 +61,7 @@ export function StepLaunch({ onBack }: StepProps) {
                 {checklist.map(([label, complete]) => (
                   <div key={label} className="onboarding-table-row grid-cols-[1fr_auto] !min-h-[50px] !py-2">
                     <span>{label}</span>
-                    <span className={complete ? "onboarding-success" : "text-amber-700"}>{complete ? "Complete" : "Needs attention"} {complete ? <Check size={14} className="ml-1 inline" /> : null}</span>
+                    <span className={complete ? "onboarding-success" : "text-amber-700"}>{complete ? text("Complete") : text("Needs attention")} {complete ? <Check size={14} className="ml-1 inline" /> : null}</span>
                   </div>
                 ))}
               </div>
@@ -94,7 +94,7 @@ export function StepLaunch({ onBack }: StepProps) {
         <section className="onboarding-card p-5">
           <div className="flex items-center justify-between gap-4 rounded-2xl border border-[#20352f] bg-[#111a17] p-4 text-white">
             <div className="flex items-center gap-3"><Rocket className="text-[#5cc9a7]" size={30} /><div><h2 className="text-xl font-semibold">You’re almost live</h2><p className="mt-1 text-xs text-[#aeb8b4]">Review the real site preview and launch with confidence.</p></div></div>
-            <div className="text-right"><strong className="text-2xl">{readiness}%</strong><span className="block text-[11px] text-[#aeb8b4]">Complete</span></div>
+            <div className="text-right"><strong className="text-2xl">{readiness}%</strong><span className="block text-[11px] text-[#aeb8b4]">{text("Complete")}</span></div>
           </div>
           <div className="mt-4 overflow-hidden rounded-2xl border border-[var(--onboarding-border)] bg-[#111513] p-2"><LivePreviewPane /></div>
           <div className="mt-4 grid gap-2 sm:grid-cols-3"><NextCard icon={<CalendarCheck2 />} title="Test appointment" copy="Check the booking flow." /><NextCard icon={<Link2 />} title="Share booking link" copy="Send it to customers." /><NextCard icon={<BarChart3 />} title="Review analytics" copy="Track new activity." /></div>
@@ -103,7 +103,7 @@ export function StepLaunch({ onBack }: StepProps) {
 
       {error ? <p className="onboarding-error mt-3">{error}</p> : null}
       <footer className="onboarding-footer">
-        <button type="button" onClick={onBack} className="onboarding-secondary-button">← Back</button>
+        <button type="button" onClick={onBack} className="onboarding-secondary-button">{text("← Back")}</button>
         <div className="onboarding-footer-actions"><button type="button" onClick={publish} disabled={publishing || readiness < 100} className="onboarding-primary-button disabled:cursor-not-allowed disabled:opacity-50">{publishing ? "Publishing…" : "Publish & go live →"}</button></div>
       </footer>
     </div>

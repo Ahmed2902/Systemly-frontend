@@ -35,7 +35,7 @@ export default function InviteStaffPage() {
     try {
       setResult(await createStaffInvite({ email: email.trim(), role }, accessToken));
     } catch (caught: unknown) {
-      setError(caught instanceof Error ? caught.message : "Unable to create invitation");
+      setError(caught instanceof Error ? caught.message : text("Unable to create invitation"));
     } finally {
       setSubmitting(false);
     }
@@ -46,9 +46,9 @@ export default function InviteStaffPage() {
       <OperationsPage>
         <OperationsPageInner className="flex min-h-full items-center justify-center">
           <OperationsState
-            title="Owner access required"
-            description="Only the business owner can create team-account invitations."
-            action={<Link href="/operations/staff" className="op-button">Back to staff</Link>}
+            title={text("Owner access required")}
+            description={text("Only the business owner can create team-account invitations.")}
+            action={<Link href="/operations/staff" className="op-button">{text("Back to staff")}</Link>}
           />
         </OperationsPageInner>
       </OperationsPage>
@@ -60,9 +60,9 @@ export default function InviteStaffPage() {
       <OperationsPageInner className="max-w-3xl">
         <OperationsPageHeader
           eyebrow="Management / Staff / Invitation"
-          title="Invite a team account"
-          description="Create a secure invitation link and send it manually until production email delivery is active."
-          actions={<Link href="/operations/staff" className="op-button">Back to staff</Link>}
+          title={text("Invite a team account")}
+          description={text("Create a secure invitation link and send it manually until production email delivery is active.")}
+          actions={<Link href="/operations/staff" className="op-button">{text("Back to staff")}</Link>}
         />
 
         <OperationsPanel>
@@ -71,16 +71,16 @@ export default function InviteStaffPage() {
               <MailPlus size={19} />
             </span>
             <div>
-              <h2 className="font-bold text-[var(--op-text)]">Account details</h2>
+              <h2 className="font-bold text-[var(--op-text)]">{text("Account details")}</h2>
               <p className="mt-1 text-sm text-[var(--op-text-muted)]">
-                The invitation expires automatically. You can copy and send it through WhatsApp or another trusted channel.
+                {text("The invitation expires automatically. You can copy and send it through WhatsApp or another trusted channel.")}
               </p>
             </div>
           </div>
 
           <form onSubmit={submit} className="mt-5 space-y-5">
             <label className="block text-sm font-semibold text-[var(--op-text-secondary)]">
-              Email address
+              {text("Email address")}
               <input
                 required
                 type="email"
@@ -92,7 +92,7 @@ export default function InviteStaffPage() {
             </label>
 
             <fieldset>
-              <legend className="text-sm font-semibold text-[var(--op-text-secondary)]">Account role</legend>
+              <legend className="text-sm font-semibold text-[var(--op-text-secondary)]">{text("Account role")}</legend>
               <div className="mt-2 grid gap-3 sm:grid-cols-2">
                 {([text("Receptionist"), text("Staff")] as InviteRole[]).map((value) => (
                   <label
@@ -114,8 +114,8 @@ export default function InviteStaffPage() {
                     <strong className="text-sm text-[var(--op-text)]">{value}</strong>
                     <p className="mt-1 text-xs leading-5 text-[var(--op-text-muted)]">
                       {value === text("Receptionist")
-                        ? "Manage bookings, customers, payments, and the daily calendar."
-                        : "Use the operational workspace without owner analytics or business settings."}
+                        ? text("Manage bookings, customers, payments, and the daily calendar.")
+                        : text("Use the operational workspace without owner analytics or business settings.")}
                     </p>
                   </label>
                 ))}
@@ -129,17 +129,17 @@ export default function InviteStaffPage() {
               disabled={submitting || !accessToken}
               className="op-button op-button-primary"
             >
-              {submitting ? "Creating invitation…" : "Create invitation"}
+              {submitting ? text("Creating invitation…") : text("Create invitation")}
             </button>
           </form>
 
           {result ? (
             <div className="mt-6 rounded-[11px] border border-[color-mix(in_srgb,var(--op-success)_38%,var(--op-border))] bg-[var(--op-success-soft)] p-4">
               <div className="flex items-center gap-2 text-sm font-bold text-[var(--op-success)]">
-                <CheckCircle2 size={17} /> Invitation created
+                <CheckCircle2 size={17} /> {text("Invitation created")}
               </div>
               <p className="mt-1 text-xs text-[var(--op-success)]">
-                Expires {new Date(result.expiresAt).toLocaleString("en-GB")}.
+                {text("Expires")} {new Date(result.expiresAt).toLocaleString("en-GB")}.
               </p>
               <div className="mt-3 flex gap-2">
                 <input readOnly value={result.acceptUrl} className="op-input min-w-0 flex-1 text-xs" />
@@ -148,7 +148,7 @@ export default function InviteStaffPage() {
                   onClick={() => navigator.clipboard.writeText(result.acceptUrl)}
                   className="op-button"
                 >
-                  <Copy size={14} /> Copy
+                  <Copy size={14} /> {text("Copy")}
                 </button>
               </div>
             </div>

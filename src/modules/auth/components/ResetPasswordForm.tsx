@@ -46,10 +46,10 @@ export function ResetPasswordForm() {
       <div className="auth-state-card">
         <div className="auth-state-icon"><Link2Off size={24} /></div>
         <div>
-          <h2>Reset link missing</h2>
-          <p>Request a new password-reset email to continue securely.</p>
+          <h2>{text("Reset link missing")}</h2>
+          <p>{text("Request a new password-reset email to continue securely.")}</p>
         </div>
-        <Link href="/forgot-password" className="auth-primary-button">Request a new link</Link>
+        <Link href="/forgot-password" className="auth-primary-button">{text("Request a new link")}</Link>
         <Link href="/login" className="auth-secondary-button">{text("Back to login")}</Link>
       </div>
     );
@@ -60,8 +60,8 @@ export function ResetPasswordForm() {
       <div className="auth-state-card">
         <div className="auth-state-icon"><CheckCircle2 size={24} /></div>
         <div>
-          <h2>Password updated</h2>
-          <p>Your new password is ready. Log in again to continue to Systemly.</p>
+          <h2>{text("Password updated")}</h2>
+          <p>{text("Your new password is ready. Log in again to continue to Systemly.")}</p>
         </div>
         <Link href="/login" className="auth-primary-button">{text("Log in")}</Link>
       </div>
@@ -79,7 +79,7 @@ export function ResetPasswordForm() {
             autoComplete="new-password"
             placeholder={text("At least 8 characters")}
           />
-          {errors.password ? <p className="auth-field-error">{errors.password.message}</p> : null}
+          {errors.password ? <p className="auth-field-error">{text(errors.password.message)}</p> : null}
         </div>
 
         <div className="auth-field">
@@ -88,15 +88,15 @@ export function ResetPasswordForm() {
             {...register("confirmPassword")}
             id="reset-confirm-password"
             autoComplete="new-password"
-            placeholder="Repeat your new password"
+            placeholder={text("Repeat your new password")}
           />
-          {errors.confirmPassword ? <p className="auth-field-error">{errors.confirmPassword.message}</p> : null}
+          {errors.confirmPassword ? <p className="auth-field-error">{text(errors.confirmPassword.message)}</p> : null}
         </div>
 
         {serverError ? <div className="auth-error" role="alert">{serverError}</div> : null}
 
         <button type="submit" disabled={isSubmitting} className="auth-primary-button">
-          {isSubmitting ? "Updating password…" : "Update password"}
+          {isSubmitting ? text("Updating password…") : text("Update password")}
         </button>
       </form>
 

@@ -73,7 +73,7 @@ export function LandingNav() {
         <div className="lp-nav-links">
           {navLinks.map((link) => (
             <Link key={link.href} href={link.href}>
-              {link.label}
+              {text(link.label)}
             </Link>
           ))}
         </div>
@@ -108,7 +108,7 @@ export function LandingNav() {
         <div className="lp-mobile-nav-links">
           {navLinks.map((link) => (
             <Link key={link.href} href={link.href} onClick={closeMobileMenu}>
-              {link.label}
+              {text(link.label)}
             </Link>
           ))}
         </div>

@@ -121,7 +121,7 @@ export default function InvoiceWorkspaceScreen() {
       })
       .catch((caught: unknown) => {
         if (active) {
-          setError(caught instanceof Error ? caught.message : "Unable to load invoice");
+          setError(caught instanceof Error ? caught.message : text("Unable to load invoice"));
         }
       })
       .finally(() => {
@@ -142,7 +142,7 @@ export default function InvoiceWorkspaceScreen() {
     try {
       await downloadInvoiceReceipt(selected.id, selected.invoiceNumber, accessToken);
     } catch (caught: unknown) {
-      setError(caught instanceof Error ? caught.message : "Unable to download receipt");
+      setError(caught instanceof Error ? caught.message : text("Unable to download receipt"));
     } finally {
       setActionRunning(false);
     }
@@ -167,7 +167,7 @@ export default function InvoiceWorkspaceScreen() {
       notifyMutation({ scope: "appointment", entityId: selected.appointment?.id });
       await loadList(true);
     } catch (caught: unknown) {
-      setError(caught instanceof Error ? caught.message : "Unable to void invoice");
+      setError(caught instanceof Error ? caught.message : text("Unable to void invoice"));
     } finally {
       setActionRunning(false);
     }
@@ -177,7 +177,7 @@ export default function InvoiceWorkspaceScreen() {
     return (
       <OperationsPage>
         <OperationsPageInner className="flex min-h-full items-center justify-center">
-          <OperationsState loading title={text("Loading invoices")} description="Preparing payments and receipts." />
+          <OperationsState loading title={text("Loading invoices")} description={text("Preparing payments and receipts.")} />
         </OperationsPageInner>
       </OperationsPage>
     );
@@ -189,7 +189,7 @@ export default function InvoiceWorkspaceScreen() {
         <OperationsPageHeader
           eyebrow={text("Management / Invoices")}
           title={text("Invoices")}
-          description="Review completed payments, download receipts, and safely void invoices."
+          description={text("Review completed payments, download receipts, and safely void invoices.")}
           actions={
             <button type="button" className="op-button" disabled={refreshing} onClick={() => void loadList(true)}>
               <RefreshCw size={15} className={refreshing ? "animate-spin" : ""} /> {text("Refresh")}
@@ -204,7 +204,7 @@ export default function InvoiceWorkspaceScreen() {
               <input
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search invoice, customer, or phone"
+                placeholder={text("Search invoice, customer, or phone")}
                 className="op-input h-10 min-h-10 pl-10"
               />
             </label>
@@ -212,7 +212,7 @@ export default function InvoiceWorkspaceScreen() {
               value={status}
               options={statusOptions}
               onChange={(value) => setStatus(value as InvoiceStatus | "")}
-              aria-label="Invoice status"
+              aria-label={text("Invoice status")}
             />
             <OperationsDropdown
               value={paymentMethod}
@@ -226,7 +226,7 @@ export default function InvoiceWorkspaceScreen() {
                 type="date"
                 value={from}
                 onChange={(event) => setFrom(event.target.value)}
-                aria-label="Invoices from date"
+                aria-label={text("Invoices from date")}
                 className="op-input h-10 min-h-10 pl-9"
               />
             </label>
@@ -234,7 +234,7 @@ export default function InvoiceWorkspaceScreen() {
               type="date"
               value={to}
               onChange={(event) => setTo(event.target.value)}
-              aria-label="Invoices to date"
+              aria-label={text("Invoices to date")}
               className="op-input h-10 min-h-10"
             />
             <button
@@ -249,7 +249,7 @@ export default function InvoiceWorkspaceScreen() {
               }}
               className="op-button"
             >
-              Clear
+              {text("Clear")}
             </button>
           </div>
         </OperationsToolbar>

@@ -75,9 +75,9 @@ export function CalendarGrid({ data, onSelectAppointment }: Props) {
     return (
       <div className="op-state h-full rounded-none border-0">
         <div>
-          <p className="font-semibold text-[var(--op-text)]">No staff to schedule</p>
+          <p className="font-semibold text-[var(--op-text)]">{text("No staff to schedule")}</p>
           <p className="mt-1 text-sm text-[var(--op-text-muted)]">
-            Add a staff member before creating appointment rows.
+            {text("Add a staff member before creating appointment rows.")}
           </p>
         </div>
       </div>
@@ -96,7 +96,7 @@ export function CalendarGrid({ data, onSelectAppointment }: Props) {
             type="search"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Find staff member"
+            placeholder={text("Find staff member")}
             className="op-input h-9 min-h-9"
             style={{ paddingLeft: 40 }}
           />
@@ -121,7 +121,7 @@ export function CalendarGrid({ data, onSelectAppointment }: Props) {
             }}
           >
             <div className="sticky left-0 z-50 flex items-center border-r border-[var(--op-border)] bg-[var(--op-surface)] px-4 text-[9px] font-extrabold uppercase tracking-[0.13em] text-[var(--op-text-faint)]">
-              Team member
+              {text("Team member")}
             </div>
             <div className="flex bg-[var(--op-surface)]">
               {hours.map((hour) => (

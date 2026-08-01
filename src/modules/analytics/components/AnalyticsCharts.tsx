@@ -1,5 +1,7 @@
 "use client";
 
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { useEffect, useId, useMemo, useRef, useState, type PointerEvent } from "react";
 import { WEEKDAYS } from "../analytics.formatters";
 
@@ -112,6 +114,7 @@ export function AreaChart({
   valueLabel?: string;
   height?: number;
 }) {
+  const text = usePlatformText();
   const rawId = useId();
   const gradientId = `area-${rawId.replace(/:/g, "")}`;
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
@@ -139,7 +142,7 @@ export function AreaChart({
       <svg
         viewBox={`0 0 ${width} ${height}`}
         role="img"
-        aria-label="Area chart"
+        aria-label={text("Area chart")}
         onPointerMove={(event) =>
           setActiveIndex(
             activeIndexFromPointer(event, width, margin.left, innerWidth, data.length),
@@ -194,7 +197,7 @@ export function AreaChart({
               />
               {index % labelStep === 0 || index === points.length - 1 ? (
                 <text x={point.x} y={height - 14} textAnchor="middle" className="analytics-chart-label">
-                  {data[index].label}
+                  {text(data[index].label)}
                 </text>
               ) : null}
             </g>
@@ -207,7 +210,7 @@ export function AreaChart({
           className={tooltipPositionClass(activeIndex, data.length)}
           left={(activePoint.x / width) * 100}
           top={(activePoint.y / height) * 100}
-          title={activeDatum.label}
+          title={text(activeDatum.label)}
           lines={[
             { label: valueLabel, value: formatValue(activeDatum.value) },
             ...(activeDatum.tooltip ?? []),
@@ -229,6 +232,7 @@ export function MultiLineChart({
   formatAxisValue?: (value: number) => string;
   height?: number;
 }) {
+  const text = usePlatformText();
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [containerRef, width] = useResponsiveChartWidth();
   const margin = { top: 24, right: 24, bottom: 48, left: 76 };
@@ -261,7 +265,7 @@ export function MultiLineChart({
         <svg
           viewBox={`0 0 ${width} ${height}`}
           role="img"
-          aria-label="Line chart"
+          aria-label={text("Line chart")}
           onPointerMove={(event) =>
             setActiveIndex(
               activeIndexFromPointer(event, width, margin.left, innerWidth, labels.length),
@@ -387,6 +391,7 @@ export function DonutChart({
   formatValue?: (value: number) => string;
   compact?: boolean;
 }) {
+  const text = usePlatformText();
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const total = items.reduce((sum, item) => sum + item.value, 0);
   const segments = useMemo(() => {
@@ -403,7 +408,7 @@ export function DonutChart({
   return (
     <div className={`analytics-donut-layout${compact ? " is-compact" : ""}`}>
       <div className="analytics-donut-svg-wrap" onPointerLeave={() => setActiveIndex(null)}>
-        <svg viewBox="0 0 180 180" role="img" aria-label="Donut chart">
+        <svg viewBox="0 0 180 180" role="img" aria-label={text("Donut chart")}>
           <circle cx="90" cy="90" r="62" fill="none" stroke="var(--analytics-grid)" strokeWidth="26" />
           {segments.map((segment, index) => (
             <circle
@@ -425,7 +430,7 @@ export function DonutChart({
         </svg>
         <div className="analytics-donut-centre">
           <strong>{active ? `${active.percent.toFixed(1)}%` : centreLabel ?? (total ? "100%" : "0")}</strong>
-          <span>{active ? active.label : total ? compactNumber(total) : "No data"}</span>
+          <span>{active ? active.label : total ? compactNumber(total) : text("No data")}</span>
           {active ? <b>{formatValue(active.value)}</b> : null}
         </div>
       </div>
@@ -438,7 +443,7 @@ export function DonutChart({
             onPointerEnter={() => setActiveIndex(index)}
             onPointerLeave={() => setActiveIndex(null)}
           >
-            <span><i style={{ backgroundColor: item.colour }} />{item.label}</span>
+            <span><i style={{ backgroundColor: item.colour }} />{text(item.label)}</span>
             <strong>{formatValue(item.value)}</strong>
           </div>
         ))}
@@ -454,6 +459,7 @@ export function LollipopChart({
   items: ChartDatum[];
   formatValue?: (value: number) => string;
 }) {
+  const text = usePlatformText();
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const max = Math.max(...items.map((item) => item.value), 1);
   if (items.length === 0) return <ChartEmpty />;
@@ -469,7 +475,7 @@ export function LollipopChart({
             className={active ? "analytics-lollipop-row is-active" : "analytics-lollipop-row"}
             onPointerEnter={() => setActiveIndex(index)}
           >
-            <span>{item.label}</span>
+            <span>{text(item.label)}</span>
             <div className="analytics-lollipop-track">
               <div style={{ width: `${percentage}%`, backgroundColor: PALETTE[index % PALETTE.length] }}>
                 <i style={{ backgroundColor: PALETTE[index % PALETTE.length] }} />
@@ -478,9 +484,9 @@ export function LollipopChart({
             <strong>{formatValue(item.value)}</strong>
             {active && item.tooltip?.length ? (
               <div className="analytics-row-tooltip">
-                <b>{item.label}</b>
+                <b>{text(item.label)}</b>
                 {item.tooltip.map((line) => (
-                  <span key={`${line.label}-${line.value}`}><em>{line.label}</em>{line.value}</span>
+                  <span key={`${line.label}-${line.value}`}><em>{text(line.label)}</em>{line.value}</span>
                 ))}
               </div>
             ) : null}
@@ -498,6 +504,7 @@ export function BookingHeatmap({
   rows: { weekday: number; hour: number; count: number }[];
   hours?: number[];
 }) {
+  const text = usePlatformText();
   const [activeCell, setActiveCell] = useState<{ weekday: number; hour: number; count: number } | null>(null);
   const resolvedHours = useMemo(() => {
     if (hours?.length) return hours;
@@ -517,7 +524,7 @@ export function BookingHeatmap({
         <div className="analytics-heatmap-tooltip">
           <strong>{WEEKDAYS[activeCell.weekday]} · {String(activeCell.hour).padStart(2, "0")}:00</strong>
           <span>{activeCell.count} {activeCell.count === 1 ? "booking" : "bookings"}</span>
-          <small>{total ? `${((activeCell.count / total) * 100).toFixed(1)}% of selected-period bookings` : "No bookings in this period"}</small>
+          <small>{total ? `${((activeCell.count / total) * 100).toFixed(1)}% of selected-period bookings` : text("No bookings in this period")}</small>
         </div>
       ) : null}
 
@@ -547,7 +554,7 @@ export function BookingHeatmap({
           </div>
         ))}
       </div>
-      <div className="analytics-heatmap-scale"><span>Low</span><i /><i /><i /><i /><i /><span>High</span></div>
+      <div className="analytics-heatmap-scale"><span>{text("Low")}</span><i /><i /><i /><i /><i /><span>{text("High")}</span></div>
     </div>
   );
 }
@@ -567,6 +574,7 @@ function ChartTooltip({
   className?: string;
   fixedTop?: boolean;
 }) {
+  const text = usePlatformText();
   return (
     <div
       className={`analytics-tooltip ${fixedTop ? "is-fixed-top" : ""} ${className}`}
@@ -575,7 +583,7 @@ function ChartTooltip({
       <strong>{title}</strong>
       {lines.map((line) => (
         <span key={`${line.label}-${line.value}`}>
-          <em>{line.colour ? <i style={{ backgroundColor: line.colour }} /> : null}{line.label}</em>
+          <em>{line.colour ? <i style={{ backgroundColor: line.colour }} /> : null}{text(line.label)}</em>
           <b>{line.value}</b>
         </span>
       ))}
@@ -584,5 +592,6 @@ function ChartTooltip({
 }
 
 function ChartEmpty() {
-  return <div className="analytics-chart-empty">No data for this period</div>;
+  const text = usePlatformText();
+  return <div className="analytics-chart-empty">{text("No data for this period")}</div>;
 }

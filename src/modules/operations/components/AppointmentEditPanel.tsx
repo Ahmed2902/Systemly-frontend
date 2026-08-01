@@ -125,6 +125,7 @@ function StyledDropdown({
   disabled = false,
   tone = "slate",
 }: StyledDropdownProps) {
+  const text = usePlatformText();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const selected = options.find((option) => option.value === value);
@@ -169,7 +170,7 @@ function StyledDropdown({
         >
           {options.length === 0 ? (
             <div className="px-3 py-2 text-xs text-slate-400">
-              No options available
+              {text("No options available")}
             </div>
           ) : (
             options.map((option) => {
@@ -190,7 +191,7 @@ function StyledDropdown({
                       : "text-slate-700 hover:bg-blue-50 hover:text-blue-700"
                   }`}
                 >
-                  {option.label}
+                  {text(option.label)}
                 </button>
               );
             })
@@ -460,7 +461,7 @@ export function AppointmentEditPanel({
       await callback();
     } catch (error: unknown) {
       setValidationError(
-        error instanceof Error ? error.message : "Action failed.",
+        error instanceof Error ? error.message : text("Action failed."),
       );
     } finally {
       setAction(null);
@@ -477,7 +478,7 @@ export function AppointmentEditPanel({
       await onSave(draft);
     } catch (error: unknown) {
       setValidationError(
-        error instanceof Error ? error.message : "Save failed.",
+        error instanceof Error ? error.message : text("Save failed."),
       );
     } finally {
       setSaving(false);
@@ -560,7 +561,7 @@ export function AppointmentEditPanel({
   const appointmentRange =
     firstSegment && lastSegment
       ? `${toTimeValue(firstSegment.startsAt, businessTimezone)} – ${toTimeValue(lastSegment.endsAt, businessTimezone)}`
-      : "No services yet";
+      : text("No services yet");
   const appointmentDateLabel = new Date(
     `${draft.date}T12:00:00Z`,
   ).toLocaleDateString([], {
@@ -588,14 +589,14 @@ export function AppointmentEditPanel({
           </div>
           <div className="flex items-center gap-3">
             <h2 className="text-2xl font-semibold text-slate-950">
-              Edit Appointment
+              {text("Edit Appointment")}
             </h2>
             <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-600">
               {statusLabel}
             </span>
           </div>
           <p className="text-sm text-slate-500">
-            Managing details for {draft.customer.name}
+            {text("Managing details for")} {draft.customer.name}
           </p>
         </div>
         <button
@@ -610,14 +611,14 @@ export function AppointmentEditPanel({
       {(locked || draft.status === "no_show") && (
         <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-6 py-3 text-sm text-slate-600">
           <span>
-            Locked —{" "}
-            {draft.status === "completed" ? "completed" : "payment collected"}
+            {text("Locked —")}{" "}
+            {draft.status === "completed" ? "completed" : text("payment collected")}
           </span>
           <button
             onClick={handleRevert}
             className="font-medium text-blue-600 hover:underline"
           >
-            Revert
+            {text("Revert")}
           </button>
         </div>
       )}
@@ -632,7 +633,7 @@ export function AppointmentEditPanel({
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
             <div className="text-xs uppercase tracking-wide text-slate-500">
-              Appointment Status
+              {text("Appointment Status")}
             </div>
             {!locked &&
             draft.status !== "cancelled_by_business" &&
@@ -680,28 +681,28 @@ export function AppointmentEditPanel({
             )}
             <div className="mt-1 text-sm text-slate-500">
               {locked
-                ? "This appointment is locked from further editing."
-                : "Editable until completion or payment collection."}
+                ? text("This appointment is locked from further editing.")
+                : text("Editable until completion or payment collection.")}
             </div>
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
             <div className="text-xs uppercase tracking-wide text-slate-500">
-              Assigned Specialist
+              {text("Assigned Specialist")}
             </div>
             <div className="mt-2 text-lg font-semibold text-slate-950">
               {primaryStaff?.name ?? "Multiple specialists"}
             </div>
             <div className="mt-1 text-sm text-slate-500">
               {draft.segments.length > 1
-                ? "This appointment includes more than one service line."
-                : "Primary staff for the appointment."}
+                ? text("This appointment includes more than one service line.")
+                : text("Primary staff for the appointment.")}
             </div>
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
             <div className="text-xs uppercase tracking-wide text-slate-500">
-              Date
+              {text("Date")}
             </div>
             <div className="mt-2 text-lg font-semibold text-slate-950">
               {appointmentDateLabel}
@@ -711,13 +712,13 @@ export function AppointmentEditPanel({
 
           <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
             <div className="text-xs uppercase tracking-wide text-slate-500">
-              Start / End Time
+              {text("Start / End Time")}
             </div>
             <div className="mt-2 text-lg font-semibold text-slate-950">
               {appointmentRange}
             </div>
             <div className="mt-1 text-sm text-slate-500">
-              {draft.segments.length} service line
+              {draft.segments.length} {text("service line")}
               {draft.segments.length === 1 ? "" : "s"}
             </div>
           </div>
@@ -727,17 +728,17 @@ export function AppointmentEditPanel({
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>
               <h3 className="text-lg font-semibold text-slate-950">
-                Booked Services
+                {text("Booked Services")}
               </h3>
               <p className="text-sm text-slate-500">
-                Adjust the assigned staff and timing for each line item.
+                {text("Adjust the assigned staff and timing for each line item.")}
               </p>
             </div>
             {!locked && (
               <>
                 <StyledDropdown
                   value=""
-                  placeholder="+ Add service…"
+                  placeholder={text("+ Add service…")}
                   tone="blue"
                   options={serviceCatalog.map((service) => ({
                     value: service.id,
@@ -763,7 +764,7 @@ export function AppointmentEditPanel({
                     className="min-w-[190px] appearance-none rounded-xl border border-blue-200 bg-blue-50 px-3 py-2.5 pr-9 text-sm font-semibold text-blue-700 shadow-sm outline-none transition hover:border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                   >
                     <option value="" disabled>
-                      + Add service…
+                      {text("+ Add service…")}
                     </option>
                     {serviceCatalog.map((s) => (
                       <option key={s.id} value={s.id}>
@@ -803,7 +804,7 @@ export function AppointmentEditPanel({
                       <button
                         onClick={() => removeSegment(i)}
                         className="rounded-full p-2 text-slate-400 transition hover:bg-white hover:text-red-600"
-                        aria-label="Remove service"
+                        aria-label={text("Remove service")}
                       >
                         ✕
                       </button>
@@ -865,11 +866,11 @@ export function AppointmentEditPanel({
                     <span>
                       {staffOptionsForSegment(seg).length
                         ? `${staffOptionsForSegment(seg).length} eligible staff`
-                        : "No eligible staff are available for this time."}
+                        : text("No eligible staff are available for this time.")}
                     </span>
                     {conflict && (
                       <span className="font-medium text-red-600">
-                        Staff double-booked at this time
+                        {text("Staff double-booked at this time")}
                       </span>
                     )}
                   </div>
@@ -884,7 +885,7 @@ export function AppointmentEditPanel({
                 onClick={addCustomItem}
                 className="rounded-2xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
               >
-                + Custom item
+                {text("+ Custom item")}
               </button>
             </div>
           )}
@@ -893,13 +894,13 @@ export function AppointmentEditPanel({
         {draft.customItems.length > 0 && (
           <div className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
             <h3 className="mb-4 text-lg font-semibold text-slate-950">
-              Custom Items
+              {text("Custom Items")}
             </h3>
             <div className="overflow-hidden rounded-2xl border border-slate-200">
               <div className="grid grid-cols-[minmax(0,1fr)_5.5rem_3.5rem_5.5rem_2rem] gap-2 border-b border-slate-200 bg-slate-50 px-3 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
                 <span>{text("Description")}</span>
                 <span className="text-right">{text("Price")}</span>
-                <span className="text-right">Qty</span>
+                <span className="text-right">{text("Qty")}</span>
                 <span className="text-right">{text("Total")}</span>
                 <span className="w-8" />
               </div>
@@ -910,8 +911,8 @@ export function AppointmentEditPanel({
                 >
                   <input
                     disabled={locked}
-                    placeholder="Description (e.g. extra cream used)"
-                    value={item.description}
+                    placeholder={text("Description (e.g. extra cream used)")}
+                    value={text(item.description)}
                     onChange={(e) =>
                       setDraft((d) => ({
                         ...d,
@@ -944,7 +945,7 @@ export function AppointmentEditPanel({
                     className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-right text-xs disabled:bg-slate-100"
                   />
                   <input
-                    aria-label="Custom item quantity"
+                    aria-label={text("Custom item quantity")}
                     disabled={locked}
                     type="number"
                     min="1"
@@ -990,15 +991,15 @@ export function AppointmentEditPanel({
             <div className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
               <div className="mb-4">
                 <h3 className="text-lg font-semibold text-slate-950">
-                  Clinic visit record
+                  {text("Clinic visit record")}
                 </h3>
                 <p className="mt-1 text-sm text-slate-500">
-                  Clinical information attached to this appointment.
+                  {text("Clinical information attached to this appointment.")}
                 </p>
               </div>
 
               <label className="block text-sm font-semibold text-slate-700">
-                Diagnosis and assessment
+                {text("Diagnosis and assessment")}
                 <textarea
                   disabled={locked}
                   value={
@@ -1017,12 +1018,12 @@ export function AppointmentEditPanel({
                   }
                   rows={3}
                   className="mt-2 w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-slate-100"
-                  placeholder="Record the diagnosis and clinical assessment."
+                  placeholder={text("Record the diagnosis and clinical assessment.")}
                 />
               </label>
 
               <label className="mt-4 block text-sm font-semibold text-slate-700">
-                Clinical session notes
+                {text("Clinical session notes")}
                 <textarea
                   disabled={locked}
                   value={
@@ -1041,12 +1042,12 @@ export function AppointmentEditPanel({
                   }
                   rows={4}
                   className="mt-2 w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-slate-100"
-                  placeholder="Record observations, procedures, and session details."
+                  placeholder={text("Record observations, procedures, and session details.")}
                 />
               </label>
 
               <label className="mt-4 block text-sm font-semibold text-slate-700">
-                Plan and prescription
+                {text("Plan and prescription")}
                 <textarea
                   disabled={locked}
                   value={
@@ -1085,19 +1086,19 @@ export function AppointmentEditPanel({
               disabled={Boolean(action)}
               className="rounded-2xl border border-red-300 bg-red-50 py-2.5 text-sm font-medium text-red-700 transition hover:bg-red-100 disabled:opacity-40"
             >
-              Delete permanently
+              {text("Delete permanently")}
             </button>
           )}
 
           <div className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
-            <h4 className="text-lg font-semibold text-slate-950">Totals</h4>
+            <h4 className="text-lg font-semibold text-slate-950">{text("Totals")}</h4>
             <div className="mt-4 space-y-3 text-sm">
               <div className="flex justify-between text-slate-600">
-                <span>Subtotal</span>
+                <span>{text("Subtotal")}</span>
                 <span>{formatMoney(subtotal)}</span>
               </div>
               <div className="flex items-center justify-between text-slate-600">
-                <span>Discount</span>
+                <span>{text("Discount")}</span>
                 <input
                   disabled={locked}
                   type="number"
@@ -1142,7 +1143,7 @@ export function AppointmentEditPanel({
             }
             className="w-full rounded-2xl bg-blue-600 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50"
           >
-            {saving ? text("Saving…") : "Save Changes"}
+            {saving ? text("Saving…") : text("Save Changes")}
           </button>
         )}
 
@@ -1152,14 +1153,14 @@ export function AppointmentEditPanel({
             onClick={handleCancel}
             className="rounded-2xl border border-red-200 bg-white py-2.5 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:opacity-40"
           >
-            Cancel Appointment
+            {text("Cancel Appointment")}
           </button>
           {draft.status === "cancelled_by_business" ? (
             <button
               onClick={handleUncancel}
               className="rounded-2xl border border-blue-200 bg-white py-2.5 text-sm font-medium text-blue-600 transition hover:bg-blue-50"
             >
-              Uncancel
+              {text("Uncancel")}
             </button>
           ) : (
             <button
@@ -1174,7 +1175,7 @@ export function AppointmentEditPanel({
               className="rounded-2xl border border-blue-200 bg-white py-2.5 text-sm font-medium text-blue-600 transition hover:bg-blue-50 disabled:opacity-40"
             >
               {draft.isPaid
-                ? "Paid ✓"
+                ? text("Paid ✓")
                 : `Collect Payment (${formatMoney(total)})`}
             </button>
           )}
@@ -1183,7 +1184,7 @@ export function AppointmentEditPanel({
               onClick={handleMarkNoShow}
               className="rounded-2xl border border-amber-200 bg-white py-2.5 text-sm font-medium text-amber-700 transition hover:bg-amber-50"
             >
-              Mark No-show
+              {text("Mark No-show")}
             </button>
           )}
           {!locked && (
@@ -1191,7 +1192,7 @@ export function AppointmentEditPanel({
               onClick={handleComplete}
               className="rounded-2xl border border-slate-200 bg-slate-50 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
             >
-              Mark complete without payment
+              {text("Mark complete without payment")}
             </button>
           )}
         </div>

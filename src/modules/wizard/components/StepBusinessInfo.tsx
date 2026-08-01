@@ -111,7 +111,7 @@ export function StepBusinessInfo({ onNext }: StepProps) {
                   </select>
                 </div>
                 <div className="onboarding-field">
-                  <label>Primary language</label>
+                  <label>{text("Primary language")}</label>
                   <select className="onboarding-select" value={state.language} onChange={(event) => patch({ language: event.target.value as "en" | "ar" })}>
                     <option value="en">{text("English")}</option>
                     <option value="ar">العربية</option>

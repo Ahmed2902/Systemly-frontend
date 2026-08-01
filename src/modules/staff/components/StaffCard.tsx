@@ -124,7 +124,7 @@ export function StaffCard({
             member.yearsExperience !== undefined ? (
               <p className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-[var(--op-text-muted)]">
                 <BriefcaseBusiness size={13} />
-                {member.yearsExperience} years experience
+                {member.yearsExperience} {text("years experience")}
               </p>
             ) : null}
           </div>
@@ -154,7 +154,7 @@ export function StaffCard({
           ) : null}
           {member.services.length === 0 ? (
             <span className="rounded-full border border-[var(--op-border)] bg-[var(--op-surface-soft)] px-2.5 py-1 text-xs font-medium text-[var(--op-text-muted)]">
-              No assigned services
+              {text("No assigned services")}
             </span>
           ) : null}
         </div>
@@ -163,7 +163,7 @@ export function StaffCard({
       <div className="border-y border-[var(--op-border)] bg-[var(--op-surface-soft)] px-5 py-4">
         <div className="flex items-center justify-between gap-3">
           <p className="text-xs font-semibold uppercase tracking-wide text-[var(--op-text-muted)]">
-            Weekly availability
+            {text("Weekly availability")}
           </p>
           <span
             className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold"
@@ -217,7 +217,7 @@ export function StaffCard({
           <div className="mt-4 rounded-xl border border-[var(--op-border)] bg-[var(--op-surface)] px-3 py-2.5">
             <div className="flex items-center justify-between gap-3 text-xs">
               <span className="font-medium text-[var(--op-text-muted)]">
-                Commission settings
+                {text("Commission settings")}
               </span>
               <span className="font-semibold text-[var(--op-text)]">
                 {configuredCommissions} of {member.services.length} configured
@@ -232,7 +232,7 @@ export function StaffCard({
           href={`/operations/staff/${member.id}`}
           className="text-sm font-semibold text-[var(--op-info)] transition hover:opacity-75"
         >
-          View profile
+          {text("View profile")}
         </Link>
         <div className="flex items-center gap-2">
           <button
@@ -249,7 +249,7 @@ export function StaffCard({
               onClick={() => onDeactivate(member)}
               className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-[var(--op-danger)] transition hover:bg-[var(--op-danger-soft)]"
             >
-              Deactivate
+              {text("Deactivate")}
             </button>
           ) : null}
         </div>

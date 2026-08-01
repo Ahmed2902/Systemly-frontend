@@ -51,7 +51,7 @@ export default function StaffAnalyticsPage() {
 
   return (
     <AnalyticsShell
-      title="Staff Analytics"
+      title={text("Staff Analytics")}
       subtitle="Service revenue contribution, commission, booked time, and utilisation"
     >
       {error ? <AnalyticsState message={error} /> : null}
@@ -62,36 +62,36 @@ export default function StaffAnalyticsPage() {
         <div className="space-y-3">
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
             <MetricCard
-              label="Service revenue generated"
+              label={text("Service revenue generated")}
               value={formatEgp(data.summary.revenueCents)}
               hint="Custom items stay in business revenue unless they are explicitly assigned to staff"
             />
             <MetricCard
-              label="Total commission"
+              label={text("Total commission")}
               value={formatEgp(data.summary.commissionCents)}
               hint="Commission calculated from attributed service lines"
             />
             <MetricCard
-              label="Average utilisation"
+              label={text("Average utilisation")}
               value={formatPercent(data.summary.averageUtilizationRate)}
             />
             <MetricCard
-              label="Low-utilisation staff"
+              label={text("Low-utilisation staff")}
               value={String(data.summary.lowUtilizationCount)}
               tone="warning"
             />
             <MetricCard
-              label="Top performer"
+              label={text("Top performer")}
               value={top?.name ?? "—"}
               hint={top ? `${formatEgp(top.totalCents)} in service revenue` : undefined}
             />
           </div>
 
           <AnalyticsPanel
-            title="Staff performance"
+            title={text("Staff performance")}
             action={
               <span className="analytics-muted text-xs">
-                Revenue is attributed through service line items; unassigned custom items are excluded
+                {text("Revenue is attributed through service line items; unassigned custom items are excluded")}
               </span>
             }
           >
@@ -100,12 +100,12 @@ export default function StaffAnalyticsPage() {
                 <thead>
                   <tr>
                     <th className="pb-2">{text("Staff")}</th>
-                    <th className="pb-2">Service revenue</th>
+                    <th className="pb-2">{text("Service revenue")}</th>
                     <th className="pb-2">{text("Commission")}</th>
-                    <th className="pb-2">Jobs</th>
-                    <th className="pb-2">Utilisation</th>
-                    <th className="pb-2">Booked</th>
-                    <th className="pb-2">Available</th>
+                    <th className="pb-2">{text("Jobs")}</th>
+                    <th className="pb-2">{text("Utilisation")}</th>
+                    <th className="pb-2">{text("Booked")}</th>
+                    <th className="pb-2">{text("Available")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -126,7 +126,7 @@ export default function StaffAnalyticsPage() {
           </AnalyticsPanel>
 
           <div className="grid gap-3 xl:grid-cols-3">
-            <AnalyticsPanel title="Service revenue by staff">
+            <AnalyticsPanel title={text("Service revenue by staff")}>
               <LollipopChart
                 items={[...data.staffPerformance]
                   .sort((a, b) => b.totalCents - a.totalCents)
@@ -147,7 +147,7 @@ export default function StaffAnalyticsPage() {
               />
             </AnalyticsPanel>
 
-            <AnalyticsPanel title="Utilisation distribution">
+            <AnalyticsPanel title={text("Utilisation distribution")}>
               <SemanticDonutChart
                 items={[
                   {
@@ -180,7 +180,7 @@ export default function StaffAnalyticsPage() {
               />
             </AnalyticsPanel>
 
-            <AnalyticsPanel title="Booked vs available time">
+            <AnalyticsPanel title={text("Booked vs available time")}>
               <div className="space-y-4">
                 {data.staffPerformance.slice(0, 7).map((row) => {
                   const total = Math.max(

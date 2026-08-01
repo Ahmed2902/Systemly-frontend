@@ -64,7 +64,7 @@ export function BusinessInfoForm() {
           )}
         />
         {errors.vertical && (
-          <p className="mt-1 text-sm text-red-400">{errors.vertical.message}</p>
+          <p className="mt-1 text-sm text-red-400">{text(errors.vertical.message)}</p>
         )}
       </div>
 
@@ -75,7 +75,7 @@ export function BusinessInfoForm() {
           className="mt-1 w-full rounded-md border border-surfaceBorder bg-background px-3 py-2 text-foreground"
         />
         {errors.name && (
-          <p className="mt-1 text-sm text-red-400">{errors.name.message}</p>
+          <p className="mt-1 text-sm text-red-400">{text(errors.name.message)}</p>
         )}
       </div>
 
@@ -86,20 +86,20 @@ export function BusinessInfoForm() {
           <SlugInput
             value={field.value ?? ""}
             onChange={field.onChange}
-            error={errors.slug?.message}
+            error={text(errors.slug?.message)}
           />
         )}
       />
 
       <div>
-        <label className="text-sm text-muted">Phone</label>
+        <label className="text-sm text-muted">{text("Phone")}</label>
         <input
           {...register("phone")}
           placeholder="01012345678"
           className="mt-1 w-full rounded-md border border-surfaceBorder bg-background px-3 py-2 text-foreground"
         />
         {errors.phone && (
-          <p className="mt-1 text-sm text-red-400">{errors.phone.message}</p>
+          <p className="mt-1 text-sm text-red-400">{text(errors.phone.message)}</p>
         )}
       </div>
 
@@ -126,7 +126,7 @@ export function BusinessInfoForm() {
         disabled={isSubmitting}
         className="w-full bg-accent text-black hover:bg-accent/90"
       >
-        {isSubmitting ? "Creating your business..." : text("Continue")}
+        {isSubmitting ? text("Creating your business...") : text("Continue")}
       </Button>
     </form>
   );

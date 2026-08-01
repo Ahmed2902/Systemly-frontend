@@ -1,5 +1,7 @@
 "use client";
 
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/modules/auth/useAuth";
 import { getOperationsAnalytics } from "@/modules/analytics/analytics.api";
@@ -30,6 +32,7 @@ const LEAD_TIME_LABELS: Record<
 };
 
 export default function OperationsAnalyticsPage() {
+  const text = usePlatformText();
   const { accessToken } = useAuth();
   const preset = useAnalyticsPreset();
   const [data, setData] = useState<OperationsAnalytics | null>(null);
@@ -70,7 +73,7 @@ export default function OperationsAnalyticsPage() {
 
   return (
     <AnalyticsShell
-      title="Bookings & Services"
+      title={text("Bookings & Services")}
       subtitle="Booking demand, peak periods, service popularity, and lead times"
     >
       {error ? <AnalyticsState message={error} /> : null}
@@ -81,11 +84,11 @@ export default function OperationsAnalyticsPage() {
         <div className="space-y-3">
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
             <MetricCard
-              label="Total bookings"
+              label={text("Total bookings")}
               value={String(data.summary.bookingCount)}
             />
             <MetricCard
-              label="Busiest weekday"
+              label={text("Busiest weekday")}
               value={
                 data.summary.busiestWeekday == null
                   ? "—"
@@ -93,7 +96,7 @@ export default function OperationsAnalyticsPage() {
               }
             />
             <MetricCard
-              label="Busiest hour"
+              label={text("Busiest hour")}
               value={
                 data.summary.busiestHour == null
                   ? "—"
@@ -101,22 +104,22 @@ export default function OperationsAnalyticsPage() {
               }
             />
             <MetricCard
-              label="Most booked service"
+              label={text("Most booked service")}
               value={data.summary.mostBookedService?.name ?? "—"}
             />
             <MetricCard
-              label="Service selections"
+              label={text("Service selections")}
               value={String(serviceSelectionCount)}
               hint="One booking may contain several services"
             />
           </div>
 
-          <AnalyticsPanel title="Appointment start heatmap">
+          <AnalyticsPanel title={text("Appointment start heatmap")}>
             <AppointmentStartHeatmap rows={data.heatmap} />
           </AnalyticsPanel>
 
           <div className="grid gap-3 xl:grid-cols-2">
-            <AnalyticsPanel title="Most booked services">
+            <AnalyticsPanel title={text("Most booked services")}>
               <LollipopChart
                 items={data.mostBookedServices.slice(0, 8).map((row) => ({
                   label: row.name,
@@ -135,7 +138,7 @@ export default function OperationsAnalyticsPage() {
                 }))}
               />
             </AnalyticsPanel>
-            <AnalyticsPanel title="Booking lead time">
+            <AnalyticsPanel title={text("Booking lead time")}>
               <DonutChart
                 items={data.leadTimes.map((row) => ({
                   label: LEAD_TIME_LABELS[row.bucket],
@@ -146,24 +149,24 @@ export default function OperationsAnalyticsPage() {
           </div>
 
           <div className="grid gap-3 xl:grid-cols-[1.2fr_.8fr]">
-            <AnalyticsPanel title="Service selections by category">
+            <AnalyticsPanel title={text("Service selections by category")}>
               <LollipopChart items={categories} />
             </AnalyticsPanel>
-            <AnalyticsPanel title="Booking insights">
+            <AnalyticsPanel title={text("Booking insights")}>
               <div className="space-y-2 text-[13px]">
                 <div className="analytics-soft-row rounded-lg px-3 py-2.5">
-                  <span className="analytics-muted">Peak period</span>
+                  <span className="analytics-muted">{text("Peak period")}</span>
                   <p className="mt-1 font-semibold">{busiestPeriod}</p>
                 </div>
                 <div className="analytics-soft-row rounded-lg px-3 py-2.5">
-                  <span className="analytics-muted">Strongest service</span>
+                  <span className="analytics-muted">{text("Strongest service")}</span>
                   <p className="mt-1 font-semibold">
                     {data.summary.mostBookedService?.name ?? "No booking data"}
                   </p>
                 </div>
                 <div className="analytics-soft-row rounded-lg px-3 py-2.5">
                   <span className="analytics-muted">
-                    Most common lead time
+                    {text("Most common lead time")}
                   </span>
                   <p className="mt-1 font-semibold">
                     {data.leadTimes.length
@@ -172,7 +175,7 @@ export default function OperationsAnalyticsPage() {
                             (a, b) => b.count - a.count,
                           )[0].bucket
                         ]
-                      : "No booking data"}
+                      : text("No booking data")}
                   </p>
                 </div>
               </div>

@@ -43,7 +43,7 @@ function InviteAcceptanceContent() {
         setError(
           caught instanceof Error
             ? caught.message
-            : "Unable to accept invitation",
+            : text("Unable to accept invitation"),
         );
         setState("error");
       });
@@ -51,8 +51,8 @@ function InviteAcceptanceContent() {
 
   if (!token) {
     return (
-      <InviteCard icon={<ShieldAlert size={24} />} title="Invalid invitation">
-        This invitation link is missing its token.
+      <InviteCard icon={<ShieldAlert size={24} />} title={text("Invalid invitation")}>
+        {text("This invitation link is missing its token.")}
       </InviteCard>
     );
   }
@@ -61,9 +61,9 @@ function InviteAcceptanceContent() {
     return (
       <InviteCard
         icon={<Loader2 className="animate-spin" size={24} />}
-        title="Checking invitation"
+        title={text("Checking invitation")}
       >
-        Please wait while Hgezli checks your account.
+        {text("Please wait while Hgezli checks your account.")}
       </InviteCard>
     );
   }
@@ -72,9 +72,9 @@ function InviteAcceptanceContent() {
     return (
       <InviteCard
         icon={<ShieldAlert size={24} />}
-        title="Sign in with the invited email"
+        title={text("Sign in with the invited email")}
       >
-        <p>Use the exact email address the owner invited.</p>
+        <p>{text("Use the exact email address the owner invited.")}</p>
         <div className="mt-5 flex justify-center gap-3">
           <Link
             href={`/login?next=${encodeURIComponent(returnPath)}`}
@@ -97,12 +97,11 @@ function InviteAcceptanceContent() {
     return (
       <InviteCard
         icon={<ShieldAlert size={24} />}
-        title="Invitation could not be accepted"
+        title={text("Invitation could not be accepted")}
       >
         <p>{error}</p>
         <p className="mt-2 text-xs text-slate-500">
-          Confirm that you signed in with the invited email, or ask the owner
-          for a new link.
+          {text("Confirm that you signed in with the invited email, or ask the owner for a new link.")}
         </p>
       </InviteCard>
     );
@@ -117,24 +116,25 @@ function InviteAcceptanceContent() {
           <Loader2 className="animate-spin" size={24} />
         )
       }
-      title={state === "success" ? "Invitation accepted" : "Joining the business"}
+      title={state === "success" ? text("Invitation accepted") : text("Joining the business")}
     >
       {state === "success"
-        ? "Your account is attached. Opening Operations…"
-        : "Please wait while your access is configured."}
+        ? text("Your account is attached. Opening Operations…")
+        : text("Please wait while your access is configured.")}
     </InviteCard>
   );
 }
 
 export default function InviteAcceptancePage() {
+  const text = usePlatformText();
   return (
     <Suspense
       fallback={
         <InviteCard
           icon={<Loader2 className="animate-spin" size={24} />}
-          title="Checking invitation"
+          title={text("Checking invitation")}
         >
-          Please wait while Hgezli checks the invitation.
+          {text("Please wait while Hgezli checks the invitation.")}
         </InviteCard>
       }
     >

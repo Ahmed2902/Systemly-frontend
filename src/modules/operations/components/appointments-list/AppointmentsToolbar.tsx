@@ -28,6 +28,7 @@ function FilterDropdown({
   options: Array<{ value: string; label: string }>;
   onChange: (value: string) => void;
 }) {
+  const text = usePlatformText();
   const [open, setOpen] = useState(false);
   const selected =
     options.find((option) => option.value === value)?.label ?? label;
@@ -56,7 +57,7 @@ function FilterDropdown({
               }}
               className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm ${option.value === value ? "bg-blue-50 font-semibold text-blue-700" : "text-slate-700 hover:bg-slate-50"}`}
             >
-              {option.label}
+              {text(option.label)}
               {option.value === value ? <Check size={14} /> : null}
             </button>
           ))}
@@ -87,7 +88,7 @@ export function AppointmentsToolbar({
           <input
             value={query}
             onChange={(e) => onQueryChange(e.target.value)}
-            placeholder="Search customers, phone, or services"
+            placeholder={text("Search customers, phone, or services")}
             className="w-full outline-none"
           />
         </label>

@@ -1,5 +1,7 @@
 "use client";
 
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { useMemo, useState } from "react";
 import type { ChartDatum } from "./AnalyticsCharts";
 
@@ -25,6 +27,7 @@ export function SemanticDonutChart({
   items: ChartDatum[];
   formatValue?: (value: number) => string;
 }) {
+  const text = usePlatformText();
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const total = items.reduce((sum, item) => sum + Math.max(item.value, 0), 0);
   const segments = useMemo(() => {
@@ -45,7 +48,7 @@ export function SemanticDonutChart({
 
   if (!items.length) {
     return (
-      <div className="analytics-chart-empty">No data for this period</div>
+      <div className="analytics-chart-empty">{text("No data for this period")}</div>
     );
   }
 
@@ -55,7 +58,7 @@ export function SemanticDonutChart({
         className="relative mx-auto h-[180px] w-[180px]"
         onPointerLeave={() => setActiveIndex(null)}
       >
-        <svg viewBox="0 0 180 180" role="img" aria-label="Donut chart">
+        <svg viewBox="0 0 180 180" role="img" aria-label={text("Donut chart")}>
           <circle
             cx="90"
             cy="90"
@@ -112,7 +115,7 @@ export function SemanticDonutChart({
                 className="h-2.5 w-2.5 shrink-0 rounded-full"
                 style={{ backgroundColor: item.colour }}
               />
-              <span className="truncate capitalize">{item.label}</span>
+              <span className="truncate capitalize">{text(item.label)}</span>
             </span>
             <strong className="text-xs text-[var(--analytics-text)]">
               {formatValue(item.value)}
@@ -131,11 +134,12 @@ export function SemanticBarList({
   items: ChartDatum[];
   formatValue?: (value: number) => string;
 }) {
+  const text = usePlatformText();
   const max = Math.max(...items.map((item) => Math.max(item.value, 0)), 1);
 
   if (!items.length) {
     return (
-      <div className="analytics-chart-empty">No data for this period</div>
+      <div className="analytics-chart-empty">{text("No data for this period")}</div>
     );
   }
 
@@ -148,7 +152,7 @@ export function SemanticBarList({
           <div key={`${item.label}-${index}`} className="group">
             <div className="mb-1.5 flex items-center justify-between gap-4 text-xs">
               <span className="truncate font-semibold text-[var(--analytics-text)]">
-                {item.label}
+                {text(item.label)}
               </span>
               <strong className="shrink-0 text-[var(--analytics-muted)]">
                 {formatValue(item.value)}

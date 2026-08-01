@@ -156,7 +156,7 @@ export default function StaffDirectoryScreen() {
       await load(true);
     } catch (caught: unknown) {
       setFormError(
-        caught instanceof Error ? caught.message : "Unable to save staff member",
+        caught instanceof Error ? caught.message : text("Unable to save staff member"),
       );
     } finally {
       setSaving(false);
@@ -170,7 +170,7 @@ export default function StaffDirectoryScreen() {
       notifyMutation({ scope: "staff", entityId: member.id });
       await load(true);
     } catch (caught: unknown) {
-      setError(caught instanceof Error ? caught.message : "Unable to deactivate staff");
+      setError(caught instanceof Error ? caught.message : text("Unable to deactivate staff"));
     }
   };
 
@@ -178,7 +178,7 @@ export default function StaffDirectoryScreen() {
     return (
       <OperationsPage>
         <OperationsPageInner className="flex min-h-full items-center justify-center">
-          <OperationsState loading title="Loading staff directory" />
+          <OperationsState loading title={text("Loading staff directory")} />
         </OperationsPageInner>
       </OperationsPage>
     );
@@ -189,8 +189,8 @@ export default function StaffDirectoryScreen() {
       <OperationsPageInner>
         <OperationsPageHeader
           eyebrow={text("Management / Staff")}
-          title="Staff directory"
-          description="Manage profiles, roles, service eligibility, schedules, time off, and commissions."
+          title={text("Staff directory")}
+          description={text("Manage profiles, roles, service eligibility, schedules, time off, and commissions.")}
           actions={
             <>
               <button type="button" className="op-button" disabled={refreshing} onClick={() => void load(true)}>
@@ -205,7 +205,7 @@ export default function StaffDirectoryScreen() {
                   setModalOpen(true);
                 }}
               >
-                <Plus size={15} /> Add staff
+                <Plus size={15} /> {text("Add staff")}
               </button>
             </>
           }
@@ -213,10 +213,10 @@ export default function StaffDirectoryScreen() {
 
         {data ? (
           <section className="op-metric-grid mb-4">
-            <OperationsMetric icon={<UsersRound size={17} />} label="Total team members" value={data.metrics.total} />
-            <OperationsMetric icon={<BriefcaseBusiness size={17} />} label="Active staff" value={data.metrics.active} tone="info" />
-            <OperationsMetric icon={<CalendarCheck2 size={17} />} label="Available today" value={data.metrics.availableToday} tone="success" />
-            <OperationsMetric icon={<CalendarOff size={17} />} label="On time off" value={data.metrics.onTimeOff} tone="warning" />
+            <OperationsMetric icon={<UsersRound size={17} />} label={text("Total team members")} value={data.metrics.total} />
+            <OperationsMetric icon={<BriefcaseBusiness size={17} />} label={text("Active staff")} value={data.metrics.active} tone="info" />
+            <OperationsMetric icon={<CalendarCheck2 size={17} />} label={text("Available today")} value={data.metrics.availableToday} tone="success" />
+            <OperationsMetric icon={<CalendarOff size={17} />} label={text("On time off")} value={data.metrics.onTimeOff} tone="warning" />
           </section>
         ) : null}
 
@@ -230,7 +230,7 @@ export default function StaffDirectoryScreen() {
               <input
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search staff by name, title, phone, or email"
+                placeholder={text("Search staff by name, title, phone, or email")}
                 className="op-input h-10 min-h-10 pl-10"
               />
             </label>
@@ -238,19 +238,19 @@ export default function StaffDirectoryScreen() {
               value={status}
               onChange={(value) => setStatus(value as StaffStatusFilter)}
               options={statusOptions}
-              aria-label="Filter staff status"
+              aria-label={text("Filter staff status")}
             />
             <OperationsDropdown
               value={role}
               onChange={(value) => setRole(value as StaffRole | "")}
               options={roleOptions}
-              aria-label="Filter staff role"
+              aria-label={text("Filter staff role")}
             />
             <OperationsDropdown
               value={serviceId}
               onChange={setServiceId}
               options={serviceOptions}
-              aria-label="Filter by service"
+              aria-label={text("Filter by service")}
             />
             <button
               type="button"
@@ -258,7 +258,7 @@ export default function StaffDirectoryScreen() {
               aria-pressed={availableToday}
               className={`op-button ${availableToday ? "op-status-success" : ""}`}
             >
-              Available today
+              {text("Available today")}
             </button>
           </div>
         </OperationsToolbar>
@@ -288,9 +288,9 @@ export default function StaffDirectoryScreen() {
           </section>
         ) : (
           <OperationsState
-            title="No staff members found"
-            description="Adjust the filters or add the first team member."
-            action={<button className="op-button op-button-primary" onClick={() => setModalOpen(true)}>Add staff</button>}
+            title={text("No staff members found")}
+            description={text("Adjust the filters or add the first team member.")}
+            action={<button className="op-button op-button-primary" onClick={() => setModalOpen(true)}>{text("Add staff")}</button>}
           />
         )}
       </OperationsPageInner>

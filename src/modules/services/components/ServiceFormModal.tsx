@@ -114,7 +114,7 @@ export function ServiceFormModal({
         type="button"
         className="absolute inset-0 cursor-default"
         onClick={onClose}
-        aria-label="Close service form"
+        aria-label={text("Close service form")}
       />
 
       <form
@@ -129,10 +129,10 @@ export function ServiceFormModal({
               </span>
               <div>
                 <h2 className="text-xl font-bold text-slate-900">
-                  {service ? "Edit service" : text("New service")}
+                  {service ? text("Edit service") : text("New service")}
                 </h2>
                 <p className="mt-0.5 text-sm text-slate-500">
-                  Configure booking time, category, and eligible staff.
+                  {text("Configure booking time, category, and eligible staff.")}
                 </p>
               </div>
             </div>
@@ -163,7 +163,7 @@ export function ServiceFormModal({
                   }))
                 }
                 className={inputClass}
-                placeholder="Haircut, consultation, treatment..."
+                placeholder={text("Haircut, consultation, treatment...")}
               />
             </label>
 
@@ -179,7 +179,7 @@ export function ServiceFormModal({
                   }))
                 }
                 className={inputClass}
-                placeholder="Consultations"
+                placeholder={text("Consultations")}
               />
               <datalist id="service-category-options">
                 {categoryOptions.map((category) => (
@@ -249,7 +249,7 @@ export function ServiceFormModal({
                   }))
                 }
                 className={inputClass}
-                placeholder="Explain what the customer receives..."
+                placeholder={text("Explain what the customer receives...")}
               />
             </label>
           </div>
@@ -261,8 +261,7 @@ export function ServiceFormModal({
                   {text("Eligible staff")}
                 </h3>
                 <p className="mt-1 text-xs text-slate-500">
-                  Services with no active staff remain visible but unavailable
-                  for booking.
+                  {text("Services with no active staff remain visible but unavailable for booking.")}
                 </p>
               </div>
               <span className="rounded-full bg-violet-50 px-2.5 py-1 text-xs font-semibold text-violet-700">
@@ -273,7 +272,7 @@ export function ServiceFormModal({
             <div className="mt-3 grid gap-2 sm:grid-cols-2">
               {staff.length === 0 ? (
                 <div className="sm:col-span-2 rounded-xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
-                  No active staff members are available yet.
+                  {text("No active staff members are available yet.")}
                 </div>
               ) : (
                 staff.map((member) => {
@@ -294,7 +293,7 @@ export function ServiceFormModal({
                           {member.name}
                         </p>
                         <p className="mt-0.5 text-xs text-slate-500">
-                          Active staff
+                          {text("Active staff")}
                         </p>
                       </div>
                       <span
@@ -329,12 +328,12 @@ export function ServiceFormModal({
           >
             <div>
               <p className="text-sm font-semibold text-slate-900">
-                {form.isActive ? "Active and bookable" : text("Inactive")}
+                {form.isActive ? text("Active and bookable") : text("Inactive")}
               </p>
               <p className="mt-1 text-xs text-slate-500">
                 {form.isActive
-                  ? "Customers and staff can select this service for new appointments."
-                  : "The service stays in history but cannot be booked."}
+                  ? text("Customers and staff can select this service for new appointments.")
+                  : text("The service stays in history but cannot be booked.")}
               </p>
             </div>
             <span
@@ -372,7 +371,7 @@ export function ServiceFormModal({
             className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:from-violet-700 hover:to-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {saving ? <Loader2 size={16} className="animate-spin" /> : null}
-            {service ? text("Save changes") : "Create service"}
+            {service ? text("Save changes") : text("Create service")}
           </button>
         </div>
       </form>
