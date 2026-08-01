@@ -3,11 +3,13 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Menu, Plus } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { usePlatformCopy } from "@/i18n/usePlatformCopy";
 import { Sidebar } from "./Sidebar";
 import { useOperations } from "../operations.context";
 
 export function OperationsShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const copy = usePlatformCopy().operations.shell;
   const { openNewAppointment } = useOperations();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -26,7 +28,7 @@ export function OperationsShell({ children }: { children: ReactNode }) {
           <button
             type="button"
             className="op-mobile-menu-button"
-            aria-label="Open navigation"
+            aria-label={copy.openNavigation}
             aria-expanded={sidebarOpen}
             onClick={() => setSidebarOpen(true)}
           >
@@ -36,7 +38,7 @@ export function OperationsShell({ children }: { children: ReactNode }) {
           <button
             type="button"
             className="op-mobile-menu-button"
-            aria-label="New appointment"
+            aria-label={copy.newAppointment}
             onClick={() => openNewAppointment()}
           >
             <Plus size={18} />

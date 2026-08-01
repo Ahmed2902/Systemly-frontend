@@ -1,7 +1,10 @@
 // src/modules/auth/components/AuthLayout.tsx
+"use client";
+
 import Link from "next/link";
 import { ReactNode } from "react";
 import { Globe2, ShieldCheck } from "lucide-react";
+import { useLocale } from "@/i18n/LocaleProvider";
 import { SystemlyWordmark } from "@/shared/components/SystemlyWordmark";
 import "../auth-systemly.css";
 
@@ -14,6 +17,8 @@ export function AuthLayout({
   subtitle: string;
   children: ReactNode;
 }) {
+  const { t } = useLocale();
+
   return (
     <main className="systemly-auth">
       <section className="systemly-auth-visual" aria-label="Systemly product overview">
@@ -22,12 +27,9 @@ export function AuthLayout({
         </Link>
 
         <div className="systemly-auth-story">
-          <p className="systemly-auth-eyebrow">Business operations</p>
-          <h2>Run the day from one connected workspace.</h2>
-          <p className="systemly-auth-story-copy">
-            Publish your website, accept bookings, coordinate staff, and understand
-            the business without switching between disconnected tools.
-          </p>
+          <p className="systemly-auth-eyebrow">{t("auth.layout.eyebrow")}</p>
+          <h2>{t("auth.layout.title")}</h2>
+          <p className="systemly-auth-story-copy">{t("auth.layout.copy")}</p>
 
           <div className="systemly-auth-product" aria-hidden="true">
             <div className="systemly-auth-product-bar">
@@ -87,8 +89,8 @@ export function AuthLayout({
         </div>
 
         <div className="systemly-auth-trust">
-          <span><ShieldCheck size={14} /> Secure account access</span>
-          <span><Globe2 size={14} /> Arabic + English ready</span>
+          <span><ShieldCheck size={14} /> {t("auth.layout.secureAccess")}</span>
+          <span><Globe2 size={14} /> {t("auth.layout.languagesReady")}</span>
         </div>
       </section>
 
@@ -106,9 +108,9 @@ export function AuthLayout({
         </div>
 
         <footer className="systemly-auth-form-footer">
-          <span>Secure by design</span>
+          <span>{t("auth.layout.secureByDesign")}</span>
           <span aria-hidden="true">·</span>
-          <span>Your data stays private</span>
+          <span>{t("auth.layout.privateData")}</span>
         </footer>
       </section>
     </main>

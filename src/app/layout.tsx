@@ -4,6 +4,7 @@ import "./systemly-shared.css";
 import { cookies } from "next/headers";
 import { AuthProvider } from "@/modules/auth/useAuth";
 import { LocaleProvider } from "@/i18n/LocaleProvider";
+import { PlatformAutoTranslator } from "@/i18n/PlatformAutoTranslator";
 import {
   getLocaleDirection,
   LOCALE_COOKIE,
@@ -45,6 +46,7 @@ export default async function RootLayout({
         <LocaleProvider initialLocale={locale}>
           <AuthProvider>
             <PlatformLanguageControl />
+            <PlatformAutoTranslator />
             {children}
           </AuthProvider>
         </LocaleProvider>
