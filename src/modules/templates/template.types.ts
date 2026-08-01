@@ -34,6 +34,8 @@ export type BaseTemplateData = TemplateRuntime & {
   businessName: string;
   tagline: string;
   template: string;
+  heroDescription: string;
+  heroCardText: string;
   aboutText: string;
   heroPhotoUrl: string | null;
   logoUrl: string | null;
@@ -42,6 +44,7 @@ export type BaseTemplateData = TemplateRuntime & {
   sectionOrder: string[];
   showTeam: boolean;
   showFaq: boolean;
+  showServicePrices: boolean;
   services: PublicService[];
   staff: PublicStaffMember[];
   faqs?: PublicFaq[];
