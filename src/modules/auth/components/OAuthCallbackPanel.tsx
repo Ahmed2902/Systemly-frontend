@@ -7,6 +7,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle2, LoaderCircle, TriangleAlert } from "lucide-react";
 import { ApiError, getCurrentUser } from "../auth.api";
 import { workspacePathForUser } from "../auth-redirect";
+import { useLocale } from "@/i18n/LocaleProvider";
+import { updatePreferredLanguage } from "../auth.api";
 import { useAuth } from "../useAuth";
 
 type OAuthState = "loading" | "success" | "error";
@@ -16,6 +18,7 @@ export function OAuthCallbackPanel() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { setSession } = useAuth();
+  const { locale } = useLocale();
   const startedRef = useRef(false);
   const [state, setState] = useState<OAuthState>("loading");
   const [message, setMessage] = useState("Completing your secure Google sign-in…");
@@ -33,7 +36,17 @@ export function OAuthCallbackPanel() {
 
     void getCurrentUser(token)
       .then((response) => {
-        setSession(response.data, token);
+        const accessToken = token;
+      const sessionUser = response.data;
+      try {
+        await updatePreferredLanguage(locale, accessToken);
+      } catch (preferenceError) {
+        console.error("Unable to persist OAuth language preference:", preferenceError);
+      }
+      setSession(
+        { ...sessionUser, preferredLanguage: locale },
+        accessToken,
+      );
         setState("success");
         setMessage("Signed in. Opening your workspace…");
         router.replace(workspacePathForUser(response.data));
