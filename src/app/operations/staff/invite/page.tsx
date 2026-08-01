@@ -22,13 +22,14 @@ import {
 } from "@/modules/staff/staff-invites.api";
 
 const inviteRoles: InviteRole[] = ["Receptionist", "Staff"];
+const receptionistRole = inviteRoles[0];
 
 export default function InviteStaffPage() {
   const text = usePlatformText();
   const { locale } = useLocale();
   const { user, accessToken } = useAuth();
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState<InviteRole>("Receptionist");
+  const [role, setRole] = useState<InviteRole>(receptionistRole);
   const [result, setResult] = useState<StaffInviteResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -122,7 +123,7 @@ export default function InviteStaffPage() {
                     />
                     <strong className="text-sm text-[var(--op-text)]">{text(value)}</strong>
                     <p className="mt-1 text-xs leading-5 text-[var(--op-text-muted)]">
-                      {value === "Receptionist"
+                      {value === receptionistRole
                         ? text("Manage bookings, customers, payments, and the daily calendar.")
                         : text("Use the operational workspace without owner analytics or business settings.")}
                     </p>
