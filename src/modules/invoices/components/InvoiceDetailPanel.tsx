@@ -1,26 +1,22 @@
 "use client";
 
-import { usePlatformText } from "@/i18n/usePlatformText";
 import Link from "next/link";
 import Image from "next/image";
 import { Download, ExternalLink, Loader2, RotateCcw } from "lucide-react";
+import { useLocale } from "@/i18n/LocaleProvider";
+import {
+  formatPlatformCurrency,
+  formatPlatformDateTime,
+} from "@/i18n/format";
+import { usePlatformText } from "@/i18n/usePlatformText";
 import type { InvoiceDetail } from "../invoices.types";
 
-const money = (cents: number) =>
-  new Intl.NumberFormat("en-EG", {
-    style: "currency",
-    currency: "EGP",
-    maximumFractionDigits: 2,
-  }).format(cents / 100);
-
-const paymentLabel = (value?: string | null) =>
-  value
-    ? value
-        .toLowerCase()
-        .split("_")
-        .map((part) => part[0].toUpperCase() + part.slice(1))
-        .join(" ")
-    : "Not recorded";
+const paymentLabels: Record<string, string> = {
+  CASH: "Cash",
+  CARD: "Card",
+  BANK_TRANSFER: "Bank transfer",
+  MOBILE_WALLET: "Mobile wallet",
+};
 
 export function InvoiceDetailPanel({
   invoice,
@@ -36,6 +32,11 @@ export function InvoiceDetailPanel({
   onVoid: () => void;
 }) {
   const text = usePlatformText();
+  const { locale } = useLocale();
+  const money = (cents: number) => formatPlatformCurrency(cents / 100, locale);
+  const paymentLabel = (value?: string | null) =>
+    value ? text(paymentLabels[value] ?? value.replace(/_/g, " ")) : text("Not recorded");
+
   if (loading) {
     return (
       <div className="flex min-h-96 items-center justify-center rounded-3xl border border-[var(--op-border)] bg-[var(--op-surface)] shadow-[var(--op-shadow)]">
@@ -75,7 +76,7 @@ export function InvoiceDetailPanel({
               </span>
             </div>
             <p className="mt-1 text-xs text-[var(--op-text-muted)]">
-              {text("Issued")} {new Date(invoice.issuedAt).toLocaleString("en-GB")}
+              {text("Issued")} {formatPlatformDateTime(invoice.issuedAt, locale)}
             </p>
           </div>
           {invoice.business.logoUrl ? (
@@ -104,10 +105,10 @@ export function InvoiceDetailPanel({
         <section className="grid gap-3 rounded-2xl bg-[var(--op-surface-soft)] p-4 text-sm sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
           <div>
             <p className="text-xs font-medium text-[var(--op-text-muted)]">{text("Customer")}</p>
-            <p className="mt-1 font-semibold text-[var(--op-text)]">
+            <p className="mt-1 font-semibold text-[var(--op-text)]" dir="auto">
               {invoice.customer.name}
             </p>
-            <p className="text-xs text-[var(--op-text-muted)]">{invoice.customer.phone}</p>
+            <p className="text-xs text-[var(--op-text-muted)]" dir="ltr">{invoice.customer.phone}</p>
           </div>
           <div>
             <p className="text-xs font-medium text-[var(--op-text-muted)]">{text("Payment method")}</p>
@@ -115,7 +116,7 @@ export function InvoiceDetailPanel({
               {paymentLabel(invoice.paymentMethod)}
             </p>
             {invoice.paymentReference ? (
-              <p className="text-xs text-[var(--op-text-muted)]">
+              <p className="text-xs text-[var(--op-text-muted)]" dir="ltr">
                 {invoice.paymentReference}
               </p>
             ) : null}
@@ -142,7 +143,7 @@ export function InvoiceDetailPanel({
                   className="grid grid-cols-[1fr_auto] gap-4 border-b border-[var(--op-border)] px-4 py-3 text-sm last:border-b-0"
                 >
                   <div>
-                    <p className="font-medium text-[var(--op-text)]">
+                    <p className="font-medium text-[var(--op-text)]" dir="auto">
                       {item.description}
                     </p>
                     <p className="mt-0.5 text-xs text-[var(--op-text-muted)]">
@@ -171,7 +172,7 @@ export function InvoiceDetailPanel({
                     className="grid grid-cols-[minmax(0,1fr)_auto] gap-4 border-b border-[var(--op-border)] px-4 py-3 text-sm last:border-b-0"
                   >
                     <div className="min-w-0">
-                      <p className="truncate font-medium text-[var(--op-text)]">
+                      <p className="truncate font-medium text-[var(--op-text)]" dir="auto">
                         {item.description}
                       </p>
                       <p className="mt-0.5 text-xs text-[var(--op-text-muted)]">
@@ -210,15 +211,15 @@ export function InvoiceDetailPanel({
             <p className="text-xs font-semibold uppercase tracking-wide text-[var(--op-warning)]">
               {text("Notes")}
             </p>
-            <p className="mt-2 text-sm text-[var(--op-text-secondary)]">{invoice.notes}</p>
+            <p className="mt-2 text-sm text-[var(--op-text-secondary)]" dir="auto">{invoice.notes}</p>
           </section>
         ) : null}
 
         {invoice.status === "voided" ? (
           <section className="rounded-2xl border border-[var(--op-border)] bg-[var(--op-surface-soft)] p-4 text-sm text-[var(--op-text-secondary)]">
             <p className="font-semibold text-[var(--op-text)]">{text("Invoice voided")}</p>
-            <p className="mt-1">
-              {invoice.voidReason ?? "No reason recorded."}
+            <p className="mt-1" dir="auto">
+              {invoice.voidReason ?? text("No reason recorded.")}
             </p>
           </section>
         ) : (
