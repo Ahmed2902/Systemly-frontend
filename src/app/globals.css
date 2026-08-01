@@ -47,6 +47,20 @@ textarea {
   unicode-bidi: plaintext;
 }
 
+.systemly-language-control {
+  position: fixed;
+  inset-block-start: 0.85rem;
+  inset-inline-end: 0.85rem;
+  z-index: 1000;
+  color: #202223;
+}
+
+.systemly-language-control .systemly-language-switcher {
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 8px 28px rgba(18, 20, 19, 0.12);
+  backdrop-filter: blur(14px);
+}
+
 .systemly-language-switcher {
   display: inline-flex;
   min-height: 2.25rem;
@@ -76,4 +90,11 @@ textarea {
 
 html[dir="rtl"] .systemly-language-switcher {
   letter-spacing: 0;
+}
+
+@media (max-width: 640px) {
+  .systemly-language-control {
+    inset-block-start: 0.65rem;
+    inset-inline-end: 0.65rem;
+  }
 }
