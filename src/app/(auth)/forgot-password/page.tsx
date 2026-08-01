@@ -11,7 +11,7 @@ export default function ForgotPasswordPage() {
   return (
     <AuthLayout
       title={text("Reset your password")}
-      subtitle="Enter the email connected to your account and we will send a secure reset link."
+      subtitle={text("Enter the email connected to your account and we will send a secure reset link.")}
     >
       <ForgotPasswordForm />
     </AuthLayout>

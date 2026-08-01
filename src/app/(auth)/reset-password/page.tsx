@@ -11,7 +11,7 @@ export default function ResetPasswordPage() {
   return (
     <AuthLayout
       title={text("Choose a new password")}
-      subtitle="Use a strong password that you do not reuse on another service."
+      subtitle={text("Use a strong password that you do not reuse on another service.")}
     >
       <ResetPasswordForm />
     </AuthLayout>

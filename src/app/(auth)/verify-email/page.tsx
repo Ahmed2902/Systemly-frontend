@@ -11,7 +11,7 @@ export default function VerifyEmailPage() {
   return (
     <AuthLayout
       title={text("Secure your account")}
-      subtitle="We are validating your email verification link and preparing your workspace."
+      subtitle={text("We are validating your email verification link and preparing your workspace.")}
     >
       <VerifyEmailPanel />
     </AuthLayout>

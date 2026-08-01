@@ -411,7 +411,7 @@ export function StaffFormModal({
                       <p className="truncate text-sm font-medium">{service.name}</p>
                       <p className="mt-0.5 text-xs text-slate-500">
                         {service.category || "Uncategorized"}
-                        {!service.isActive ? " · Inactive" : ""}
+                        {!service.isActive ? ` · ${text("Inactive")}` : ""}
                       </p>
                     </div>
                     <span

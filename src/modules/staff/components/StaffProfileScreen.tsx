@@ -120,7 +120,7 @@ export default function StaffProfileScreen({ staffId }: { staffId: string }) {
     return (
       <div className="p-8">
         <Link href="/operations/staff" className="text-sm font-semibold text-violet-700">
-          ← Back to staff
+          {text("← Back to staff")}
         </Link>
         <div className="mt-6 rounded-2xl border border-rose-200 bg-rose-50 p-5 text-rose-700">
           {error ?? "Staff profile not found"}
@@ -315,7 +315,7 @@ function TimeOffPanel({ workspace, staffId, accessToken, reload }: { workspace: 
 
 function AppointmentsPanel({ workspace }: { workspace: StaffWorkspaceResponse }) {
   const text = usePlatformText();
-  return <section className="rounded-3xl border border-white bg-white/90 p-6 shadow-sm"><h2 className="text-lg font-bold text-slate-900">Upcoming appointments</h2><div className="mt-5 space-y-3">{workspace.upcomingAppointments.map((item) => <Link key={item.segmentId} href={`/operations/appointments/${item.appointmentId}`} className="grid gap-2 rounded-2xl border border-slate-200 bg-slate-50/70 p-4 transition hover:border-violet-200 hover:bg-violet-50/50 sm:grid-cols-[10rem_1fr_auto]"><span className="text-sm font-semibold text-slate-800">{new Date(item.startsAt).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })}</span><span><b className="text-slate-900">{item.customer.name}</b><span className="ml-2 text-sm text-slate-500">{item.service.name}</span></span><span className="text-xs font-semibold text-violet-700">{item.status.replaceAll("_", " ")}</span></Link>)}{!workspace.upcomingAppointments.length ? <p className="rounded-2xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">{text("No upcoming appointments.")}</p> : null}</div></section>;
+  return <section className="rounded-3xl border border-white bg-white/90 p-6 shadow-sm"><h2 className="text-lg font-bold text-slate-900">{text("Upcoming appointments")}</h2><div className="mt-5 space-y-3">{workspace.upcomingAppointments.map((item) => <Link key={item.segmentId} href={`/operations/appointments/${item.appointmentId}`} className="grid gap-2 rounded-2xl border border-slate-200 bg-slate-50/70 p-4 transition hover:border-violet-200 hover:bg-violet-50/50 sm:grid-cols-[10rem_1fr_auto]"><span className="text-sm font-semibold text-slate-800">{new Date(item.startsAt).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })}</span><span><b className="text-slate-900">{item.customer.name}</b><span className="ml-2 text-sm text-slate-500">{item.service.name}</span></span><span className="text-xs font-semibold text-violet-700">{item.status.replaceAll("_", " ")}</span></Link>)}{!workspace.upcomingAppointments.length ? <p className="rounded-2xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">{text("No upcoming appointments.")}</p> : null}</div></section>;
 }
 
 function Summary({ icon, label, value, tone }: { icon: React.ReactNode; label: string; value: number; tone: "violet" | "sky" | "amber" | "emerald" }) {
