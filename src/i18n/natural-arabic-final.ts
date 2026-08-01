@@ -33,6 +33,7 @@ export const naturalArabicFinalPairs: ReadonlyArray<readonly [string, string]> =
   ["Commission calculated from attributed service lines", "العمولة محسوبة من بنود الخدمات المسندة للموظف"],
   ["Why are you voiding this invoice? The appointment will return to In progress.", "لماذا تريد إلغاء هذه الفاتورة؟ سيعود الموعد إلى حالة جارٍ التنفيذ."],
   ["Void this invoice and reopen the appointment for editing and payment?", "هل تريد إلغاء الفاتورة وإعادة فتح الموعد للتعديل وتحصيل الدفع؟"],
+  ["Management / Staff / Invitation", "الإدارة / فريق العمل / دعوة"],
   ["invoice", "فاتورة"],
   ["invoices", "فواتير"],
   ["No reason recorded.", "لم يتم تسجيل سبب."],
