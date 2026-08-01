@@ -15,9 +15,7 @@ import {
   type AppLocale,
 } from "./config";
 import { translate, type MessageKey } from "./messages";
-import { platformCopy } from "./platform-copy";
-
-type PlatformCopy = (typeof platformCopy)[AppLocale];
+import { platformCopy, type PlatformCopy } from "./platform-copy";
 
 type LocaleContextValue = {
   locale: AppLocale;
@@ -39,12 +37,18 @@ export function LocaleProvider({
   const [locale, setLocaleState] = useState<AppLocale>(initialLocale);
 
   const setLocale = useCallback((nextLocale: AppLocale) => {
+    if (nextLocale === locale) return;
+
     setLocaleState(nextLocale);
     document.cookie = `${LOCALE_COOKIE}=${nextLocale}; Path=/; Max-Age=${LOCALE_COOKIE_MAX_AGE}; SameSite=Lax`;
     document.documentElement.lang = nextLocale;
     document.documentElement.dir = getLocaleDirection(nextLocale);
     document.documentElement.dataset.locale = nextLocale;
-  }, []);
+
+    // Reload from clean server-rendered markup so translated text, date strings,
+    // chart labels, and direction-sensitive components cannot retain stale locale state.
+    window.location.reload();
+  }, [locale]);
 
   const value = useMemo<LocaleContextValue>(
     () => ({
