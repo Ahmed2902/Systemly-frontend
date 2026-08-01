@@ -6,7 +6,7 @@ export type AuthUser = {
   email: string;
   businessId: string | null;
   role: string;
-  preferredLanguage: AppLocale;
+  preferredLanguage?: AppLocale;
   vertical?: string | null;
   timezone?: string | null;
 };
