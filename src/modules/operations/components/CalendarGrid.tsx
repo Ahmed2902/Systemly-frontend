@@ -1,5 +1,7 @@
 "use client";
 
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import type { CalendarDayData } from "../appointment.types";
@@ -25,6 +27,7 @@ interface Props {
 }
 
 export function CalendarGrid({ data, onSelectAppointment }: Props) {
+  const text = usePlatformText();
   const [search, setSearch] = useState("");
   const hours = useMemo(
     () =>
@@ -159,7 +162,7 @@ export function CalendarGrid({ data, onSelectAppointment }: Props) {
                       {member.name}
                     </p>
                     <p className="mt-0.5 truncate text-[9px] font-semibold uppercase tracking-[0.08em] text-[var(--op-text-muted)]">
-                      {member.role || "Staff"}
+                      {member.role || text("Staff")}
                     </p>
                   </div>
                   <span className="rounded-full border border-[var(--op-border)] bg-[var(--op-surface-soft)] px-2 py-1 text-[9px] font-bold text-[var(--op-text-muted)]">

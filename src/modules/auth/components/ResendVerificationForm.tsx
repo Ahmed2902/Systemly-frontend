@@ -1,5 +1,7 @@
 "use client";
 
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -13,6 +15,7 @@ import {
 import { ApiError, resendVerification } from "../auth.api";
 
 export function ResendVerificationForm() {
+  const text = usePlatformText();
   const searchParams = useSearchParams();
   const initialEmail = searchParams.get("email") ?? "";
   const [sentTo, setSentTo] = useState<string | null>(
@@ -52,7 +55,7 @@ export function ResendVerificationForm() {
       <div className="auth-state-card">
         <div className="auth-state-icon"><MailCheck size={24} /></div>
         <div>
-          <h2>Verify your email</h2>
+          <h2>{text("Verify your email")}</h2>
           <p>
             Open the secure link in your email to activate your account. The link will return you to Systemly automatically.
           </p>
@@ -75,13 +78,13 @@ export function ResendVerificationForm() {
           {serverError ? <div className="auth-error" role="alert">{serverError}</div> : null}
 
           <button type="submit" disabled={isSubmitting} className="auth-secondary-button">
-            {isSubmitting ? "Sending email…" : "Resend verification email"}
+            {isSubmitting ? "Sending email…" : text("Resend verification email")}
           </button>
         </form>
       </div>
 
       <p className="auth-switch-copy">
-        Already verified? <Link href="/login" className="auth-text-link">Log in</Link>
+        Already verified? <Link href="/login" className="auth-text-link">{text("Log in")}</Link>
       </p>
     </div>
   );

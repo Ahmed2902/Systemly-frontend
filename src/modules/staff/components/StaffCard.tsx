@@ -1,5 +1,7 @@
 "use client";
 
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import Link from "next/link";
 import {
   BriefcaseBusiness,
@@ -49,6 +51,7 @@ export function StaffCard({
   onEdit: (member: StaffDirectoryItem) => void;
   onDeactivate: (member: StaffDirectoryItem) => void;
 }) {
+  const text = usePlatformText();
   const inactive = !member.isActive;
   const onLeave = Boolean(member.currentTimeOff);
   const accent = inactive
@@ -238,7 +241,7 @@ export function StaffCard({
             className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-[var(--op-text-secondary)] transition hover:bg-[var(--op-hover)] hover:text-[var(--op-text)]"
           >
             <Pencil size={13} />
-            Edit
+            {text("Edit")}
           </button>
           {canManageProtectedFields && member.isActive ? (
             <button

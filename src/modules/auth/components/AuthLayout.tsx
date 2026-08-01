@@ -1,3 +1,5 @@
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 // src/modules/auth/components/AuthLayout.tsx
 "use client";
 
@@ -17,6 +19,7 @@ export function AuthLayout({
   subtitle: string;
   children: ReactNode;
 }) {
+  const text = usePlatformText();
   const { t } = useLocale();
 
   return (
@@ -34,15 +37,15 @@ export function AuthLayout({
           <div className="systemly-auth-product" aria-hidden="true">
             <div className="systemly-auth-product-bar">
               <span className="systemly-auth-product-status">systemly / operations</span>
-              <span>Today</span>
+              <span>{text("Today")}</span>
             </div>
             <div className="systemly-auth-product-body">
               <div className="systemly-auth-product-nav">
                 <div className="systemly-auth-product-wordmark">Systemly</div>
-                <span>Dashboard</span>
-                <span className="is-active">Calendar</span>
-                <span>Appointments</span>
-                <span>Customers</span>
+                <span>{text("Dashboard")}</span>
+                <span className="is-active">{text("Calendar")}</span>
+                <span>{text("Appointments")}</span>
+                <span>{text("Customers")}</span>
               </div>
               <div className="systemly-auth-product-main">
                 <div className="systemly-auth-product-heading">
@@ -50,19 +53,19 @@ export function AuthLayout({
                     <small>Monday</small>
                     <strong>July 27, 2026</strong>
                   </div>
-                  <em>Live workspace</em>
+                  <em>{text("Live workspace")}</em>
                 </div>
                 <div className="systemly-auth-product-grid">
                   <div className="systemly-auth-product-metric">
-                    <small>Bookings</small>
+                    <small>{text("Bookings")}</small>
                     <strong>18 today</strong>
                   </div>
                   <div className="systemly-auth-product-metric">
-                    <small>Available staff</small>
+                    <small>{text("Available staff")}</small>
                     <strong>4 of 5</strong>
                   </div>
                   <div className="systemly-auth-product-metric">
-                    <small>Collected</small>
+                    <small>{text("Collected")}</small>
                     <strong>EGP 6,820</strong>
                   </div>
                 </div>

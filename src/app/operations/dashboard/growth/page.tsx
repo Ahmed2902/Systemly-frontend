@@ -1,5 +1,7 @@
 "use client";
 
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/modules/auth/useAuth";
 import { getGrowthAnalytics } from "@/modules/analytics/analytics.api";
@@ -23,6 +25,7 @@ const monthLabel = (value: string) =>
   new Intl.DateTimeFormat("en-GB", { month: "short", year: "2-digit" }).format(new Date(value));
 
 export default function GrowthAnalyticsPage() {
+  const text = usePlatformText();
   const { accessToken } = useAuth();
   const preset = useAnalyticsPreset();
   const [data, setData] = useState<GrowthAnalytics | null>(null);
@@ -63,11 +66,11 @@ export default function GrowthAnalyticsPage() {
                   label: monthLabel(row.bucket),
                   value: row.totalCents,
                   tooltip: [
-                    { label: "Paid invoices", value: String(row.invoiceCount) },
-                    { label: "Growth", value: row.growthPct == null ? "No comparison" : formatPercent(row.growthPct) },
+                    { label: text("Paid invoices"), value: String(row.invoiceCount) },
+                    { label: text("Growth"), value: row.growthPct == null ? "No comparison" : formatPercent(row.growthPct) },
                   ],
                 }))}
-                valueLabel="Revenue"
+                valueLabel={text("Revenue")}
                 formatValue={formatEgp}
                 formatAxisValue={formatEgp}
                 height={275}
@@ -79,8 +82,8 @@ export default function GrowthAnalyticsPage() {
                   label: monthLabel(row.bucket),
                   value: Math.abs(row.growthPct ?? 0),
                   tooltip: [
-                    { label: "Growth", value: formatPercent(row.growthPct) },
-                    { label: "Revenue", value: formatEgp(row.totalCents) },
+                    { label: text("Growth"), value: formatPercent(row.growthPct) },
+                    { label: text("Revenue"), value: formatEgp(row.totalCents) },
                   ],
                 }))}
                 formatValue={(value) => formatPercent(value)}
@@ -92,7 +95,7 @@ export default function GrowthAnalyticsPage() {
             <AnalyticsPanel title="Monthly paid invoice count">
               <MultiLineChart
                 labels={data.monthlyGrowth.map((row) => monthLabel(row.bucket))}
-                series={[{ name: "Paid invoices", values: data.monthlyGrowth.map((row) => row.invoiceCount), colour: "#8b5cf6", formatValue: (value) => String(Math.round(value)) }]}
+                series={[{ name: text("Paid invoices"), values: data.monthlyGrowth.map((row) => row.invoiceCount), colour: "#8b5cf6", formatValue: (value) => String(Math.round(value)) }]}
                 formatAxisValue={(value) => String(Math.round(value))}
                 height={215}
               />
@@ -105,7 +108,7 @@ export default function GrowthAnalyticsPage() {
           <AnalyticsPanel title="Customer retention cohorts">
             <div className="overflow-x-auto">
               <table className="analytics-table w-full min-w-[600px] text-left">
-                <thead><tr><th className="pb-2">Cohort</th><th className="pb-2">Customers</th><th className="pb-2">30-day</th><th className="pb-2">60-day</th><th className="pb-2">90-day</th></tr></thead>
+                <thead><tr><th className="pb-2">Cohort</th><th className="pb-2">{text("Customers")}</th><th className="pb-2">30-day</th><th className="pb-2">60-day</th><th className="pb-2">90-day</th></tr></thead>
                 <tbody>{data.retentionCohorts.map((row) => (
                   <tr key={row.cohortStart} className="border-t"><td className="py-3 font-semibold">{new Intl.DateTimeFormat("en-GB", { month: "short", year: "numeric" }).format(new Date(row.cohortStart))}</td><td>{row.totalCustomers}</td><td>{row.totalCustomers ? formatPercent((row.retained30 / row.totalCustomers) * 100) : "—"}</td><td>{row.totalCustomers ? formatPercent((row.retained60 / row.totalCustomers) * 100) : "—"}</td><td>{row.totalCustomers ? formatPercent((row.retained90 / row.totalCustomers) * 100) : "—"}</td></tr>
                 ))}</tbody>

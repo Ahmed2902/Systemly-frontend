@@ -1,5 +1,7 @@
 "use client";
 
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -28,31 +30,32 @@ const showcaseSlides = [
 type ShowcaseSlide = (typeof showcaseSlides)[number]["id"];
 
 export function LandingHero() {
+  const text = usePlatformText();
   return (
     <section className="lp-hero">
       <div className="lp-shell lp-hero-grid">
         <div className="lp-hero-copy-block">
           <p className="lp-kicker">
-            The operating system for service businesses
+            {text("The operating system for service businesses")}
           </p>
-          <h1 className="lp-hero-title">The system behind your business.</h1>
+          <h1 className="lp-hero-title">{text("The system behind your business.")}</h1>
           <p className="lp-hero-copy">
             Build the customer experience, take bookings, run the working day,
             and understand the business from one connected platform.
           </p>
           <div className="lp-hero-actions">
             <Link href="/signup" className="lp-button lp-button-primary">
-              Start free <ArrowRight size={17} />
+              {text("Start free")} <ArrowRight size={17} />
             </Link>
             <a href="#demo" className="lp-button lp-button-secondary">
-              <Play size={16} fill="currentColor" /> Explore the product
+              <Play size={16} fill="currentColor" /> {text("Explore the product")}
             </a>
           </div>
           <div className="lp-hero-proof" aria-label="Product highlights">
-            <span>Website + booking</span>
-            <span>Daily operations</span>
-            <span>Owner analytics</span>
-            <span>Arabic + English</span>
+            <span>{text("Website + booking")}</span>
+            <span>{text("Daily operations")}</span>
+            <span>{text("Owner analytics")}</span>
+            <span>{text("Arabic + English")}</span>
           </div>
         </div>
 
@@ -175,6 +178,7 @@ function ShowcaseSlidePanel({
 }
 
 function ProductSidebar({ active }: { active: string }) {
+  const text = usePlatformText();
   return (
     <nav
       className="lp-showcase-sidebar"
@@ -182,7 +186,7 @@ function ProductSidebar({ active }: { active: string }) {
     >
       <div className="lp-showcase-wordmark">Systemly</div>
       <div className="lp-showcase-sidebar-links">
-        {["Dashboard", "Calendar", "Appointments", "Customers", "Invoices"].map(
+        {[text("Dashboard"), text("Calendar"), text("Appointments"), text("Customers"), text("Invoices")].map(
           (item) => (
             <span key={item} className={item === active ? "is-active" : ""}>
               {item}
@@ -195,9 +199,10 @@ function ProductSidebar({ active }: { active: string }) {
 }
 
 function CalendarPreview() {
+  const text = usePlatformText();
   return (
     <div className="lp-showcase-app-shell">
-      <ProductSidebar active="Calendar" />
+      <ProductSidebar active={text("Calendar")} />
       <div className="lp-showcase-app-main lp-showcase-calendar-main">
         <div className="lp-showcase-app-heading">
           <div>
@@ -214,15 +219,15 @@ function CalendarPreview() {
           >
             <span>
               <i className="is-confirmed" />
-              Confirmed
+              {text("Confirmed")}
             </span>
             <span>
               <i className="is-progress" />
-              In progress
+              {text("In progress")}
             </span>
             <span>
               <i className="is-completed" />
-              Completed
+              {text("Completed")}
             </span>
           </div>
           <span>Africa/Cairo</span>
@@ -230,7 +235,7 @@ function CalendarPreview() {
 
         <div className="lp-showcase-calendar-board">
           <div className="lp-showcase-calendar-head">
-            <span>Staff</span>
+            <span>{text("Staff")}</span>
             <div>
               {["9:00", "10:00", "11:00", "12:00"].map((time) => (
                 <b key={time}>{time}</b>
@@ -332,23 +337,24 @@ function CalendarEvent({
 }
 
 function DashboardPreview() {
+  const text = usePlatformText();
   return (
     <div className="lp-showcase-app-shell">
-      <ProductSidebar active="Dashboard" />
+      <ProductSidebar active={text("Dashboard")} />
       <div className="lp-showcase-app-main lp-showcase-dashboard-main">
         <div className="lp-showcase-app-heading">
           <div>
-            <small>Owner analytics</small>
-            <strong>Business overview</strong>
+            <small>{text("Owner analytics")}</small>
+            <strong>{text("Business overview")}</strong>
           </div>
-          <span className="lp-showcase-owner-pill">Owner only</span>
+          <span className="lp-showcase-owner-pill">{text("Owner only")}</span>
         </div>
 
         <div className="lp-showcase-metrics">
-          <Metric label="Revenue" value="EGP 38,620" note="+12.4%" />
-          <Metric label="Appointments" value="568" note="This month" />
-          <Metric label="Average ticket" value="EGP 486" note="+5.8%" />
-          <Metric label="Returning" value="68%" note="Customers" />
+          <Metric label={text("Revenue")} value="EGP 38,620" note="+12.4%" />
+          <Metric label={text("Appointments")} value="568" note={text("This month")} />
+          <Metric label={text("Average ticket")} value="EGP 486" note="+5.8%" />
+          <Metric label={text("Returning")} value="68%" note={text("Customers")} />
         </div>
 
         <div className="lp-showcase-dashboard-grid">
@@ -356,7 +362,7 @@ function DashboardPreview() {
             <div className="lp-showcase-card-heading">
               <div>
                 <strong>Revenue this month</strong>
-                <span>Paid invoices</span>
+                <span>{text("Paid invoices")}</span>
               </div>
               <div>
                 <b>EGP 38,620</b>
@@ -381,7 +387,7 @@ function DashboardPreview() {
           <div className="lp-showcase-dashboard-side">
             <article className="lp-showcase-service-card">
               <div className="lp-showcase-card-title">
-                <strong>Top services</strong>
+                <strong>{text("Top services")}</strong>
                 <BarChart3 size={15} />
               </div>
               {[
@@ -403,26 +409,26 @@ function DashboardPreview() {
 
             <article className="lp-showcase-operations-card">
               <div className="lp-showcase-card-title">
-                <strong>Today</strong>
+                <strong>{text("Today")}</strong>
                 <UsersRound size={15} />
               </div>
               <div className="lp-showcase-today-stats">
                 <span>
                   <strong>18</strong>
-                  <small>Completed</small>
+                  <small>{text("Completed")}</small>
                 </span>
                 <span>
                   <strong>4</strong>
-                  <small>Upcoming</small>
+                  <small>{text("Upcoming")}</small>
                 </span>
                 <span>
                   <strong>2</strong>
-                  <small>No-shows</small>
+                  <small>{text("No-shows")}</small>
                 </span>
               </div>
               <div className="lp-showcase-utilization">
                 <span>
-                  <b>Staff utilization</b>
+                  <b>{text("Staff utilization")}</b>
                   <strong>76%</strong>
                 </span>
                 <i>
@@ -456,6 +462,7 @@ function Metric({
 }
 
 function WebsitePreview() {
+  const text = usePlatformText();
   return (
     <div className="lp-showcase-website-shell">
       <div className="lp-showcase-site-nav">
@@ -473,7 +480,7 @@ function WebsitePreview() {
       <div className="lp-showcase-site-card">
         <Globe2 size={18} />
         <span>Live website</span>
-        <strong>Arabic + English</strong>
+        <strong>{text("Arabic + English")}</strong>
         <small>
           Built from the same services and availability your team manages.
         </small>
@@ -488,6 +495,7 @@ function WebsitePreview() {
 }
 
 function BookingPreview() {
+  const text = usePlatformText();
   return (
     <div className="lp-showcase-booking-shell">
       <div className="lp-showcase-booking-brand">
@@ -503,8 +511,8 @@ function BookingPreview() {
         <div className="lp-showcase-service-list">
           <small>Choose a service</small>
           {[
-            ["Hair consultation", "45 min", "EGP 450"],
-            ["Skin treatment", "60 min", "EGP 700"],
+            [text("Hair consultation"), "45 min", "EGP 450"],
+            [text("Skin treatment"), "60 min", "EGP 700"],
             ["Gel manicure", "45 min", "EGP 320"],
           ].map(([name, duration, price], index) => (
             <button
@@ -523,12 +531,12 @@ function BookingPreview() {
         <div className="lp-showcase-booking-summary">
           <ClipboardCheck size={21} />
           <small>Your booking</small>
-          <strong>Hair consultation</strong>
+          <strong>{text("Hair consultation")}</strong>
           <span>Monday, July 27 · 10:00 AM</span>
           <div>
             <Check size={14} /> Real staff availability
           </div>
-          <button type="button">Continue</button>
+          <button type="button">{text("Continue")}</button>
         </div>
       </div>
     </div>

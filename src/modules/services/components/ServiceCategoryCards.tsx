@@ -1,5 +1,7 @@
 "use client";
 
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import {
   ArrowRight,
   ChevronLeft,
@@ -45,6 +47,7 @@ export function ServiceCategoryCards({
   onSelect: (category: string) => void;
   selectedCategory?: string;
 }) {
+  const text = usePlatformText();
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [visibleCount, setVisibleCount] = useState(3);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -241,7 +244,7 @@ export function ServiceCategoryCards({
                           ? "var(--op-success)"
                           : "var(--op-text-faint)",
                       }}
-                      aria-label={service.isActive ? "Active" : "Inactive"}
+                      aria-label={service.isActive ? text("Active") : text("Inactive")}
                     />
                   </div>
                 ))}

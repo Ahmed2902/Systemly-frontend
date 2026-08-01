@@ -1,3 +1,5 @@
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 // src/modules/onboarding/components/BusinessInfoForm.tsx
 "use client";
 
@@ -16,6 +18,7 @@ import { SlugInput } from "./SlugInput";
 import { useState } from "react";
 
 export function BusinessInfoForm() {
+  const text = usePlatformText();
   const router = useRouter();
   const { accessToken } = useAuth();
   const [serverError, setServerError] = useState<string | null>(null);
@@ -42,7 +45,7 @@ export function BusinessInfoForm() {
       setServerError(
         err instanceof Error
           ? err.message
-          : "Something went wrong. Please try again.",
+          : text("Something went wrong. Please try again."),
       );
     }
   }
@@ -50,7 +53,7 @@ export function BusinessInfoForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div>
-        <label className="text-sm text-muted">Business type</label>
+        <label className="text-sm text-muted">{text("Business type")}</label>
         <Controller
           name="vertical"
           control={control}
@@ -66,7 +69,7 @@ export function BusinessInfoForm() {
       </div>
 
       <div>
-        <label className="text-sm text-muted">Business name</label>
+        <label className="text-sm text-muted">{text("Business name")}</label>
         <input
           {...register("name")}
           className="mt-1 w-full rounded-md border border-surfaceBorder bg-background px-3 py-2 text-foreground"
@@ -101,7 +104,7 @@ export function BusinessInfoForm() {
       </div>
 
       <div>
-        <label className="text-sm text-muted">City</label>
+        <label className="text-sm text-muted">{text("City")}</label>
         <input
           {...register("city")}
           className="mt-1 w-full rounded-md border border-surfaceBorder bg-background px-3 py-2 text-foreground"
@@ -109,7 +112,7 @@ export function BusinessInfoForm() {
       </div>
 
       <div>
-        <label className="text-sm text-muted">Address</label>
+        <label className="text-sm text-muted">{text("Address")}</label>
         <input
           {...register("address")}
           className="mt-1 w-full rounded-md border border-surfaceBorder bg-background px-3 py-2 text-foreground"
@@ -123,7 +126,7 @@ export function BusinessInfoForm() {
         disabled={isSubmitting}
         className="w-full bg-accent text-black hover:bg-accent/90"
       >
-        {isSubmitting ? "Creating your business..." : "Continue"}
+        {isSubmitting ? "Creating your business..." : text("Continue")}
       </Button>
     </form>
   );

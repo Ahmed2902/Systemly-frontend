@@ -1,5 +1,7 @@
 "use client";
 
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { useMemo, useState } from "react";
 import {
   CalendarDays,
@@ -174,6 +176,7 @@ function appointmentTime(appointment: DemoAppointment) {
 }
 
 export function LiveOperationsDemo() {
+  const text = usePlatformText();
   const [page, setPage] = useState<DemoPage>("calendar");
   const [selectedAppointmentId, setSelectedAppointmentId] = useState<
     string | null
@@ -214,7 +217,7 @@ export function LiveOperationsDemo() {
           <aside className="systemly-demo-sidebar">
             <div className="systemly-demo-brand-block">
               <div className="systemly-demo-wordmark">Systemly</div>
-              <p>Business operations</p>
+              <p>{text("Business operations")}</p>
               <button type="button" className="systemly-demo-new-button">
                 <Plus size={16} /> New Appointment
               </button>
@@ -262,13 +265,13 @@ export function LiveOperationsDemo() {
                     <div className="systemly-demo-calendar-key">
                       <div aria-label="Appointment statuses">
                         <span>
-                          <i /> Confirmed
+                          <i /> {text("Confirmed")}
                         </span>
                         <span>
-                          <i /> In progress
+                          <i /> {text("In progress")}
                         </span>
                         <span>
-                          <i /> Completed
+                          <i /> {text("Completed")}
                         </span>
                       </div>
                       <strong>3 staff · 3 appointments</strong>
@@ -294,8 +297,8 @@ export function LiveOperationsDemo() {
               <div className="systemly-demo-list-page">
                 <header className="systemly-demo-page-header">
                   <div>
-                    <p>Operations</p>
-                    <h3>Appointments</h3>
+                    <p>{text("Operations")}</p>
+                    <h3>{text("Appointments")}</h3>
                   </div>
                 </header>
                 <label className="systemly-demo-search">
@@ -351,15 +354,15 @@ export function LiveOperationsDemo() {
                 <header className="systemly-demo-page-header">
                   <div>
                     <p>Customer records</p>
-                    <h3>Customers</h3>
+                    <h3>{text("Customers")}</h3>
                   </div>
                 </header>
                 <div className="systemly-demo-table">
                   <div className="systemly-demo-table-head">
-                    <span>Customer</span>
+                    <span>{text("Customer")}</span>
                     <span>Phone</span>
                     <span>Visits</span>
-                    <span>No-shows</span>
+                    <span>{text("No-shows")}</span>
                   </div>
                   {customers.map((customer) => (
                     <div key={customer.id} className="systemly-demo-table-row">
@@ -378,16 +381,16 @@ export function LiveOperationsDemo() {
                 <header className="systemly-demo-page-header">
                   <div>
                     <p>Cash invoices</p>
-                    <h3>Invoices</h3>
+                    <h3>{text("Invoices")}</h3>
                   </div>
                 </header>
                 <div className="systemly-demo-table">
                   <div className="systemly-demo-table-head systemly-demo-invoice-grid">
-                    <span>Invoice</span>
-                    <span>Customer</span>
-                    <span>Services</span>
-                    <span>Total</span>
-                    <span>Status</span>
+                    <span>{text("Invoice")}</span>
+                    <span>{text("Customer")}</span>
+                    <span>{text("Services")}</span>
+                    <span>{text("Total")}</span>
+                    <span>{text("Status")}</span>
                   </div>
                   {invoices.map((invoice) => (
                     <div
@@ -418,6 +421,7 @@ function AppointmentPreview({
   appointment: DemoAppointment;
   onClose: () => void;
 }) {
+  const text = usePlatformText();
   const total = appointment.segments.reduce(
     (sum, segment) => sum + segment.price,
     0,
@@ -432,7 +436,7 @@ function AppointmentPreview({
       >
         <X size={16} />
       </button>
-      <p className="systemly-demo-eyebrow">Appointment details</p>
+      <p className="systemly-demo-eyebrow">{text("Appointment details")}</p>
       <h4>{appointment.customer.name}</h4>
       <span>{appointment.customer.phone}</span>
       <StatusPill status={appointment.status.replaceAll("_", " ")} />
@@ -452,11 +456,11 @@ function AppointmentPreview({
           <dd>{appointmentTime(appointment)}</dd>
         </div>
         <div>
-          <dt>Total</dt>
+          <dt>{text("Total")}</dt>
           <dd>{money(total)}</dd>
         </div>
         <div>
-          <dt>Payment</dt>
+          <dt>{text("Payment")}</dt>
           <dd>{appointment.isPaid ? "Paid in cash" : "Not collected"}</dd>
         </div>
       </dl>

@@ -1,5 +1,7 @@
 "use client";
 
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -11,6 +13,7 @@ import { useAuth } from "../useAuth";
 type OAuthState = "loading" | "success" | "error";
 
 export function OAuthCallbackPanel() {
+  const text = usePlatformText();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { setSession } = useAuth();
@@ -56,7 +59,7 @@ export function OAuthCallbackPanel() {
         <p>{message}</p>
       </div>
       {state === "error" ? (
-        <Link href="/login" className="auth-primary-button">Return to login</Link>
+        <Link href="/login" className="auth-primary-button">{text("Return to login")}</Link>
       ) : null}
     </div>
   );

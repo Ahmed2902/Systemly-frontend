@@ -1,5 +1,7 @@
 "use client";
 
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { useEffect, useMemo, useState } from "react";
 import { Check, Loader2, Plus, X } from "lucide-react";
 import { MIN_SERVICE_DURATION, SERVICE_DURATION_STEP } from "../services.types";
@@ -47,6 +49,7 @@ export function ServiceFormModal({
   onClose,
   onSubmit,
 }: Props) {
+  const text = usePlatformText();
   const [form, setForm] = useState<ServiceInput>(() =>
     createInitialState(service),
   );
@@ -126,7 +129,7 @@ export function ServiceFormModal({
               </span>
               <div>
                 <h2 className="text-xl font-bold text-slate-900">
-                  {service ? "Edit service" : "New service"}
+                  {service ? "Edit service" : text("New service")}
                 </h2>
                 <p className="mt-0.5 text-sm text-slate-500">
                   Configure booking time, category, and eligible staff.
@@ -139,7 +142,7 @@ export function ServiceFormModal({
             type="button"
             onClick={onClose}
             className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
-            aria-label="Close"
+            aria-label={text("Close")}
           >
             <X size={18} />
           </button>
@@ -148,7 +151,7 @@ export function ServiceFormModal({
         <div className="space-y-6 px-6 py-6">
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="sm:col-span-2 text-sm font-medium text-slate-700">
-              Service name
+              {text("Service name")}
               <input
                 required
                 maxLength={255}
@@ -165,7 +168,7 @@ export function ServiceFormModal({
             </label>
 
             <label className="text-sm font-medium text-slate-700">
-              Category
+              {text("Category")}
               <input
                 list="service-category-options"
                 value={form.category ?? ""}
@@ -186,7 +189,7 @@ export function ServiceFormModal({
             </label>
 
             <label className="text-sm font-medium text-slate-700">
-              Duration
+              {text("Duration")}
               <div className="relative">
                 <input
                   required
@@ -211,7 +214,7 @@ export function ServiceFormModal({
 
             {canManageMoney ? (
               <label className="text-sm font-medium text-slate-700">
-                Price
+                {text("Price")}
                 <div className="relative">
                   <input
                     type="number"
@@ -234,7 +237,7 @@ export function ServiceFormModal({
             ) : null}
 
             <label className="sm:col-span-2 text-sm font-medium text-slate-700">
-              Description
+              {text("Description")}
               <textarea
                 rows={3}
                 maxLength={2000}
@@ -255,7 +258,7 @@ export function ServiceFormModal({
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h3 className="text-sm font-semibold text-slate-900">
-                  Eligible staff
+                  {text("Eligible staff")}
                 </h3>
                 <p className="mt-1 text-xs text-slate-500">
                   Services with no active staff remain visible but unavailable
@@ -326,7 +329,7 @@ export function ServiceFormModal({
           >
             <div>
               <p className="text-sm font-semibold text-slate-900">
-                {form.isActive ? "Active and bookable" : "Inactive"}
+                {form.isActive ? "Active and bookable" : text("Inactive")}
               </p>
               <p className="mt-1 text-xs text-slate-500">
                 {form.isActive
@@ -361,7 +364,7 @@ export function ServiceFormModal({
             disabled={saving}
             className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
           >
-            Cancel
+            {text("Cancel")}
           </button>
           <button
             type="submit"
@@ -369,7 +372,7 @@ export function ServiceFormModal({
             className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:from-violet-700 hover:to-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {saving ? <Loader2 size={16} className="animate-spin" /> : null}
-            {service ? "Save changes" : "Create service"}
+            {service ? text("Save changes") : "Create service"}
           </button>
         </div>
       </form>

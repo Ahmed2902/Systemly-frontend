@@ -1,5 +1,7 @@
 "use client";
 
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { useEffect, useMemo, useState } from "react";
 import { X, Search } from "lucide-react";
 import { useAuth } from "@/modules/auth/useAuth";
@@ -19,6 +21,7 @@ import type {
 import type { ServiceCatalogItem, StaffMember } from "../appointment.types";
 
 export function NewAppointmentModal() {
+  const text = usePlatformText();
   const {
     isNewAppointmentOpen,
     appointmentCustomer,
@@ -277,9 +280,9 @@ export function NewAppointmentModal() {
   if (!isNewAppointmentOpen) return null;
 
   const stepItems = [
-    { id: 1, label: "Customer" },
-    { id: 2, label: "Services" },
-    { id: 3, label: "Staff" },
+    { id: 1, label: text("Customer") },
+    { id: 2, label: text("Services") },
+    { id: 3, label: text("Staff") },
     { id: 4, label: "Time" },
     { id: 5, label: "Review" },
   ] as const;
@@ -292,7 +295,7 @@ export function NewAppointmentModal() {
             <button
               onClick={closeNewAppointment}
               className="mt-0.5 rounded-full p-1.5 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
-              aria-label="Close"
+              aria-label={text("Close")}
             >
               <X size={18} />
             </button>
@@ -443,14 +446,14 @@ export function NewAppointmentModal() {
                     Or add new customer
                   </div>
                   <h3 className="mt-1 text-xl font-semibold text-slate-950">
-                    Customer details
+                    {text("Customer details")}
                   </h3>
                 </div>
 
                 <div className="space-y-4">
                   <div>
                     <label className="mb-1 block text-sm font-medium text-slate-700">
-                      Full name
+                      {text("Full name")}
                     </label>
                     <input
                       type="text"
@@ -463,7 +466,7 @@ export function NewAppointmentModal() {
 
                   <div>
                     <label className="mb-1 block text-sm font-medium text-slate-700">
-                      Phone number
+                      {text("Phone number")}
                     </label>
                     <input
                       type="tel"
@@ -476,7 +479,7 @@ export function NewAppointmentModal() {
 
                   <div>
                     <label className="mb-1 block text-sm font-medium text-slate-700">
-                      Notes
+                      {text("Notes")}
                     </label>
                     <textarea
                       value={notes}
@@ -719,7 +722,7 @@ export function NewAppointmentModal() {
                   <div className="mt-5 grid gap-3 sm:grid-cols-2">
                     <div className="rounded-2xl bg-slate-50 px-4 py-3">
                       <div className="text-xs uppercase tracking-wide text-slate-500">
-                        Customer
+                        {text("Customer")}
                       </div>
                       <div className="mt-1 font-medium text-slate-950">
                         {customerName.trim() || "Unnamed customer"}
@@ -745,14 +748,14 @@ export function NewAppointmentModal() {
                 <div className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
                   <div className="mb-4 flex items-center justify-between">
                     <h4 className="text-lg font-semibold text-slate-950">
-                      Booked services
+                      {text("Booked services")}
                     </h4>
                     <button
                       type="button"
                       onClick={() => setActiveStep(2)}
                       className="text-sm font-medium text-blue-700 hover:underline"
                     >
-                      Edit
+                      {text("Edit")}
                     </button>
                   </div>
 
@@ -784,7 +787,7 @@ export function NewAppointmentModal() {
               <div className="space-y-5">
                 <div className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
                   <h4 className="text-lg font-semibold text-slate-950">
-                    Notes
+                    {text("Notes")}
                   </h4>
                   <div className="mt-3 rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-600">
                     {notes.trim() || "No additional notes"}
@@ -810,7 +813,7 @@ export function NewAppointmentModal() {
             onClick={activeStep === 1 ? closeNewAppointment : goBack}
             className="rounded-2xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
           >
-            {activeStep === 1 ? "Cancel" : "Back"}
+            {activeStep === 1 ? text("Cancel") : text("Back")}
           </button>
 
           <button

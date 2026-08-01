@@ -1,5 +1,7 @@
 "use client";
 
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { useEffect, useMemo, useState } from "react";
 import {
   Check,
@@ -68,6 +70,7 @@ export function StaffFormModal({
     photoChange: StaffPhotoChange,
   ) => Promise<void>;
 }) {
+  const text = usePlatformText();
   const [form, setForm] = useState<StaffProfileInput>(() => initialForm(member));
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [removePhoto, setRemovePhoto] = useState(false);
@@ -169,7 +172,7 @@ export function StaffFormModal({
             type="button"
             onClick={onClose}
             className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
-            aria-label="Close"
+            aria-label={text("Close")}
           >
             <X size={18} />
           </button>
@@ -216,7 +219,7 @@ export function StaffFormModal({
                         }}
                         className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-rose-600 transition hover:bg-rose-50"
                       >
-                        <Trash2 size={15} /> Remove
+                        <Trash2 size={15} /> {text("Remove")}
                       </button>
                     ) : null}
                   </div>
@@ -228,7 +231,7 @@ export function StaffFormModal({
             </div>
 
             <label className="sm:col-span-2 text-sm font-medium text-slate-700">
-              Full name
+              {text("Full name")}
               <input
                 required
                 maxLength={255}
@@ -289,7 +292,7 @@ export function StaffFormModal({
             </label>
 
             <label className="text-sm font-medium text-slate-700">
-              Email
+              {text("Email")}
               <input
                 type="email"
                 value={form.email ?? ""}
@@ -440,7 +443,7 @@ export function StaffFormModal({
             disabled={saving}
             className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
           >
-            Cancel
+            {text("Cancel")}
           </button>
           <button
             type="submit"
@@ -448,7 +451,7 @@ export function StaffFormModal({
             className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:from-violet-700 hover:to-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {saving ? <Loader2 size={16} className="animate-spin" /> : null}
-            {member ? "Save changes" : "Add staff member"}
+            {member ? text("Save changes") : "Add staff member"}
           </button>
         </footer>
       </form>

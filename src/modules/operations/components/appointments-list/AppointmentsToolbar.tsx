@@ -1,4 +1,6 @@
 "use client";
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { CalendarDays, Check, ChevronDown, Search } from "lucide-react";
 import { useState } from "react";
 export type SortMode = "soonest" | "latest" | "customer" | "status";
@@ -76,6 +78,7 @@ export function AppointmentsToolbar({
   onStatusFilterChange,
   onSortChange,
 }: Props) {
+  const text = usePlatformText();
   return (
     <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
       <div className="flex flex-wrap items-center gap-2">
@@ -98,11 +101,11 @@ export function AppointmentsToolbar({
           />
         </label>
         <FilterDropdown
-          label="All staff"
+          label={text("All staff")}
           value={staffFilter}
           onChange={onStaffFilterChange}
           options={[
-            { value: "all", label: "All staff" },
+            { value: "all", label: text("All staff") },
             ...staff.map((member) => ({
               value: member.id,
               label: member.name,
@@ -110,28 +113,28 @@ export function AppointmentsToolbar({
           ]}
         />
         <FilterDropdown
-          label="All statuses"
+          label={text("All statuses")}
           value={statusFilter}
           onChange={onStatusFilterChange}
           options={[
-            { value: "all", label: "All statuses" },
-            { value: "pending", label: "Pending" },
-            { value: "confirmed", label: "Confirmed" },
-            { value: "in_progress", label: "In progress" },
-            { value: "no_show", label: "No-show" },
-            { value: "completed", label: "Completed" },
-            { value: "cancelled", label: "Cancelled" },
+            { value: "all", label: text("All statuses") },
+            { value: "pending", label: text("Pending") },
+            { value: "confirmed", label: text("Confirmed") },
+            { value: "in_progress", label: text("In progress") },
+            { value: "no_show", label: text("No-show") },
+            { value: "completed", label: text("Completed") },
+            { value: "cancelled", label: text("Cancelled") },
           ]}
         />
         <FilterDropdown
-          label="Soonest first"
+          label={text("Soonest first")}
           value={sort}
           onChange={(value) => onSortChange(value as SortMode)}
           options={[
-            { value: "soonest", label: "Soonest first" },
-            { value: "latest", label: "Latest first" },
-            { value: "customer", label: "Customer name" },
-            { value: "status", label: "Status" },
+            { value: "soonest", label: text("Soonest first") },
+            { value: "latest", label: text("Latest first") },
+            { value: "customer", label: text("Customer name") },
+            { value: "status", label: text("Status") },
           ]}
         />
       </div>

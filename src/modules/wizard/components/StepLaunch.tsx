@@ -1,5 +1,7 @@
 "use client";
 
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { BarChart3, CalendarCheck2, Check, Link2, Rocket, ShieldCheck } from "lucide-react";
@@ -9,17 +11,18 @@ import { submitOnboarding } from "../wizard.api";
 import { LivePreviewPane } from "./LivePreviewPane";
 
 export function StepLaunch({ onBack }: StepProps) {
+  const text = usePlatformText();
   const { state } = useWizard();
   const router = useRouter();
   const [publishing, setPublishing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const checklist = [
-    ["Business profile", Boolean(state.name && state.phone && state.slug)],
-    ["Services", state.services.length > 0],
+    [text("Business profile"), Boolean(state.name && state.phone && state.slug)],
+    [text("Services"), state.services.length > 0],
     ["Team", state.staff.length > 0],
-    ["Availability", state.staff.some((member) => member.availability.length > 0)],
-    ["Website", Boolean(state.template)],
+    [text("Availability"), state.staff.some((member) => member.availability.length > 0)],
+    [text("Website"), Boolean(state.template)],
   ] as const;
   const readiness = Math.round((checklist.filter(([, complete]) => complete).length / checklist.length) * 100);
 
@@ -39,7 +42,7 @@ export function StepLaunch({ onBack }: StepProps) {
   return (
     <div>
       <div className="onboarding-page-intro">
-        <p className="onboarding-kicker">Launch</p>
+        <p className="onboarding-kicker">{text("Launch")}</p>
         <h1 className="onboarding-page-title">Everything in one final view.</h1>
         <p className="onboarding-page-copy">Review the business, website, and booking setup before customers see it.</p>
       </div>
@@ -68,7 +71,7 @@ export function StepLaunch({ onBack }: StepProps) {
               <div className="onboarding-table mt-3">
                 <SummaryRow label="Business URL" value={`systemly.app/${state.slug || "your-business"}`} />
                 <SummaryRow label="Industry" value={state.vertical || "Not selected"} />
-                <SummaryRow label="Template" value={state.template || "Not selected"} />
+                <SummaryRow label={text("Template")} value={state.template || "Not selected"} />
                 <SummaryRow label="Online booking" value="Enabled" />
               </div>
             </div>

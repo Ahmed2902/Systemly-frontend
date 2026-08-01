@@ -1,5 +1,7 @@
 "use client";
 
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { useMemo, useState } from "react";
 import { CalendarDays, Clock3, Globe2, UserRoundCheck } from "lucide-react";
 import { useWizard } from "../wizard.context";
@@ -8,6 +10,7 @@ import { StepProps } from "../wizard.types";
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 export function StepAssignments({ onNext, onBack }: StepProps) {
+  const text = usePlatformText();
   const { state, patch } = useWizard();
   const [selectedStaffId, setSelectedStaffId] = useState(state.staff[0]?.clientId ?? "");
   const selectedStaff = state.staff.find((member) => member.clientId === selectedStaffId) ?? state.staff[0];
@@ -47,7 +50,7 @@ export function StepAssignments({ onNext, onBack }: StepProps) {
   return (
     <div>
       <div className="onboarding-page-intro">
-        <p className="onboarding-kicker">Availability</p>
+        <p className="onboarding-kicker">{text("Availability")}</p>
         <h1 className="onboarding-page-title">Set the rhythm of the week.</h1>
         <p className="onboarding-page-copy">Choose each team member and define the hours customers can book with them.</p>
       </div>
@@ -84,7 +87,7 @@ export function StepAssignments({ onNext, onBack }: StepProps) {
                       <span className="text-[var(--onboarding-muted)]">to</span>
                       <input type="time" value={slot.endTime} onChange={(event) => updateHours(dayOfWeek, "endTime", event.target.value)} className="onboarding-input" aria-label={`${day} end time`} />
                     </div>
-                  ) : <span className="text-sm text-[var(--onboarding-muted)]">Closed</span>}
+                  ) : <span className="text-sm text-[var(--onboarding-muted)]">{text("Closed")}</span>}
                 </div>
               );
             })}
@@ -110,7 +113,7 @@ export function StepAssignments({ onNext, onBack }: StepProps) {
 
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <div className="rounded-2xl border border-[var(--onboarding-border)] p-4"><Clock3 className="text-[var(--onboarding-mint)]" size={18} /><h3 className="mt-2 text-sm font-semibold">Booking policies</h3><div className="mt-2 space-y-1.5 text-xs text-[var(--onboarding-muted)]"><p>Minimum notice <span className="float-right font-semibold text-[var(--onboarding-text)]">2 hours</span></p><p>Advance booking <span className="float-right font-semibold text-[var(--onboarding-text)]">30 days</span></p></div></div>
-            <div className="rounded-2xl border border-[var(--onboarding-border)] p-4"><Globe2 className="text-[var(--onboarding-mint)]" size={18} /><h3 className="mt-2 text-sm font-semibold">Timezone</h3><p className="mt-2 text-xs">Cairo, Egypt (GMT+2)</p><p className="mt-1 text-[11px] text-[var(--onboarding-muted)]">All booking times use this timezone.</p></div>
+            <div className="rounded-2xl border border-[var(--onboarding-border)] p-4"><Globe2 className="text-[var(--onboarding-mint)]" size={18} /><h3 className="mt-2 text-sm font-semibold">{text("Timezone")}</h3><p className="mt-2 text-xs">Cairo, Egypt (GMT+2)</p><p className="mt-1 text-[11px] text-[var(--onboarding-muted)]">All booking times use this timezone.</p></div>
           </div>
         </section>
       </div>

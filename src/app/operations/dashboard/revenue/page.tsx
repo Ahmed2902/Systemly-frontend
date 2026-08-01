@@ -1,5 +1,7 @@
 "use client";
 
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/modules/auth/useAuth";
 import { getRevenueAnalytics } from "@/modules/analytics/analytics.api";
@@ -27,6 +29,7 @@ import {
 } from "@/modules/analytics/analytics.formatters";
 
 export default function RevenueAnalyticsPage() {
+  const text = usePlatformText();
   const { accessToken } = useAuth();
   const preset = useAnalyticsPreset();
   const [data, setData] = useState<RevenueAnalytics | null>(null);
@@ -72,7 +75,7 @@ export default function RevenueAnalyticsPage() {
               emoji="↗"
             />
             <MetricCard
-              label="Paid invoices"
+              label={text("Paid invoices")}
               value={String(data.summary.paidInvoiceCount)}
               hint="Successfully settled invoices"
               emoji="🧾"
@@ -127,10 +130,10 @@ export default function RevenueAnalyticsPage() {
                 label: shortDate(row.bucket),
                 value: row.totalCents,
                 tooltip: [
-                  { label: "Paid invoices", value: String(row.invoiceCount) },
+                  { label: text("Paid invoices"), value: String(row.invoiceCount) },
                 ],
               }))}
-              valueLabel="Revenue"
+              valueLabel={text("Revenue")}
               formatValue={formatEgp}
               formatAxisValue={formatEgp}
               height={285}
@@ -195,7 +198,7 @@ export default function RevenueAnalyticsPage() {
                     label: row.description,
                     value: row.totalCents,
                     tooltip: [
-                      { label: "Revenue", value: formatEgp(row.totalCents) },
+                      { label: text("Revenue"), value: formatEgp(row.totalCents) },
                       { label: "Quantity", value: String(row.quantity) },
                     ],
                   }))}
@@ -211,7 +214,7 @@ export default function RevenueAnalyticsPage() {
                 labels={data.trend.map((row) => shortDate(row.bucket))}
                 series={[
                   {
-                    name: "Paid invoices",
+                    name: text("Paid invoices"),
                     colour: "var(--op-success)",
                     values: data.trend.map((row) => row.invoiceCount),
                     formatValue: (value) => String(Math.round(value)),
@@ -237,8 +240,8 @@ export default function RevenueAnalyticsPage() {
                 label: WEEKDAYS[row.weekday],
                 value: row.totalCents,
                 tooltip: [
-                  { label: "Revenue", value: formatEgp(row.totalCents) },
-                  { label: "Paid invoices", value: String(row.invoiceCount) },
+                  { label: text("Revenue"), value: formatEgp(row.totalCents) },
+                  { label: text("Paid invoices"), value: String(row.invoiceCount) },
                 ],
               }))}
               formatValue={formatEgp}

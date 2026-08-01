@@ -1,5 +1,7 @@
 "use client";
 
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CalendarDays, RefreshCw, Search } from "lucide-react";
 import { useAuth } from "@/modules/auth/useAuth";
@@ -45,6 +47,7 @@ const paymentOptions = [
 ];
 
 export default function InvoiceWorkspaceScreen() {
+  const text = usePlatformText();
   const { accessToken, loading: authLoading } = useAuth();
   const { notifyMutation } = useOperations();
   const [catalog, setCatalog] = useState<InvoiceListResponse | null>(null);
@@ -88,7 +91,7 @@ export default function InvoiceWorkspaceScreen() {
         );
         setError(null);
       } catch (caught: unknown) {
-        setError(caught instanceof Error ? caught.message : "Unable to load invoices");
+        setError(caught instanceof Error ? caught.message : text("Unable to load invoices"));
       } finally {
         setLoading(false);
         setRefreshing(false);
@@ -174,7 +177,7 @@ export default function InvoiceWorkspaceScreen() {
     return (
       <OperationsPage>
         <OperationsPageInner className="flex min-h-full items-center justify-center">
-          <OperationsState loading title="Loading invoices" description="Preparing payments and receipts." />
+          <OperationsState loading title={text("Loading invoices")} description="Preparing payments and receipts." />
         </OperationsPageInner>
       </OperationsPage>
     );
@@ -184,12 +187,12 @@ export default function InvoiceWorkspaceScreen() {
     <OperationsPage>
       <OperationsPageInner>
         <OperationsPageHeader
-          eyebrow="Management / Invoices"
-          title="Invoices"
+          eyebrow={text("Management / Invoices")}
+          title={text("Invoices")}
           description="Review completed payments, download receipts, and safely void invoices."
           actions={
             <button type="button" className="op-button" disabled={refreshing} onClick={() => void loadList(true)}>
-              <RefreshCw size={15} className={refreshing ? "animate-spin" : ""} /> Refresh
+              <RefreshCw size={15} className={refreshing ? "animate-spin" : ""} /> {text("Refresh")}
             </button>
           }
         />
@@ -215,7 +218,7 @@ export default function InvoiceWorkspaceScreen() {
               value={paymentMethod}
               options={paymentOptions}
               onChange={(value) => setPaymentMethod(value as PaymentMethod | "")}
-              aria-label="Payment method"
+              aria-label={text("Payment method")}
             />
             <label className="relative">
               <CalendarDays className="pointer-events-none absolute left-3 top-3 text-[var(--op-text-muted)]" size={15} />
@@ -255,7 +258,7 @@ export default function InvoiceWorkspaceScreen() {
 
         <div className="mb-3 flex items-center justify-between text-xs text-[var(--op-text-muted)]">
           <span>{visibleTotal} invoice{visibleTotal === 1 ? "" : "s"}</span>
-          {loading || refreshing ? <span>Refreshing…</span> : null}
+          {loading || refreshing ? <span>{text("Refreshing…")}</span> : null}
         </div>
 
         <div className="grid items-start gap-3 xl:grid-cols-[minmax(0,1fr)_25rem] [&>section]:border-[var(--op-border)] [&>section]:bg-[var(--op-surface)] [&>section]:shadow-[var(--op-shadow)]">

@@ -1,5 +1,7 @@
 "use client";
 
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { ExternalLink, ImagePlus, Save, Trash2 } from "lucide-react";
 import { useAuth } from "@/modules/auth/useAuth";
@@ -51,6 +53,7 @@ function textOrNull(value: string) {
 }
 
 export function SettingsScreen() {
+  const text = usePlatformText();
   const { user, accessToken, loading: authLoading } = useAuth();
   const { notifyMutation } = useOperations();
   const [workspace, setWorkspace] = useState<SettingsWorkspace | null>(null);
@@ -62,7 +65,7 @@ export function SettingsScreen() {
   const [success, setSuccess] = useState<string | null>(null);
 
   const canManage =
-    user?.role === "BusinessAdmin" || user?.role === "SuperAdmin";
+    user?.role === text("BusinessAdmin") || user?.role === text("SuperAdmin");
 
   const load = useCallback(async () => {
     if (!accessToken || !canManage) return;
@@ -81,7 +84,7 @@ export function SettingsScreen() {
       setWebsite({ ...EMPTY_WEBSITE, ...(data.websiteContent ?? {}) });
       setError(null);
     } catch (cause) {
-      setError(errorMessage(cause, "Unable to load settings"));
+      setError(errorMessage(cause, text("Unable to load settings")));
     } finally {
       setLoading(false);
     }
@@ -105,7 +108,7 @@ export function SettingsScreen() {
       await action();
       notifyMutation({ scope: "settings", entityId: workspace?.id });
       await load();
-      setSuccess("Settings saved successfully.");
+      setSuccess(text("Settings saved successfully."));
     } catch (cause) {
       setError(errorMessage(cause, "Unable to save settings"));
     } finally {
@@ -130,7 +133,7 @@ export function SettingsScreen() {
     return (
       <OperationsPage>
         <OperationsPageInner className="flex min-h-full items-center justify-center">
-          <OperationsState loading title="Loading settings" />
+          <OperationsState loading title={text("Loading settings")} />
         </OperationsPageInner>
       </OperationsPage>
     );
@@ -163,8 +166,8 @@ export function SettingsScreen() {
     <OperationsPage>
       <OperationsPageInner className="max-w-[1180px]">
         <OperationsPageHeader
-          eyebrow="Business / Settings"
-          title="Settings"
+          eyebrow={text("Business / Settings")}
+          title={text("Settings")}
           description="Manage the business identity, branding, generated website, and publishing status."
           actions={
             workspace.isActive ? (
@@ -180,7 +183,7 @@ export function SettingsScreen() {
 
         <div className="space-y-4">
           <SettingsSection
-            title="Business profile"
+            title={text("Business profile")}
             description="Used across Operations, receipts, notifications, and the public website."
             action={
               <button
@@ -193,11 +196,11 @@ export function SettingsScreen() {
             }
           >
             <div className="grid gap-4 md:grid-cols-2">
-              <Field label="Business name"><input className="op-input" value={business.name} onChange={(event) => setBusiness({ ...business, name: event.target.value })} /></Field>
+              <Field label={text("Business name")}><input className="op-input" value={business.name} onChange={(event) => setBusiness({ ...business, name: event.target.value })} /></Field>
               <Field label="Phone"><input className="op-input" value={business.phone} onChange={(event) => setBusiness({ ...business, phone: event.target.value })} /></Field>
-              <Field label="Address"><input className="op-input" value={business.address ?? ""} onChange={(event) => setBusiness({ ...business, address: textOrNull(event.target.value) })} /></Field>
-              <Field label="City"><input className="op-input" value={business.city ?? ""} onChange={(event) => setBusiness({ ...business, city: textOrNull(event.target.value) })} /></Field>
-              <Field label="Timezone">
+              <Field label={text("Address")}><input className="op-input" value={business.address ?? ""} onChange={(event) => setBusiness({ ...business, address: textOrNull(event.target.value) })} /></Field>
+              <Field label={text("City")}><input className="op-input" value={business.city ?? ""} onChange={(event) => setBusiness({ ...business, city: textOrNull(event.target.value) })} /></Field>
+              <Field label={text("Timezone")}>
                 <select className="op-select" value={business.timezone} onChange={(event) => setBusiness({ ...business, timezone: event.target.value })}>
                   <option value="Africa/Cairo">Africa/Cairo</option>
                   <option value="UTC">UTC</option>
@@ -205,8 +208,8 @@ export function SettingsScreen() {
               </Field>
               <Field label="Default language">
                 <select className="op-select" value={business.language} onChange={(event) => setBusiness({ ...business, language: event.target.value as "en" | "ar" })}>
-                  <option value="en">English</option>
-                  <option value="ar">Arabic</option>
+                  <option value="en">{text("English")}</option>
+                  <option value="ar">{text("Arabic")}</option>
                 </select>
               </Field>
             </div>
@@ -244,7 +247,7 @@ export function SettingsScreen() {
                           onClick={() => void run(`remove-${kind}`, () => removeBrandingImage(kind, accessToken!))}
                           className="op-button op-button-danger"
                         >
-                          <Trash2 size={15} /> Remove
+                          <Trash2 size={15} /> {text("Remove")}
                         </button>
                       ) : null}
                     </div>
@@ -255,7 +258,7 @@ export function SettingsScreen() {
           </SettingsSection>
 
           <SettingsSection
-            title="Public website"
+            title={text("Public website")}
             description="Control the content and appearance of the generated salon or clinic website."
             action={
               <button
@@ -268,9 +271,9 @@ export function SettingsScreen() {
             }
           >
             <div className="grid gap-4 md:grid-cols-2">
-              <Field label="Tagline" className="md:col-span-2"><input className="op-input" value={website.tagline ?? ""} onChange={(event) => setWebsite({ ...website, tagline: textOrNull(event.target.value) })} /></Field>
+              <Field label={text("Tagline")} className="md:col-span-2"><input className="op-input" value={website.tagline ?? ""} onChange={(event) => setWebsite({ ...website, tagline: textOrNull(event.target.value) })} /></Field>
               <Field label="About" className="md:col-span-2"><textarea rows={5} className="op-input min-h-32 resize-y" value={website.aboutText ?? ""} onChange={(event) => setWebsite({ ...website, aboutText: textOrNull(event.target.value) })} /></Field>
-              <Field label="Template">
+              <Field label={text("Template")}>
                 <select className="op-select" value={website.template ?? (user?.vertical === "clinic" ? "clinic-clarity" : "aura-wellness")} onChange={(event) => setWebsite({ ...website, template: event.target.value })}>
                   <option value="aura-wellness">Aura Wellness — Salon</option>
                   <option value="clinic-clarity">Clinic Clarity — Clinic</option>

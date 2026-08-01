@@ -1,5 +1,7 @@
 "use client";
 
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -64,6 +66,7 @@ function dateLabel(value: string) {
 }
 
 export default function StaffProfileScreen({ staffId }: { staffId: string }) {
+  const text = usePlatformText();
   const { accessToken, loading: authLoading } = useAuth();
   const [workspace, setWorkspace] = useState<StaffWorkspaceResponse | null>(null);
   const [tab, setTab] = useState<Tab>("overview");
@@ -169,7 +172,7 @@ export default function StaffProfileScreen({ staffId }: { staffId: string }) {
                 <div className="flex flex-wrap items-center gap-2">
                   <h1 className="text-3xl font-bold tracking-tight text-slate-950">{workspace.staff.name}</h1>
                   <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${workspace.staff.isActive ? "bg-emerald-100 text-emerald-700" : "bg-slate-200 text-slate-600"}`}>
-                    {workspace.staff.isActive ? "Active" : "Inactive"}
+                    {workspace.staff.isActive ? text("Active") : text("Inactive")}
                   </span>
                 </div>
                 <p className="mt-1 text-sm text-slate-500">
@@ -195,7 +198,7 @@ export default function StaffProfileScreen({ staffId }: { staffId: string }) {
             ["services", "Services & commission"],
             ["schedule", "Weekly schedule"],
             ["time-off", "Breaks & time off"],
-            ["appointments", "Appointments"],
+            ["appointments", text("Appointments")],
           ] as Array<[Tab, string]>).map(([value, label]) => (
             <button key={value} type="button" onClick={() => setTab(value)} className={`shrink-0 rounded-xl px-4 py-2.5 text-sm font-semibold transition ${tab === value ? "bg-violet-600 text-white shadow-sm" : "text-slate-600 hover:bg-violet-50 hover:text-violet-700"}`}>
               {label}

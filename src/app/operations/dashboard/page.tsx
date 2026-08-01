@@ -1,5 +1,7 @@
 "use client";
 
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import Link from "next/link";
 import { useEffect, useState, type ReactNode } from "react";
 import { AlertTriangle, CheckCircle2, UsersRound } from "lucide-react";
@@ -26,6 +28,7 @@ import {
 } from "@/modules/analytics/analytics.formatters";
 
 export default function DashboardOverviewPage() {
+  const text = usePlatformText();
   const { accessToken, user } = useAuth();
   const preset = useAnalyticsPreset();
   const [data, setData] = useState<DashboardAnalytics | null>(null);
@@ -68,7 +71,7 @@ export default function DashboardOverviewPage() {
               hint="Collected in the selected period"
             />
             <MetricCard
-              label="Paid invoices"
+              label={text("Paid invoices")}
               value={String(data.revenue.summary.paidInvoiceCount)}
               hint="Completed payments"
             />
@@ -118,10 +121,10 @@ export default function DashboardOverviewPage() {
                   ),
                   value: row.totalCents,
                   tooltip: [
-                    { label: "Paid invoices", value: String(row.invoiceCount) },
+                    { label: text("Paid invoices"), value: String(row.invoiceCount) },
                   ],
                 }))}
-                valueLabel="Revenue"
+                valueLabel={text("Revenue")}
                 formatValue={formatEgp}
                 formatAxisValue={formatEgp}
                 height={290}
@@ -212,7 +215,7 @@ export default function DashboardOverviewPage() {
                 label: row.name,
                 value: row.totalCents,
                 tooltip: [
-                  { label: "Revenue", value: formatEgp(row.totalCents) },
+                  { label: text("Revenue"), value: formatEgp(row.totalCents) },
                   { label: "Jobs", value: String(row.lineItemCount) },
                   {
                     label: "Utilisation",

@@ -1,5 +1,7 @@
 "use client";
 
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { useMemo, useState } from "react";
 import {
   Clock3,
@@ -26,6 +28,7 @@ function normalizeCategory(value: string) {
 }
 
 export function StepServicesStaff({ onNext, onBack }: StepProps) {
+  const text = usePlatformText();
   const { state, patch } = useWizard();
   const [error, setError] = useState<string | null>(null);
   const [attemptedSubmit, setAttemptedSubmit] = useState(false);
@@ -181,7 +184,7 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
     else if (
       state.staff.some(
         (member) =>
-          member.role !== "Receptionist" && member.serviceIds.length === 0,
+          member.role !== text("Receptionist") && member.serviceIds.length === 0,
       )
     )
       nextError = "Assign at least one service to every service provider";
@@ -222,7 +225,7 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
             <div className="onboarding-section-heading-main">
               <div>
                 <p className="onboarding-section-number">01</p>
-                <h2>Services</h2>
+                <h2>{text("Services")}</h2>
                 <p>Set the name, duration, price, and optional category.</p>
               </div>
               <div className="onboarding-services-summary" aria-label="Service summary">
@@ -243,7 +246,7 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
               }
             >
               <Plus size={16} />
-              Add service
+              {text("Add service")}
             </button>
           </div>
 
@@ -257,7 +260,7 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
                   </span>
 
                   <label className="onboarding-field onboarding-service-name-field">
-                    <span>Service name</span>
+                    <span>{text("Service name")}</span>
                     <input
                       value={service.name}
                       onChange={(event) =>
@@ -316,7 +319,7 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
                   </label>
 
                   <label className="onboarding-field onboarding-service-category-field">
-                    <span>Category</span>
+                    <span>{text("Category")}</span>
                     <input
                       value={service.category || ""}
                       onChange={(event) =>
@@ -362,7 +365,7 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
                   className="onboarding-secondary-button"
                 >
                   <Plus size={16} />
-                  Add service
+                  {text("Add service")}
                 </button>
               </div>
             ) : null}
@@ -414,7 +417,7 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
           <div className="onboarding-team-list">
             {state.staff.map((member, index) => {
               const missingName = attemptedSubmit && !member.name.trim();
-              const isReceptionist = member.role === "Receptionist";
+              const isReceptionist = member.role === text("Receptionist");
               const missingServices =
                 attemptedSubmit &&
                 !isReceptionist &&
@@ -488,7 +491,7 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
                               name: event.target.value,
                             })
                           }
-                          placeholder="Team member name"
+                          placeholder={text("Team member name")}
                           className={`onboarding-input ${missingName ? "is-invalid" : ""}`}
                           data-onboarding-invalid={
                             missingName ? "true" : undefined
@@ -503,7 +506,7 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
                       </label>
 
                       <div className="onboarding-role-picker">
-                        <span>Role</span>
+                        <span>{text("Role")}</span>
                         <div>
                           {STAFF_ROLE_OPTIONS.map((role) => (
                             <button
@@ -580,7 +583,7 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
                               [member.clientId]: event.target.value,
                             }))
                           }
-                          placeholder="Search services"
+                          placeholder={text("Search services")}
                           aria-label={`Search services for ${member.name || "team member"}`}
                         />
                       </label>

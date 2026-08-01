@@ -1,5 +1,7 @@
 "use client";
 
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { useEffect, useRef, useState } from "react";
 import type {
   AppointmentSummary,
@@ -218,6 +220,7 @@ export function AppointmentEditPanel({
   onUncancel,
   onMarkNoShow,
 }: Props) {
+  const text = usePlatformText();
   const [draft, setDraft] = useState<AppointmentSummary>(appointment);
   const [saving, setSaving] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -598,7 +601,7 @@ export function AppointmentEditPanel({
         <button
           onClick={onClose}
           className="rounded-full p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
-          aria-label="Close"
+          aria-label={text("Close")}
         >
           ✕
         </button>
@@ -639,10 +642,10 @@ export function AppointmentEditPanel({
                   value={draft.status}
                   disabled={Boolean(action)}
                   options={[
-                    { value: "pending", label: "Pending" },
-                    { value: "confirmed", label: "Confirmed" },
-                    { value: "in_progress", label: "In progress" },
-                    { value: "no_show", label: "No-show" },
+                    { value: "pending", label: text("Pending") },
+                    { value: "confirmed", label: text("Confirmed") },
+                    { value: "in_progress", label: text("In progress") },
+                    { value: "no_show", label: text("No-show") },
                   ]}
                   onChange={(value) => {
                     const status = value as AppointmentSummary["status"];
@@ -665,9 +668,9 @@ export function AppointmentEditPanel({
                   }}
                   className="hidden"
                 >
-                  <option value="pending">Pending</option>
-                  <option value="confirmed">Confirmed</option>
-                  <option value="no_show">No-show</option>
+                  <option value="pending">{text("Pending")}</option>
+                  <option value="confirmed">{text("Confirmed")}</option>
+                  <option value="no_show">{text("No-show")}</option>
                 </select>
               </>
             ) : (
@@ -894,10 +897,10 @@ export function AppointmentEditPanel({
             </h3>
             <div className="overflow-hidden rounded-2xl border border-slate-200">
               <div className="grid grid-cols-[minmax(0,1fr)_5.5rem_3.5rem_5.5rem_2rem] gap-2 border-b border-slate-200 bg-slate-50 px-3 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-                <span>Description</span>
-                <span className="text-right">Price</span>
+                <span>{text("Description")}</span>
+                <span className="text-right">{text("Price")}</span>
                 <span className="text-right">Qty</span>
-                <span className="text-right">Total</span>
+                <span className="text-right">{text("Total")}</span>
                 <span className="w-8" />
               </div>
               {draft.customItems.map((item) => (
@@ -1110,7 +1113,7 @@ export function AppointmentEditPanel({
               </div>
               <div className="space-y-2 border-t border-slate-100 pt-3">
                 <span className="block text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  Payment method
+                  {text("Payment method")}
                 </span>
                 <StyledDropdown
                   value={paymentMethod}
@@ -1122,7 +1125,7 @@ export function AppointmentEditPanel({
                 />
               </div>
               <div className="flex justify-between border-t border-slate-200 pt-3 text-base font-semibold text-slate-950">
-                <span>Total</span>
+                <span>{text("Total")}</span>
                 <span>{formatMoney(total)}</span>
               </div>
             </div>
@@ -1139,7 +1142,7 @@ export function AppointmentEditPanel({
             }
             className="w-full rounded-2xl bg-blue-600 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50"
           >
-            {saving ? "Saving…" : "Save Changes"}
+            {saving ? text("Saving…") : "Save Changes"}
           </button>
         )}
 

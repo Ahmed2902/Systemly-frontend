@@ -1,5 +1,7 @@
 "use client";
 
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { LucideIcon } from "lucide-react";
@@ -52,13 +54,14 @@ export function Sidebar({
   open?: boolean;
   onClose?: () => void;
 }) {
+  const text = usePlatformText();
   const pathname = usePathname();
   const { user } = useAuth();
   const copy = usePlatformCopy().operations.shell;
   const { openNewAppointment } = useOperations();
   const { theme, toggleTheme } = useOperationsTheme();
   const ownerView =
-    user?.role === "BusinessAdmin" || user?.role === "SuperAdmin";
+    user?.role === text("BusinessAdmin") || user?.role === text("SuperAdmin");
 
   const navGroups: NavGroup[] = [
     {

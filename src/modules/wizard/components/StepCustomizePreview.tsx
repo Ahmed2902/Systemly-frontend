@@ -1,5 +1,7 @@
 "use client";
 
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { useState } from "react";
 import {
   Check,
@@ -29,6 +31,7 @@ const COLOURS = [
 ];
 
 export function StepCustomizePreview({ onNext, onBack }: StepProps) {
+  const text = usePlatformText();
   const { state, patch } = useWizard();
   const [device, setDevice] = useState<"desktop" | "mobile">("desktop");
   const [uploading, setUploading] = useState<string | null>(null);
@@ -72,7 +75,7 @@ export function StepCustomizePreview({ onNext, onBack }: StepProps) {
   return (
     <div className="onboarding-website-step">
       <div className="onboarding-page-intro">
-        <p className="onboarding-kicker">Public website</p>
+        <p className="onboarding-kicker">{text("Public website")}</p>
         <h1 className="onboarding-page-title">
           Make the customer experience yours.
         </h1>
@@ -94,7 +97,7 @@ export function StepCustomizePreview({ onNext, onBack }: StepProps) {
 
           <div className="mt-5 grid gap-5">
             <div className="onboarding-field">
-              <label>Template</label>
+              <label>{text("Template")}</label>
               <select
                 value={state.template}
                 onChange={(event) => patch({ template: event.target.value })}
@@ -135,7 +138,7 @@ export function StepCustomizePreview({ onNext, onBack }: StepProps) {
 
             <div className="grid gap-3 sm:grid-cols-2">
               <UploadTile
-                label="Logo"
+                label={text("Logo")}
                 value={state.logoUrl}
                 uploading={uploading === "logo"}
                 onUpload={(file) => upload("logo", file)}
@@ -398,6 +401,7 @@ function UploadTile({
   onUpload: (file?: File) => void;
   onClear: () => void;
 }) {
+  const text = usePlatformText();
   return (
     <div className="onboarding-field">
       <label>{label}</label>
@@ -416,7 +420,7 @@ function UploadTile({
           {uploading
             ? "Uploading…"
             : value
-              ? "Replace image"
+              ? text("Replace image")
               : `Upload ${label.toLowerCase()}`}
           <input
             type="file"

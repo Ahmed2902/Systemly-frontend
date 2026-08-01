@@ -1,5 +1,7 @@
 "use client";
 
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/modules/auth/useAuth";
 import { getStaffAnalytics } from "@/modules/analytics/analytics.api";
@@ -20,6 +22,7 @@ import {
 } from "@/modules/analytics/analytics.formatters";
 
 export default function StaffAnalyticsPage() {
+  const text = usePlatformText();
   const { accessToken } = useAuth();
   const preset = useAnalyticsPreset();
   const [data, setData] = useState<StaffAnalytics | null>(null);
@@ -96,9 +99,9 @@ export default function StaffAnalyticsPage() {
               <table className="analytics-table w-full min-w-[820px] text-left">
                 <thead>
                   <tr>
-                    <th className="pb-2">Staff</th>
+                    <th className="pb-2">{text("Staff")}</th>
                     <th className="pb-2">Service revenue</th>
-                    <th className="pb-2">Commission</th>
+                    <th className="pb-2">{text("Commission")}</th>
                     <th className="pb-2">Jobs</th>
                     <th className="pb-2">Utilisation</th>
                     <th className="pb-2">Booked</th>

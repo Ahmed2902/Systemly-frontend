@@ -1,5 +1,7 @@
 "use client";
 
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { useCallback, useEffect, useState } from "react";
 import {
   CalendarDays,
@@ -44,6 +46,7 @@ import { errorMessage } from "@/shared/lib/error-message";
 import type { PaymentMethod } from "@/modules/invoices/invoices.types";
 
 export default function CalendarPage() {
+  const text = usePlatformText();
   const { user, accessToken, loading: authLoading } = useAuth();
   const { openNewAppointment, notifyMutation } = useOperations();
   const timezone = user?.timezone || "Africa/Cairo";
@@ -75,7 +78,7 @@ export default function CalendarPage() {
         setDetailLoadedId(null);
         setError(null);
       } catch (cause: unknown) {
-        setError(errorMessage(cause, "Failed to load calendar"));
+        setError(errorMessage(cause, text("Failed to load calendar")));
       } finally {
         setLoading(false);
         setRefreshing(false);
@@ -89,17 +92,17 @@ export default function CalendarPage() {
   useEffect(() => {
     if (authLoading) return;
     if (!user) {
-      setError("Not signed in.");
+      setError(text("Not signed in."));
       setLoading(false);
       return;
     }
     if (!businessId) {
-      setError("No business is linked to this account.");
+      setError(text("No business is linked to this account."));
       setLoading(false);
       return;
     }
     if (!accessToken) {
-      setError("Missing access token.");
+      setError(text("Missing access token."));
       setLoading(false);
       return;
     }
@@ -127,7 +130,7 @@ export default function CalendarPage() {
       })
       .catch((cause: unknown) => {
         if (cancelled) return;
-        setError(errorMessage(cause, "Failed to load appointment details"));
+        setError(errorMessage(cause, text("Failed to load appointment details")));
         setSelectedId(null);
         setDetailLoadedId(null);
       });
@@ -152,7 +155,7 @@ export default function CalendarPage() {
     return (
       <div className="op-page">
         <div className="op-page-inner flex min-h-full items-center justify-center">
-          <OperationsState loading title="Loading calendar" description="Preparing staff schedules and appointments." />
+          <OperationsState loading title={text("Loading calendar")} description={text("Preparing staff schedules and appointments.")} />
         </div>
       </div>
     );
@@ -162,7 +165,7 @@ export default function CalendarPage() {
     return (
       <div className="op-page">
         <div className="op-page-inner flex min-h-full items-center justify-center">
-          <OperationsState title="Calendar unavailable" description={error ?? "Unable to load this workspace."} />
+          <OperationsState title={text("Calendar unavailable")} description={error ?? text("Unable to load this workspace.")} />
         </div>
       </div>
     );
@@ -172,9 +175,9 @@ export default function CalendarPage() {
     <div className="op-page overflow-hidden">
       <div className="flex h-full min-h-0 flex-col px-3 py-4 sm:px-5 lg:px-6">
         <OperationsPageHeader
-          eyebrow="Workspace / Calendar"
-          title="Daily schedule"
-          description="Manage staff availability, breaks, multi-service appointments, and payments from one timeline."
+          eyebrow={text("Workspace / Calendar")}
+          title={text("Daily schedule")}
+          description={text("Manage staff availability, breaks, multi-service appointments, and payments from one timeline.")}
           className="mb-3"
           actions={
             <>
@@ -185,14 +188,14 @@ export default function CalendarPage() {
                 disabled={refreshing}
               >
                 <RefreshCw size={15} className={refreshing ? "animate-spin" : ""} />
-                Refresh
+                {text("Refresh")}
               </button>
               <button
                 type="button"
                 className="op-button op-button-primary"
                 onClick={() => openNewAppointment()}
               >
-                <Plus size={15} /> New appointment
+                <Plus size={15} /> {text("New appointment")}
               </button>
             </>
           }
@@ -203,7 +206,7 @@ export default function CalendarPage() {
             <button
               type="button"
               className="op-icon-button h-8 w-8 border-0 bg-transparent"
-              aria-label="Previous day"
+              aria-label={text("Previous day")}
               onClick={() => setDate((current) => shift(current, -1))}
             >
               <ChevronLeft size={16} />
@@ -213,12 +216,12 @@ export default function CalendarPage() {
               className="op-button min-h-8 border-0 bg-transparent px-3"
               onClick={() => setDate(dateKeyInTimezone(new Date(), timezone))}
             >
-              Today
+              {text("Today")}
             </button>
             <button
               type="button"
               className="op-icon-button h-8 w-8 border-0 bg-transparent"
-              aria-label="Next day"
+              aria-label={text("Next day")}
               onClick={() => setDate((current) => shift(current, 1))}
             >
               <ChevronRight size={16} />
@@ -237,7 +240,7 @@ export default function CalendarPage() {
             className="mb-3"
             action={
               <button type="button" className="op-button" onClick={() => void loadWorkspace(selectedId, true)}>
-                Retry
+                {text("Retry")}
               </button>
             }
           >
@@ -263,7 +266,7 @@ export default function CalendarPage() {
 
               {selected && !selectedDetail ? (
                 <aside className="hidden w-[420px] flex-none items-center justify-center rounded-[13px] border border-[var(--op-border)] bg-[var(--op-surface)] text-sm text-[var(--op-text-muted)] shadow-[var(--op-shadow)] xl:flex">
-                  Loading appointment…
+                  {text("Loading appointment…")}
                 </aside>
               ) : null}
 
@@ -338,7 +341,7 @@ export default function CalendarPage() {
               ) : null}
             </div>
           ) : (
-            <OperationsState title="No calendar data" description="Retry loading the selected day." />
+            <OperationsState title={text("No calendar data")} description={text("Retry loading the selected day.")} />
           )}
         </div>
       </div>

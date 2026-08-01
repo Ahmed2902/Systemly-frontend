@@ -1,5 +1,7 @@
 "use client";
 
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -11,6 +13,7 @@ import { useAuth } from "../useAuth";
 type VerificationState = "loading" | "success" | "error";
 
 export function VerifyEmailPanel() {
+  const text = usePlatformText();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { setSession } = useAuth();
@@ -64,7 +67,7 @@ export function VerifyEmailPanel() {
       {state === "error" ? (
         <>
           <Link href="/resend-verification" className="auth-primary-button">Send a new verification link</Link>
-          <Link href="/login" className="auth-secondary-button">Back to login</Link>
+          <Link href="/login" className="auth-secondary-button">{text("Back to login")}</Link>
         </>
       ) : null}
     </div>

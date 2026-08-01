@@ -1,5 +1,7 @@
 "use client";
 
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/modules/auth/useAuth";
 import { getCustomerAnalytics } from "@/modules/analytics/analytics.api";
@@ -20,6 +22,7 @@ import {
 } from "@/modules/analytics/analytics.formatters";
 
 export default function CustomerAnalyticsPage() {
+  const text = usePlatformText();
   const { accessToken } = useAuth();
   const preset = useAnalyticsPreset();
   const [data, setData] = useState<CustomerAnalytics | null>(null);
@@ -63,7 +66,7 @@ export default function CustomerAnalyticsPage() {
               emoji="＋"
             />
             <MetricCard
-              label="Returning customers"
+              label={text("Returning customers")}
               value={String(data.summary.returningCustomers)}
               hint="Customers who booked again"
               emoji="↻"
@@ -96,13 +99,13 @@ export default function CustomerAnalyticsPage() {
                 labels={data.newVsReturning.map((row) => shortDate(row.bucket))}
                 series={[
                   {
-                    name: "New",
+                    name: text("New"),
                     values: data.newVsReturning.map((row) => row.newCustomers),
                     colour: "#2563eb",
                     formatValue: (value) => String(Math.round(value)),
                   },
                   {
-                    name: "Returning",
+                    name: text("Returning"),
                     values: data.newVsReturning.map(
                       (row) => row.returningCustomers,
                     ),
@@ -138,7 +141,7 @@ export default function CustomerAnalyticsPage() {
                 labels={data.noShowRate.map((row) => shortDate(row.bucket))}
                 series={[
                   {
-                    name: "No-shows",
+                    name: text("No-shows"),
                     values: data.noShowRate.map((row) => row.noShowCount),
                     colour: "#b45309",
                     formatValue: (value) => String(Math.round(value)),
@@ -217,9 +220,9 @@ export default function CustomerAnalyticsPage() {
                 <table className="analytics-table w-full min-w-[560px] text-left">
                   <thead>
                     <tr>
-                      <th className="pb-2">Customer</th>
+                      <th className="pb-2">{text("Customer")}</th>
                       <th className="pb-2">Spend</th>
-                      <th className="pb-2">Invoices</th>
+                      <th className="pb-2">{text("Invoices")}</th>
                       <th className="pb-2">Average</th>
                     </tr>
                   </thead>

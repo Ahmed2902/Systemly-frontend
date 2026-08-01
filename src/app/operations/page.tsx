@@ -1,10 +1,13 @@
 "use client";
 
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/modules/auth/useAuth";
 
 export default function OperationsIndexPage() {
+  const text = usePlatformText();
   const router = useRouter();
   const { user, loading } = useAuth();
 
@@ -21,7 +24,7 @@ export default function OperationsIndexPage() {
       return;
     }
 
-    const isOwner = user.role === "BusinessAdmin" || user.role === "SuperAdmin";
+    const isOwner = user.role === text("BusinessAdmin") || user.role === text("SuperAdmin");
     router.replace(isOwner ? "/operations/dashboard" : "/operations/calendar");
   }, [loading, router, user]);
 

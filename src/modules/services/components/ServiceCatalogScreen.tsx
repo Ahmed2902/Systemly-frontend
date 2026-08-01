@@ -1,5 +1,7 @@
 "use client";
 
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Activity,
@@ -42,6 +44,7 @@ import { ServiceFormModal } from "./ServiceFormModal";
 import { ServicesTable } from "./ServicesTable";
 
 export default function ServiceCatalogScreen() {
+  const text = usePlatformText();
   const { accessToken, loading: authLoading } = useAuth();
   const { notifyMutation } = useOperations();
   const [catalog, setCatalog] = useState<ServiceCatalogResponse | null>(null);
@@ -78,7 +81,7 @@ export default function ServiceCatalogScreen() {
         );
         setError(null);
       } catch (caught: unknown) {
-        setError(caught instanceof Error ? caught.message : "Unable to load services");
+        setError(caught instanceof Error ? caught.message : text("Unable to load services"));
       } finally {
         setLoading(false);
         setRefreshing(false);
@@ -107,9 +110,9 @@ export default function ServiceCatalogScreen() {
     [catalog?.categories],
   );
   const statusOptions = [
-    { value: "all", label: "All statuses" },
-    { value: "active", label: "Active", tone: "active" as const },
-    { value: "inactive", label: "Inactive", tone: "inactive" as const },
+    { value: "all", label: text("All statuses") },
+    { value: "active", label: text("Active"), tone: "active" as const },
+    { value: "inactive", label: text("Inactive"), tone: "inactive" as const },
   ];
 
   const openCreate = () => {
@@ -196,16 +199,16 @@ export default function ServiceCatalogScreen() {
     <OperationsPage>
       <OperationsPageInner>
         <OperationsPageHeader
-          eyebrow="Management / Services"
+          eyebrow={text("Management / Services")}
           title="Service catalog"
           description="Manage services, categories, duration, price, and staff eligibility."
           actions={
             <>
               <button type="button" className="op-button" disabled={refreshing} onClick={() => void load(true)}>
-                <RefreshCw size={15} className={refreshing ? "animate-spin" : ""} /> Refresh
+                <RefreshCw size={15} className={refreshing ? "animate-spin" : ""} /> {text("Refresh")}
               </button>
               <button type="button" onClick={openCreate} className="op-button op-button-primary">
-                <Plus size={15} /> New service
+                <Plus size={15} /> {text("New service")}
               </button>
             </>
           }
@@ -243,7 +246,7 @@ export default function ServiceCatalogScreen() {
         </OperationsToolbar>
 
         {error ? (
-          <OperationsAlert tone="danger" className="mb-4" action={<button className="op-button" onClick={() => void load(true)}>Retry</button>}>
+          <OperationsAlert tone="danger" className="mb-4" action={<button className="op-button" onClick={() => void load(true)}>{text("Retry")}</button>}>
             {error}
           </OperationsAlert>
         ) : null}

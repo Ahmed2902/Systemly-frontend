@@ -1,5 +1,7 @@
 "use client";
 
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { useState } from "react";
 import {
   CalendarDays,
@@ -80,6 +82,7 @@ export function CustomerProfilePanel({
   onSaveNotes: (notes: string) => Promise<void>;
   onNewAppointment: () => void;
 }) {
+  const text = usePlatformText();
   const { customer, stats, upcoming, history } = workspace;
   const [notes, setNotes] = useState(customer.notes ?? "");
   const notesDirty = notes !== (customer.notes ?? "");
@@ -167,7 +170,7 @@ export function CustomerProfilePanel({
         <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <MetricCard label="Completed visits" value={stats.visits} />
           <MetricCard
-            label="No-shows"
+            label={text("No-shows")}
             value={stats.noShows}
             warning={stats.noShows > 0}
           />
@@ -191,7 +194,7 @@ export function CustomerProfilePanel({
               <dd className="font-medium text-slate-700">{customer.phone}</dd>
             </div>
             <div className="grid grid-cols-[8rem_1fr] gap-3 py-3">
-              <dt className="text-slate-400">Email</dt>
+              <dt className="text-slate-400">{text("Email")}</dt>
               <dd className="font-medium text-slate-700">
                 {customer.email || "Not provided"}
               </dd>
@@ -238,7 +241,7 @@ export function CustomerProfilePanel({
               onClick={() => void saveNotes()}
               className="rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-45"
             >
-              {savingNotes ? "Saving…" : "Save notes"}
+              {savingNotes ? text("Saving…") : text("Save notes")}
             </button>
           </div>
         </section>

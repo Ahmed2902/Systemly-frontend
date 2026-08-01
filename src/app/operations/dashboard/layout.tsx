@@ -1,5 +1,7 @@
 "use client";
 
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { useEffect, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/modules/auth/useAuth";
@@ -10,10 +12,11 @@ import {
 } from "@/modules/operations/components/OperationsUI";
 
 export default function OwnerAnalyticsLayout({ children }: { children: ReactNode }) {
+  const text = usePlatformText();
   const router = useRouter();
   const { user, loading } = useAuth();
   const owner =
-    user?.role === "BusinessAdmin" || user?.role === "SuperAdmin";
+    user?.role === text("BusinessAdmin") || user?.role === text("SuperAdmin");
 
   useEffect(() => {
     if (!loading && user && !owner) {

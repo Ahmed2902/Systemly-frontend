@@ -1,5 +1,7 @@
 "use client";
 
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { type FormEvent, useState } from "react";
 import Link from "next/link";
 import { CheckCircle2, Copy, MailPlus } from "lucide-react";
@@ -15,13 +17,14 @@ import {
 import { createStaffInvite, type InviteRole, type StaffInviteResult } from "@/modules/staff/staff-invites.api";
 
 export default function InviteStaffPage() {
+  const text = usePlatformText();
   const { user, accessToken } = useAuth();
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState<InviteRole>("Receptionist");
+  const [role, setRole] = useState<InviteRole>(text("Receptionist"));
   const [result, setResult] = useState<StaffInviteResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const owner = user?.role === "BusinessAdmin" || user?.role === "SuperAdmin";
+  const owner = user?.role === text("BusinessAdmin") || user?.role === text("SuperAdmin");
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -91,7 +94,7 @@ export default function InviteStaffPage() {
             <fieldset>
               <legend className="text-sm font-semibold text-[var(--op-text-secondary)]">Account role</legend>
               <div className="mt-2 grid gap-3 sm:grid-cols-2">
-                {(["Receptionist", "Staff"] as InviteRole[]).map((value) => (
+                {([text("Receptionist"), text("Staff")] as InviteRole[]).map((value) => (
                   <label
                     key={value}
                     className={`cursor-pointer rounded-[11px] border p-4 transition ${
@@ -110,7 +113,7 @@ export default function InviteStaffPage() {
                     />
                     <strong className="text-sm text-[var(--op-text)]">{value}</strong>
                     <p className="mt-1 text-xs leading-5 text-[var(--op-text-muted)]">
-                      {value === "Receptionist"
+                      {value === text("Receptionist")
                         ? "Manage bookings, customers, payments, and the daily calendar."
                         : "Use the operational workspace without owner analytics or business settings."}
                     </p>

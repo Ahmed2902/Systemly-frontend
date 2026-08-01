@@ -1,5 +1,7 @@
 "use client";
 
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { useState } from "react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
@@ -12,6 +14,7 @@ import {
 import { ApiError, requestPasswordReset } from "../auth.api";
 
 export function ForgotPasswordForm() {
+  const text = usePlatformText();
   const [sentTo, setSentTo] = useState<string | null>(null);
   const [serverError, setServerError] = useState<string | null>(null);
   const {
@@ -44,7 +47,7 @@ export function ForgotPasswordForm() {
         <button type="button" className="auth-secondary-button" onClick={() => setSentTo(null)}>
           Use another email
         </button>
-        <Link href="/login" className="auth-primary-button">Back to login</Link>
+        <Link href="/login" className="auth-primary-button">{text("Back to login")}</Link>
       </div>
     );
   }
@@ -68,12 +71,12 @@ export function ForgotPasswordForm() {
         {serverError ? <div className="auth-error" role="alert">{serverError}</div> : null}
 
         <button type="submit" disabled={isSubmitting} className="auth-primary-button">
-          {isSubmitting ? "Sending reset link…" : "Send reset link"}
+          {isSubmitting ? "Sending reset link…" : text("Send reset link")}
         </button>
       </form>
 
       <p className="auth-switch-copy">
-        Remembered your password? <Link href="/login" className="auth-text-link">Back to login</Link>
+        Remembered your password? <Link href="/login" className="auth-text-link">{text("Back to login")}</Link>
       </p>
     </div>
   );

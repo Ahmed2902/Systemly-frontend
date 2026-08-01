@@ -1,5 +1,7 @@
 "use client";
 
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   BriefcaseBusiness,
@@ -60,6 +62,7 @@ const roleOptions = [
 ];
 
 export default function StaffDirectoryScreen() {
+  const text = usePlatformText();
   const { accessToken, loading: authLoading } = useAuth();
   const { notifyMutation } = useOperations();
   const [data, setData] = useState<StaffDirectoryResponse | null>(null);
@@ -99,7 +102,7 @@ export default function StaffDirectoryScreen() {
         );
         setError(null);
       } catch (caught: unknown) {
-        setError(caught instanceof Error ? caught.message : "Unable to load staff");
+        setError(caught instanceof Error ? caught.message : text("Unable to load staff"));
       } finally {
         setLoading(false);
         setRefreshing(false);
@@ -185,13 +188,13 @@ export default function StaffDirectoryScreen() {
     <OperationsPage>
       <OperationsPageInner>
         <OperationsPageHeader
-          eyebrow="Management / Staff"
+          eyebrow={text("Management / Staff")}
           title="Staff directory"
           description="Manage profiles, roles, service eligibility, schedules, time off, and commissions."
           actions={
             <>
               <button type="button" className="op-button" disabled={refreshing} onClick={() => void load(true)}>
-                <RefreshCw size={15} className={refreshing ? "animate-spin" : ""} /> Refresh
+                <RefreshCw size={15} className={refreshing ? "animate-spin" : ""} /> {text("Refresh")}
               </button>
               <button
                 type="button"
@@ -261,7 +264,7 @@ export default function StaffDirectoryScreen() {
         </OperationsToolbar>
 
         {error ? (
-          <OperationsAlert tone="danger" className="mb-4" action={<button className="op-button" onClick={() => void load(true)}>Retry</button>}>
+          <OperationsAlert tone="danger" className="mb-4" action={<button className="op-button" onClick={() => void load(true)}>{text("Retry")}</button>}>
             {error}
           </OperationsAlert>
         ) : null}
