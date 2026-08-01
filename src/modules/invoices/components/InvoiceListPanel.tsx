@@ -1,24 +1,17 @@
 "use client";
 
-import { usePlatformText } from "@/i18n/usePlatformText";
 import { ReceiptText } from "lucide-react";
+import { useLocale } from "@/i18n/LocaleProvider";
+import { formatPlatformCurrency, formatPlatformDate } from "@/i18n/format";
+import { usePlatformText } from "@/i18n/usePlatformText";
 import type { InvoiceListItem } from "../invoices.types";
 
-const money = (cents: number) =>
-  new Intl.NumberFormat("en-EG", {
-    style: "currency",
-    currency: "EGP",
-    maximumFractionDigits: 2,
-  }).format(cents / 100);
-
-const paymentMethodLabel = (value?: string | null) =>
-  value
-    ? value
-        .toLowerCase()
-        .split("_")
-        .map((part) => part[0].toUpperCase() + part.slice(1))
-        .join(" ")
-    : "Not recorded";
+const paymentLabels: Record<string, string> = {
+  CASH: "Cash",
+  CARD: "Card",
+  BANK_TRANSFER: "Bank transfer",
+  MOBILE_WALLET: "Mobile wallet",
+};
 
 export function InvoiceListPanel({
   invoices,
@@ -30,6 +23,13 @@ export function InvoiceListPanel({
   onSelect: (id: string) => void;
 }) {
   const text = usePlatformText();
+  const { locale } = useLocale();
+  const money = (cents: number) => formatPlatformCurrency(cents / 100, locale);
+  const paymentMethodLabel = (value?: string | null) =>
+    value ? text(paymentLabels[value] ?? value.replace(/_/g, " ")) : text("Not recorded");
+  const invoiceDate = (value: string) =>
+    formatPlatformDate(value, locale, { day: "numeric", month: "short", year: "numeric" });
+
   if (invoices.length === 0) {
     return (
       <div className="flex min-h-72 flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-white/70 p-8 text-center">
@@ -60,26 +60,26 @@ export function InvoiceListPanel({
             key={invoice.id}
             aria-pressed={selected}
             onClick={() => onSelect(invoice.id)}
-            className={`grid w-full gap-3 border-b border-slate-100 px-5 py-4 text-left transition last:border-b-0 lg:grid-cols-[1.05fr_1.3fr_.8fr_.9fr_.75fr_.65fr] lg:items-center ${
+            className={`grid w-full gap-3 border-b border-slate-100 px-5 py-4 text-start transition last:border-b-0 lg:grid-cols-[1.05fr_1.3fr_.8fr_.9fr_.75fr_.65fr] lg:items-center ${
               selected ? "invoice-row-selected" : "hover:bg-slate-50"
             } ${invoice.status === "voided" ? "opacity-65" : ""}`}
           >
             <div>
-              <p className="font-semibold text-slate-900">{invoice.invoiceNumber}</p>
+              <p className="font-semibold text-slate-900" dir="ltr">{invoice.invoiceNumber}</p>
               <p className="mt-1 text-xs text-slate-500 lg:hidden">
-                {new Date(invoice.issuedAt).toLocaleDateString("en-GB")}
+                {invoiceDate(invoice.issuedAt)}
               </p>
             </div>
             <div className="min-w-0">
-              <p className="truncate font-medium text-slate-800">
+              <p className="truncate font-medium text-slate-800" dir="auto">
                 {invoice.customer.name}
               </p>
-              <p className="truncate text-xs text-slate-500">
-                {invoice.services.join(" · ") || "Appointment payment"}
+              <p className="truncate text-xs text-slate-500" dir="auto">
+                {invoice.services.join(" · ") || text("Appointment payment")}
               </p>
             </div>
             <p className="hidden text-sm text-slate-600 lg:block">
-              {new Date(invoice.issuedAt).toLocaleDateString("en-GB")}
+              {invoiceDate(invoice.issuedAt)}
             </p>
             <p className="text-sm font-medium text-slate-700">
               {paymentMethodLabel(invoice.paymentMethod)}
