@@ -30,6 +30,16 @@ const TECHNICAL = [
   /^(pending|confirmed|in_progress|completed|no_show|cancelled_by_customer|cancelled_by_business|paid|draft|sent|voided)$/,
   /\b(bg-|text-|border-|hover:|focus:|shadow-|opacity-|translate-|scale-|rotate-|cursor-|object-|font-|items-|justify-|gap-|rounded-|ring-|var\(--)/,
 ];
+const ARABIC_CATALOGUES = [
+  ["src/i18n/platform-copy.ts", "platformLiteralPairs"],
+  ["src/i18n/natural-arabic.ts", "naturalArabicPairs"],
+  ["src/i18n/natural-arabic-more.ts", "naturalArabicMorePairs"],
+  ["src/i18n/natural-arabic-final.ts", "naturalArabicFinalPairs"],
+];
+const BANNED_LITERAL_ARABIC = [
+  "النظام الذي يدير نشاطك من الخلف",
+  "النظام خلف نشاطك",
+];
 
 function walk(entry) {
   const absolute = path.join(ROOT, entry);
@@ -49,26 +59,24 @@ function readPairs(filename, variable) {
   const absolute = path.join(ROOT, filename);
   const source = fs.readFileSync(absolute, "utf8");
   const file = ts.createSourceFile(absolute, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
-  const keys = new Set();
+  const pairs = [];
   function visit(node) {
     if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) && node.name.text === variable && node.initializer && ts.isArrayLiteralExpression(node.initializer)) {
       for (const item of node.initializer.elements) {
         if (!ts.isArrayLiteralExpression(item) || item.elements.length < 2) continue;
         const [sourceValue, targetValue] = item.elements;
-        if (ts.isStringLiteralLike(sourceValue) && ts.isStringLiteralLike(targetValue) && targetValue.text.trim()) keys.add(normalize(sourceValue.text));
+        if (ts.isStringLiteralLike(sourceValue) && ts.isStringLiteralLike(targetValue) && targetValue.text.trim()) {
+          pairs.push([normalize(sourceValue.text), normalize(targetValue.text)]);
+        }
       }
     }
     ts.forEachChild(node, visit);
   }
   visit(file);
-  return keys;
+  return pairs;
 }
-const catalogue = new Set([
-  ...readPairs("src/i18n/platform-copy.ts", "platformLiteralPairs"),
-  ...readPairs("src/i18n/natural-arabic.ts", "naturalArabicPairs"),
-  ...readPairs("src/i18n/natural-arabic-more.ts", "naturalArabicMorePairs"),
-  ...readPairs("src/i18n/natural-arabic-final.ts", "naturalArabicFinalPairs"),
-]);
+const cataloguePairs = ARABIC_CATALOGUES.flatMap(([filename, variable]) => readPairs(filename, variable));
+const catalogue = new Set(cataloguePairs.map(([source]) => source));
 function callName(node) { return ts.isCallExpression(node) ? node.expression.getText() : ""; }
 function translated(node) {
   let current = node.parent;
@@ -82,6 +90,17 @@ function translated(node) {
 }
 
 const problems = [];
+for (const [source, arabic] of cataloguePairs) {
+  if (/[٠-٩]/.test(arabic)) {
+    problems.push(`[Arabic digits] ${JSON.stringify(source)} -> ${JSON.stringify(arabic)}`);
+  }
+  for (const banned of BANNED_LITERAL_ARABIC) {
+    if (arabic.includes(banned)) {
+      problems.push(`[Literal Arabic] ${JSON.stringify(source)} -> ${JSON.stringify(arabic)}`);
+    }
+  }
+}
+
 for (const filename of [...new Set(TARGETS.flatMap(walk))]) {
   const source = fs.readFileSync(filename, "utf8");
   const file = ts.createSourceFile(filename, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
@@ -110,4 +129,4 @@ if (unique.length) {
   console.error(`Found ${unique.length} platform localization issue(s):\n${unique.join("\n")}`);
   process.exit(1);
 }
-console.log(`Localization audit passed with ${catalogue.size} explicit Arabic entries.`);
+console.log(`Localization audit passed with ${catalogue.size} explicit Arabic entries and the approved product voice.`);
