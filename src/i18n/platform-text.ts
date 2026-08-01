@@ -44,9 +44,10 @@ function interpolate(message: string, values?: TranslationValues): string {
  */
 export function translatePlatformText(
   locale: AppLocale,
-  source: string,
+  source: string | null | undefined,
   values?: TranslationValues,
 ): string {
+  if (!source) return "";
   const translated = maps[locale].get(source) ?? source;
   return interpolate(translated, values);
 }
