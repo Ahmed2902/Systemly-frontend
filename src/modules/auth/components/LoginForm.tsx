@@ -12,11 +12,13 @@ import { useAuth } from "../useAuth";
 import { safeNextPath, workspacePathForUser } from "../auth-redirect";
 import { GoogleAuthButton } from "./GoogleAuthButton";
 import { PasswordField } from "./PasswordField";
+import { useLocale } from "@/i18n/LocaleProvider";
 
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { setSession } = useAuth();
+  const { t } = useLocale();
   const [serverError, setServerError] = useState<string | null>(null);
   const [needsVerification, setNeedsVerification] = useState(false);
 
@@ -41,9 +43,9 @@ export function LoginForm() {
       const apiErr = err as ApiError;
       if (apiErr.code === "EMAIL_NOT_VERIFIED") {
         setNeedsVerification(true);
-        setServerError("Verify your email before logging in.");
+        setServerError(t("auth.login.verifyFirst"));
       } else {
-        setServerError(apiErr.error ?? apiErr.message ?? "Invalid email or password.");
+        setServerError(apiErr.error ?? apiErr.message ?? t("auth.login.invalid"));
       }
     }
   }
@@ -59,12 +61,12 @@ export function LoginForm() {
 
   return (
     <div className="auth-stack">
-      <GoogleAuthButton label="Continue with Google" />
-      <div className="auth-divider">or use email</div>
+      <GoogleAuthButton label={t("auth.login.google")} />
+      <div className="auth-divider">{t("auth.login.divider")}</div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="auth-form" noValidate>
         <div className="auth-field">
-          <label htmlFor="login-email" className="auth-label">Email</label>
+          <label htmlFor="login-email" className="auth-label">{t("auth.login.email")}</label>
           <input
             {...register("email")}
             id="login-email"
@@ -72,20 +74,21 @@ export function LoginForm() {
             autoComplete="email"
             placeholder="you@business.com"
             className="auth-input"
+            dir="ltr"
           />
           {errors.email ? <p className="auth-field-error">{errors.email.message}</p> : null}
         </div>
 
         <div className="auth-field">
           <div className="auth-field-row">
-            <label htmlFor="login-password" className="auth-label">Password</label>
-            <Link href="/forgot-password" className="auth-text-link">Forgot password?</Link>
+            <label htmlFor="login-password" className="auth-label">{t("auth.login.password")}</label>
+            <Link href="/forgot-password" className="auth-text-link">{t("auth.login.forgot")}</Link>
           </div>
           <PasswordField
             {...register("password")}
             id="login-password"
             autoComplete="current-password"
-            placeholder="Enter your password"
+            placeholder={t("auth.login.passwordPlaceholder")}
           />
           {errors.password ? <p className="auth-field-error">{errors.password.message}</p> : null}
         </div>
@@ -94,18 +97,18 @@ export function LoginForm() {
           <div className="auth-error" role="alert">
             {serverError}
             {needsVerification ? (
-              <> <Link href={resendHref} className="auth-text-link">Resend verification email</Link></>
+              <> <Link href={resendHref} className="auth-text-link">{t("auth.login.resend")}</Link></>
             ) : null}
           </div>
         ) : null}
 
         <button type="submit" disabled={isSubmitting} className="auth-primary-button">
-          {isSubmitting ? "Logging in…" : "Log in"}
+          {isSubmitting ? t("auth.login.submitting") : t("auth.login.submit")}
         </button>
       </form>
 
       <p className="auth-switch-copy">
-        New to Systemly? <Link href={signupHref} className="auth-text-link">Create an account</Link>
+        {t("auth.login.newUser")} <Link href={signupHref} className="auth-text-link">{t("auth.login.createAccount")}</Link>
       </p>
     </div>
   );
