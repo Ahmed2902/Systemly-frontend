@@ -15,10 +15,14 @@ import {
   type AppLocale,
 } from "./config";
 import { translate, type MessageKey } from "./messages";
+import { platformCopy } from "./platform-copy";
+
+type PlatformCopy = (typeof platformCopy)[AppLocale];
 
 type LocaleContextValue = {
   locale: AppLocale;
   direction: "rtl" | "ltr";
+  copy: PlatformCopy;
   setLocale: (locale: AppLocale) => void;
   t: (key: MessageKey) => string;
 };
@@ -46,6 +50,7 @@ export function LocaleProvider({
     () => ({
       locale,
       direction: getLocaleDirection(locale),
+      copy: platformCopy[locale],
       setLocale,
       t: (key) => translate(locale, key),
     }),
