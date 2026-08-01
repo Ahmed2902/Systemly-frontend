@@ -4,6 +4,7 @@ import type {
   SignupInput,
 } from "./auth.schema";
 import type { AuthSessionResponse, AuthUser } from "./auth.types";
+import type { AppLocale } from "@/i18n/config";
 import { apiUrl } from "../../shared/lib/api-url";
 import { clearCsrfToken, getCsrfToken } from "@/shared/lib/csrf";
 import { setAccessToken } from "./auth.store";
@@ -34,6 +35,11 @@ type MessageResponse = {
 type CurrentUserResponse = {
   success: true;
   data: AuthUser;
+};
+
+type LanguagePreferenceResponse = {
+  success: true;
+  data: { preferredLanguage: AppLocale };
 };
 
 async function handle<T>(res: Response): Promise<T> {
@@ -99,7 +105,9 @@ async function requestWithCsrf<T>(
   throw new Error("Unable to validate the secure session");
 }
 
-export async function registerUser(payload: SignupInput) {
+export async function registerUser(
+  payload: SignupInput & { preferredLanguage?: AppLocale },
+) {
   const response = await publicRequest<RegisterResponse>("/auth/register", {
     method: "POST",
     body: JSON.stringify(payload),
@@ -128,6 +136,17 @@ export async function verifyEmail(token: string) {
 export async function getCurrentUser(accessToken: string) {
   return publicRequest<CurrentUserResponse>("/auth/me", {
     headers: { Authorization: `Bearer ${accessToken}` },
+  });
+}
+
+export function updatePreferredLanguage(
+  locale: AppLocale,
+  accessToken: string,
+) {
+  return requestWithCsrf<LanguagePreferenceResponse>("/auth/preferences", {
+    method: "PATCH",
+    headers: { Authorization: `Bearer ${accessToken}` },
+    body: JSON.stringify({ preferredLanguage: locale }),
   });
 }
 
