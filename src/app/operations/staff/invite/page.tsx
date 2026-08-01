@@ -1,9 +1,11 @@
 "use client";
 
-import { usePlatformText } from "@/i18n/usePlatformText";
 import { type FormEvent, useState } from "react";
 import Link from "next/link";
 import { CheckCircle2, Copy, MailPlus } from "lucide-react";
+import { useLocale } from "@/i18n/LocaleProvider";
+import { formatPlatformDateTime } from "@/i18n/format";
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { useAuth } from "@/modules/auth/useAuth";
 import {
   OperationsAlert,
@@ -13,17 +15,24 @@ import {
   OperationsPanel,
   OperationsState,
 } from "@/modules/operations/components/OperationsUI";
-import { createStaffInvite, type InviteRole, type StaffInviteResult } from "@/modules/staff/staff-invites.api";
+import {
+  createStaffInvite,
+  type InviteRole,
+  type StaffInviteResult,
+} from "@/modules/staff/staff-invites.api";
+
+const inviteRoles: InviteRole[] = ["Receptionist", "Staff"];
 
 export default function InviteStaffPage() {
   const text = usePlatformText();
+  const { locale } = useLocale();
   const { user, accessToken } = useAuth();
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState<InviteRole>(text("Receptionist"));
+  const [role, setRole] = useState<InviteRole>("Receptionist");
   const [result, setResult] = useState<StaffInviteResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const owner = user?.role === text("BusinessAdmin") || user?.role === text("SuperAdmin");
+  const owner = user?.role === "BusinessAdmin" || user?.role === "SuperAdmin";
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -58,7 +67,7 @@ export default function InviteStaffPage() {
     <OperationsPage>
       <OperationsPageInner className="max-w-3xl">
         <OperationsPageHeader
-          eyebrow="Management / Staff / Invitation"
+          eyebrow={text("Management / Staff / Invitation")}
           title={text("Invite a team account")}
           description={text("Create a secure invitation link and send it manually until production email delivery is active.")}
           actions={<Link href="/operations/staff" className="op-button">{text("Back to staff")}</Link>}
@@ -87,13 +96,14 @@ export default function InviteStaffPage() {
                 onChange={(event) => setEmail(event.target.value)}
                 placeholder="reception@example.com"
                 className="op-input mt-1.5"
+                dir="ltr"
               />
             </label>
 
             <fieldset>
               <legend className="text-sm font-semibold text-[var(--op-text-secondary)]">{text("Account role")}</legend>
               <div className="mt-2 grid gap-3 sm:grid-cols-2">
-                {([text("Receptionist"), text("Staff")] as InviteRole[]).map((value) => (
+                {inviteRoles.map((value) => (
                   <label
                     key={value}
                     className={`cursor-pointer rounded-[11px] border p-4 transition ${
@@ -110,9 +120,9 @@ export default function InviteStaffPage() {
                       onChange={() => setRole(value)}
                       className="sr-only"
                     />
-                    <strong className="text-sm text-[var(--op-text)]">{value}</strong>
+                    <strong className="text-sm text-[var(--op-text)]">{text(value)}</strong>
                     <p className="mt-1 text-xs leading-5 text-[var(--op-text-muted)]">
-                      {value === text("Receptionist")
+                      {value === "Receptionist"
                         ? text("Manage bookings, customers, payments, and the daily calendar.")
                         : text("Use the operational workspace without owner analytics or business settings.")}
                     </p>
@@ -138,10 +148,10 @@ export default function InviteStaffPage() {
                 <CheckCircle2 size={17} /> {text("Invitation created")}
               </div>
               <p className="mt-1 text-xs text-[var(--op-success)]">
-                {text("Expires")} {new Date(result.expiresAt).toLocaleString("en-GB")}.
+                {text("Expires")} {formatPlatformDateTime(result.expiresAt, locale)}.
               </p>
               <div className="mt-3 flex gap-2">
-                <input readOnly value={result.acceptUrl} className="op-input min-w-0 flex-1 text-xs" />
+                <input readOnly value={result.acceptUrl} className="op-input min-w-0 flex-1 text-xs" dir="ltr" />
                 <button
                   type="button"
                   onClick={() => navigator.clipboard.writeText(result.acceptUrl)}
