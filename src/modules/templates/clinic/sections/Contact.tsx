@@ -4,7 +4,7 @@ import Link from "next/link";
 import {
   ArrowUpRight,
   CalendarDays,
-  camera,
+  Camera,
   MapPin,
   MessageCircle,
   Phone,
@@ -51,7 +51,7 @@ export function Contact({
           label: "Instagram",
           value: "View our clinic updates",
           href: externalUrl(instagram),
-          Icon: Instagram,
+          Icon: Camera,
         }
       : null,
     location
