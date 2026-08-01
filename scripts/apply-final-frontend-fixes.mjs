@@ -19,7 +19,9 @@ function walk(directory) {
 for (const file of walk("src")) {
   update(file, (source) => {
     if (!source.includes('"use client";')) return source;
-    const withoutDirective = source.replace(/(?:^|\n)\s*"use client";\s*\n?/, "\n").replace(/^\s+/, "");
+    const withoutDirective = source
+      .replace(/(?:^|\n)\s*"use client";\s*\n?/, "\n")
+      .replace(/^\s+/, "");
     return `"use client";\n\n${withoutDirective}`;
   });
 }
@@ -67,6 +69,53 @@ for (const [file, subtitle] of [
         `description={text(${JSON.stringify(subtitle)})}`,
       ),
   );
+}
+
+const analyticsAttributes = new Map([
+  ["src/app/operations/dashboard/customers/page.tsx", [
+    "Loading customer analytics…",
+    "First-time customers acquired",
+    "Customers who booked again",
+  ]],
+  ["src/app/operations/dashboard/growth/page.tsx", [
+    "Loading growth analytics…",
+  ]],
+  ["src/app/operations/dashboard/operations/page.tsx", [
+    "Loading bookings and services analytics…",
+    "One booking may contain several services",
+  ]],
+  ["src/app/operations/dashboard/page.tsx", [
+    "Loading dashboard overview…",
+    "Collected in the selected period",
+    "Completed payments",
+    "Collected per paid invoice",
+    "Appointments in this period",
+  ]],
+  ["src/app/operations/dashboard/revenue/page.tsx", [
+    "Loading revenue analytics…",
+    "Collected in the selected period",
+    "Successfully settled invoices",
+    "Average value per successful payment",
+    "No custom items were sold in this period.",
+  ]],
+  ["src/app/operations/dashboard/staff/page.tsx", [
+    "Loading staff analytics…",
+    "Custom items stay in business revenue unless they are explicitly assigned to staff",
+    "Commission calculated from attributed service lines",
+  ]],
+]);
+
+for (const [file, values] of analyticsAttributes) {
+  update(file, (source) => {
+    let next = source;
+    for (const value of values) {
+      next = next.replaceAll(
+        `=${JSON.stringify(value)}`,
+        `={text(${JSON.stringify(value)})}`,
+      );
+    }
+    return next;
+  });
 }
 
 update("src/modules/auth/components/SignupForm.tsx", (source) =>
