@@ -11,12 +11,16 @@ const TARGETS = [
   "src/modules/invoices", "src/modules/staff", "src/modules/services",
   "src/modules/settings", "src/shared/components/AuthGuard.tsx",
 ];
-const ATTRS = new Set(["aria-label", "title", "placeholder", "alt", "subtitle"]);
+const ATTRS = new Set(["aria-label", "title", "placeholder", "alt", "subtitle", "description", "message", "hint"]);
 const ALLOWED = new Set([
   "Systemly", "Google", "Africa/Cairo", "EGP", "PDF", "CSV", "URL", "ID",
   "Inter", "Playfair Display", "NOIR STUDIO", "Mariam Adel", "Yasmine Ali",
   "Salma Tarek", "Salma", "Ahmed Hassan", "Dr. Sarah Jenkins",
   "Aura Wellness — Salon", "Clinic Clarity — Clinic",
+  "systemly.app/", "hgezli.com/", "ArrowDown", "Home",
+  "analytics-chart-point is-active", "analytics-donut-segment is-active",
+  "analytics-lollipop-row is-active", "analytics-heatmap-cell is-active",
+  "pl-3.5", "mx-auto max-w-md",
 ]);
 const TECHNICAL = [
   /^https?:\/\//, /^\//, /^#/, /^\./, /^[a-z0-9_-]+$/, /^[A-Z0-9_]+$/,
