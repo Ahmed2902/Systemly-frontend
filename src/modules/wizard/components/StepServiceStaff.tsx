@@ -178,8 +178,13 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
       nextError = "Add at least one staff member";
     else if (state.staff.some((member) => !member.name.trim()))
       nextError = "Every staff member needs a name";
-    else if (state.staff.some((member) => member.serviceIds.length === 0))
-      nextError = "Assign at least one service to every team member";
+    else if (
+      state.staff.some(
+        (member) =>
+          member.role !== "Receptionist" && member.serviceIds.length === 0,
+      )
+    )
+      nextError = "Assign at least one service to every service provider";
 
     if (nextError) {
       setError(nextError);
@@ -395,8 +400,9 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
             <div>
               <strong>Customers only see eligible staff.</strong>
               <p>
-                Assign at least one service to every person. You will set their
-                working hours in the next step.
+                Assign at least one service to every service provider.
+                Receptionists can skip this step. You will set working hours in
+                the next step.
               </p>
             </div>
             <span>
@@ -408,8 +414,11 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
           <div className="onboarding-team-list">
             {state.staff.map((member, index) => {
               const missingName = attemptedSubmit && !member.name.trim();
+              const isReceptionist = member.role === "Receptionist";
               const missingServices =
-                attemptedSubmit && member.serviceIds.length === 0;
+                attemptedSubmit &&
+                !isReceptionist &&
+                member.serviceIds.length === 0;
               const visibleServices = filteredServicesFor(member.clientId);
 
               return (
@@ -531,7 +540,10 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
                   >
                     <div className="onboarding-eligibility-heading">
                       <div>
-                        <strong>Services this person provides</strong>
+                        <strong>
+                          Services this person provides
+                          {isReceptionist ? " (optional)" : ""}
+                        </strong>
                         <span>
                           {member.serviceIds.length} of {state.services.length}
                           {" "}selected

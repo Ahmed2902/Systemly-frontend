@@ -30,7 +30,7 @@ export function Faq({
           </p>
         </div>
 
-        <div className="overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--background)]">
+        <div className="self-start overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--background)]">
           {faqs.map((faq, index) => {
             const isOpen = openIndex === index;
             const answerId = `salon-faq-${index}`;

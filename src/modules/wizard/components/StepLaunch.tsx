@@ -19,7 +19,7 @@ export function StepLaunch({ onBack }: StepProps) {
     ["Services", state.services.length > 0],
     ["Team", state.staff.length > 0],
     ["Availability", state.staff.some((member) => member.availability.length > 0)],
-    ["Website", Boolean(state.template && state.tagline)],
+    ["Website", Boolean(state.template)],
   ] as const;
   const readiness = Math.round((checklist.filter(([, complete]) => complete).length / checklist.length) * 100);
 
