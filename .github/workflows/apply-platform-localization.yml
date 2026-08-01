@@ -1,9 +1,12 @@
 name: Apply platform localization codemod
 
 on:
-  push:
+  pull_request:
     branches:
-      - fix/production-arabic-localization
+      - main
+    types:
+      - opened
+      - synchronize
     paths:
       - scripts/migrate-platform-localization.mjs
       - .github/workflows/apply-platform-localization.yml
@@ -17,12 +20,13 @@ concurrency:
 
 jobs:
   migrate:
+    if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     steps:
       - name: Checkout branch
         uses: actions/checkout@v4
         with:
-          ref: fix/production-arabic-localization
+          ref: ${{ github.head_ref }}
           fetch-depth: 0
 
       - name: Set up Node.js
@@ -47,4 +51,4 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add src
           git commit -m "refactor: migrate platform copy to explicit translations"
-          git push origin HEAD:fix/production-arabic-localization
+          git push origin HEAD:${{ github.head_ref }}
