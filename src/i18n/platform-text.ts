@@ -1,18 +1,21 @@
 import type { AppLocale } from "./config";
 import { naturalArabicPairs } from "./natural-arabic";
+import { naturalArabicMorePairs } from "./natural-arabic-more";
 import { getPlatformLiteralMap } from "./platform-copy";
 
 export type TranslationValues = Record<string, string | number>;
 
+const naturalPairs = [...naturalArabicPairs, ...naturalArabicMorePairs] as const;
+
 function buildArabicMap() {
   const map = getPlatformLiteralMap("ar");
-  for (const [english, arabic] of naturalArabicPairs) map.set(english, arabic);
+  for (const [english, arabic] of naturalPairs) map.set(english, arabic);
   return map;
 }
 
 function buildEnglishMap() {
   const map = getPlatformLiteralMap("en");
-  for (const [english] of naturalArabicPairs) map.set(english, english);
+  for (const [english] of naturalPairs) map.set(english, english);
   return map;
 }
 
