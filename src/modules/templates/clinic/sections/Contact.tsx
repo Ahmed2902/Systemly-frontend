@@ -4,7 +4,7 @@ import Link from "next/link";
 import {
   ArrowUpRight,
   CalendarDays,
-  Instagram,
+  camera,
   MapPin,
   MessageCircle,
   Phone,
