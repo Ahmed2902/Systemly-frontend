@@ -1,6 +1,5 @@
 "use client";
 
-
 import { usePlatformText } from "@/i18n/usePlatformText";
 import Link from "next/link";
 import { ArrowRight, ExternalLink, Menu, X } from "lucide-react";
@@ -91,7 +90,7 @@ export function LandingNav() {
           <button
             type="button"
             className="lp-mobile-menu"
-            aria-label={mobileOpen ? "Close navigation" : "Open navigation"}
+            aria-label={text(mobileOpen ? "Close navigation" : "Open navigation")}
             aria-expanded={mobileOpen}
             aria-controls="landing-mobile-navigation"
             onClick={() => setMobileOpen((current) => !current)}
