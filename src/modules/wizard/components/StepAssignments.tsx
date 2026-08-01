@@ -100,7 +100,7 @@ export function StepAssignments({ onNext, onBack }: StepProps) {
 
           <div className="mt-5 grid grid-cols-2 gap-3">
             <div className="rounded-2xl border border-[var(--onboarding-border)] bg-[#fafaf8] p-4"><UserRoundCheck className="text-[var(--onboarding-mint)]" size={20} /><strong className="mt-3 block text-2xl">{workingDays}</strong><span className="mt-1 block text-xs text-[var(--onboarding-muted)]">{text("Working days")}</span></div>
-            <div className="rounded-2xl border border-[var(--onboarding-border)] bg-[#fafaf8] p-4"><Clock3 className="text-[var(--onboarding-mint)]" size={20} /><strong className="mt-3 block text-2xl">{weeklyHours.toFixed(1)}</strong><span className="mt-1 block text-xs text-[var(--onboarding-muted)]">Weekly hours</span></div>
+            <div className="rounded-2xl border border-[var(--onboarding-border)] bg-[#fafaf8] p-4"><Clock3 className="text-[var(--onboarding-mint)]" size={20} /><strong className="mt-3 block text-2xl">{weeklyHours.toFixed(1)}</strong><span className="mt-1 block text-xs text-[var(--onboarding-muted)]">{text("Weekly hours")}</span></div>
           </div>
 
           <div className="mt-4 rounded-2xl border border-[var(--onboarding-border)] p-4">

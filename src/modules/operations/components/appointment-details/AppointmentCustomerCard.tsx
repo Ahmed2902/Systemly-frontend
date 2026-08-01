@@ -1,3 +1,6 @@
+"use client";
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import Link from "next/link";
 import { ArrowUpRight, CalendarDays, Phone, UserRound } from "lucide-react";
 
@@ -32,6 +35,7 @@ function lastVisitLabel(value: string) {
 }
 
 export function AppointmentCustomerCard({ customer }: Props) {
+  const text = usePlatformText();
   const hasLastVisit = Boolean(customer.lastVisitAt);
 
   return (
@@ -40,13 +44,13 @@ export function AppointmentCustomerCard({ customer }: Props) {
         <div className="flex items-center gap-2">
           <UserRound size={17} className="shrink-0 text-blue-600" />
 
-          <h2 className="font-semibold text-slate-900">Customer information</h2>
+          <h2 className="font-semibold text-slate-900">{text("Customer information")}</h2>
         </div>
 
         <Link
           href={`/operations/customers/${customer.id}`}
           className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-blue-50 hover:text-blue-700"
-          aria-label="Open customer details"
+          aria-label={text("Open customer details")}
         >
           <ArrowUpRight size={16} />
         </Link>
@@ -72,7 +76,7 @@ export function AppointmentCustomerCard({ customer }: Props) {
               <span>{customer.phone}</span>
             </a>
           ) : (
-            <p className="mt-1 text-sm text-slate-400">No phone number</p>
+            <p className="mt-1 text-sm text-slate-400">{text("No phone number")}</p>
           )}
         </div>
       </div>
@@ -82,11 +86,11 @@ export function AppointmentCustomerCard({ customer }: Props) {
           hasLastVisit ? "grid-cols-3" : "grid-cols-2"
         }`}
       >
-        <CustomerMetric value={customer.visits} label="Visits" />
+        <CustomerMetric value={customer.visits} label={text("Visits")} />
 
         <CustomerMetric
           value={customer.noShows}
-          label="No-shows"
+          label={text("No-shows")}
           warning={customer.noShows > 0}
         />
 
@@ -101,7 +105,7 @@ export function AppointmentCustomerCard({ customer }: Props) {
               {lastVisitLabel(customer.lastVisitAt)}
             </p>
 
-            <p className="mt-0.5 text-[11px] text-blue-600">Last visit</p>
+            <p className="mt-0.5 text-[11px] text-blue-600">{text("Last visit")}</p>
           </div>
         ) : null}
       </div>

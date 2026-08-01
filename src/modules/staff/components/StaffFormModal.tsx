@@ -240,7 +240,7 @@ export function StaffFormModal({
                   setForm((current) => ({ ...current, name: event.target.value }))
                 }
                 className={inputClass}
-                placeholder="Dr. Sarah Jenkins"
+                placeholder={text("Dr. Sarah Jenkins")}
               />
             </label>
 

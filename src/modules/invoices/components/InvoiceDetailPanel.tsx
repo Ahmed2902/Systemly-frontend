@@ -1,3 +1,6 @@
+"use client";
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import Link from "next/link";
 import Image from "next/image";
 import { Download, ExternalLink, Loader2, RotateCcw } from "lucide-react";
@@ -32,6 +35,7 @@ export function InvoiceDetailPanel({
   onDownload: () => void;
   onVoid: () => void;
 }) {
+  const text = usePlatformText();
   if (loading) {
     return (
       <div className="flex min-h-96 items-center justify-center rounded-3xl border border-[var(--op-border)] bg-[var(--op-surface)] shadow-[var(--op-shadow)]">
@@ -43,7 +47,7 @@ export function InvoiceDetailPanel({
   if (!invoice) {
     return (
       <div className="flex min-h-96 items-center justify-center rounded-3xl border border-dashed border-[var(--op-border)] bg-[var(--op-surface)] p-8 text-center text-sm text-[var(--op-text-muted)]">
-        Select an invoice to review its receipt and payment details.
+        {text("Select an invoice to review its receipt and payment details.")}
       </div>
     );
   }
@@ -67,11 +71,11 @@ export function InvoiceDetailPanel({
                     : "bg-[var(--op-surface-raised)] text-[var(--op-text-muted)]"
                 }`}
               >
-                {invoice.status === "paid" ? "Paid" : "Voided"}
+                {invoice.status === "paid" ? text("Paid") : text("Voided")}
               </span>
             </div>
             <p className="mt-1 text-xs text-[var(--op-text-muted)]">
-              Issued {new Date(invoice.issuedAt).toLocaleString("en-GB")}
+              {text("Issued")} {new Date(invoice.issuedAt).toLocaleString("en-GB")}
             </p>
           </div>
           {invoice.business.logoUrl ? (
@@ -92,21 +96,21 @@ export function InvoiceDetailPanel({
           className="op-button op-button-primary mt-4 w-full py-3 disabled:opacity-50"
         >
           <Download size={16} />
-          Download receipt
+          {text("Download receipt")}
         </button>
       </div>
 
       <div className="space-y-5 p-5">
         <section className="grid gap-3 rounded-2xl bg-[var(--op-surface-soft)] p-4 text-sm sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
           <div>
-            <p className="text-xs font-medium text-[var(--op-text-muted)]">Customer</p>
+            <p className="text-xs font-medium text-[var(--op-text-muted)]">{text("Customer")}</p>
             <p className="mt-1 font-semibold text-[var(--op-text)]">
               {invoice.customer.name}
             </p>
             <p className="text-xs text-[var(--op-text-muted)]">{invoice.customer.phone}</p>
           </div>
           <div>
-            <p className="text-xs font-medium text-[var(--op-text-muted)]">Payment method</p>
+            <p className="text-xs font-medium text-[var(--op-text-muted)]">{text("Payment method")}</p>
             <p className="mt-1 font-semibold text-[var(--op-text)]">
               {paymentLabel(invoice.paymentMethod)}
             </p>
@@ -123,14 +127,14 @@ export function InvoiceDetailPanel({
             href={`/operations/appointments/${invoice.appointment.id}`}
             className="flex items-center justify-between rounded-2xl border border-white bg-[#f7f7f4] px-4 py-3 text-sm font-semibold text-[#111411] shadow-sm transition hover:bg-white hover:shadow-md"
           >
-            Open appointment
+            {text("Open appointment")}
             <ExternalLink size={15} />
           </Link>
         ) : null}
 
         {serviceItems.length > 0 ? (
           <section>
-            <h3 className="font-semibold text-[var(--op-text)]">Services</h3>
+            <h3 className="font-semibold text-[var(--op-text)]">{text("Services")}</h3>
             <div className="mt-3 overflow-hidden rounded-2xl border border-[var(--op-border)]">
               {serviceItems.map((item) => (
                 <div
@@ -157,7 +161,7 @@ export function InvoiceDetailPanel({
 
         {customItems.length > 0 ? (
           <section>
-            <h3 className="font-semibold text-[var(--op-text)]">Custom items</h3>
+            <h3 className="font-semibold text-[var(--op-text)]">{text("Custom items")}</h3>
             <div className="mt-3 overflow-hidden rounded-2xl border border-[var(--op-border)]">
               {customItems.map((item) => {
                 const calculatedTotal = item.unitPriceCents * item.quantity;
@@ -186,17 +190,17 @@ export function InvoiceDetailPanel({
 
         <section className="space-y-2 rounded-2xl bg-[var(--op-surface-soft)] p-4 text-sm">
           <div className="flex justify-between text-[var(--op-text-secondary)]">
-            <span>Subtotal</span>
+            <span>{text("Subtotal")}</span>
             <span>{money(invoice.subtotalCents)}</span>
           </div>
           {invoice.discountCents > 0 ? (
             <div className="flex justify-between text-[var(--op-danger)]">
-              <span>Discount</span>
+              <span>{text("Discount")}</span>
               <span>-{money(invoice.discountCents)}</span>
             </div>
           ) : null}
           <div className="flex justify-between border-t border-[var(--op-border)] pt-3 text-lg font-bold text-[var(--op-text)]">
-            <span>Total</span>
+            <span>{text("Total")}</span>
             <span>{money(invoice.totalCents)}</span>
           </div>
         </section>
@@ -204,7 +208,7 @@ export function InvoiceDetailPanel({
         {invoice.notes ? (
           <section className="rounded-2xl border border-[var(--op-warning)] bg-[var(--op-warning-soft)] p-4">
             <p className="text-xs font-semibold uppercase tracking-wide text-[var(--op-warning)]">
-              Notes
+              {text("Notes")}
             </p>
             <p className="mt-2 text-sm text-[var(--op-text-secondary)]">{invoice.notes}</p>
           </section>
@@ -212,7 +216,7 @@ export function InvoiceDetailPanel({
 
         {invoice.status === "voided" ? (
           <section className="rounded-2xl border border-[var(--op-border)] bg-[var(--op-surface-soft)] p-4 text-sm text-[var(--op-text-secondary)]">
-            <p className="font-semibold text-[var(--op-text)]">Invoice voided</p>
+            <p className="font-semibold text-[var(--op-text)]">{text("Invoice voided")}</p>
             <p className="mt-1">
               {invoice.voidReason ?? "No reason recorded."}
             </p>
@@ -225,7 +229,7 @@ export function InvoiceDetailPanel({
             className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--op-danger)] bg-[var(--op-danger-soft)] px-4 py-3 text-sm font-semibold text-[var(--op-danger)] transition hover:brightness-105 disabled:opacity-50"
           >
             <RotateCcw size={16} />
-            Void invoice and reopen appointment
+            {text("Void invoice and reopen appointment")}
           </button>
         )}
       </div>

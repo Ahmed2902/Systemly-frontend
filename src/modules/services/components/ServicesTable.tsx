@@ -1,3 +1,6 @@
+"use client";
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import {
   Archive,
   Clock3,
@@ -41,20 +44,21 @@ export function ServicesTable({
   onToggleActive: (service: CatalogService) => void;
   actionId: string | null;
 }) {
+  const text = usePlatformText();
   return (
     <section className="op-panel services-table overflow-hidden">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--op-border)] px-5 py-4">
         <div>
           <div className="flex items-center gap-2">
             <h2 className="text-lg font-semibold text-[var(--op-text)]">
-              All Services
+              {text("All Services")}
             </h2>
             <span className="rounded-full bg-[var(--op-surface-soft)] px-2.5 py-1 text-xs font-semibold text-[var(--op-text-secondary)]">
               {services.length}
             </span>
           </div>
           <p className="mt-1 text-sm text-[var(--op-text-muted)]">
-            Manage availability, duration, staff eligibility, and categories.
+            {text("Manage availability, duration, staff eligibility, and categories.")}
           </p>
         </div>
       </div>
@@ -65,11 +69,10 @@ export function ServicesTable({
             <MoreHorizontal size={24} />
           </div>
           <h3 className="mt-4 font-semibold text-[var(--op-text)]">
-            No services found
+            {text("No services found")}
           </h3>
           <p className="mt-1 max-w-sm text-sm text-[var(--op-text-muted)]">
-            Try another search or filter, or create the first service in this
-            category.
+            {text("Try another search or filter, or create the first service in this category.")}
           </p>
         </div>
       ) : (
@@ -78,27 +81,27 @@ export function ServicesTable({
             <thead className="relative z-10 bg-[var(--op-surface-soft)] text-xs uppercase tracking-wide text-[var(--op-text-muted)]">
               <tr>
                 <th className="border-b border-[var(--op-border)] px-5 py-3 font-semibold">
-                  Service
+                  {text("Service")}
                 </th>
                 <th className="border-b border-[var(--op-border)] px-4 py-3 font-semibold">
-                  Category
+                  {text("Category")}
                 </th>
                 <th className="border-b border-[var(--op-border)] px-4 py-3 font-semibold">
-                  Duration
+                  {text("Duration")}
                 </th>
                 {canManageMoney ? (
                   <th className="border-b border-[var(--op-border)] px-4 py-3 font-semibold">
-                    Price
+                    {text("Price")}
                   </th>
                 ) : null}
                 <th className="border-b border-[var(--op-border)] px-4 py-3 font-semibold">
-                  Eligible staff
+                  {text("Eligible staff")}
                 </th>
                 <th className="border-b border-[var(--op-border)] px-4 py-3 font-semibold">
-                  Status
+                  {text("Status")}
                 </th>
                 <th className="border-b border-[var(--op-border)] px-5 py-3 text-right font-semibold">
-                  Actions
+                  {text("Actions")}
                 </th>
               </tr>
             </thead>
@@ -179,7 +182,7 @@ export function ServicesTable({
                       {service.eligibleStaff.length === 0 ? (
                         <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--op-surface-soft)] px-2.5 py-1 text-xs font-medium text-[var(--op-text-muted)]">
                           <UserRoundX size={13} />
-                          No active staff
+                          {text("No active staff")}
                         </span>
                       ) : (
                         <div className="flex items-center">
@@ -217,7 +220,7 @@ export function ServicesTable({
                               : "bg-[var(--op-text-faint)]"
                           }`}
                         />
-                        {service.isActive ? "Active" : "Inactive"}
+                        {service.isActive ? text("Active") : text("Inactive")}
                       </span>
                     </td>
                     <td className="border-b border-[var(--op-border)] px-5 py-4 align-middle">

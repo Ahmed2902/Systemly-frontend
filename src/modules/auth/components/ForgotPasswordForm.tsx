@@ -41,7 +41,7 @@ export function ForgotPasswordForm() {
         <div>
           <h2>{text("Check your inbox")}</h2>
           <p>
-            If <strong>{sentTo}</strong> belongs to an account, we sent a secure password-reset link.
+            {text("If")} <strong>{sentTo}</strong> {text("belongs to an account, we sent a secure password-reset link.")}
           </p>
         </div>
         <button type="button" className="auth-secondary-button" onClick={() => setSentTo(null)}>

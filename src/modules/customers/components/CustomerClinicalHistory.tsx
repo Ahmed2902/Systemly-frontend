@@ -1,3 +1,6 @@
+"use client";
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import Link from "next/link";
 import {
   ClipboardPlus,
@@ -51,6 +54,7 @@ export function CustomerClinicalHistory({
   entries: CustomerClinicalHistoryEntry[];
   timezone: string;
 }) {
+  const text = usePlatformText();
   return (
     <section className="rounded-2xl border border-[var(--op-border)] bg-[var(--op-surface)] p-5 shadow-[var(--op-shadow)]">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -60,11 +64,10 @@ export function CustomerClinicalHistory({
           </span>
           <div>
             <h2 className="font-semibold text-[var(--op-text)]">
-              Clinical history
+              {text("Clinical history")}
             </h2>
             <p className="mt-1 text-sm text-[var(--op-text-muted)]">
-              Diagnosis, session notes, treatment plans, and prescriptions from
-              completed visits.
+              {text("Diagnosis, session notes, treatment plans, and prescriptions from completed visits.")}
             </p>
           </div>
         </div>
@@ -77,11 +80,10 @@ export function CustomerClinicalHistory({
         <div className="mt-5 flex flex-col items-center rounded-2xl border border-dashed border-[var(--op-border)] bg-[var(--op-surface-soft)] px-6 py-10 text-center">
           <FileHeart size={24} className="text-[var(--op-text-muted)]" />
           <p className="mt-3 font-semibold text-[var(--op-text)]">
-            No clinical history yet
+            {text("No clinical history yet")}
           </p>
           <p className="mt-1 max-w-md text-sm text-[var(--op-text-muted)]">
-            Completed clinic appointments with recorded clinical information
-            will appear here.
+            {text("Completed clinic appointments with recorded clinical information will appear here.")}
           </p>
         </div>
       ) : (
@@ -98,7 +100,7 @@ export function CustomerClinicalHistory({
                       {formatVisitDate(entry.startsAt, timezone)}
                     </p>
                     <span className="rounded-full bg-emerald-500/12 px-2.5 py-1 text-xs font-semibold text-emerald-500">
-                      Completed
+                      {text("Completed")}
                     </span>
                   </div>
                   <p className="mt-2 text-sm text-[var(--op-text-muted)]">
@@ -112,24 +114,24 @@ export function CustomerClinicalHistory({
                   href={`/operations/appointments/${entry.appointmentId}`}
                   className="op-button op-button-primary shrink-0"
                 >
-                  Open appointment <ExternalLink size={14} />
+                  {text("Open appointment")} <ExternalLink size={14} />
                 </Link>
               </header>
 
               <div className="grid gap-3 p-4 lg:grid-cols-3">
                 <ClinicalField
                   icon={Stethoscope}
-                  label="Diagnosis and assessment"
+                  label={text("Diagnosis and assessment")}
                   value={entry.diagnosisAssessment}
                 />
                 <ClinicalField
                   icon={ClipboardPlus}
-                  label="Clinical session notes"
+                  label={text("Clinical session notes")}
                   value={entry.clinicalSessionNotes}
                 />
                 <ClinicalField
                   icon={Pill}
-                  label="Plan and prescription"
+                  label={text("Plan and prescription")}
                   value={entry.planAndPrescription}
                 />
               </div>

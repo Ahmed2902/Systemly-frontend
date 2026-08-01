@@ -206,16 +206,16 @@ function CalendarPreview() {
       <div className="lp-showcase-app-main lp-showcase-calendar-main">
         <div className="lp-showcase-app-heading">
           <div>
-            <small>Monday</small>
-            <strong>July 27, 2026</strong>
+            <small>{text("Monday")}</small>
+            <strong>{text("July 27, 2026")}</strong>
           </div>
-          <button type="button">+ New appointment</button>
+          <button type="button">{text("+ New appointment")}</button>
         </div>
 
         <div className="lp-showcase-calendar-toolbar">
           <div
             className="lp-showcase-status-key"
-            aria-label="Appointment statuses"
+            aria-label={text("Appointment statuses")}
           >
             <span>
               <i className="is-confirmed" />
@@ -255,7 +255,7 @@ function CalendarPreview() {
               left="69%"
               width="16%"
               tone="break"
-              title="Break"
+              title={text("Break")}
               detail="30 min"
             />
           </CalendarRow>
@@ -361,11 +361,11 @@ function DashboardPreview() {
           <article className="lp-showcase-revenue-card">
             <div className="lp-showcase-card-heading">
               <div>
-                <strong>Revenue this month</strong>
+                <strong>{text("Revenue this month")}</strong>
                 <span>{text("Paid invoices")}</span>
               </div>
               <div>
-                <b>EGP 38,620</b>
+                <b>{text("EGP 38,620")}</b>
                 <small>
                   <TrendingUp size={11} /> 12.4%
                 </small>
@@ -377,10 +377,10 @@ function DashboardPreview() {
               ))}
             </div>
             <div className="lp-showcase-chart-axis">
-              <span>Jul 1</span>
-              <span>Jul 10</span>
-              <span>Jul 20</span>
-              <span>Jul 30</span>
+              <span>{text("Jul 1")}</span>
+              <span>{text("Jul 10")}</span>
+              <span>{text("Jul 20")}</span>
+              <span>{text("Jul 30")}</span>
             </div>
           </article>
 
@@ -467,28 +467,28 @@ function WebsitePreview() {
     <div className="lp-showcase-website-shell">
       <div className="lp-showcase-site-nav">
         <strong>NOIR STUDIO</strong>
-        <span>Services&nbsp;&nbsp; About&nbsp;&nbsp; Book</span>
+        <span>{text("Services About Book")}</span>
       </div>
       <div className="lp-showcase-site-copy">
-        <small>CAIRO · BY APPOINTMENT</small>
-        <h3>Care, designed around you.</h3>
+        <small>{text("CAIRO · BY APPOINTMENT")}</small>
+        <h3>{text("Care, designed around you.")}</h3>
         <p>
-          Personal appointments, considered services, and a calm way to book.
+          {text("Personal appointments, considered services, and a calm way to book.")}
         </p>
-        <button type="button">Book an appointment</button>
+        <button type="button">{text("Book an appointment")}</button>
       </div>
       <div className="lp-showcase-site-card">
         <Globe2 size={18} />
-        <span>Live website</span>
+        <span>{text("Live website")}</span>
         <strong>{text("Arabic + English")}</strong>
         <small>
-          Built from the same services and availability your team manages.
+          {text("Built from the same services and availability your team manages.")}
         </small>
       </div>
       <div className="lp-showcase-site-services" aria-hidden="true">
-        <span>Hair care</span>
-        <span>Skin treatments</span>
-        <span>Nail services</span>
+        <span>{text("Hair care")}</span>
+        <span>{text("Skin treatments")}</span>
+        <span>{text("Nail services")}</span>
       </div>
     </div>
   );
@@ -500,16 +500,16 @@ function BookingPreview() {
     <div className="lp-showcase-booking-shell">
       <div className="lp-showcase-booking-brand">
         <strong>NOIR STUDIO</strong>
-        <span>Book your visit</span>
+        <span>{text("Book your visit")}</span>
       </div>
-      <div className="lp-showcase-booking-steps" aria-label="Booking progress">
-        <span className="is-active">1 Service</span>
-        <span>2 Time</span>
-        <span>3 Details</span>
+      <div className="lp-showcase-booking-steps" aria-label={text("Booking progress")}>
+        <span className="is-active">{text("1 Service")}</span>
+        <span>{text("2 Time")}</span>
+        <span>{text("3 Details")}</span>
       </div>
       <div className="lp-showcase-booking-content">
         <div className="lp-showcase-service-list">
-          <small>Choose a service</small>
+          <small>{text("Choose a service")}</small>
           {[
             [text("Hair consultation"), "45 min", "EGP 450"],
             [text("Skin treatment"), "60 min", "EGP 700"],
@@ -530,11 +530,11 @@ function BookingPreview() {
         </div>
         <div className="lp-showcase-booking-summary">
           <ClipboardCheck size={21} />
-          <small>Your booking</small>
+          <small>{text("Your booking")}</small>
           <strong>{text("Hair consultation")}</strong>
-          <span>Monday, July 27 · 10:00 AM</span>
+          <span>{text("Monday, July 27 · 10:00 AM")}</span>
           <div>
-            <Check size={14} /> Real staff availability
+            <Check size={14} /> {text("Real staff availability")}
           </div>
           <button type="button">{text("Continue")}</button>
         </div>

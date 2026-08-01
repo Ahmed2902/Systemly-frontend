@@ -311,7 +311,7 @@ export function NewAppointmentModal() {
           </div>
 
           <div className="text-sm font-medium text-slate-500">
-            Step {activeStep} {text("of 5")}
+            {text("Step")} {activeStep} {text("of 5")}
           </div>
         </div>
 
@@ -540,7 +540,7 @@ export function NewAppointmentModal() {
                             {svc.name}
                           </div>
                           <div className="mt-1 text-xs text-slate-500">
-                            {svc.defaultDurationMinutes} min ·{" "}
+                            {svc.defaultDurationMinutes} {text("min ·")}{" "}
                             {(svc.defaultPrice / 100).toFixed(0)} EGP
                           </div>
                         </div>
@@ -596,7 +596,7 @@ export function NewAppointmentModal() {
                             {service.name}
                           </div>
                           <div className="text-xs text-slate-500">
-                            {service.defaultDurationMinutes} min ·{" "}
+                            {service.defaultDurationMinutes} {text("min ·")}{" "}
                             {(service.defaultPrice / 100).toFixed(0)} EGP
                           </div>
                         </div>
@@ -769,7 +769,7 @@ export function NewAppointmentModal() {
                             {service.name}
                           </div>
                           <div className="text-xs text-slate-500">
-                            {service.defaultDurationMinutes} mins ·{" "}
+                            {service.defaultDurationMinutes} {text("mins ·")}{" "}
                             {(service.defaultPrice / 100).toFixed(0)} EGP
                           </div>
                         </div>

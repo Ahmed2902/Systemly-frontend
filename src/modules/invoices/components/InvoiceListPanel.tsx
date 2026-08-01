@@ -1,3 +1,6 @@
+"use client";
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { ReceiptText } from "lucide-react";
 import type { InvoiceListItem } from "../invoices.types";
 
@@ -26,13 +29,14 @@ export function InvoiceListPanel({
   selectedId?: string | null;
   onSelect: (id: string) => void;
 }) {
+  const text = usePlatformText();
   if (invoices.length === 0) {
     return (
       <div className="flex min-h-72 flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-white/70 p-8 text-center">
         <ReceiptText size={28} className="text-violet-500" />
-        <p className="mt-3 font-semibold text-slate-800">No invoices found</p>
+        <p className="mt-3 font-semibold text-slate-800">{text("No invoices found")}</p>
         <p className="mt-1 text-sm text-slate-500">
-          Paid receipts will appear after payment is collected from an appointment.
+          {text("Paid receipts will appear after payment is collected from an appointment.")}
         </p>
       </div>
     );
@@ -41,12 +45,12 @@ export function InvoiceListPanel({
   return (
     <div className="overflow-hidden rounded-2xl border border-white/80 bg-white/90 shadow-sm backdrop-blur">
       <div className="hidden grid-cols-[1.05fr_1.3fr_.8fr_.9fr_.75fr_.65fr] gap-4 border-b border-slate-200 bg-slate-50/80 px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 lg:grid">
-        <span>Invoice</span>
-        <span>Customer</span>
-        <span>Date</span>
-        <span>Payment method</span>
-        <span>Amount</span>
-        <span>Status</span>
+        <span>{text("Invoice")}</span>
+        <span>{text("Customer")}</span>
+        <span>{text("Date")}</span>
+        <span>{text("Payment method")}</span>
+        <span>{text("Amount")}</span>
+        <span>{text("Status")}</span>
       </div>
       {invoices.map((invoice) => {
         const selected = selectedId === invoice.id;
@@ -88,7 +92,7 @@ export function InvoiceListPanel({
                   : "bg-slate-200 text-slate-600"
               }`}
             >
-              {invoice.status === "paid" ? "Paid" : "Voided"}
+              {invoice.status === "paid" ? text("Paid") : text("Voided")}
             </span>
           </button>
         );

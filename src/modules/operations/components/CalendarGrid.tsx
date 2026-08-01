@@ -243,7 +243,7 @@ export function CalendarGrid({ data, onSelectAppointment }: Props) {
 
       {search && !filteredStaff.length ? (
         <div className="border-t border-[var(--op-border)] px-4 py-3 text-sm text-[var(--op-text-muted)]">
-          No staff match “{search}”.
+          {text("No staff match “")}{search}”.
         </div>
       ) : null}
     </div>

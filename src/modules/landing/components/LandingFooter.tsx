@@ -1,3 +1,6 @@
+"use client";
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { SystemlyWordmark } from "@/shared/components/SystemlyWordmark";
@@ -9,13 +12,14 @@ const columns = [
 ] as const;
 
 export function LandingFooter() {
+  const text = usePlatformText();
   return (
     <footer className="lp-footer">
       <div className="lp-shell">
         <div className="lp-footer-lead">
           <SystemlyWordmark className="systemly-brand text-3xl" />
-          <h2>The operating system for service businesses.</h2>
-          <Link href="/signup">Start free <ArrowUpRight size={18}/></Link>
+          <h2>{text("The operating system for service businesses.")}</h2>
+          <Link href="/signup">{text("Start free")} <ArrowUpRight size={18}/></Link>
         </div>
 
         <div className="lp-footer-links">
@@ -28,8 +32,8 @@ export function LandingFooter() {
         </div>
 
         <div className="lp-footer-bottom">
-          <span>© {new Date().getFullYear()} Systemly.</span>
-          <span>Built for salons, clinics, and appointment teams.</span>
+          <span>© {new Date().getFullYear()} {text("Systemly.")}</span>
+          <span>{text("Built for salons, clinics, and appointment teams.")}</span>
         </div>
       </div>
     </footer>

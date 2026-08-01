@@ -1,3 +1,6 @@
+"use client";
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import Link from "next/link";
 import { ArrowLeft, Save } from "lucide-react";
 import type { AppointmentStatus } from "@/modules/operations/appointment.types";
@@ -43,6 +46,7 @@ export function AppointmentHeader({
   onSave,
   onComplete,
 }: Props) {
+  const text = usePlatformText();
   return (
     <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
       <div>
@@ -51,15 +55,15 @@ export function AppointmentHeader({
           className="flex w-fit items-center gap-1.5 text-sm text-slate-500 transition hover:text-blue-700"
         >
           <ArrowLeft size={15} />
-          Back to calendar
+          {text("Back to calendar")}
         </Link>
 
         <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">
-          Appointment Details
+          {text("Appointment Details")}
         </h1>
 
         <div className="mt-1.5 flex flex-wrap items-center gap-2 text-sm text-slate-500">
-          <span>ID: #{id}</span>
+          <span>{text("ID: #")}{id}</span>
           <span aria-hidden="true">•</span>
           <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${styles[status]}`}>
             {labels[status]}
@@ -72,7 +76,7 @@ export function AppointmentHeader({
           {dirty ? (
             <span className="inline-flex items-center gap-1.5 text-xs font-medium text-amber-600">
               <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-              Unsaved changes
+              {text("Unsaved changes")}
             </span>
           ) : null}
           <button
@@ -82,7 +86,7 @@ export function AppointmentHeader({
             className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-blue-200 hover:text-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-45"
           >
             <Save size={15} />
-            {saving ? "Saving…" : "Save changes"}
+            {saving ? text("Saving…") : text("Save changes")}
           </button>
         </div>
 
@@ -93,7 +97,7 @@ export function AppointmentHeader({
             disabled={saving}
             className="min-h-10 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-blue-200 transition hover:bg-blue-700 disabled:opacity-45"
           >
-            Complete
+            {text("Complete")}
           </button>
         ) : null}
       </div>

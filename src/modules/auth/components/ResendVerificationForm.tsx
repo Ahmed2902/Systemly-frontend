@@ -48,7 +48,7 @@ export function ResendVerificationForm() {
     <div className="auth-stack">
       {sentTo ? (
         <div className="auth-success" role="status">
-          <strong>{text("Check your inbox.")}</strong> If {sentTo} is registered and still needs verification, a fresh link has been sent.
+          <strong>{text("Check your inbox.")}</strong> {text("If")} {sentTo} {text("is registered and still needs verification, a fresh link has been sent.")}
         </div>
       ) : null}
 

@@ -1,3 +1,6 @@
+"use client";
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { Plus, Trash2 } from "lucide-react";
 import {
   formatMoneyEgp,
@@ -96,6 +99,7 @@ export function BookedServicesSection({
   onItemsChange,
   onDiscountChange,
 }: Props) {
+  const text = usePlatformText();
   const staffOptions = (serviceId: string) =>
     staff
       .filter((member) => member.serviceIds?.includes(serviceId))
@@ -274,10 +278,10 @@ export function BookedServicesSection({
       {/* Booked services header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="font-semibold text-slate-900">Booked services</h2>
+          <h2 className="font-semibold text-slate-900">{text("Booked services")}</h2>
 
           <p className="mt-1 text-sm text-slate-500">
-            Services scheduled for this appointment.
+            {text("Services scheduled for this appointment.")}
           </p>
         </div>
 
@@ -288,17 +292,17 @@ export function BookedServicesSection({
           className="flex min-h-10 items-center gap-1.5 rounded-xl bg-blue-50 px-3.5 py-2 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-45"
         >
           <Plus size={15} />
-          Add service
+          {text("Add service")}
         </button>
       </div>
 
       {/* Booked services table */}
       <div className="relative mt-5 overflow-visible rounded-xl bg-slate-50/70">
         <div className="hidden grid-cols-[minmax(11rem,1.2fr)_minmax(8rem,1fr)_minmax(7rem,1fr)_minmax(7rem,1fr)_auto] gap-3 border-b border-slate-100 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-400 md:grid">
-          <span>Service</span>
-          <span>Staff</span>
-          <span>Starts</span>
-          <span>Ends</span>
+          <span>{text("Service")}</span>
+          <span>{text("Staff")}</span>
+          <span>{text("Starts")}</span>
+          <span>{text("Ends")}</span>
           <span aria-hidden="true" />
         </div>
 
@@ -309,7 +313,7 @@ export function BookedServicesSection({
               className="relative grid gap-3 px-4 py-4 md:grid-cols-[minmax(11rem,1.2fr)_minmax(8rem,1fr)_minmax(7rem,1fr)_minmax(7rem,1fr)_auto] md:items-center"
             >
               <label className="flex min-w-0 flex-col items-center text-center text-xs font-medium text-slate-500 md:text-transparent">
-                <span className="mb-1 md:hidden">Service</span>
+                <span className="mb-1 md:hidden">{text("Service")}</span>
 
                 <AppointmentDropdown
                   align="center"
@@ -340,7 +344,7 @@ export function BookedServicesSection({
               </label>
 
               <label className="flex min-w-0 flex-col items-center text-center text-xs font-medium text-slate-500 md:text-transparent">
-                <span className="mb-1 md:hidden">Staff</span>
+                <span className="mb-1 md:hidden">{text("Staff")}</span>
 
                 <AppointmentDropdown
                   align="center"
@@ -352,7 +356,7 @@ export function BookedServicesSection({
               </label>
 
               <label className="flex min-w-0 flex-col items-center text-center text-xs font-medium text-slate-500 md:text-transparent">
-                <span className="mb-1 md:hidden">Starts</span>
+                <span className="mb-1 md:hidden">{text("Starts")}</span>
 
                 <AppointmentDropdown
                   align="center"
@@ -366,7 +370,7 @@ export function BookedServicesSection({
               </label>
 
               <label className="flex min-w-0 flex-col items-center text-center text-xs font-medium text-slate-500 md:text-transparent">
-                <span className="mb-1 md:hidden">Ends</span>
+                <span className="mb-1 md:hidden">{text("Ends")}</span>
 
                 <AppointmentDropdown
                   align="center"
@@ -405,10 +409,10 @@ export function BookedServicesSection({
       <div className="mt-6 border-t border-slate-100 pt-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h3 className="font-semibold text-slate-900">Custom items</h3>
+            <h3 className="font-semibold text-slate-900">{text("Custom items")}</h3>
 
             <p className="mt-1 text-sm text-slate-500">
-              Products, extra charges, or other untimed items.
+              {text("Products, extra charges, or other untimed items.")}
             </p>
           </div>
 
@@ -419,16 +423,16 @@ export function BookedServicesSection({
             className="flex min-h-10 items-center gap-1.5 rounded-xl bg-blue-50 px-3.5 py-2 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-45"
           >
             <Plus size={15} />
-            Add item
+            {text("Add item")}
           </button>
         </div>
 
         <div className="relative mt-5 overflow-hidden rounded-xl bg-slate-50/70">
           <div className="hidden grid-cols-[minmax(11rem,1.4fr)_minmax(7rem,.75fr)_minmax(5rem,.5fr)_minmax(7rem,.8fr)_auto] gap-3 border-b border-slate-100 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-400 md:grid">
-            <span>Description</span>
-            <span>Unit price</span>
-            <span>Quantity</span>
-            <span>Total</span>
+            <span>{text("Description")}</span>
+            <span>{text("Unit price")}</span>
+            <span>{text("Quantity")}</span>
+            <span>{text("Total")}</span>
             <span aria-hidden="true" />
           </div>
 
@@ -441,13 +445,13 @@ export function BookedServicesSection({
                 >
                   {/* Description */}
                   <label className="flex min-w-0 flex-col text-xs font-medium text-slate-500 md:items-center md:text-center md:text-transparent">
-                    <span className="mb-1 md:hidden">Description</span>
+                    <span className="mb-1 md:hidden">{text("Description")}</span>
 
                     <input
                       aria-label={`Custom item ${index + 1} description`}
                       value={item.description}
                       disabled={!editable}
-                      placeholder="Item description"
+                      placeholder={text("Item description")}
                       onChange={(event) =>
                         updateItem(index, {
                           description: event.target.value,
@@ -459,7 +463,7 @@ export function BookedServicesSection({
 
                   {/* Unit price */}
                   <label className="flex min-w-0 flex-col text-xs font-medium text-slate-500 md:items-center md:text-center md:text-transparent">
-                    <span className="mb-1 md:hidden">Unit price</span>
+                    <span className="mb-1 md:hidden">{text("Unit price")}</span>
 
                     <div className="relative w-full">
                       <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-xs font-semibold text-slate-400">
@@ -490,7 +494,7 @@ export function BookedServicesSection({
 
                   {/* Quantity */}
                   <label className="flex min-w-0 flex-col text-xs font-medium text-slate-500 md:items-center md:text-center md:text-transparent">
-                    <span className="mb-1 md:hidden">Quantity</span>
+                    <span className="mb-1 md:hidden">{text("Quantity")}</span>
 
                     <input
                       aria-label={`Custom item ${index + 1} quantity`}
@@ -513,7 +517,7 @@ export function BookedServicesSection({
 
                   {/* Total */}
                   <div className="flex min-w-0 flex-col text-xs font-medium text-slate-500 md:items-center md:text-center">
-                    <span className="mb-1 md:hidden">Total</span>
+                    <span className="mb-1 md:hidden">{text("Total")}</span>
 
                     <p className="flex h-10 w-full items-center justify-center rounded-xl px-3 text-sm font-semibold text-slate-900">
                       {formatMoneyEgp(item.priceCents * item.quantity)}
@@ -544,12 +548,11 @@ export function BookedServicesSection({
               </div>
 
               <p className="mt-3 text-sm font-medium text-slate-600">
-                No custom items
+                {text("No custom items")}
               </p>
 
               <p className="mt-1 max-w-sm text-xs leading-5 text-slate-400">
-                Add products, supplies, or extra charges that do not require
-                appointment time.
+                {text("Add products, supplies, or extra charges that do not require appointment time.")}
               </p>
             </div>
           )}
@@ -559,7 +562,7 @@ export function BookedServicesSection({
       {/* Discount and total */}
       <div className="mt-6 flex flex-wrap items-end justify-between gap-4 rounded-xl bg-slate-50/80 p-4">
         <div>
-          <p className="text-sm font-medium text-slate-600">Discount</p>
+          <p className="text-sm font-medium text-slate-600">{text("Discount")}</p>
 
           <div className="relative mt-1.5">
             <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-slate-400">
@@ -567,7 +570,7 @@ export function BookedServicesSection({
             </span>
 
             <input
-              aria-label="Discount amount in EGP"
+              aria-label={text("Discount amount in EGP")}
               type="number"
               min="0"
               step="1"
@@ -586,12 +589,12 @@ export function BookedServicesSection({
           </div>
 
           <span className="mt-1 block text-xs font-normal text-slate-400">
-            Amount in EGP
+            {text("Amount in EGP")}
           </span>
         </div>
 
         <div className="text-right">
-          <p className="text-sm font-medium text-slate-500">Estimated total</p>
+          <p className="text-sm font-medium text-slate-500">{text("Estimated total")}</p>
 
           <p className="mt-1 text-xl font-bold tracking-tight text-slate-900">
             {formatMoneyEgp(total)}

@@ -77,22 +77,20 @@ export function StepCustomizePreview({ onNext, onBack }: StepProps) {
       <div className="onboarding-page-intro">
         <p className="onboarding-kicker">{text("Public website")}</p>
         <h1 className="onboarding-page-title">
-          Make the customer experience yours.
+          {text("Make the customer experience yours.")}
         </h1>
         <p className="onboarding-page-copy">
-          Shape the public website while the preview updates from the same
-          services, team, and availability already configured.
+          {text("Shape the public website while the preview updates from the same services, team, and availability already configured.")}
         </p>
       </div>
 
       <div className="onboarding-grid-preview">
         <section className="onboarding-card onboarding-website-controls p-5">
           <h2 className="text-[23px] font-semibold tracking-[-.03em]">
-            Website details
+            {text("Website details")}
           </h2>
           <p className="mt-1 text-sm text-[var(--onboarding-muted)]">
-            Choose a template, brand treatment, imagery, and key customer-facing
-            content.
+            {text("Choose a template, brand treatment, imagery, and key customer-facing content.")}
           </p>
 
           <div className="mt-5 grid gap-5">
@@ -112,7 +110,7 @@ export function StepCustomizePreview({ onNext, onBack }: StepProps) {
             </div>
 
             <div className="onboarding-field">
-              <label>Primary brand colour</label>
+              <label>{text("Primary brand colour")}</label>
               <div className="flex flex-wrap gap-2.5">
                 {COLOURS.map((colour) => (
                   <button
@@ -145,7 +143,7 @@ export function StepCustomizePreview({ onNext, onBack }: StepProps) {
                 onClear={() => patch({ logoUrl: null })}
               />
               <UploadTile
-                label="Hero image"
+                label={text("Hero image")}
                 value={state.heroPhotoUrl}
                 uploading={uploading === "hero"}
                 onUpload={(file) => upload("hero", file)}
@@ -154,7 +152,7 @@ export function StepCustomizePreview({ onNext, onBack }: StepProps) {
             </div>
 
             <div className="onboarding-field">
-              <label>Gallery images</label>
+              <label>{text("Gallery images")}</label>
               <div className="grid grid-cols-5 gap-2">
                 {state.galleryPhotoUrls.slice(0, 9).map((url, index) => (
                   <div
@@ -163,7 +161,7 @@ export function StepCustomizePreview({ onNext, onBack }: StepProps) {
                   >
                     <img
                       src={url}
-                      alt="Gallery"
+                      alt={text("Gallery")}
                       className="h-full w-full object-cover"
                     />
                     <button
@@ -176,7 +174,7 @@ export function StepCustomizePreview({ onNext, onBack }: StepProps) {
                         })
                       }
                       className="absolute right-1 top-1 grid h-6 w-6 place-items-center rounded-full bg-black/75 text-white opacity-0 group-hover:opacity-100"
-                      aria-label="Remove gallery image"
+                      aria-label={text("Remove gallery image")}
                     >
                       <X size={12} />
                     </button>
@@ -197,17 +195,17 @@ export function StepCustomizePreview({ onNext, onBack }: StepProps) {
             </div>
 
             <div className="onboarding-field">
-              <label>Headline</label>
+              <label>{text("Headline")}</label>
               <input
                 value={state.tagline}
                 onChange={(event) => patch({ tagline: event.target.value })}
-                placeholder="Care, designed around you."
+                placeholder={text("Care, designed around you.")}
                 className="onboarding-input"
               />
             </div>
 
             <div className="onboarding-field">
-              <label>Hero introduction</label>
+              <label>{text("Hero introduction")}</label>
               <textarea
                 value={state.heroDescription}
                 onChange={(event) =>
@@ -215,15 +213,15 @@ export function StepCustomizePreview({ onNext, onBack }: StepProps) {
                 }
                 placeholder={
                   state.vertical === "clinic"
-                    ? "Professional care with clear treatment choices and convenient online booking."
-                    : "Explore considered services, meet the people behind the work, and book a time that fits your day."
+                    ? text("Professional care with clear treatment choices and convenient online booking.")
+                    : text("Explore considered services, meet the people behind the work, and book a time that fits your day.")
                 }
                 className="onboarding-textarea"
               />
             </div>
 
             <div className="onboarding-field">
-              <label>Hero image highlight</label>
+              <label>{text("Hero image highlight")}</label>
               <input
                 value={state.heroCardText}
                 onChange={(event) =>
@@ -231,8 +229,8 @@ export function StepCustomizePreview({ onNext, onBack }: StepProps) {
                 }
                 placeholder={
                   state.vertical === "clinic"
-                    ? "Thoughtful care, from your first question to your next visit."
-                    : "Your next visit, already organised."
+                    ? text("Thoughtful care, from your first question to your next visit.")
+                    : text("Your next visit, already organised.")
                 }
                 className="onboarding-input"
               />
@@ -240,9 +238,9 @@ export function StepCustomizePreview({ onNext, onBack }: StepProps) {
 
             <label className="flex items-center justify-between rounded-2xl border border-[var(--onboarding-border)] bg-[#fafaf8] p-4">
               <span>
-                <strong className="block text-sm">Show service prices</strong>
+                <strong className="block text-sm">{text("Show service prices")}</strong>
                 <small className="mt-1 block text-[var(--onboarding-muted)]">
-                  Hide prices when customers need a consultation or quote first.
+                  {text("Hide prices when customers need a consultation or quote first.")}
                 </small>
               </span>
               <input
@@ -266,11 +264,11 @@ export function StepCustomizePreview({ onNext, onBack }: StepProps) {
             </div>
 
             <div className="onboarding-field">
-              <label>About the business</label>
+              <label>{text("About the business")}</label>
               <textarea
                 value={state.aboutText}
                 onChange={(event) => patch({ aboutText: event.target.value })}
-                placeholder="Tell customers what makes your business special."
+                placeholder={text("Tell customers what makes your business special.")}
                 className="onboarding-textarea"
               />
             </div>
@@ -286,15 +284,15 @@ export function StepCustomizePreview({ onNext, onBack }: StepProps) {
             </div>
 
             <div className="onboarding-field">
-              <label>Section order</label>
+              <label>{text("Section order")}</label>
               <SectionOrderList />
             </div>
 
             <label className="flex items-center justify-between rounded-2xl border border-[var(--onboarding-border)] bg-[#fafaf8] p-4">
               <span>
-                <strong className="block text-sm">Show FAQ section</strong>
+                <strong className="block text-sm">{text("Show FAQ section")}</strong>
                 <small className="mt-1 block text-[var(--onboarding-muted)]">
-                  Answer common questions before customers book.
+                  {text("Answer common questions before customers book.")}
                 </small>
               </span>
               <input
@@ -313,9 +311,9 @@ export function StepCustomizePreview({ onNext, onBack }: StepProps) {
         <section className="onboarding-card onboarding-preview-card p-5">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <h2 className="text-xl font-semibold">Live preview</h2>
+              <h2 className="text-xl font-semibold">{text("Live preview")}</h2>
               <p className="mt-1 text-sm text-[var(--onboarding-muted)]">
-                Inspect the real customer experience before launch.
+                {text("Inspect the real customer experience before launch.")}
               </p>
             </div>
             <div className="flex flex-wrap items-center justify-end gap-2">
@@ -325,7 +323,7 @@ export function StepCustomizePreview({ onNext, onBack }: StepProps) {
                 className="onboarding-secondary-button !min-h-10 !px-3"
               >
                 <ExternalLink size={15} />
-                Open preview
+                {text("Open preview")}
               </button>
               <div className="flex rounded-full border border-[var(--onboarding-border)] bg-[#f6f6f3] p-1">
                 <button
@@ -338,7 +336,7 @@ export function StepCustomizePreview({ onNext, onBack }: StepProps) {
                   }`}
                 >
                   <Monitor size={16} />
-                  Desktop
+                  {text("Desktop")}
                 </button>
                 <button
                   type="button"
@@ -350,7 +348,7 @@ export function StepCustomizePreview({ onNext, onBack }: StepProps) {
                   }`}
                 >
                   <Smartphone size={16} />
-                  Mobile
+                  {text("Mobile")}
                 </button>
               </div>
             </div>

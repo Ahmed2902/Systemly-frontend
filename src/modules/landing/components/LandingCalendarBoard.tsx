@@ -1,3 +1,6 @@
+"use client";
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import type { CSSProperties } from "react";
 
 type CalendarTone =
@@ -116,13 +119,14 @@ export function LandingCalendarBoard({
   selectedAppointmentId?: string | null;
   onSelectAppointment?: (appointmentId: string) => void;
 }) {
+  const text = usePlatformText();
   return (
     <div
       className={`landing-calendar-preview landing-calendar-preview-${variant}`}
-      aria-label="Systemly staff calendar preview"
+      aria-label={text("Systemly staff calendar preview")}
     >
       <div className="landing-calendar-preview-head">
-        <span>Team member</span>
+        <span>{text("Team member")}</span>
         <div>
           {HOURS.map((hour) => (
             <b key={hour}>{hour}</b>

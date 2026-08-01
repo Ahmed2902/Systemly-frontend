@@ -70,7 +70,7 @@ export function WizardShell() {
 
       <div className="onboarding-shell">
         <div className="onboarding-mobile-progress">
-          <span>Step {stepIndex + 1} of {steps.length}</span>
+          <span>{text("Step")} {stepIndex + 1} of {steps.length}</span>
           <strong>{text(currentStep.label)}</strong>
           <small>{currentStep.hint}</small>
           <div

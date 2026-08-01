@@ -145,7 +145,7 @@ export default function ServiceCatalogScreen() {
       setEditingService(null);
       await load(true);
     } catch (caught: unknown) {
-      setFormError(caught instanceof Error ? caught.message : "Unable to save service");
+      setFormError(caught instanceof Error ? caught.message : text("Unable to save service"));
     } finally {
       setSaving(false);
     }
@@ -171,7 +171,7 @@ export default function ServiceCatalogScreen() {
       notifyMutation({ scope: "service", entityId: service.id });
       await load(true);
     } catch (caught: unknown) {
-      setError(caught instanceof Error ? caught.message : "Unable to update service");
+      setError(caught instanceof Error ? caught.message : text("Unable to update service"));
     } finally {
       setActionId(null);
     }

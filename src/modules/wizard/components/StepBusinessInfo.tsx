@@ -35,9 +35,9 @@ export function StepBusinessInfo({ onNext }: StepProps) {
     <div>
       <div className="onboarding-page-intro">
         <p className="onboarding-kicker">{text("Business profile")}</p>
-        <h1 className="onboarding-page-title">Start with the business.</h1>
+        <h1 className="onboarding-page-title">{text("Start with the business.")}</h1>
         <p className="onboarding-page-copy">
-          These details shape your Operations workspace, public website, booking flow, and customer communications.
+          {text("These details shape your Operations workspace, public website, booking flow, and customer communications.")}
         </p>
       </div>
 
@@ -47,12 +47,12 @@ export function StepBusinessInfo({ onNext }: StepProps) {
             <div className="flex items-center gap-3">
               <div className="onboarding-icon-tile"><Building2 size={20} /></div>
               <div>
-                <h2 className="text-base font-semibold">Business details</h2>
-                <p className="mt-1 text-xs text-[var(--onboarding-muted)]">Add the information customers and staff will rely on.</p>
+                <h2 className="text-base font-semibold">{text("Business details")}</h2>
+                <p className="mt-1 text-xs text-[var(--onboarding-muted)]">{text("Add the information customers and staff will rely on.")}</p>
               </div>
             </div>
             <span className="inline-flex items-center gap-2 rounded-full border border-[var(--onboarding-border)] px-3 py-2 text-[11px] text-[var(--onboarding-muted)]">
-              <LockKeyhole size={13} className="text-[var(--onboarding-mint)]" /> Secure &amp; private
+              <LockKeyhole size={13} className="text-[var(--onboarding-mint)]" /> {text("Secure & private")}
             </span>
           </header>
 
@@ -60,7 +60,7 @@ export function StepBusinessInfo({ onNext }: StepProps) {
             <div className="grid gap-5 sm:grid-cols-2">
               <div className="onboarding-field">
                 <label>{text("Business name")}</label>
-                <input value={state.name} onChange={(event) => patch({ name: event.target.value })} placeholder="e.g. Noir Studio" className="onboarding-input" />
+                <input value={state.name} onChange={(event) => patch({ name: event.target.value })} placeholder={text("e.g. Noir Studio")} className="onboarding-input" />
                 {errors.name ? <p className="onboarding-error">{errors.name}</p> : null}
               </div>
               <div className="onboarding-field">
@@ -72,16 +72,16 @@ export function StepBusinessInfo({ onNext }: StepProps) {
 
             <div className="onboarding-form-section border-t border-[var(--onboarding-border)] pt-6">
               <div className="onboarding-field">
-                <label>Business vertical</label>
+                <label>{text("Business vertical")}</label>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <button type="button" onClick={() => selectVertical("salon")} className={`onboarding-choice flex min-h-20 items-center gap-4 p-4 text-left ${state.vertical === "salon" ? "is-selected" : ""}`}>
                     <span className="onboarding-icon-tile is-small"><Scissors size={18} /></span>
-                    <span><strong className="block text-sm">{text("Salon")}</strong><small className="mt-1 block text-[11px] text-[var(--onboarding-muted)]">Hair, nails and beauty</small></span>
+                    <span><strong className="block text-sm">{text("Salon")}</strong><small className="mt-1 block text-[11px] text-[var(--onboarding-muted)]">{text("Hair, nails and beauty")}</small></span>
                     {state.vertical === "salon" ? <Check className="ml-auto text-[var(--onboarding-mint)]" size={17} /> : null}
                   </button>
                   <button type="button" onClick={() => selectVertical("clinic")} className={`onboarding-choice flex min-h-20 items-center gap-4 p-4 text-left ${state.vertical === "clinic" ? "is-selected" : ""}`}>
                     <span className={`onboarding-icon-tile is-small ${state.vertical === "clinic" ? "" : "is-muted"}`}><Stethoscope size={18} /></span>
-                    <span><strong className="block text-sm">{text("Clinic")}</strong><small className="mt-1 block text-[11px] text-[var(--onboarding-muted)]">Medical, dental and wellness</small></span>
+                    <span><strong className="block text-sm">{text("Clinic")}</strong><small className="mt-1 block text-[11px] text-[var(--onboarding-muted)]">{text("Medical, dental and wellness")}</small></span>
                     {state.vertical === "clinic" ? <Check className="ml-auto text-[var(--onboarding-mint)]" size={17} /> : null}
                   </button>
                 </div>
@@ -93,13 +93,13 @@ export function StepBusinessInfo({ onNext }: StepProps) {
               <div className="grid gap-5 sm:grid-cols-2">
                 <div className="onboarding-field">
                   <label>{text("City")}</label>
-                  <input value={state.city} onChange={(event) => patch({ city: event.target.value })} placeholder="e.g. Cairo" className="onboarding-input" />
+                  <input value={state.city} onChange={(event) => patch({ city: event.target.value })} placeholder={text("e.g. Cairo")} className="onboarding-input" />
                 </div>
                 <div className="onboarding-field">
                   <label>{text("Address")}</label>
                   <div className="relative">
                     {!state.address ? <MapPin size={16} aria-hidden="true" className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--onboarding-muted)]" /> : null}
-                    <input value={state.address} onChange={(event) => patch({ address: event.target.value })} placeholder="e.g. 123 Street, Maadi" className={`onboarding-input ${state.address ? "pl-3.5" : "pl-10"}`} />
+                    <input value={state.address} onChange={(event) => patch({ address: event.target.value })} placeholder={text("e.g. 123 Street, Maadi")} className={`onboarding-input ${state.address ? "pl-3.5" : "pl-10"}`} />
                   </div>
                 </div>
               </div>
@@ -107,7 +107,7 @@ export function StepBusinessInfo({ onNext }: StepProps) {
                 <div className="onboarding-field">
                   <label>{text("Timezone")}</label>
                   <select className="onboarding-select" value={state.timezone} onChange={(event) => patch({ timezone: event.target.value })}>
-                    <option value="Africa/Cairo">(GMT+02:00) Cairo</option>
+                    <option value="Africa/Cairo">{text("(GMT+02:00) Cairo")}</option>
                   </select>
                 </div>
                 <div className="onboarding-field">
@@ -124,9 +124,9 @@ export function StepBusinessInfo({ onNext }: StepProps) {
         </section>
 
         <footer className="onboarding-footer">
-          <p className="onboarding-secure-copy">You can edit these details later from Settings.</p>
+          <p className="onboarding-secure-copy">{text("You can edit these details later from Settings.")}</p>
           <div className="onboarding-footer-actions">
-            <button type="button" onClick={validateAndNext} className="onboarding-primary-button">Save and continue →</button>
+            <button type="button" onClick={validateAndNext} className="onboarding-primary-button">{text("Save and continue →")}</button>
           </div>
         </footer>
       </div>

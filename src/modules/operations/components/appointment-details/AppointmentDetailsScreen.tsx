@@ -287,7 +287,7 @@ export default function AppointmentDetailsScreen() {
     return (
       <div className="p-8">
         <Link href="/operations/appointments" className="text-sm text-blue-600">
-          ← Back to appointments
+          {text("← Back to appointments")}
         </Link>
         <p className="mt-5 text-red-600">{error ?? "Appointment not found."}</p>
       </div>

@@ -1,3 +1,6 @@
+"use client";
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { CalendarClock, Clock3 } from "lucide-react";
 import type { AppointmentStatus } from "@/modules/operations/appointment.types";
 import { AppointmentDropdown } from "./AppointmentDropdown";
@@ -39,6 +42,7 @@ export function AppointmentOverviewCard({
   onStartsAtChange,
   options,
 }: Props) {
+  const text = usePlatformText();
   const [date, time = ""] = startsAt.split("T");
 
   return (
@@ -49,9 +53,9 @@ export function AppointmentOverviewCard({
             <CalendarClock size={19} />
           </span>
           <div>
-            <h2 className="font-semibold text-[var(--op-text)]">Appointment</h2>
+            <h2 className="font-semibold text-[var(--op-text)]">{text("Appointment")}</h2>
             <p className="text-xs text-[var(--op-text-muted)]">
-              Timing and appointment status
+              {text("Timing and appointment status")}
             </p>
           </div>
         </div>
@@ -69,11 +73,11 @@ export function AppointmentOverviewCard({
       <div className="mt-5 space-y-3">
         <div className="min-w-0 rounded-xl border border-[var(--op-border)] bg-[var(--op-surface-soft)] p-3">
           <p className="text-xs font-medium text-[var(--op-text-muted)]">
-            Appointment time
+            {text("Appointment time")}
           </p>
           <div className="mt-2 grid min-w-0 gap-2 sm:grid-cols-[minmax(10.5rem,1.25fr)_minmax(9.5rem,1fr)]">
             <input
-              aria-label="Appointment date"
+              aria-label={text("Appointment date")}
               type="date"
               value={date}
               disabled={!editable}
@@ -95,10 +99,10 @@ export function AppointmentOverviewCard({
         <div className="flex min-w-0 items-center justify-between gap-4 rounded-xl border border-[var(--op-border)] bg-[var(--op-surface-soft)] px-4 py-3">
           <div>
             <p className="text-xs font-medium text-[var(--op-text-muted)]">
-              Duration
+              {text("Duration")}
             </p>
             <p className="mt-1 text-xs text-[var(--op-text-faint)]">
-              From the first service start to the final service end
+              {text("From the first service start to the final service end")}
             </p>
           </div>
           <p className="flex shrink-0 items-center gap-2 text-sm font-semibold text-[var(--op-text)]">
@@ -109,7 +113,7 @@ export function AppointmentOverviewCard({
       </div>
 
       <p className="mt-5 border-t border-[var(--op-border)] pt-4 text-xs text-[var(--op-text-faint)]">
-        Created{" "}
+        {text("Created")}{" "}
         {new Date(createdAt).toLocaleString([], {
           dateStyle: "medium",
           timeStyle: "short",

@@ -1074,7 +1074,7 @@ export function AppointmentEditPanel({
                   }
                   rows={4}
                   className="mt-2 w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-slate-100"
-                  placeholder="Add treatment plan, medication, dosage, instructions, and follow-up details."
+                  placeholder={text("Add treatment plan, medication, dosage, instructions, and follow-up details.")}
                 />
               </label>
             </div>

@@ -36,7 +36,7 @@ export function AuthLayout({
 
           <div className="systemly-auth-product" aria-hidden="true">
             <div className="systemly-auth-product-bar">
-              <span className="systemly-auth-product-status">systemly / operations</span>
+              <span className="systemly-auth-product-status">{text("systemly / operations")}</span>
               <span>{text("Today")}</span>
             </div>
             <div className="systemly-auth-product-body">
@@ -50,23 +50,23 @@ export function AuthLayout({
               <div className="systemly-auth-product-main">
                 <div className="systemly-auth-product-heading">
                   <div>
-                    <small>Monday</small>
-                    <strong>July 27, 2026</strong>
+                    <small>{text("Monday")}</small>
+                    <strong>{text("July 27, 2026")}</strong>
                   </div>
                   <em>{text("Live workspace")}</em>
                 </div>
                 <div className="systemly-auth-product-grid">
                   <div className="systemly-auth-product-metric">
                     <small>{text("Bookings")}</small>
-                    <strong>18 today</strong>
+                    <strong>{text("18 today")}</strong>
                   </div>
                   <div className="systemly-auth-product-metric">
                     <small>{text("Available staff")}</small>
-                    <strong>4 of 5</strong>
+                    <strong>{text("4 of 5")}</strong>
                   </div>
                   <div className="systemly-auth-product-metric">
                     <small>{text("Collected")}</small>
-                    <strong>EGP 6,820</strong>
+                    <strong>{text("EGP 6,820")}</strong>
                   </div>
                 </div>
                 <div className="systemly-auth-product-schedule">
@@ -78,11 +78,11 @@ export function AuthLayout({
                   <div className="systemly-auth-product-bookings">
                     <div className="systemly-auth-booking">
                       <strong>Yasmine Ali</strong>
-                      <small>Hair consultation · Mona</small>
+                      <small>{text("Hair consultation · Mona")}</small>
                     </div>
                     <div className="systemly-auth-booking">
                       <strong>Salma Tarek</strong>
-                      <small>Skin treatment · Lina</small>
+                      <small>{text("Skin treatment · Lina")}</small>
                     </div>
                   </div>
                 </div>
