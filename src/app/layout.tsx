@@ -1,8 +1,16 @@
 // src/app/layout.tsx
 import "./globals.css";
 import "./systemly-shared.css";
+import { cookies } from "next/headers";
 import { AuthProvider } from "@/modules/auth/useAuth";
-import { Playfair_Display, Inter } from "next/font/google";
+import { LocaleProvider } from "@/i18n/LocaleProvider";
+import {
+  getLocaleDirection,
+  LOCALE_COOKIE,
+  normalizeLocale,
+} from "@/i18n/config";
+import { PlatformLanguageControl } from "@/shared/components/PlatformLanguageControl";
+import { Cairo, Inter, Playfair_Display } from "next/font/google";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -10,16 +18,36 @@ const playfair = Playfair_Display({
   weight: ["500", "600", "700"],
 });
 const inter = Inter({ subsets: ["latin"], variable: "--font-body" });
+const cairo = Cairo({
+  subsets: ["arabic", "latin"],
+  variable: "--font-arabic",
+  weight: ["400", "500", "600", "700"],
+});
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const cookieStore = await cookies();
+  const locale = normalizeLocale(cookieStore.get(LOCALE_COOKIE)?.value);
+  const direction = getLocaleDirection(locale);
+
   return (
-    <html lang="en" className={`${playfair.variable} ${inter.variable}`}>
+    <html
+      lang={locale}
+      dir={direction}
+      data-locale={locale}
+      className={`${playfair.variable} ${inter.variable} ${cairo.variable}`}
+      suppressHydrationWarning
+    >
       <body>
-        <AuthProvider>{children}</AuthProvider>
+        <LocaleProvider initialLocale={locale}>
+          <AuthProvider>
+            <PlatformLanguageControl />
+            {children}
+          </AuthProvider>
+        </LocaleProvider>
       </body>
     </html>
   );
