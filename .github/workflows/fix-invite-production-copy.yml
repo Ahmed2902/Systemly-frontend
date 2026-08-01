@@ -1,0 +1,37 @@
+name: Fix production invitation copy
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize]
+    paths:
+      - scripts/fix-invite-production-copy.mjs
+      - .github/workflows/fix-invite-production-copy.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: node scripts/fix-invite-production-copy.mjs
+      - name: Commit copy and remove one-time files
+        run: |
+          rm -f scripts/fix-invite-production-copy.mjs
+          rm -f .github/workflows/fix-invite-production-copy.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "fix: align invitation copy with production delivery" || exit 0
+          git push origin HEAD:${{ github.head_ref }}
