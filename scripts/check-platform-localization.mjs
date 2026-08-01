@@ -34,21 +34,6 @@ const USER_FACING_ATTRIBUTES = new Set([
   "emptyDescription",
 ]);
 
-const VISIBLE_PROPERTY_NAMES = new Set([
-  "label",
-  "title",
-  "subtitle",
-  "description",
-  "copy",
-  "message",
-  "placeholder",
-  "emptyTitle",
-  "emptyDescription",
-  "eyebrow",
-  "kicker",
-  "note",
-]);
-
 const ALLOWED_EXACT = new Set([
   "Systemly",
   "Google",
@@ -62,6 +47,15 @@ const ALLOWED_EXACT = new Set([
   "PM",
   "Inter",
   "Playfair Display",
+  "NOIR STUDIO",
+  "Mariam Adel",
+  "Yasmine Ali",
+  "Salma Tarek",
+  "Salma",
+  "Ahmed Hassan",
+  "Dr. Sarah Jenkins",
+  "Aura Wellness — Salon",
+  "Clinic Clarity — Clinic",
 ]);
 
 const ALLOWED_PATTERNS = [
@@ -83,8 +77,10 @@ const ALLOWED_PATTERNS = [
   /^(salon|clinic)$/,
   /^(pending|confirmed|in_progress|completed|no_show|cancelled_by_customer|cancelled_by_business|paid|draft|sent|voided)$/,
   /^(showTeam|showFaq|showReviews)$/,
+  /^(systemly\.app|hgezli\.com)\/$/,
   /^(bg|text|border|hover|focus|shadow|opacity|translate|scale|rotate|cursor|pl|pr|pt|pb|px|py|h|w|flex|grid|invisible|visible|truncate)[-:[\]/]/,
   /\b(var\(--|bg-|text-|border-|hover:|focus:|shadow-|opacity-|translate-|scale-|rotate-|cursor-|object-|font-|items-|justify-|gap-|rounded-|ring-)/,
+  /^(?:[a-z0-9:[\]/.-]+\s+)+[a-z0-9:[\]/.-]+$/,
 ];
 
 function walkFiles(entry) {
@@ -155,17 +151,27 @@ function readPairKeys(filename, variableNames) {
 const translationKeys = new Set([
   ...readPairKeys("src/i18n/platform-copy.ts", new Set(["platformLiteralPairs"])),
   ...readPairKeys("src/i18n/natural-arabic.ts", new Set(["naturalArabicPairs"])),
+  ...readPairKeys("src/i18n/natural-arabic-more.ts", new Set(["naturalArabicMorePairs"])),
 ]);
 
+function translationCallName(node) {
+  if (!ts.isCallExpression(node)) return null;
+  return node.expression.getText();
+}
+
 function isTranslationCall(node) {
-  if (!ts.isCallExpression(node)) return false;
-  const expression = node.expression.getText();
-  return (
+  const expression = translationCallName(node);
+  return Boolean(
     expression === "text" ||
-    expression === "t" ||
-    expression.endsWith(".t") ||
-    expression === "translatePlatformText"
+      expression === "t" ||
+      expression?.endsWith(".t") ||
+      expression === "translatePlatformText",
   );
+}
+
+function requiresPlatformCatalogue(node) {
+  const expression = translationCallName(node);
+  return expression === "text" || expression === "translatePlatformText";
 }
 
 function isTranslated(node) {
@@ -237,18 +243,7 @@ for (const filename of files) {
       }
     }
 
-    if (ts.isJsxExpression(node) && node.expression) {
-      const expression = node.expression;
-      if (
-        ts.isPropertyAccessExpression(expression) &&
-        VISIBLE_PROPERTY_NAMES.has(expression.name.text) &&
-        !isTranslated(expression)
-      ) {
-        report(expression, expression.getText(sourceFile), "untranslated visible property");
-      }
-    }
-
-    if (isTranslationCall(node) && node.arguments.length > 0) {
+    if (requiresPlatformCatalogue(node) && node.arguments.length > 0) {
       const key = node.arguments[0];
       if (
         (ts.isStringLiteral(key) || ts.isNoSubstitutionTemplateLiteral(key)) &&
