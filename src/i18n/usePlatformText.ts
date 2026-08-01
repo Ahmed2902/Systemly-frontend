@@ -2,9 +2,10 @@
 
 import { useCallback } from "react";
 import { useLocale } from "./LocaleProvider";
-import { translatePlatformText } from "./platform-copy";
-
-export type TranslationValues = Record<string, string | number>;
+import {
+  translatePlatformText,
+  type TranslationValues,
+} from "./platform-text";
 
 export function usePlatformText() {
   const { locale } = useLocale();
