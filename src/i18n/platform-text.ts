@@ -1,11 +1,24 @@
 import type { AppLocale } from "./config";
+import { naturalArabicPairs } from "./natural-arabic";
 import { getPlatformLiteralMap } from "./platform-copy";
 
 export type TranslationValues = Record<string, string | number>;
 
+function buildArabicMap() {
+  const map = getPlatformLiteralMap("ar");
+  for (const [english, arabic] of naturalArabicPairs) map.set(english, arabic);
+  return map;
+}
+
+function buildEnglishMap() {
+  const map = getPlatformLiteralMap("en");
+  for (const [english] of naturalArabicPairs) map.set(english, english);
+  return map;
+}
+
 const maps: Record<AppLocale, Map<string, string>> = {
-  en: getPlatformLiteralMap("en"),
-  ar: getPlatformLiteralMap("ar"),
+  en: buildEnglishMap(),
+  ar: buildArabicMap(),
 };
 
 function interpolate(message: string, values?: TranslationValues): string {
