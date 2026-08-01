@@ -34,6 +34,21 @@ const USER_FACING_ATTRIBUTES = new Set([
   "emptyDescription",
 ]);
 
+const VISIBLE_PROPERTY_NAMES = new Set([
+  "label",
+  "title",
+  "subtitle",
+  "description",
+  "copy",
+  "message",
+  "placeholder",
+  "emptyTitle",
+  "emptyDescription",
+  "eyebrow",
+  "kicker",
+  "note",
+]);
+
 const ALLOWED_EXACT = new Set([
   "Systemly",
   "Google",
@@ -45,22 +60,31 @@ const ALLOWED_EXACT = new Set([
   "ID",
   "AM",
   "PM",
+  "Inter",
+  "Playfair Display",
 ]);
 
 const ALLOWED_PATTERNS = [
   /^https?:\/\//,
   /^\//,
-  /^#/, 
+  /^#/,
   /^\.?\.?\//,
+  /^\./,
   /^[a-z0-9_-]+$/,
   /^[A-Z0-9_]+$/,
   /^\d{1,2}:\d{2}$/,
   /^\d+(px|rem|em|%|ms|s)$/,
   /^[\w.-]+@[\w.-]+$/,
+  /^image\//,
+  /^var\(--/,
+  /^min\(/,
   /^(GET|POST|PATCH|PUT|DELETE)$/,
   /^(light|dark|system)$/,
   /^(salon|clinic)$/,
   /^(pending|confirmed|in_progress|completed|no_show|cancelled_by_customer|cancelled_by_business|paid|draft|sent|voided)$/,
+  /^(showTeam|showFaq|showReviews)$/,
+  /^(bg|text|border|hover|focus|shadow|opacity|translate|scale|rotate|cursor|pl|pr|pt|pb|px|py|h|w|flex|grid|invisible|visible|truncate)[-:[\]/]/,
+  /\b(var\(--|bg-|text-|border-|hover:|focus:|shadow-|opacity-|translate-|scale-|rotate-|cursor-|object-|font-|items-|justify-|gap-|rounded-|ring-)/,
 ];
 
 function walkFiles(entry) {
@@ -76,7 +100,7 @@ function walkFiles(entry) {
 }
 
 function normalize(value) {
-  return value.replace(/\s+/g, " ").trim();
+  return value.replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
 }
 
 function isEnglishCopy(value) {
@@ -87,20 +111,67 @@ function isEnglishCopy(value) {
   return normalized.length >= 2;
 }
 
+function readPairKeys(filename, variableNames) {
+  const absolute = path.join(ROOT, filename);
+  if (!fs.existsSync(absolute)) return new Set();
+  const source = fs.readFileSync(absolute, "utf8");
+  const sourceFile = ts.createSourceFile(
+    absolute,
+    source,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TS,
+  );
+  const keys = new Set();
+
+  function visit(node) {
+    if (
+      ts.isVariableDeclaration(node) &&
+      ts.isIdentifier(node.name) &&
+      variableNames.has(node.name.text) &&
+      node.initializer &&
+      ts.isArrayLiteralExpression(node.initializer)
+    ) {
+      for (const item of node.initializer.elements) {
+        if (!ts.isArrayLiteralExpression(item) || item.elements.length < 2) continue;
+        const sourceElement = item.elements[0];
+        const targetElement = item.elements[1];
+        if (
+          ts.isStringLiteralLike(sourceElement) &&
+          ts.isStringLiteralLike(targetElement) &&
+          targetElement.text.trim()
+        ) {
+          keys.add(normalize(sourceElement.text));
+        }
+      }
+    }
+    ts.forEachChild(node, visit);
+  }
+
+  visit(sourceFile);
+  return keys;
+}
+
+const translationKeys = new Set([
+  ...readPairKeys("src/i18n/platform-copy.ts", new Set(["platformLiteralPairs"])),
+  ...readPairKeys("src/i18n/natural-arabic.ts", new Set(["naturalArabicPairs"])),
+]);
+
+function isTranslationCall(node) {
+  if (!ts.isCallExpression(node)) return false;
+  const expression = node.expression.getText();
+  return (
+    expression === "text" ||
+    expression === "t" ||
+    expression.endsWith(".t") ||
+    expression === "translatePlatformText"
+  );
+}
+
 function isTranslated(node) {
   let current = node.parent;
   while (current) {
-    if (ts.isCallExpression(current)) {
-      const expression = current.expression.getText();
-      if (
-        expression === "text" ||
-        expression === "t" ||
-        expression.endsWith(".t") ||
-        expression === "translatePlatformText"
-      ) {
-        return true;
-      }
-    }
+    if (isTranslationCall(current)) return true;
     if (ts.isStatement(current) || ts.isJsxElement(current)) break;
     current = current.parent;
   }
@@ -156,17 +227,36 @@ for (const filename of files) {
       !isTranslated(node)
     ) {
       const parent = node.parent;
-      const isVisibleExpression =
-        ts.isJsxExpression(parent) ||
+      const directJsxValue = ts.isJsxExpression(parent);
+      const conditionalValue =
         ts.isConditionalExpression(parent) ||
-        ts.isArrayLiteralExpression(parent) ||
-        (ts.isPropertyAssignment(parent) &&
-          ts.isIdentifier(parent.name) &&
-          /^(label|title|subtitle|description|copy|message|placeholder|emptyTitle|emptyDescription|eyebrow|kicker|note|name)$/i.test(
-            parent.name.text,
-          ));
+        (ts.isConditionalExpression(parent.parent) &&
+          (parent.parent.whenTrue === parent || parent.parent.whenFalse === parent));
+      if (directJsxValue || conditionalValue) {
+        report(node, node.text, "string expression");
+      }
+    }
 
-      if (isVisibleExpression) report(node, node.text, "string expression");
+    if (ts.isJsxExpression(node) && node.expression) {
+      const expression = node.expression;
+      if (
+        ts.isPropertyAccessExpression(expression) &&
+        VISIBLE_PROPERTY_NAMES.has(expression.name.text) &&
+        !isTranslated(expression)
+      ) {
+        report(expression, expression.getText(sourceFile), "untranslated visible property");
+      }
+    }
+
+    if (isTranslationCall(node) && node.arguments.length > 0) {
+      const key = node.arguments[0];
+      if (
+        (ts.isStringLiteral(key) || ts.isNoSubstitutionTemplateLiteral(key)) &&
+        isEnglishCopy(key.text) &&
+        !translationKeys.has(normalize(key.text))
+      ) {
+        report(key, key.text, "missing Arabic catalogue entry");
+      }
     }
 
     ts.forEachChild(node, visit);
@@ -184,7 +274,7 @@ const ordered = [...unique.values()].sort((a, b) =>
 );
 
 if (ordered.length) {
-  console.error(`Found ${ordered.length} platform strings that are not explicitly localized:\n`);
+  console.error(`Found ${ordered.length} platform localization issues:\n`);
   for (const finding of ordered) {
     console.error(
       `${finding.file}:${finding.location} [${finding.kind}] ${JSON.stringify(finding.value)}`,
@@ -193,4 +283,6 @@ if (ordered.length) {
   process.exit(1);
 }
 
-console.log(`Localization audit passed across ${files.length} platform files.`);
+console.log(
+  `Localization audit passed across ${files.length} platform files with ${translationKeys.size} Arabic catalogue entries.`,
+);
