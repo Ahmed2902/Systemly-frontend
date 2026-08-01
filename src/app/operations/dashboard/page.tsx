@@ -57,7 +57,7 @@ export default function DashboardOverviewPage() {
     >
       {error ? <AnalyticsState message={error} /> : null}
       {!data && !error ? (
-        <AnalyticsState message="Loading dashboard overview…" />
+        <AnalyticsState message={text("Loading dashboard overview…")} />
       ) : null}
       {data ? (
         <div className="space-y-3">
@@ -67,22 +67,22 @@ export default function DashboardOverviewPage() {
               value={formatEgp(data.revenue.summary.revenueCents)}
               trend={formatPercent(growthPct)}
               tone={growthTone}
-              hint="Collected in the selected period"
+              hint={text("Collected in the selected period")}
             />
             <MetricCard
               label={text("Paid invoices")}
               value={String(data.revenue.summary.paidInvoiceCount)}
-              hint="Completed payments"
+              hint={text("Completed payments")}
             />
             <MetricCard
               label={text("Average paid invoice")}
               value={formatEgp(data.revenue.summary.averageInvoiceCents)}
-              hint="Collected per paid invoice"
+              hint={text("Collected per paid invoice")}
             />
             <MetricCard
               label={text("Total bookings")}
               value={String(data.operations.summary.bookingCount)}
-              hint="Appointments in this period"
+              hint={text("Appointments in this period")}
             />
             <MetricCard
               label={text("Active customers")}

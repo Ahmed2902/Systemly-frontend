@@ -77,7 +77,7 @@ export default function OperationsAnalyticsPage() {
     >
       {error ? <AnalyticsState message={error} /> : null}
       {!data && !error ? (
-        <AnalyticsState message="Loading bookings and services analytics…" />
+        <AnalyticsState message={text("Loading bookings and services analytics…")} />
       ) : null}
       {data ? (
         <div className="space-y-3">
@@ -109,7 +109,7 @@ export default function OperationsAnalyticsPage() {
             <MetricCard
               label={text("Service selections")}
               value={String(serviceSelectionCount)}
-              hint="One booking may contain several services"
+              hint={text("One booking may contain several services")}
             />
           </div>
 

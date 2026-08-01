@@ -62,7 +62,7 @@ export default function RevenueAnalyticsPage() {
     >
       {error ? <AnalyticsState message={error} /> : null}
       {!data && !error ? (
-        <AnalyticsState message="Loading revenue analytics…" />
+        <AnalyticsState message={text("Loading revenue analytics…")} />
       ) : null}
       {data ? (
         <div className="space-y-3">
@@ -70,19 +70,19 @@ export default function RevenueAnalyticsPage() {
             <MetricCard
               label={text("Total revenue")}
               value={formatEgp(data.summary.revenueCents)}
-              hint="Collected in the selected period"
+              hint={text("Collected in the selected period")}
               emoji="↗"
             />
             <MetricCard
               label={text("Paid invoices")}
               value={String(data.summary.paidInvoiceCount)}
-              hint="Successfully settled invoices"
+              hint={text("Successfully settled invoices")}
               emoji="🧾"
             />
             <MetricCard
               label={text("Average paid invoice")}
               value={formatEgp(data.summary.averageInvoiceCents)}
-              hint="Average value per successful payment"
+              hint={text("Average value per successful payment")}
               emoji="◷"
             />
             <MetricCard
@@ -204,7 +204,7 @@ export default function RevenueAnalyticsPage() {
                   formatValue={formatEgp}
                 />
               ) : (
-                <AnalyticsState message="No custom items were sold in this period." />
+                <AnalyticsState message={text("No custom items were sold in this period.")} />
               )}
             </AnalyticsPanel>
 

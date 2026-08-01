@@ -43,7 +43,7 @@ export default function GrowthAnalyticsPage() {
   return (
     <AnalyticsShell title={text("Growth Analytics")} subtitle={text("Monthly momentum, acquisition mix, invoice volume, and retention")}>
       {error ? <AnalyticsState message={error} /> : null}
-      {!data && !error ? <AnalyticsState message="Loading growth analytics…" /> : null}
+      {!data && !error ? <AnalyticsState message={text("Loading growth analytics…")} /> : null}
       {data ? (
         <div className="space-y-3">
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">

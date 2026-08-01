@@ -53,7 +53,7 @@ export default function CustomerAnalyticsPage() {
     >
       {error ? <AnalyticsState message={error} /> : null}
       {!data && !error ? (
-        <AnalyticsState message="Loading customer analytics…" />
+        <AnalyticsState message={text("Loading customer analytics…")} />
       ) : null}
       {data ? (
         <div className="space-y-3">
@@ -61,13 +61,13 @@ export default function CustomerAnalyticsPage() {
             <MetricCard
               label={text("New customers")}
               value={String(data.summary.newCustomers)}
-              hint="First-time customers acquired"
+              hint={text("First-time customers acquired")}
               emoji="＋"
             />
             <MetricCard
               label={text("Returning customers")}
               value={String(data.summary.returningCustomers)}
-              hint="Customers who booked again"
+              hint={text("Customers who booked again")}
               emoji="↻"
             />
             <MetricCard

@@ -55,7 +55,7 @@ export default function StaffAnalyticsPage() {
     >
       {error ? <AnalyticsState message={error} /> : null}
       {!data && !error ? (
-        <AnalyticsState message="Loading staff analytics…" />
+        <AnalyticsState message={text("Loading staff analytics…")} />
       ) : null}
       {data ? (
         <div className="space-y-3">
@@ -63,12 +63,12 @@ export default function StaffAnalyticsPage() {
             <MetricCard
               label={text("Service revenue generated")}
               value={formatEgp(data.summary.revenueCents)}
-              hint="Custom items stay in business revenue unless they are explicitly assigned to staff"
+              hint={text("Custom items stay in business revenue unless they are explicitly assigned to staff")}
             />
             <MetricCard
               label={text("Total commission")}
               value={formatEgp(data.summary.commissionCents)}
-              hint="Commission calculated from attributed service lines"
+              hint={text("Commission calculated from attributed service lines")}
             />
             <MetricCard
               label={text("Average utilisation")}
