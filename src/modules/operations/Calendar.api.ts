@@ -95,7 +95,13 @@ export async function getServiceCatalog(
   }));
 }
 
+function clinicText(value: string | Record<string, unknown> | null | undefined) {
+  if (!value) return undefined;
+  return typeof value === "string" ? value : JSON.stringify(value, null, 2);
+}
+
 function appointmentUpdateBody(appointment: AppointmentSummary) {
+  const clinical = appointment.clinicVisitRecord;
   return {
     segments: appointment.segments.map((segment) => ({
       id: segment.id.startsWith("seg-new") ? undefined : segment.id,
@@ -112,12 +118,14 @@ function appointmentUpdateBody(appointment: AppointmentSummary) {
     })),
     discountCents: appointment.discount,
     notes: appointment.notes,
-    clinical: appointment.clinicVisitRecord
+    clinical: clinical
       ? {
-          notes: appointment.clinicVisitRecord.notes ?? undefined,
-          diagnosis: appointment.clinicVisitRecord.diagnosis ?? undefined,
-          prescriptionJson:
-            appointment.clinicVisitRecord.prescriptionJson ?? undefined,
+          diagnosisAssessment:
+            clinical.diagnosisAssessment ?? clinical.diagnosis ?? undefined,
+          clinicalSessionNotes:
+            clinical.clinicalSessionNotes ?? clinical.notes ?? undefined,
+          planAndPrescription:
+            clinical.planAndPrescription ?? clinicText(clinical.prescriptionJson),
         }
       : undefined,
   };

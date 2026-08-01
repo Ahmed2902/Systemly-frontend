@@ -61,9 +61,9 @@ type Draft = {
   customItems: Item[];
   discountCents: number;
   notes: string;
-  diagnosis: string;
-  clinicalNotes: string;
-  prescriptionText: string;
+  diagnosisAssessment: string;
+  clinicalSessionNotes: string;
+  planAndPrescription: string;
 };
 function localValue(value: string, timezone: string) {
   const parts = new Intl.DateTimeFormat("en-CA", {
@@ -152,11 +152,12 @@ export default function AppointmentDetailsScreen() {
         })),
         discountCents: detail.discountCents ?? 0,
         notes: detail.notes ?? "",
-        diagnosis: detail.clinicVisitRecord?.diagnosis ?? "",
-        clinicalNotes: detail.clinicVisitRecord?.notes ?? "",
-        prescriptionText: detail.clinicVisitRecord?.prescriptionJson
-          ? JSON.stringify(detail.clinicVisitRecord.prescriptionJson, null, 2)
-          : "",
+        diagnosisAssessment:
+          mapped.clinicVisitRecord?.diagnosisAssessment ?? "",
+        clinicalSessionNotes:
+          mapped.clinicVisitRecord?.clinicalSessionNotes ?? "",
+        planAndPrescription:
+          mapped.clinicVisitRecord?.planAndPrescription ?? "",
       };
       setRaw(detail);
       setCalendar(day);
@@ -206,13 +207,6 @@ export default function AppointmentDetailsScreen() {
     setSaving(true);
     setError(null);
     try {
-      let prescriptionJson: Record<string, unknown> | undefined;
-      if (draft.prescriptionText.trim()) {
-        const parsed = JSON.parse(draft.prescriptionText);
-        if (!parsed || typeof parsed !== "object" || Array.isArray(parsed))
-          throw new Error("Prescription must be a JSON object.");
-        prescriptionJson = parsed;
-      }
       const segments: AppointmentSegment[] = draft.segments.map(
         (segment, index) => ({
           id: segment.id,
@@ -247,9 +241,9 @@ export default function AppointmentDetailsScreen() {
           clinicVisitRecord:
             user?.vertical === "clinic"
               ? {
-                  diagnosis: draft.diagnosis,
-                  notes: draft.clinicalNotes,
-                  prescriptionJson,
+                  diagnosisAssessment: draft.diagnosisAssessment,
+                  clinicalSessionNotes: draft.clinicalSessionNotes,
+                  planAndPrescription: draft.planAndPrescription,
                 }
               : null,
         },
@@ -424,16 +418,18 @@ export default function AppointmentDetailsScreen() {
             />
             {user?.vertical === "clinic" ? (
               <ClinicVisitSection
-                diagnosis={draft.diagnosis}
-                clinicalNotes={draft.clinicalNotes}
-                prescriptionText={draft.prescriptionText}
+                diagnosisAssessment={draft.diagnosisAssessment}
+                clinicalSessionNotes={draft.clinicalSessionNotes}
+                planAndPrescription={draft.planAndPrescription}
                 disabled={!editable}
-                onDiagnosisChange={(diagnosis) => update({ diagnosis })}
-                onClinicalNotesChange={(clinicalNotes) =>
-                  update({ clinicalNotes })
+                onDiagnosisAssessmentChange={(diagnosisAssessment) =>
+                  update({ diagnosisAssessment })
                 }
-                onPrescriptionChange={(prescriptionText) =>
-                  update({ prescriptionText })
+                onClinicalSessionNotesChange={(clinicalSessionNotes) =>
+                  update({ clinicalSessionNotes })
+                }
+                onPlanAndPrescriptionChange={(planAndPrescription) =>
+                  update({ planAndPrescription })
                 }
               />
             ) : null}

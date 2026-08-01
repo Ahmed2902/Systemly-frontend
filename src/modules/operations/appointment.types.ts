@@ -84,9 +84,15 @@ export interface AppointmentSummary {
 }
 
 export interface ClinicVisitRecord {
-  notes?: string | null;
+  diagnosisAssessment?: string | null;
+  clinicalSessionNotes?: string | null;
+  planAndPrescription?: string | null;
+  /** @deprecated Temporary aliases for the existing Calendar drawer. */
   diagnosis?: string | null;
-  prescriptionJson?: Record<string, unknown> | null;
+  /** @deprecated Temporary aliases for the existing Calendar drawer. */
+  notes?: string | null;
+  /** @deprecated Temporary aliases for the existing Calendar drawer. */
+  prescriptionJson?: string | Record<string, unknown> | null;
 }
 
 export interface StaffBreak {

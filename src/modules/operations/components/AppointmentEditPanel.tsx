@@ -279,9 +279,7 @@ export function AppointmentEditPanel({
       service.defaultDurationMinutes > 0
         ? service.defaultDurationMinutes
         : 30;
-    const end = new Date(
-      start.getTime() + durationMinutes * 60000,
-    );
+    const end = new Date(start.getTime() + durationMinutes * 60000);
     const eligibleStaff = getAvailableStaffForSegment({
       staff,
       serviceId: service.id,
@@ -473,7 +471,6 @@ export function AppointmentEditPanel({
     }
     setSaving(true);
     try {
-      // TODO: PATCH /appointments/:id  — see API list
       await onSave(draft);
     } catch (error: unknown) {
       setValidationError(
@@ -503,7 +500,12 @@ export function AppointmentEditPanel({
       draft.status !== "cancelled_by_customer"
     )
       return;
-    if (!confirm("Permanently delete this cancelled appointment? This cannot be undone.")) return;
+    if (
+      !confirm(
+        "Permanently delete this cancelled appointment? This cannot be undone.",
+      )
+    )
+      return;
     await runAction("Deleting…", () => onDelete(draft.id));
   }
 
@@ -556,7 +558,9 @@ export function AppointmentEditPanel({
     firstSegment && lastSegment
       ? `${toTimeValue(firstSegment.startsAt, businessTimezone)} – ${toTimeValue(lastSegment.endsAt, businessTimezone)}`
       : "No services yet";
-  const appointmentDateLabel = new Date(`${draft.date}T12:00:00Z`).toLocaleDateString([], {
+  const appointmentDateLabel = new Date(
+    `${draft.date}T12:00:00Z`,
+  ).toLocaleDateString([], {
     month: "2-digit",
     day: "2-digit",
     year: "numeric",
@@ -631,39 +635,40 @@ export function AppointmentEditPanel({
             draft.status !== "cancelled_by_business" &&
             draft.status !== "cancelled_by_customer" ? (
               <>
-              <StyledDropdown
-                value={draft.status}
-                disabled={Boolean(action)}
-                options={[
-                  { value: "pending", label: "Pending" },
-                  { value: "confirmed", label: "Confirmed" },
-                  { value: "in_progress", label: "In progress" },
-                  { value: "no_show", label: "No-show" },
-                ]}
-                onChange={(value) => {
-                  const status = value as AppointmentSummary["status"];
-                  void runAction("Updating status…", async () => {
-                    await onStatusChange(status);
-                    setDraft((current) => ({ ...current, status }));
-                  });
-                }}
-              />
-              <select
-                value={draft.status}
-                disabled={Boolean(action)}
-                onChange={(event) => {
-                  const status = event.target.value as AppointmentSummary["status"];
-                  void runAction("Updating status…", async () => {
-                    await onStatusChange(status);
-                    setDraft((current) => ({ ...current, status }));
-                  });
-                }}
-                className="hidden"
-              >
-                <option value="pending">Pending</option>
-                <option value="confirmed">Confirmed</option>
-                <option value="no_show">No-show</option>
-              </select>
+                <StyledDropdown
+                  value={draft.status}
+                  disabled={Boolean(action)}
+                  options={[
+                    { value: "pending", label: "Pending" },
+                    { value: "confirmed", label: "Confirmed" },
+                    { value: "in_progress", label: "In progress" },
+                    { value: "no_show", label: "No-show" },
+                  ]}
+                  onChange={(value) => {
+                    const status = value as AppointmentSummary["status"];
+                    void runAction("Updating status…", async () => {
+                      await onStatusChange(status);
+                      setDraft((current) => ({ ...current, status }));
+                    });
+                  }}
+                />
+                <select
+                  value={draft.status}
+                  disabled={Boolean(action)}
+                  onChange={(event) => {
+                    const status = event.target
+                      .value as AppointmentSummary["status"];
+                    void runAction("Updating status…", async () => {
+                      await onStatusChange(status);
+                      setDraft((current) => ({ ...current, status }));
+                    });
+                  }}
+                  className="hidden"
+                >
+                  <option value="pending">Pending</option>
+                  <option value="confirmed">Confirmed</option>
+                  <option value="no_show">No-show</option>
+                </select>
               </>
             ) : (
               <div className="mt-2 text-lg font-semibold text-slate-950">
@@ -727,44 +732,46 @@ export function AppointmentEditPanel({
             </div>
             {!locked && (
               <>
-              <StyledDropdown
-                value=""
-                placeholder="+ Add service…"
-                tone="blue"
-                options={serviceCatalog.map((service) => ({
-                  value: service.id,
-                  label: service.name,
-                }))}
-                onChange={(serviceId) => {
-                  const service = serviceCatalog.find(
-                    (item) => item.id === serviceId,
-                  );
-                  if (service) addService(service);
-                }}
-              />
-              <div className="hidden">
-              <select
-                onChange={(e) => {
-                  const svc = serviceCatalog.find(
-                    (s) => s.id === e.target.value,
-                  );
-                  if (svc) addService(svc);
-                  e.target.value = "";
-                }}
-                defaultValue=""
-                className="min-w-[190px] appearance-none rounded-xl border border-blue-200 bg-blue-50 px-3 py-2.5 pr-9 text-sm font-semibold text-blue-700 shadow-sm outline-none transition hover:border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-              >
-                <option value="" disabled>
-                  + Add service…
-                </option>
-                {serviceCatalog.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name}
-                  </option>
-                ))}
-              </select>
-              <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-blue-500">⌄</span>
-              </div>
+                <StyledDropdown
+                  value=""
+                  placeholder="+ Add service…"
+                  tone="blue"
+                  options={serviceCatalog.map((service) => ({
+                    value: service.id,
+                    label: service.name,
+                  }))}
+                  onChange={(serviceId) => {
+                    const service = serviceCatalog.find(
+                      (item) => item.id === serviceId,
+                    );
+                    if (service) addService(service);
+                  }}
+                />
+                <div className="hidden">
+                  <select
+                    onChange={(e) => {
+                      const svc = serviceCatalog.find(
+                        (s) => s.id === e.target.value,
+                      );
+                      if (svc) addService(svc);
+                      e.target.value = "";
+                    }}
+                    defaultValue=""
+                    className="min-w-[190px] appearance-none rounded-xl border border-blue-200 bg-blue-50 px-3 py-2.5 pr-9 text-sm font-semibold text-blue-700 shadow-sm outline-none transition hover:border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  >
+                    <option value="" disabled>
+                      + Add service…
+                    </option>
+                    {serviceCatalog.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name}
+                      </option>
+                    ))}
+                  </select>
+                  <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-blue-500">
+                    ⌄
+                  </span>
+                </div>
               </>
             )}
           </div>
@@ -811,21 +818,23 @@ export function AppointmentEditPanel({
                       onChange={(staffId) => updateSegment(i, { staffId })}
                     />
                     <div className="hidden">
-                    <select
-                      disabled={locked}
-                      value={seg.staffId}
-                      onChange={(e) =>
-                        updateSegment(i, { staffId: e.target.value })
-                      }
-                      className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-3 py-2.5 pr-9 text-sm font-medium text-slate-700 shadow-sm outline-none transition hover:border-blue-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-slate-100"
-                    >
-                      {staffOptionsForSegment(seg).map((s) => (
-                        <option key={s.id} value={s.id}>
-                          {s.name}
-                        </option>
-                      ))}
-                    </select>
-                    <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-slate-400">⌄</span>
+                      <select
+                        disabled={locked}
+                        value={seg.staffId}
+                        onChange={(e) =>
+                          updateSegment(i, { staffId: e.target.value })
+                        }
+                        className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-3 py-2.5 pr-9 text-sm font-medium text-slate-700 shadow-sm outline-none transition hover:border-blue-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-slate-100"
+                      >
+                        {staffOptionsForSegment(seg).map((s) => (
+                          <option key={s.id} value={s.id}>
+                            {s.name}
+                          </option>
+                        ))}
+                      </select>
+                      <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-slate-400">
+                        ⌄
+                      </span>
                     </div>
                     <StyledDropdown
                       value={toTimeValue(seg.startsAt, businessTimezone)}
@@ -833,7 +842,9 @@ export function AppointmentEditPanel({
                       options={timeOptionsIncluding(
                         toTimeValue(seg.startsAt, businessTimezone),
                       )}
-                      onChange={(value) => updateSegmentTime(i, "startsAt", value)}
+                      onChange={(value) =>
+                        updateSegmentTime(i, "startsAt", value)
+                      }
                     />
                     <StyledDropdown
                       value={toTimeValue(seg.endsAt, businessTimezone)}
@@ -841,7 +852,9 @@ export function AppointmentEditPanel({
                       options={timeOptionsIncluding(
                         toTimeValue(seg.endsAt, businessTimezone),
                       )}
-                      onChange={(value) => updateSegmentTime(i, "endsAt", value)}
+                      onChange={(value) =>
+                        updateSegmentTime(i, "endsAt", value)
+                      }
                     />
                   </div>
 
@@ -941,7 +954,10 @@ export function AppointmentEditPanel({
                           c.id === item.id
                             ? {
                                 ...c,
-                                quantity: Math.max(1, Math.floor(Number(e.target.value) || 1)),
+                                quantity: Math.max(
+                                  1,
+                                  Math.floor(Number(e.target.value) || 1),
+                                ),
                               }
                             : c,
                         ),
@@ -969,65 +985,94 @@ export function AppointmentEditPanel({
         <div className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
           {isClinic && (
             <div className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
-              <label className="mb-2 block text-sm font-semibold text-slate-950">
-                Clinic Visit Record
-              </label>
-              <textarea
-                disabled={locked}
-                value={draft.clinicVisitRecord?.notes ?? ""}
-                onChange={(e) =>
-                  setDraft((d) => ({
-                    ...d,
-                    clinicVisitRecord: {
-                      ...(d.clinicVisitRecord ?? {}),
-                      notes: e.target.value,
-                    },
-                  }))
-                }
-                rows={4}
-                className="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-slate-100"
-                placeholder="Enter primary diagnosis or patient complaint..."
-              />
-              <input
-                disabled={locked}
-                value={draft.clinicVisitRecord?.diagnosis ?? ""}
-                onChange={(e) =>
-                  setDraft((d) => ({
-                    ...d,
-                    clinicVisitRecord: {
-                      ...(d.clinicVisitRecord ?? {}),
-                      diagnosis: e.target.value,
-                    },
-                  }))
-                }
-                className="mt-3 w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm disabled:bg-slate-100"
-                placeholder="Diagnosis"
-              />
-              <textarea
-                disabled={locked}
-                defaultValue={JSON.stringify(
-                  draft.clinicVisitRecord?.prescriptionJson ?? {},
-                  null,
-                  2,
-                )}
-                onBlur={(e) => {
-                  try {
-                    const prescriptionJson = JSON.parse(e.target.value);
-                    setDraft((d) => ({
-                      ...d,
-                      clinicVisitRecord: {
-                        ...(d.clinicVisitRecord ?? {}),
-                        prescriptionJson,
-                      },
-                    }));
-                  } catch {
-                    setValidationError("Prescription must be valid JSON.");
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold text-slate-950">
+                  Clinic visit record
+                </h3>
+                <p className="mt-1 text-sm text-slate-500">
+                  Clinical information attached to this appointment.
+                </p>
+              </div>
+
+              <label className="block text-sm font-semibold text-slate-700">
+                Diagnosis and assessment
+                <textarea
+                  disabled={locked}
+                  value={
+                    draft.clinicVisitRecord?.diagnosisAssessment ??
+                    draft.clinicVisitRecord?.diagnosis ??
+                    ""
                   }
-                }}
-                rows={4}
-                className="mt-3 w-full rounded-2xl border border-slate-300 px-4 py-3 font-mono text-xs disabled:bg-slate-100"
-                placeholder='Prescription JSON, e.g. {"medicine":"..."}'
-              />
+                  onChange={(event) =>
+                    setDraft((current) => ({
+                      ...current,
+                      clinicVisitRecord: {
+                        ...(current.clinicVisitRecord ?? {}),
+                        diagnosisAssessment: event.target.value,
+                      },
+                    }))
+                  }
+                  rows={3}
+                  className="mt-2 w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-slate-100"
+                  placeholder="Record the diagnosis and clinical assessment."
+                />
+              </label>
+
+              <label className="mt-4 block text-sm font-semibold text-slate-700">
+                Clinical session notes
+                <textarea
+                  disabled={locked}
+                  value={
+                    draft.clinicVisitRecord?.clinicalSessionNotes ??
+                    draft.clinicVisitRecord?.notes ??
+                    ""
+                  }
+                  onChange={(event) =>
+                    setDraft((current) => ({
+                      ...current,
+                      clinicVisitRecord: {
+                        ...(current.clinicVisitRecord ?? {}),
+                        clinicalSessionNotes: event.target.value,
+                      },
+                    }))
+                  }
+                  rows={4}
+                  className="mt-2 w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-slate-100"
+                  placeholder="Record observations, procedures, and session details."
+                />
+              </label>
+
+              <label className="mt-4 block text-sm font-semibold text-slate-700">
+                Plan and prescription
+                <textarea
+                  disabled={locked}
+                  value={
+                    draft.clinicVisitRecord?.planAndPrescription ??
+                    (typeof draft.clinicVisitRecord?.prescriptionJson ===
+                    "string"
+                      ? draft.clinicVisitRecord.prescriptionJson
+                      : draft.clinicVisitRecord?.prescriptionJson
+                        ? JSON.stringify(
+                            draft.clinicVisitRecord.prescriptionJson,
+                            null,
+                            2,
+                          )
+                        : "")
+                  }
+                  onChange={(event) =>
+                    setDraft((current) => ({
+                      ...current,
+                      clinicVisitRecord: {
+                        ...(current.clinicVisitRecord ?? {}),
+                        planAndPrescription: event.target.value,
+                      },
+                    }))
+                  }
+                  rows={4}
+                  className="mt-2 w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-slate-100"
+                  placeholder="Add treatment plan, medication, dosage, instructions, and follow-up details."
+                />
+              </label>
             </div>
           )}
           {(draft.status === "cancelled_by_business" ||
@@ -1089,7 +1134,9 @@ export function AppointmentEditPanel({
         {!locked && (
           <button
             onClick={handleSave}
-            disabled={saving || Boolean(action) || hasAnyConflict || hasInvalidDraft}
+            disabled={
+              saving || Boolean(action) || hasAnyConflict || hasInvalidDraft
+            }
             className="w-full rounded-2xl bg-blue-600 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50"
           >
             {saving ? "Saving…" : "Save Changes"}

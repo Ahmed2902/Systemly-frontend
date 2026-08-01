@@ -48,18 +48,24 @@ export function CustomersWorkspace({
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [filter, setFilter] = useState<CustomerFilter>("all");
   const [selectedId, setSelectedId] = useState<string | null>(initialCustomerId);
-  const [workspace, setWorkspace] = useState<CustomerWorkspaceResponse | null>(null);
+  const [workspace, setWorkspace] = useState<CustomerWorkspaceResponse | null>(
+    null,
+  );
   const [listLoading, setListLoading] = useState(true);
   const [detailLoading, setDetailLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const [editingCustomer, setEditingCustomer] = useState<CustomerProfile | null>(null);
+  const [editingCustomer, setEditingCustomer] =
+    useState<CustomerProfile | null>(null);
   const [savingCustomer, setSavingCustomer] = useState(false);
   const [savingNotes, setSavingNotes] = useState(false);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => setDebouncedSearch(search.trim()), 250);
+    const timer = window.setTimeout(
+      () => setDebouncedSearch(search.trim()),
+      250,
+    );
     return () => window.clearTimeout(timer);
   }, [search]);
 
@@ -78,14 +84,19 @@ export function CustomersWorkspace({
         setTotal(result.total);
         setSelectedId((current) => {
           if (initialCustomerId) return initialCustomerId;
-          if (current && result.items.some((customer) => customer.id === current)) {
+          if (
+            current &&
+            result.items.some((customer) => customer.id === current)
+          ) {
             return current;
           }
           return result.items[0]?.id ?? null;
         });
         setError(null);
       } catch (caught: unknown) {
-        setError(caught instanceof Error ? caught.message : "Unable to load customers");
+        setError(
+          caught instanceof Error ? caught.message : "Unable to load customers",
+        );
       } finally {
         setListLoading(false);
         setRefreshing(false);
@@ -104,7 +115,9 @@ export function CustomersWorkspace({
       } catch (caught: unknown) {
         setWorkspace(null);
         setError(
-          caught instanceof Error ? caught.message : "Unable to load customer details",
+          caught instanceof Error
+            ? caught.message
+            : "Unable to load customer details",
         );
       } finally {
         setDetailLoading(false);
@@ -152,7 +165,11 @@ export function CustomersWorkspace({
     setSavingCustomer(true);
     try {
       if (editingCustomer) {
-        const updated = await updateCustomer(editingCustomer.id, input, accessToken);
+        const updated = await updateCustomer(
+          editingCustomer.id,
+          input,
+          accessToken,
+        );
         setWorkspace((current) =>
           current && current.customer.id === updated.id
             ? { ...current, customer: updated }
@@ -169,7 +186,9 @@ export function CustomersWorkspace({
       }
       setModalOpen(false);
     } catch (caught: unknown) {
-      setError(caught instanceof Error ? caught.message : "Unable to save customer");
+      setError(
+        caught instanceof Error ? caught.message : "Unable to save customer",
+      );
     } finally {
       setSavingCustomer(false);
     }
@@ -179,12 +198,20 @@ export function CustomersWorkspace({
     if (!accessToken || !workspace) return;
     setSavingNotes(true);
     try {
-      const updated = await updateCustomer(workspace.customer.id, { notes }, accessToken);
-      setWorkspace((current) => (current ? { ...current, customer: updated } : current));
+      const updated = await updateCustomer(
+        workspace.customer.id,
+        { notes },
+        accessToken,
+      );
+      setWorkspace((current) =>
+        current ? { ...current, customer: updated } : current,
+      );
       notifyMutation({ scope: "customer", entityId: updated.id });
       await loadList(true);
     } catch (caught: unknown) {
-      setError(caught instanceof Error ? caught.message : "Unable to save notes");
+      setError(
+        caught instanceof Error ? caught.message : "Unable to save notes",
+      );
     } finally {
       setSavingNotes(false);
     }
@@ -209,10 +236,23 @@ export function CustomersWorkspace({
           description="Manage customer profiles, notes, visit history, and future appointments."
           actions={
             <>
-              <button type="button" className="op-button" disabled={refreshing} onClick={() => void loadList(true)}>
-                <RefreshCw size={15} className={refreshing ? "animate-spin" : ""} /> Refresh
+              <button
+                type="button"
+                className="op-button"
+                disabled={refreshing}
+                onClick={() => void loadList(true)}
+              >
+                <RefreshCw
+                  size={15}
+                  className={refreshing ? "animate-spin" : ""}
+                />{" "}
+                Refresh
               </button>
-              <button type="button" className="op-button op-button-primary" onClick={openCreate}>
+              <button
+                type="button"
+                className="op-button op-button-primary"
+                onClick={openCreate}
+              >
                 <Plus size={15} /> New customer
               </button>
             </>
@@ -220,7 +260,18 @@ export function CustomersWorkspace({
         />
 
         {error ? (
-          <OperationsAlert tone="danger" className="mb-4" action={<button className="op-button" onClick={() => void loadList(true)}>Retry</button>}>
+          <OperationsAlert
+            tone="danger"
+            className="mb-4"
+            action={
+              <button
+                className="op-button"
+                onClick={() => void loadList(true)}
+              >
+                Retry
+              </button>
+            }
+          >
             {error}
           </OperationsAlert>
         ) : null}
@@ -241,13 +292,18 @@ export function CustomersWorkspace({
 
           <div className="min-w-0">
             {detailLoading ? (
-              <OperationsState loading title="Loading customer profile" className="min-h-[420px]" />
+              <OperationsState
+                loading
+                title="Loading customer profile"
+                className="min-h-[420px]"
+              />
             ) : workspace ? (
               <div className="[&>section]:border-[var(--op-border)] [&>section]:bg-[var(--op-surface)] [&>section]:shadow-[var(--op-shadow)]">
                 <CustomerProfilePanel
                   key={workspace.customer.id}
                   workspace={workspace}
                   timezone={timezone}
+                  isClinic={user?.vertical === "clinic"}
                   savingNotes={savingNotes}
                   onEdit={openEdit}
                   onSaveNotes={saveNotes}
@@ -261,7 +317,11 @@ export function CustomersWorkspace({
               </div>
             ) : (
               <OperationsState
-                title={selectedListCustomer ? "Unable to load this customer" : "Select a customer"}
+                title={
+                  selectedListCustomer
+                    ? "Unable to load this customer"
+                    : "Select a customer"
+                }
                 description="Choose a customer to review contact details, notes, and appointment history."
                 className="min-h-[420px]"
               />
