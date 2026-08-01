@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useLocale } from "@/i18n/LocaleProvider";
 import { signupSchema, SignupInput } from "../auth.schema";
 import { registerUser, ApiError } from "../auth.api";
 import { safeNextPath } from "../auth-redirect";
@@ -15,6 +16,7 @@ import { PasswordField } from "./PasswordField";
 export function SignupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { t } = useLocale();
   const [serverError, setServerError] = useState<string | null>(null);
 
   const {
@@ -33,9 +35,7 @@ export function SignupForm() {
       router.push(`/resend-verification?${params.toString()}`);
     } catch (err) {
       const apiErr = err as ApiError;
-      setServerError(
-        apiErr.error ?? apiErr.message ?? "Something went wrong. Please try again.",
-      );
+      setServerError(apiErr.error ?? apiErr.message ?? t("auth.signup.failed"));
     }
   }
 
@@ -46,24 +46,25 @@ export function SignupForm() {
 
   return (
     <div className="auth-stack">
-      <GoogleAuthButton label="Sign up with Google" />
-      <div className="auth-divider">or use email</div>
+      <GoogleAuthButton label={t("auth.signup.google")} />
+      <div className="auth-divider">{t("auth.signup.divider")}</div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="auth-form" noValidate>
         <div className="auth-field">
-          <label htmlFor="signup-name" className="auth-label">Full name</label>
+          <label htmlFor="signup-name" className="auth-label">{t("auth.signup.name")}</label>
           <input
             {...register("name")}
             id="signup-name"
             autoComplete="name"
             placeholder="Ahmed Hassan"
             className="auth-input"
+            dir="auto"
           />
           {errors.name ? <p className="auth-field-error">{errors.name.message}</p> : null}
         </div>
 
         <div className="auth-field">
-          <label htmlFor="signup-email" className="auth-label">Email</label>
+          <label htmlFor="signup-email" className="auth-label">{t("auth.signup.email")}</label>
           <input
             {...register("email")}
             id="signup-email"
@@ -71,12 +72,13 @@ export function SignupForm() {
             autoComplete="email"
             placeholder="you@business.com"
             className="auth-input"
+            dir="ltr"
           />
           {errors.email ? <p className="auth-field-error">{errors.email.message}</p> : null}
         </div>
 
         <div className="auth-field">
-          <label htmlFor="signup-phone" className="auth-label">Egyptian mobile number</label>
+          <label htmlFor="signup-phone" className="auth-label">{t("auth.signup.phone")}</label>
           <input
             {...register("phone")}
             id="signup-phone"
@@ -85,17 +87,18 @@ export function SignupForm() {
             autoComplete="tel"
             placeholder="01012345678"
             className="auth-input"
+            dir="ltr"
           />
           {errors.phone ? <p className="auth-field-error">{errors.phone.message}</p> : null}
         </div>
 
         <div className="auth-field">
-          <label htmlFor="signup-password" className="auth-label">Password</label>
+          <label htmlFor="signup-password" className="auth-label">{t("auth.signup.password")}</label>
           <PasswordField
             {...register("password")}
             id="signup-password"
             autoComplete="new-password"
-            placeholder="At least 8 characters"
+            placeholder={t("auth.signup.passwordPlaceholder")}
           />
           {errors.password ? <p className="auth-field-error">{errors.password.message}</p> : null}
         </div>
@@ -103,15 +106,13 @@ export function SignupForm() {
         {serverError ? <div className="auth-error" role="alert">{serverError}</div> : null}
 
         <button type="submit" disabled={isSubmitting} className="auth-primary-button">
-          {isSubmitting ? "Creating account…" : "Create account"}
+          {isSubmitting ? t("auth.signup.submitting") : t("auth.signup.submit")}
         </button>
       </form>
 
+      <p className="auth-switch-copy">{t("auth.signup.responsible")}</p>
       <p className="auth-switch-copy">
-        By continuing, you agree to use Systemly responsibly and keep your account secure.
-      </p>
-      <p className="auth-switch-copy">
-        Already have an account? <Link href={loginHref} className="auth-text-link">Log in</Link>
+        {t("auth.signup.existing")} <Link href={loginHref} className="auth-text-link">{t("auth.signup.login")}</Link>
       </p>
     </div>
   );
