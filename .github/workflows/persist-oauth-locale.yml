@@ -1,0 +1,37 @@
+name: Persist OAuth locale
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize]
+    paths:
+      - scripts/persist-oauth-locale.mjs
+      - .github/workflows/persist-oauth-locale.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: node scripts/persist-oauth-locale.mjs
+      - name: Commit OAuth locale persistence and remove one-time files
+        run: |
+          rm -f scripts/persist-oauth-locale.mjs
+          rm -f .github/workflows/persist-oauth-locale.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "fix: persist the selected locale after OAuth" || exit 0
+          git push origin HEAD:${{ github.head_ref }}
