@@ -15,11 +15,14 @@ export async function checkSlugAvailability(slug: string): Promise<boolean> {
   return json.available;
 }
 
-export async function uploadImage(file: File): Promise<{ url: string; publicId: string }> {
+export async function uploadImage(
+  file: File,
+): Promise<{ url: string; publicId: string }> {
   const fileExt = file.name.split(".").pop() || "jpg";
-  const uniqueId = typeof crypto.randomUUID === "function"
-    ? crypto.randomUUID()
-    : Math.random().toString(36).slice(2);
+  const uniqueId =
+    typeof crypto.randomUUID === "function"
+      ? crypto.randomUUID()
+      : Math.random().toString(36).slice(2);
   const storagePath = `gallery/${uniqueId}.${fileExt}`;
 
   const presignRes = await fetch(apiUrl("/photos/gallery/presign"), {
@@ -38,7 +41,9 @@ export async function uploadImage(file: File): Promise<{ url: string; publicId: 
     headers: { "Content-Type": file.type },
     body: file,
   });
-  if (!cloudRes.ok) throw new Error("Direct cloud storage delivery transaction failed.");
+  if (!cloudRes.ok) {
+    throw new Error("Direct cloud storage delivery transaction failed.");
+  }
 
   return { url: publicUrl, publicId: storagePath };
 }
@@ -55,6 +60,8 @@ export async function submitOnboarding(state: WizardState) {
     timezone: state.timezone,
     language: state.language,
     tagline: state.tagline,
+    heroDescription: state.heroDescription.trim() || undefined,
+    heroCardText: state.heroCardText.trim() || undefined,
     aboutText: state.aboutText,
     logoUrl: state.logoUrl || undefined,
     heroPhotoUrl: state.heroPhotoUrl || undefined,
@@ -63,6 +70,7 @@ export async function submitOnboarding(state: WizardState) {
     sectionOrder: state.sectionOrder,
     showTeam: state.showTeam,
     showFaq: state.showFaq,
+    showServicePrices: state.showServicePrices,
     instagram: state.instagram || undefined,
     whatsapp: state.whatsapp || undefined,
     services: state.services.map((service) => ({
