@@ -1,29 +1,30 @@
 import fs from "node:fs";
 
-function update(path, replacements) {
-  let source = fs.readFileSync(path, "utf8");
-  let changed = false;
-  for (const [before, after] of replacements) {
-    if (source.includes(after)) continue;
-    if (!source.includes(before)) throw new Error(`Pattern not found in ${path}: ${before}`);
-    source = source.replace(before, after);
-    changed = true;
-  }
-  if (changed) fs.writeFileSync(path, source);
-  console.log(`${changed ? "updated" : "unchanged"} ${path}`);
+function update(path, transform) {
+  const source = fs.readFileSync(path, "utf8");
+  const next = transform(source);
+  if (next !== source) fs.writeFileSync(path, next);
+  console.log(`${next !== source ? "updated" : "unchanged"} ${path}`);
 }
 
-update("src/modules/staff/components/StaffFormModal.tsx", [
-  [
+update("src/modules/staff/components/StaffFormModal.tsx", (source) =>
+  source.replace(
     '{!service.isActive ? " · Inactive" : ""}',
     '{!service.isActive ? ` · ${text("Inactive")}` : ""}',
-  ],
-]);
+  ),
+);
 
-update("src/modules/staff/components/StaffProfileScreen.tsx", [
-  [">← Back to staff</Link>", '>{text("← Back to staff")}</Link>'],
-  [">Upcoming appointments</h2>", '>{text("Upcoming appointments")}</h2>'],
-]);
+update("src/modules/staff/components/StaffProfileScreen.tsx", (source) =>
+  source
+    .replace(
+      /([>\s])← Back to staff(\s*<\/Link>)/,
+      '$1{text("← Back to staff")}$2',
+    )
+    .replace(
+      /(<h2[^>]*>)Upcoming appointments(<\/h2>)/,
+      '$1{text("Upcoming appointments")}$2',
+    ),
+);
 
 for (const [path, subtitle] of [
   ["src/app/(auth)/forgot-password/page.tsx", "Enter the email connected to your account and we will send a secure reset link."],
@@ -32,5 +33,10 @@ for (const [path, subtitle] of [
   ["src/app/(auth)/resend-verification/page.tsx", "Enter your email and we will send a fresh verification link."],
   ["src/app/(auth)/oauth-callback/page.tsx", "We are securely connecting your Google account to Systemly."],
 ]) {
-  update(path, [[`subtitle=${JSON.stringify(subtitle)}`, `subtitle={text(${JSON.stringify(subtitle)})}`]]);
+  update(path, (source) =>
+    source.replace(
+      `subtitle=${JSON.stringify(subtitle)}`,
+      `subtitle={text(${JSON.stringify(subtitle)})}`,
+    ),
+  );
 }
