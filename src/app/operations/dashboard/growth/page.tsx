@@ -1,6 +1,5 @@
 "use client";
 
-
 import { usePlatformText } from "@/i18n/usePlatformText";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/modules/auth/useAuth";
@@ -42,7 +41,7 @@ export default function GrowthAnalyticsPage() {
   }, [accessToken, preset]);
 
   return (
-    <AnalyticsShell title={text("Growth Analytics")} subtitle="Monthly momentum, acquisition mix, invoice volume, and retention">
+    <AnalyticsShell title={text("Growth Analytics")} subtitle={text("Monthly momentum, acquisition mix, invoice volume, and retention")}>
       {error ? <AnalyticsState message={error} /> : null}
       {!data && !error ? <AnalyticsState message="Loading growth analytics…" /> : null}
       {data ? (

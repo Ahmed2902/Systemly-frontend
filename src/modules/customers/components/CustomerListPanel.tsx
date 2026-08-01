@@ -1,6 +1,5 @@
 "use client";
 
-
 import { usePlatformText } from "@/i18n/usePlatformText";
 import { Search, UserRoundPlus } from "lucide-react";
 import type {

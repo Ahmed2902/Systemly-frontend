@@ -1,6 +1,5 @@
 "use client";
 
-
 import { usePlatformText } from "@/i18n/usePlatformText";
 import { useMemo, useState } from "react";
 import { CalendarDays, Clock3, Globe2, UserRoundCheck } from "lucide-react";

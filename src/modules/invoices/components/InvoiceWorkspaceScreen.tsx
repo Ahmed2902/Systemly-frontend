@@ -1,7 +1,7 @@
 "use client";
 
-
 import { usePlatformText } from "@/i18n/usePlatformText";
+import { useLocale } from "@/i18n/LocaleProvider";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CalendarDays, RefreshCw, Search } from "lucide-react";
 import { useAuth } from "@/modules/auth/useAuth";
@@ -48,6 +48,7 @@ const paymentOptions = [
 
 export default function InvoiceWorkspaceScreen() {
   const text = usePlatformText();
+  const { locale } = useLocale();
   const { accessToken, loading: authLoading } = useAuth();
   const { notifyMutation } = useOperations();
   const [catalog, setCatalog] = useState<InvoiceListResponse | null>(null);
@@ -140,7 +141,7 @@ export default function InvoiceWorkspaceScreen() {
     setActionRunning(true);
     setError(null);
     try {
-      await downloadInvoiceReceipt(selected.id, selected.invoiceNumber, accessToken);
+      await downloadInvoiceReceipt(selected.id, selected.invoiceNumber, accessToken, locale);
     } catch (caught: unknown) {
       setError(caught instanceof Error ? caught.message : text("Unable to download receipt"));
     } finally {
@@ -151,11 +152,11 @@ export default function InvoiceWorkspaceScreen() {
   const voidSelected = async () => {
     if (!selected || !accessToken) return;
     const reason = window.prompt(
-      "Why are you voiding this invoice? The appointment will return to In progress.",
+      text("Why are you voiding this invoice? The appointment will return to In progress."),
     );
     if (!reason?.trim()) return;
     const confirmed = window.confirm(
-      "Void this invoice and reopen the appointment for editing and payment?",
+      text("Void this invoice and reopen the appointment for editing and payment?"),
     );
     if (!confirmed) return;
     setActionRunning(true);
@@ -210,13 +211,13 @@ export default function InvoiceWorkspaceScreen() {
             </label>
             <OperationsDropdown
               value={status}
-              options={statusOptions}
+              options={statusOptions.map((option) => ({ ...option, label: text(option.label) }))}
               onChange={(value) => setStatus(value as InvoiceStatus | "")}
               aria-label={text("Invoice status")}
             />
             <OperationsDropdown
               value={paymentMethod}
-              options={paymentOptions}
+              options={paymentOptions.map((option) => ({ ...option, label: text(option.label) }))}
               onChange={(value) => setPaymentMethod(value as PaymentMethod | "")}
               aria-label={text("Payment method")}
             />
@@ -257,7 +258,7 @@ export default function InvoiceWorkspaceScreen() {
         {error ? <OperationsAlert tone="danger" className="mb-4">{error}</OperationsAlert> : null}
 
         <div className="mb-3 flex items-center justify-between text-xs text-[var(--op-text-muted)]">
-          <span>{visibleTotal} invoice{visibleTotal === 1 ? "" : "s"}</span>
+          <span>{visibleTotal} {text(visibleTotal === 1 ? "invoice" : "invoices")}</span>
           {loading || refreshing ? <span>{text("Refreshing…")}</span> : null}
         </div>
 

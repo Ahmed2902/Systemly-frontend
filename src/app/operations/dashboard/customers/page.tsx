@@ -1,6 +1,5 @@
 "use client";
 
-
 import { usePlatformText } from "@/i18n/usePlatformText";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/modules/auth/useAuth";
@@ -50,7 +49,7 @@ export default function CustomerAnalyticsPage() {
   return (
     <AnalyticsShell
       title={text("Customer Analytics")}
-      subtitle="Acquisition, appointment behaviour, repeat booking retention, and lifetime value"
+      subtitle={text("Acquisition, appointment behaviour, repeat booking retention, and lifetime value")}
     >
       {error ? <AnalyticsState message={error} /> : null}
       {!data && !error ? (

@@ -1,8 +1,7 @@
+"use client";
 
 import { usePlatformText } from "@/i18n/usePlatformText";
 // src/modules/wizard/components/ImageUploader.tsx
-"use client";
-
 import imageCompression from "browser-image-compression";
 import { useRef, useState } from "react";
 

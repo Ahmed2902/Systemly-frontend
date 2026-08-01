@@ -1,6 +1,6 @@
-// src/modules/wizard/components/SectionOrderList.tsx
 "use client";
 
+// src/modules/wizard/components/SectionOrderList.tsx
 import { GripVertical } from "lucide-react";
 import { DndContext, closestCenter, DragEndEvent } from "@dnd-kit/core";
 import {

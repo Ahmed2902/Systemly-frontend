@@ -11,7 +11,7 @@ export default function ResendVerificationPage() {
   return (
     <AuthLayout
       title={text("Verify your email")}
-      subtitle="Activate your account through the secure link sent to your inbox."
+      subtitle={text("Activate your account through the secure link sent to your inbox.")}
     >
       <ResendVerificationForm />
     </AuthLayout>

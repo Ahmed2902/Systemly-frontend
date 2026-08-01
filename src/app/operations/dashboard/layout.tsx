@@ -1,6 +1,5 @@
 "use client";
 
-
 import { usePlatformText } from "@/i18n/usePlatformText";
 import { useEffect, type ReactNode } from "react";
 import { useRouter } from "next/navigation";

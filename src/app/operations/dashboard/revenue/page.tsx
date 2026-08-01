@@ -1,6 +1,5 @@
 "use client";
 
-
 import { usePlatformText } from "@/i18n/usePlatformText";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/modules/auth/useAuth";
@@ -59,7 +58,7 @@ export default function RevenueAnalyticsPage() {
   return (
     <AnalyticsShell
       title={text("Revenue Analytics")}
-      subtitle="Revenue, invoice volume, category mix, custom items, and weekday performance"
+      subtitle={text("Revenue, invoice volume, category mix, custom items, and weekday performance")}
     >
       {error ? <AnalyticsState message={error} /> : null}
       {!data && !error ? (

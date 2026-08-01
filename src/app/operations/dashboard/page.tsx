@@ -1,6 +1,5 @@
 "use client";
 
-
 import { usePlatformText } from "@/i18n/usePlatformText";
 import Link from "next/link";
 import { useEffect, useState, type ReactNode } from "react";
@@ -54,7 +53,7 @@ export default function DashboardOverviewPage() {
   return (
     <AnalyticsShell
       title={`Hello, ${firstName}`}
-      subtitle="Here are the latest financial, customer, and operational signals from your business."
+      subtitle={text("Here are the latest financial, customer, and operational signals from your business.")}
     >
       {error ? <AnalyticsState message={error} /> : null}
       {!data && !error ? (

@@ -1,6 +1,5 @@
 "use client";
 
-
 import { usePlatformText } from "@/i18n/usePlatformText";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/modules/auth/useAuth";
@@ -74,7 +73,7 @@ export default function OperationsAnalyticsPage() {
   return (
     <AnalyticsShell
       title={text("Bookings & Services")}
-      subtitle="Booking demand, peak periods, service popularity, and lead times"
+      subtitle={text("Booking demand, peak periods, service popularity, and lead times")}
     >
       {error ? <AnalyticsState message={error} /> : null}
       {!data && !error ? (

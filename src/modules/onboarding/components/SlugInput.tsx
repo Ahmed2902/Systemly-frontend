@@ -1,8 +1,7 @@
+"use client";
 
 import { usePlatformText } from "@/i18n/usePlatformText";
 // src/modules/onboarding/components/SlugInput.tsx
-"use client";
-
 import { useEffect, useState } from "react";
 import { checkSlugAvailability } from "../onboarding.api";
 

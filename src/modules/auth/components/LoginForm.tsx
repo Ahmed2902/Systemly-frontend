@@ -1,8 +1,7 @@
+"use client";
 
 import { usePlatformText } from "@/i18n/usePlatformText";
 // src/modules/auth/components/LoginForm.tsx
-"use client";
-
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";

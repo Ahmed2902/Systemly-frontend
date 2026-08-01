@@ -1,8 +1,7 @@
+"use client";
 
 import { usePlatformText } from "@/i18n/usePlatformText";
 // src/modules/wizard/components/FaqEditor.tsx
-"use client";
-
 import { Plus, Trash2 } from "lucide-react";
 import { useWizard } from "../wizard.context";
 

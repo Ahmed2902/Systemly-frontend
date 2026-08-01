@@ -1,8 +1,7 @@
+"use client";
 
 import { usePlatformText } from "@/i18n/usePlatformText";
 // src/modules/auth/components/SignupForm.tsx
-"use client";
-
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -19,7 +18,7 @@ export function SignupForm() {
   const text = usePlatformText();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const [serverError, setServerError] = useState<string | null>(null);
 
   const {
@@ -31,7 +30,7 @@ export function SignupForm() {
   async function onSubmit(data: SignupInput) {
     setServerError(null);
     try {
-      await registerUser(data);
+      await registerUser({ ...data, preferredLanguage: locale });
       const params = new URLSearchParams({ email: data.email, sent: "1" });
       const nextPath = safeNextPath(searchParams.get("next"));
       if (nextPath) params.set("next", nextPath);

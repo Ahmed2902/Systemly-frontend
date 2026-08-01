@@ -1,6 +1,5 @@
 "use client";
 
-
 import { usePlatformText } from "@/i18n/usePlatformText";
 import { useState } from "react";
 import { Building2, Check, LockKeyhole, MapPin, Scissors, Stethoscope } from "lucide-react";

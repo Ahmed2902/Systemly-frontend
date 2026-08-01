@@ -1,8 +1,7 @@
+"use client";
 
 import { usePlatformText } from "@/i18n/usePlatformText";
 // src/modules/auth/components/AuthLayout.tsx
-"use client";
-
 import Link from "next/link";
 import { ReactNode } from "react";
 import { Globe2, ShieldCheck } from "lucide-react";

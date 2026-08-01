@@ -1,6 +1,5 @@
 "use client";
 
-
 import { usePlatformText } from "@/i18n/usePlatformText";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/modules/auth/useAuth";
@@ -52,7 +51,7 @@ export default function StaffAnalyticsPage() {
   return (
     <AnalyticsShell
       title={text("Staff Analytics")}
-      subtitle="Service revenue contribution, commission, booked time, and utilisation"
+      subtitle={text("Service revenue contribution, commission, booked time, and utilisation")}
     >
       {error ? <AnalyticsState message={error} /> : null}
       {!data && !error ? (

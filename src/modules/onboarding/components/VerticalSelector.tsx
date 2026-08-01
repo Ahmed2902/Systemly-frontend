@@ -1,8 +1,7 @@
+"use client";
 
 import { usePlatformText } from "@/i18n/usePlatformText";
 // src/modules/onboarding/components/VerticalSelector.tsx
-"use client";
-
 const options = [
   {
     value: "salon",

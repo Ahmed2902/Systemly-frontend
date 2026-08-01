@@ -1,6 +1,6 @@
-// src/modules/auth/components/GoogleAuthButton.tsx
 "use client";
 
+// src/modules/auth/components/GoogleAuthButton.tsx
 import { apiUrl } from "@/shared/lib/api-url";
 
 export function GoogleAuthButton({ label }: { label: string }) {

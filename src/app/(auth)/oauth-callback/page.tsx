@@ -24,7 +24,7 @@ export default function OAuthCallbackPage() {
   return (
     <AuthLayout
       title={text("Connecting your account")}
-      subtitle="Systemly is completing your secure Google sign-in."
+      subtitle={text("Systemly is completing your secure Google sign-in.")}
     >
       <Suspense fallback={<OAuthFallback />}>
         <OAuthCallbackPanel />

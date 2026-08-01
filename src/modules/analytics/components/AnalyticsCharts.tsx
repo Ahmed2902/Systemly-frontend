@@ -1,6 +1,5 @@
 "use client";
 
-
 import { usePlatformText } from "@/i18n/usePlatformText";
 import { useEffect, useId, useMemo, useRef, useState, type PointerEvent } from "react";
 import { WEEKDAYS } from "../analytics.formatters";
