@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "npm run localization:check && next typegen && tsc --noEmit",
-    "localization:check": "node scripts/check-platform-localization.mjs"
+    "localization:check": "node scripts/check-platform-localization-v2.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
