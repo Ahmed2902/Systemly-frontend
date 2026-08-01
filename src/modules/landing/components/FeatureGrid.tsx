@@ -42,9 +42,9 @@ export function FeatureGrid() {
           {chapters.map((chapter, index) => (
             <article className={`lp-chapter lp-chapter-${chapter.visual}`} key={chapter.title}>
               <div className="lp-chapter-copy">
-                <span>{chapter.eyebrow}</span>
-                <h3>{chapter.title}</h3>
-                <p>{chapter.copy}</p>
+                <span>{text(chapter.eyebrow)}</span>
+                <h3>{text(chapter.title)}</h3>
+                <p>{text(chapter.copy)}</p>
                 <a href="#demo">{text("Explore this workflow")} <span aria-hidden="true">↗</span></a>
               </div>
 
