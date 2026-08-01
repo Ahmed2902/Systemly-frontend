@@ -8,7 +8,8 @@ on:
       - opened
       - synchronize
     paths:
-      - scripts/migrate-platform-localization.mjs
+      - scripts/migrate-platform-localization-v2.mjs
+      - src/i18n/natural-arabic.ts
       - .github/workflows/apply-platform-localization.yml
 
 permissions:
@@ -39,7 +40,7 @@ jobs:
         run: npm ci
 
       - name: Migrate explicit platform copy
-        run: node scripts/migrate-platform-localization.mjs
+        run: node scripts/migrate-platform-localization-v2.mjs
 
       - name: Commit generated migration
         run: |
@@ -50,5 +51,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add src
-          git commit -m "refactor: migrate platform copy to explicit translations"
+          git commit -m "refactor: expand explicit platform translations"
           git push origin HEAD:${{ github.head_ref }}
