@@ -12,6 +12,8 @@ export function wizardStateToTemplateData(state: WizardState): TemplateData {
     businessName: state.name,
     tagline: state.tagline,
     template: state.template,
+    heroDescription: state.heroDescription,
+    heroCardText: state.heroCardText,
     aboutText: state.aboutText,
     heroPhotoUrl: state.heroPhotoUrl ?? defaultHero,
     logoUrl: state.logoUrl ?? null,
@@ -20,6 +22,7 @@ export function wizardStateToTemplateData(state: WizardState): TemplateData {
     sectionOrder: state.sectionOrder,
     showTeam: state.showTeam,
     showFaq: state.showFaq,
+    showServicePrices: state.showServicePrices,
     services: state.services.map((service) => ({
       id: service.clientId,
       name: service.name,

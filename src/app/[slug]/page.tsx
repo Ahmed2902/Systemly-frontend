@@ -42,12 +42,15 @@ type PublicBusinessFaq = {
 
 type PublicBusinessWebsiteContent = {
   tagline?: string | null;
+  heroDescription?: string | null;
+  heroCardText?: string | null;
   aboutText?: string | null;
   template?: string | null;
   primaryColor?: string | null;
   sectionOrder?: string[] | null;
   showTeam?: boolean | null;
   showFaq?: boolean | null;
+  showServicePrices?: boolean | null;
   instagramUrl?: string | null;
   whatsappNumber?: string | null;
 };
@@ -78,9 +81,15 @@ function isTemplateVertical(value: string): value is TemplateVertical {
 }
 
 async function getBusiness(slug: string): Promise<PublicBusiness | null> {
-  const res = await fetch(apiUrl(`/businesses/public/${slug}`), { cache: "no-store" });
+  const res = await fetch(apiUrl(`/businesses/public/${slug}`), {
+    cache: "no-store",
+  });
   if (res.status === 404) return null;
-  if (!res.ok) throw new Error(`Failed to load business: ${res.status} ${await res.text()}`);
+  if (!res.ok) {
+    throw new Error(
+      `Failed to load business: ${res.status} ${await res.text()}`,
+    );
+  }
   const json: PublicBusinessResponse = await res.json();
   return json.data;
 }
@@ -98,7 +107,10 @@ export default async function PublicBusinessPage({
   const vertical = business.vertical;
 
   const content = business.websiteContent;
-  const template = resolveTemplateForVertical(content?.template ?? "", vertical);
+  const template = resolveTemplateForVertical(
+    content?.template ?? "",
+    vertical,
+  );
   if (!template) notFound();
   const language: PublicSiteLanguage = business.language === "ar" ? "ar" : "en";
 
@@ -110,16 +122,21 @@ export default async function PublicBusinessPage({
     businessName: business.name,
     tagline: content?.tagline ?? "",
     template: template.id,
+    heroDescription: content?.heroDescription ?? "",
+    heroCardText: content?.heroCardText ?? "",
     aboutText: content?.aboutText ?? "",
     logoUrl: business.logoUrl ?? null,
     heroPhotoUrl: business.coverUrl ?? legacyHeroUrl ?? null,
     galleryPhotoUrls: business.photos
-      .filter((photo: { kind: string; url: string }) => photo.kind === "gallery")
+      .filter(
+        (photo: { kind: string; url: string }) => photo.kind === "gallery",
+      )
       .map((photo: { url: string }) => photo.url),
     primaryColor: content?.primaryColor ?? template.theme.primary,
     sectionOrder: completePublicSectionOrder(content?.sectionOrder ?? []),
     showTeam: content?.showTeam ?? true,
     showFaq: content?.showFaq ?? true,
+    showServicePrices: content?.showServicePrices ?? true,
     services: business.services.map((service) => ({
       id: service.id,
       name: service.name,
@@ -137,7 +154,10 @@ export default async function PublicBusinessPage({
       yearsExperience: staff.yearsExperience ?? null,
       photoUrl: staff.photoUrl ?? null,
     })),
-    faqs: business.faqs.map((faq) => ({ question: faq.question, answer: faq.answer })),
+    faqs: business.faqs.map((faq) => ({
+      question: faq.question,
+      answer: faq.answer,
+    })),
     phone: business.phone,
     address: business.address ?? undefined,
     city: business.city ?? undefined,
@@ -149,9 +169,10 @@ export default async function PublicBusinessPage({
     previewMode: false,
   };
 
-  const templateData: TemplateData = vertical === "clinic"
-    ? { ...commonData, vertical: "clinic" }
-    : { ...commonData, vertical: "salon" };
+  const templateData: TemplateData =
+    vertical === "clinic"
+      ? { ...commonData, vertical: "clinic" }
+      : { ...commonData, vertical: "salon" };
 
   return renderTemplate(templateData);
 }

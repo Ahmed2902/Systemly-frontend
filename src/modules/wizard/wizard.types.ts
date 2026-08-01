@@ -52,6 +52,8 @@ export type WizardState = {
   services: WizardService[];
   staff: WizardStaffMember[];
   tagline: string;
+  heroDescription: string;
+  heroCardText: string;
   aboutText: string;
   heroPhotoUrl: string | null;
   logoUrl: string | null;
@@ -60,6 +62,7 @@ export type WizardState = {
   sectionOrder: string[];
   showTeam: boolean;
   showFaq: boolean;
+  showServicePrices: boolean;
   instagram: string;
   whatsapp: string;
   faqs: WizardFaq[];
