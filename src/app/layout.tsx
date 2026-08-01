@@ -9,6 +9,7 @@ import {
   LOCALE_COOKIE,
   normalizeLocale,
 } from "@/i18n/config";
+import { PlatformLanguageControl } from "@/shared/components/PlatformLanguageControl";
 import { Cairo, Inter, Playfair_Display } from "next/font/google";
 
 const playfair = Playfair_Display({
@@ -42,7 +43,10 @@ export default async function RootLayout({
     >
       <body>
         <LocaleProvider initialLocale={locale}>
-          <AuthProvider>{children}</AuthProvider>
+          <AuthProvider>
+            <PlatformLanguageControl />
+            {children}
+          </AuthProvider>
         </LocaleProvider>
       </body>
     </html>
