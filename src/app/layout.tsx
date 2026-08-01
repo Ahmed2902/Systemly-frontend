@@ -1,14 +1,15 @@
 // src/app/layout.tsx
 import "./globals.css";
 import "./systemly-shared.css";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { AuthProvider } from "@/modules/auth/useAuth";
 import { LocaleProvider } from "@/i18n/LocaleProvider";
-import { PlatformAutoTranslator } from "@/i18n/PlatformAutoTranslator";
 import {
+  DEFAULT_LOCALE,
   getLocaleDirection,
   LOCALE_COOKIE,
   normalizeLocale,
+  type AppLocale,
 } from "@/i18n/config";
 import { PlatformLanguageControl } from "@/shared/components/PlatformLanguageControl";
 import { Cairo, Inter, Playfair_Display } from "next/font/google";
@@ -25,13 +26,33 @@ const cairo = Cairo({
   weight: ["400", "500", "600", "700"],
 });
 
+function localeFromAcceptLanguage(value: string | null): AppLocale {
+  if (!value) return DEFAULT_LOCALE;
+
+  const languages = value
+    .split(",")
+    .map((entry) => {
+      const [tag, quality = "q=1"] = entry.trim().split(";");
+      const score = Number(quality.replace(/^q=/, "")) || 0;
+      return { tag: tag.toLowerCase(), score };
+    })
+    .sort((a, b) => b.score - a.score);
+
+  return languages.some(({ tag }) => tag === "ar" || tag.startsWith("ar-"))
+    ? "ar"
+    : DEFAULT_LOCALE;
+}
+
 export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const cookieStore = await cookies();
-  const locale = normalizeLocale(cookieStore.get(LOCALE_COOKIE)?.value);
+  const storedLocale = cookieStore.get(LOCALE_COOKIE)?.value;
+  const locale = storedLocale
+    ? normalizeLocale(storedLocale)
+    : localeFromAcceptLanguage((await headers()).get("accept-language"));
   const direction = getLocaleDirection(locale);
 
   return (
@@ -46,7 +67,6 @@ export default async function RootLayout({
         <LocaleProvider initialLocale={locale}>
           <AuthProvider>
             <PlatformLanguageControl />
-            <PlatformAutoTranslator />
             {children}
           </AuthProvider>
         </LocaleProvider>
