@@ -1,5 +1,6 @@
 "use client";
 
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -14,6 +15,7 @@ import { ApiError, resetPassword } from "../auth.api";
 import { PasswordField } from "./PasswordField";
 
 export function ResetPasswordForm() {
+  const text = usePlatformText();
   const searchParams = useSearchParams();
   const token = searchParams.get("token")?.trim() ?? "";
   const [completed, setCompleted] = useState(false);
@@ -43,11 +45,11 @@ export function ResetPasswordForm() {
       <div className="auth-state-card">
         <div className="auth-state-icon"><Link2Off size={24} /></div>
         <div>
-          <h2>Reset link missing</h2>
-          <p>Request a new password-reset email to continue securely.</p>
+          <h2>{text("Reset link missing")}</h2>
+          <p>{text("Request a new password-reset email to continue securely.")}</p>
         </div>
-        <Link href="/forgot-password" className="auth-primary-button">Request a new link</Link>
-        <Link href="/login" className="auth-secondary-button">Back to login</Link>
+        <Link href="/forgot-password" className="auth-primary-button">{text("Request a new link")}</Link>
+        <Link href="/login" className="auth-secondary-button">{text("Back to login")}</Link>
       </div>
     );
   }
@@ -57,10 +59,10 @@ export function ResetPasswordForm() {
       <div className="auth-state-card">
         <div className="auth-state-icon"><CheckCircle2 size={24} /></div>
         <div>
-          <h2>Password updated</h2>
-          <p>Your new password is ready. Log in again to continue to Systemly.</p>
+          <h2>{text("Password updated")}</h2>
+          <p>{text("Your new password is ready. Log in again to continue to Systemly.")}</p>
         </div>
-        <Link href="/login" className="auth-primary-button">Log in</Link>
+        <Link href="/login" className="auth-primary-button">{text("Log in")}</Link>
       </div>
     );
   }
@@ -69,36 +71,44 @@ export function ResetPasswordForm() {
     <div className="auth-stack">
       <form onSubmit={handleSubmit(onSubmit)} className="auth-form" noValidate>
         <div className="auth-field">
-          <label htmlFor="reset-password" className="auth-label">New password</label>
+          <label htmlFor="reset-password" className="auth-label">{text("New password")}</label>
           <PasswordField
             {...register("password")}
             id="reset-password"
             autoComplete="new-password"
-            placeholder="At least 8 characters"
+            placeholder={text("At least 8 characters")}
           />
-          {errors.password ? <p className="auth-field-error">{errors.password.message}</p> : null}
+          {errors.password ? (
+            <p className="auth-field-error">
+              {text(errors.password.message ?? "Password must be at least 8 characters")}
+            </p>
+          ) : null}
         </div>
 
         <div className="auth-field">
-          <label htmlFor="reset-confirm-password" className="auth-label">Confirm new password</label>
+          <label htmlFor="reset-confirm-password" className="auth-label">{text("Confirm new password")}</label>
           <PasswordField
             {...register("confirmPassword")}
             id="reset-confirm-password"
             autoComplete="new-password"
-            placeholder="Repeat your new password"
+            placeholder={text("Repeat your new password")}
           />
-          {errors.confirmPassword ? <p className="auth-field-error">{errors.confirmPassword.message}</p> : null}
+          {errors.confirmPassword ? (
+            <p className="auth-field-error">
+              {text(errors.confirmPassword.message ?? "Confirm your new password")}
+            </p>
+          ) : null}
         </div>
 
         {serverError ? <div className="auth-error" role="alert">{serverError}</div> : null}
 
         <button type="submit" disabled={isSubmitting} className="auth-primary-button">
-          {isSubmitting ? "Updating password…" : "Update password"}
+          {isSubmitting ? text("Updating password…") : text("Update password")}
         </button>
       </form>
 
       <p className="auth-switch-copy">
-        <Link href="/login" className="auth-text-link">Back to login</Link>
+        <Link href="/login" className="auth-text-link">{text("Back to login")}</Link>
       </p>
     </div>
   );

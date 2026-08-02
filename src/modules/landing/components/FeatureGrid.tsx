@@ -1,3 +1,6 @@
+"use client";
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { BarChart3, CalendarDays, Globe2, ReceiptText } from "lucide-react";
 import { LandingCalendarBoard } from "./LandingCalendarBoard";
 
@@ -23,15 +26,15 @@ const chapters = [
 ] as const;
 
 export function FeatureGrid() {
+  const text = usePlatformText();
   return (
     <section id="features" className="lp-product-story">
       <div className="lp-shell">
         <header className="lp-editorial-heading">
-          <p className="lp-kicker">One connected product</p>
-          <h2>From the first booking to the final receipt.</h2>
+          <p className="lp-kicker">{text("One connected product")}</p>
+          <h2>{text("From the first booking to the final receipt.")}</h2>
           <p>
-            Systemly does not bolt a website onto a separate admin tool. The public
-            experience and daily operation share one source of truth.
+            {text("Systemly does not bolt a website onto a separate admin tool. The public experience and daily operation share one source of truth.")}
           </p>
         </header>
 
@@ -39,10 +42,10 @@ export function FeatureGrid() {
           {chapters.map((chapter, index) => (
             <article className={`lp-chapter lp-chapter-${chapter.visual}`} key={chapter.title}>
               <div className="lp-chapter-copy">
-                <span>{chapter.eyebrow}</span>
-                <h3>{chapter.title}</h3>
-                <p>{chapter.copy}</p>
-                <a href="#demo">Explore this workflow <span aria-hidden="true">↗</span></a>
+                <span>{text(chapter.eyebrow)}</span>
+                <h3>{text(chapter.title)}</h3>
+                <p>{text(chapter.copy)}</p>
+                <a href="#demo">{text("Explore this workflow")} <span aria-hidden="true">↗</span></a>
               </div>
 
               {chapter.visual === "website" ? <WebsiteVisual /> : null}
@@ -54,11 +57,11 @@ export function FeatureGrid() {
           ))}
         </div>
 
-        <div className="lp-capability-row" aria-label="Additional capabilities">
-          <div><Globe2 size={20}/><strong>Arabic + English</strong><span>Customer experiences prepared for both directions.</span></div>
-          <div><CalendarDays size={20}/><strong>Multi-staff appointments</strong><span>One visit can move between eligible staff without splitting the customer journey.</span></div>
-          <div><ReceiptText size={20}/><strong>Payments + receipts</strong><span>Collect, issue, download, and safely void from the appointment context.</span></div>
-          <div><BarChart3 size={20}/><strong>Owner-only insight</strong><span>Revenue and performance remain private without blocking daily work.</span></div>
+        <div className="lp-capability-row" aria-label={text("Additional capabilities")}>
+          <div><Globe2 size={20}/><strong>{text("Arabic + English")}</strong><span>{text("Customer experiences prepared for both directions.")}</span></div>
+          <div><CalendarDays size={20}/><strong>{text("Multi-staff appointments")}</strong><span>{text("One visit can move between eligible staff without splitting the customer journey.")}</span></div>
+          <div><ReceiptText size={20}/><strong>{text("Payments + receipts")}</strong><span>{text("Collect, issue, download, and safely void from the appointment context.")}</span></div>
+          <div><BarChart3 size={20}/><strong>{text("Owner-only insight")}</strong><span>{text("Revenue and performance remain private without blocking daily work.")}</span></div>
         </div>
       </div>
     </section>
@@ -66,22 +69,24 @@ export function FeatureGrid() {
 }
 
 function WebsiteVisual() {
+  const text = usePlatformText();
   return (
     <div className="lp-story-visual lp-website-visual" aria-hidden="true">
-      <div className="lp-site-nav"><b>NOIR STUDIO</b><span>Services&nbsp;&nbsp; About&nbsp;&nbsp; Book</span></div>
-      <div className="lp-site-hero"><small>CAIRO · BY APPOINTMENT</small><h4>Care, designed around you.</h4><p>Personal appointments and a calm way to book.</p><button>Book an appointment</button></div>
-      <div className="lp-booking-float"><span>Book online</span><strong>Choose a service</strong><i>Hair consultation · 45 min</i><i>Skin treatment · 60 min</i></div>
+      <div className="lp-site-nav"><b>NOIR STUDIO</b><span>{text("Services About Book")}</span></div>
+      <div className="lp-site-hero"><small>{text("CAIRO · BY APPOINTMENT")}</small><h4>{text("Care, designed around you.")}</h4><p>{text("Personal appointments and a calm way to book.")}</p><button>{text("Book an appointment")}</button></div>
+      <div className="lp-booking-float"><span>{text("Book online")}</span><strong>{text("Choose a service")}</strong><i>{text("Hair consultation · 45 min")}</i><i>{text("Skin treatment · 60 min")}</i></div>
     </div>
   );
 }
 
 function OperationsVisual() {
+  const text = usePlatformText();
   return (
     <div className="lp-story-visual lp-operations-visual" aria-hidden="true">
       <div className="lp-ops-toolbar">
-        <b>Calendar</b>
-        <span>Monday, 27 July</span>
-        <button type="button">New appointment</button>
+        <b>{text("Calendar")}</b>
+        <span>{text("Monday, 27 July")}</span>
+        <button type="button">{text("New appointment")}</button>
       </div>
       <LandingCalendarBoard variant="story" />
     </div>
@@ -89,21 +94,22 @@ function OperationsVisual() {
 }
 
 function AnalyticsVisual() {
+  const text = usePlatformText();
   return (
     <div className="lp-story-visual lp-analytics-visual" aria-hidden="true">
       <div className="lp-metrics">
-        <span><small>Revenue</small><strong>EGP 38,620</strong><em>+12.4%</em></span>
-        <span><small>Bookings</small><strong>568</strong><em>This month</em></span>
-        <span><small>Returning</small><strong>68%</strong><em>Customers</em></span>
+        <span><small>{text("Revenue")}</small><strong>{text("EGP 38,620")}</strong><em>+12.4%</em></span>
+        <span><small>{text("Bookings")}</small><strong>568</strong><em>{text("This month")}</em></span>
+        <span><small>{text("Returning")}</small><strong>68%</strong><em>{text("Customers")}</em></span>
       </div>
       <div className="lp-chart">
         <div className="lp-chart-heading">
-          <div><b>Revenue this month</b><small>Paid invoices only</small></div>
-          <strong>EGP 38,620</strong>
+          <div><b>{text("Revenue this month")}</b><small>{text("Paid invoices only")}</small></div>
+          <strong>{text("EGP 38,620")}</strong>
         </div>
         <div className="lp-chart-canvas">
           <svg viewBox="0 0 500 180" preserveAspectRatio="none"><path d="M0 155 C45 150 55 110 100 118 S165 65 210 82 S270 125 315 69 S390 40 500 17" fill="none" stroke="currentColor" strokeWidth="5" strokeLinecap="round"/></svg>
-          <div className="lp-chart-axis"><span>Jul 1</span><span>Jul 10</span><span>Jul 20</span><span>Jul 30</span></div>
+          <div className="lp-chart-axis"><span>{text("Jul 1")}</span><span>{text("Jul 10")}</span><span>{text("Jul 20")}</span><span>{text("Jul 30")}</span></div>
         </div>
       </div>
     </div>

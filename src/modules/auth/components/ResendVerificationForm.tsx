@@ -1,5 +1,6 @@
 "use client";
 
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -13,6 +14,7 @@ import {
 import { ApiError, resendVerification } from "../auth.api";
 
 export function ResendVerificationForm() {
+  const text = usePlatformText();
   const searchParams = useSearchParams();
   const initialEmail = searchParams.get("email") ?? "";
   const [sentTo, setSentTo] = useState<string | null>(
@@ -45,22 +47,22 @@ export function ResendVerificationForm() {
     <div className="auth-stack">
       {sentTo ? (
         <div className="auth-success" role="status">
-          <strong>Check your inbox.</strong> If {sentTo} is registered and still needs verification, a fresh link has been sent.
+          <strong>{text("Check your inbox.")}</strong> {text("If")} {sentTo} {text("is registered and still needs verification, a fresh link has been sent.")}
         </div>
       ) : null}
 
       <div className="auth-state-card">
         <div className="auth-state-icon"><MailCheck size={24} /></div>
         <div>
-          <h2>Verify your email</h2>
+          <h2>{text("Verify your email")}</h2>
           <p>
-            Open the secure link in your email to activate your account. The link will return you to Systemly automatically.
+            {text("Open the secure link in your email to activate your account. The link will return you to Systemly automatically.")}
           </p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="auth-form" noValidate>
           <div className="auth-field">
-            <label htmlFor="verification-email" className="auth-label">Email address</label>
+            <label htmlFor="verification-email" className="auth-label">{text("Email address")}</label>
             <input
               {...register("email")}
               id="verification-email"
@@ -69,19 +71,23 @@ export function ResendVerificationForm() {
               placeholder="you@business.com"
               className="auth-input"
             />
-            {errors.email ? <p className="auth-field-error">{errors.email.message}</p> : null}
+            {errors.email ? (
+              <p className="auth-field-error">
+                {text(errors.email.message ?? "Enter a valid email address")}
+              </p>
+            ) : null}
           </div>
 
           {serverError ? <div className="auth-error" role="alert">{serverError}</div> : null}
 
           <button type="submit" disabled={isSubmitting} className="auth-secondary-button">
-            {isSubmitting ? "Sending email…" : "Resend verification email"}
+            {isSubmitting ? text("Sending email…") : text("Resend verification email")}
           </button>
         </form>
       </div>
 
       <p className="auth-switch-copy">
-        Already verified? <Link href="/login" className="auth-text-link">Log in</Link>
+        {text("Already verified?")} <Link href="/login" className="auth-text-link">{text("Log in")}</Link>
       </p>
     </div>
   );

@@ -1,5 +1,6 @@
 "use client";
 
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { useEffect, useMemo, useState } from "react";
 import {
   Check,
@@ -68,6 +69,7 @@ export function StaffFormModal({
     photoChange: StaffPhotoChange,
   ) => Promise<void>;
 }) {
+  const text = usePlatformText();
   const [form, setForm] = useState<StaffProfileInput>(() => initialForm(member));
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [removePhoto, setRemovePhoto] = useState(false);
@@ -144,7 +146,7 @@ export function StaffFormModal({
         type="button"
         className="absolute inset-0 cursor-default"
         onClick={onClose}
-        aria-label="Close staff form"
+        aria-label={text("Close staff form")}
       />
 
       <form
@@ -158,10 +160,10 @@ export function StaffFormModal({
             </span>
             <div>
               <h2 className="text-xl font-bold text-slate-950">
-                {member ? "Edit staff profile" : "Add staff member"}
+                {member ? text("Edit staff profile") : text("Add staff member")}
               </h2>
               <p className="mt-0.5 text-sm text-slate-500">
-                Manage the internal profile and public team information.
+                {text("Manage the internal profile and public team information.")}
               </p>
             </div>
           </div>
@@ -169,7 +171,7 @@ export function StaffFormModal({
             type="button"
             onClick={onClose}
             className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
-            aria-label="Close"
+            aria-label={text("Close")}
           >
             <X size={18} />
           </button>
@@ -178,13 +180,13 @@ export function StaffFormModal({
         <div className="space-y-7 px-6 py-6">
           <section className="grid gap-4 sm:grid-cols-2">
             <div className="sm:col-span-2">
-              <p className="text-sm font-medium text-slate-700">Profile photo</p>
+              <p className="text-sm font-medium text-slate-700">{text("Profile photo")}</p>
               <div className="mt-2 flex flex-col gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-center">
                 <div className="flex h-28 w-28 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200">
                   {previewUrl ? (
                     <img
                       src={previewUrl}
-                      alt="Staff photo preview"
+                      alt={text("Staff photo preview")}
                       className="h-full w-full object-cover"
                     />
                   ) : (
@@ -193,12 +195,12 @@ export function StaffFormModal({
                 </div>
                 <div>
                   <p className="text-sm text-slate-500">
-                    JPG, PNG, or WebP. Maximum size 5 MB.
+                    {text("JPG, PNG, or WebP. Maximum size 5 MB.")}
                   </p>
                   <div className="mt-3 flex flex-wrap gap-2">
                     <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-violet-50 px-3 py-2 text-sm font-semibold text-violet-700 transition hover:bg-violet-100">
                       <ImagePlus size={15} />
-                      {previewUrl ? "Replace photo" : "Upload photo"}
+                      {previewUrl ? text("Replace photo") : text("Upload photo")}
                       <input
                         type="file"
                         accept="image/jpeg,image/png,image/webp"
@@ -216,7 +218,7 @@ export function StaffFormModal({
                         }}
                         className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-rose-600 transition hover:bg-rose-50"
                       >
-                        <Trash2 size={15} /> Remove
+                        <Trash2 size={15} /> {text("Remove")}
                       </button>
                     ) : null}
                   </div>
@@ -228,7 +230,7 @@ export function StaffFormModal({
             </div>
 
             <label className="sm:col-span-2 text-sm font-medium text-slate-700">
-              Full name
+              {text("Full name")}
               <input
                 required
                 maxLength={255}
@@ -237,12 +239,12 @@ export function StaffFormModal({
                   setForm((current) => ({ ...current, name: event.target.value }))
                 }
                 className={inputClass}
-                placeholder="Dr. Sarah Jenkins"
+                placeholder={text("Dr. Sarah Jenkins")}
               />
             </label>
 
             <label className="text-sm font-medium text-slate-700">
-              Job title
+              {text("Job title")}
               <input
                 maxLength={120}
                 value={form.jobTitle ?? ""}
@@ -253,12 +255,12 @@ export function StaffFormModal({
                   }))
                 }
                 className={inputClass}
-                placeholder="Lead therapist"
+                placeholder={text("Lead therapist")}
               />
             </label>
 
             <label className="text-sm font-medium text-slate-700">
-              Years of experience
+              {text("Years of experience")}
               <input
                 type="number"
                 min={0}
@@ -277,7 +279,7 @@ export function StaffFormModal({
             </label>
 
             <label className="text-sm font-medium text-slate-700">
-              Phone
+              {text("Phone")}
               <input
                 value={form.phone ?? ""}
                 onChange={(event) =>
@@ -289,7 +291,7 @@ export function StaffFormModal({
             </label>
 
             <label className="text-sm font-medium text-slate-700">
-              Email
+              {text("Email")}
               <input
                 type="email"
                 value={form.email ?? ""}
@@ -302,7 +304,7 @@ export function StaffFormModal({
             </label>
 
             <label className="sm:col-span-2 text-sm font-medium text-slate-700">
-              Biography
+              {text("Biography")}
               <textarea
                 rows={4}
                 maxLength={4000}
@@ -311,7 +313,7 @@ export function StaffFormModal({
                   setForm((current) => ({ ...current, bio: event.target.value }))
                 }
                 className={inputClass}
-                placeholder="Specialties, professional background, and customer-facing introduction..."
+                placeholder={text("Specialties, professional background, and customer-facing introduction...")}
               />
             </label>
           </section>
@@ -319,9 +321,9 @@ export function StaffFormModal({
           {canManageProtectedFields ? (
             <section className="grid gap-4 rounded-2xl border border-violet-100 bg-violet-50/50 p-4 sm:grid-cols-2">
               <div>
-                <p className="text-sm font-semibold text-slate-900">Permission role</p>
+                <p className="text-sm font-semibold text-slate-900">{text("Permission role")}</p>
                 <p className="mt-1 text-xs text-slate-500">
-                  This classifies the profile only; no login account is created in V1.
+                  {text("This classifies the profile only; no login account is created in V1.")}
                 </p>
                 <div className="mt-3">
                   <OperationsDropdown
@@ -333,7 +335,7 @@ export function StaffFormModal({
                         role: value as StaffRole,
                       }))
                     }
-                    aria-label="Staff role"
+                    aria-label={text("Staff role")}
                   />
                 </div>
               </div>
@@ -354,10 +356,10 @@ export function StaffFormModal({
               >
                 <div>
                   <p className="text-sm font-semibold text-slate-900">
-                    {form.isActive ? "Active profile" : "Inactive profile"}
+                    {form.isActive ? text("Active profile") : text("Inactive profile")}
                   </p>
                   <p className="mt-1 text-xs text-slate-500">
-                    Inactive staff remain visible in history but cannot be booked.
+                    {text("Inactive staff remain visible in history but cannot be booked.")}
                   </p>
                 </div>
                 <span
@@ -379,10 +381,10 @@ export function StaffFormModal({
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h3 className="text-sm font-semibold text-slate-900">
-                  Assigned services
+                  {text("Assigned services")}
                 </h3>
                 <p className="mt-1 text-xs text-slate-500">
-                  Commission settings are configured separately inside the staff profile.
+                  {text("Commission settings are configured separately inside the staff profile.")}
                 </p>
               </div>
               <span className="rounded-full bg-violet-50 px-2.5 py-1 text-xs font-semibold text-violet-700">
@@ -408,7 +410,7 @@ export function StaffFormModal({
                       <p className="truncate text-sm font-medium">{service.name}</p>
                       <p className="mt-0.5 text-xs text-slate-500">
                         {service.category || "Uncategorized"}
-                        {!service.isActive ? " · Inactive" : ""}
+                        {!service.isActive ? ` · ${text("Inactive")}` : ""}
                       </p>
                     </div>
                     <span
@@ -440,7 +442,7 @@ export function StaffFormModal({
             disabled={saving}
             className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
           >
-            Cancel
+            {text("Cancel")}
           </button>
           <button
             type="submit"
@@ -448,7 +450,7 @@ export function StaffFormModal({
             className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:from-violet-700 hover:to-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {saving ? <Loader2 size={16} className="animate-spin" /> : null}
-            {member ? "Save changes" : "Add staff member"}
+            {member ? text("Save changes") : text("Add staff member")}
           </button>
         </footer>
       </form>

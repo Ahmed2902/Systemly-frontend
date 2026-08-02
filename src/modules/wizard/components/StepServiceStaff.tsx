@@ -1,5 +1,6 @@
 "use client";
 
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { useMemo, useState } from "react";
 import {
   Clock3,
@@ -26,6 +27,7 @@ function normalizeCategory(value: string) {
 }
 
 export function StepServicesStaff({ onNext, onBack }: StepProps) {
+  const text = usePlatformText();
   const { state, patch } = useWizard();
   const [error, setError] = useState<string | null>(null);
   const [attemptedSubmit, setAttemptedSubmit] = useState(false);
@@ -181,7 +183,7 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
     else if (
       state.staff.some(
         (member) =>
-          member.role !== "Receptionist" && member.serviceIds.length === 0,
+          member.role !== text("Receptionist") && member.serviceIds.length === 0,
       )
     )
       nextError = "Assign at least one service to every service provider";
@@ -206,13 +208,12 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
   return (
     <div className="onboarding-services-step">
       <div className="onboarding-page-intro">
-        <p className="onboarding-kicker">Services &amp; team</p>
+        <p className="onboarding-kicker">{text("Services & team")}</p>
         <h1 className="onboarding-page-title">
-          Define what happens—and who provides it.
+          {text("Define what happens—and who provides it.")}
         </h1>
         <p className="onboarding-page-copy">
-          Add the services customers can book, then connect each one to the
-          eligible team members.
+          {text("Add the services customers can book, then connect each one to the eligible team members.")}
         </p>
       </div>
 
@@ -222,10 +223,10 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
             <div className="onboarding-section-heading-main">
               <div>
                 <p className="onboarding-section-number">01</p>
-                <h2>Services</h2>
-                <p>Set the name, duration, price, and optional category.</p>
+                <h2>{text("Services")}</h2>
+                <p>{text("Set the name, duration, price, and optional category.")}</p>
               </div>
-              <div className="onboarding-services-summary" aria-label="Service summary">
+              <div className="onboarding-services-summary" aria-label={text("Service summary")}>
                 <span><strong>{state.services.length}</strong> services</span>
                 <span><strong>{categories}</strong> categories</span>
                 <span><strong>EGP {averagePrice}</strong> average</span>
@@ -243,7 +244,7 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
               }
             >
               <Plus size={16} />
-              Add service
+              {text("Add service")}
             </button>
           </div>
 
@@ -257,7 +258,7 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
                   </span>
 
                   <label className="onboarding-field onboarding-service-name-field">
-                    <span>Service name</span>
+                    <span>{text("Service name")}</span>
                     <input
                       value={service.name}
                       onChange={(event) =>
@@ -265,20 +266,20 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
                           name: event.target.value,
                         })
                       }
-                      placeholder="e.g. Hair consultation"
+                      placeholder={text("e.g. Hair consultation")}
                       className={`onboarding-input ${missingName ? "is-invalid" : ""}`}
                       data-onboarding-invalid={missingName ? "true" : undefined}
                       aria-invalid={missingName || undefined}
                     />
                     {missingName ? (
                       <small className="onboarding-field-error">
-                        Add a service name.
+                        {text("Add a service name.")}
                       </small>
                     ) : null}
                   </label>
 
                   <label className="onboarding-field">
-                    <span>Minutes</span>
+                    <span>{text("Minutes")}</span>
                     <input
                       type="number"
                       min={5}
@@ -297,7 +298,7 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
                   </label>
 
                   <label className="onboarding-field">
-                    <span>Price (EGP)</span>
+                    <span>{text("Price (EGP)")}</span>
                     <input
                       type="number"
                       min={0}
@@ -316,7 +317,7 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
                   </label>
 
                   <label className="onboarding-field onboarding-service-category-field">
-                    <span>Category</span>
+                    <span>{text("Category")}</span>
                     <input
                       value={service.category || ""}
                       onChange={(event) =>
@@ -329,7 +330,7 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
                           category: normalizeCategory(event.target.value),
                         })
                       }
-                      placeholder="e.g. Hair"
+                      placeholder={text("e.g. Hair")}
                       className="onboarding-input"
                     />
                   </label>
@@ -351,10 +352,9 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
                 <div className="onboarding-icon-tile is-muted">
                   <Plus size={18} />
                 </div>
-                <strong>Add your first bookable service</strong>
+                <strong>{text("Add your first bookable service")}</strong>
                 <p>
-                  Services appear on your public site and connect to eligible
-                  team members below.
+                  {text("Services appear on your public site and connect to eligible team members below.")}
                 </p>
                 <button
                   type="button"
@@ -362,7 +362,7 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
                   className="onboarding-secondary-button"
                 >
                   <Plus size={16} />
-                  Add service
+                  {text("Add service")}
                 </button>
               </div>
             ) : null}
@@ -373,10 +373,9 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
           <div className="onboarding-section-heading">
             <div>
               <p className="onboarding-section-number">02</p>
-              <h2>Team &amp; service eligibility</h2>
+              <h2>{text("Team & service eligibility")}</h2>
               <p>
-                Add each person, choose their role, and select the services they
-                can provide.
+                {text("Add each person, choose their role, and select the services they can provide.")}
               </p>
             </div>
             <button
@@ -391,30 +390,28 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
               }
             >
               <Plus size={16} />
-              Add staff
+              {text("Add staff")}
             </button>
           </div>
 
           <div className="onboarding-inline-callout">
             <Users size={20} />
             <div>
-              <strong>Customers only see eligible staff.</strong>
+              <strong>{text("Customers only see eligible staff.")}</strong>
               <p>
-                Assign at least one service to every service provider.
-                Receptionists can skip this step. You will set working hours in
-                the next step.
+                {text("Assign at least one service to every service provider. Receptionists can skip this step. You will set working hours in the next step.")}
               </p>
             </div>
             <span>
               <Clock3 size={15} />
-              Availability comes next
+              {text("Availability comes next")}
             </span>
           </div>
 
           <div className="onboarding-team-list">
             {state.staff.map((member, index) => {
               const missingName = attemptedSubmit && !member.name.trim();
-              const isReceptionist = member.role === "Receptionist";
+              const isReceptionist = member.role === text("Receptionist");
               const missingServices =
                 attemptedSubmit &&
                 !isReceptionist &&
@@ -425,7 +422,7 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
                 <article key={member.clientId} className="onboarding-team-card">
                   <div className="onboarding-team-card-top">
                     <div className="onboarding-team-photo-field">
-                      <span>Photo</span>
+                      <span>{text("Photo")}</span>
                       <div className="onboarding-team-photo">
                         {member.photoUrl ? (
                           <img
@@ -442,10 +439,10 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
                             <ImagePlus size={19} />
                           )}
                           {uploadingStaffId === member.clientId
-                            ? "Uploading…"
+                            ? text("Uploading…")
                             : member.photoUrl
-                              ? "Replace"
-                              : "Add photo"}
+                              ? text("Replace")
+                              : text("Add photo")}
                           <input
                             type="file"
                             accept="image/*"
@@ -477,10 +474,10 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
 
                     <div className="onboarding-team-identity">
                       <div className="onboarding-team-index">
-                        Team member {String(index + 1).padStart(2, "0")}
+                        {text("Team member")} {String(index + 1).padStart(2, "0")}
                       </div>
                       <label className="onboarding-field">
-                        <span>Name</span>
+                        <span>{text("Name")}</span>
                         <input
                           value={member.name}
                           onChange={(event) =>
@@ -488,7 +485,7 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
                               name: event.target.value,
                             })
                           }
-                          placeholder="Team member name"
+                          placeholder={text("Team member name")}
                           className={`onboarding-input ${missingName ? "is-invalid" : ""}`}
                           data-onboarding-invalid={
                             missingName ? "true" : undefined
@@ -497,13 +494,13 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
                         />
                         {missingName ? (
                           <small className="onboarding-field-error">
-                            Add this team member’s name.
+                            {text("Add this team member’s name.")}
                           </small>
                         ) : null}
                       </label>
 
                       <div className="onboarding-role-picker">
-                        <span>Role</span>
+                        <span>{text("Role")}</span>
                         <div>
                           {STAFF_ROLE_OPTIONS.map((role) => (
                             <button
@@ -541,8 +538,8 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
                     <div className="onboarding-eligibility-heading">
                       <div>
                         <strong>
-                          Services this person provides
-                          {isReceptionist ? " (optional)" : ""}
+                          {text("Services this person provides")}
+                          {isReceptionist ? text("(optional)") : ""}
                         </strong>
                         <span>
                           {member.serviceIds.length} of {state.services.length}
@@ -557,14 +554,14 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
                           }
                           disabled={!state.services.length}
                         >
-                          Select all
+                          {text("Select all")}
                         </button>
                         <button
                           type="button"
                           onClick={() => clearStaffServices(member.clientId)}
                           disabled={!member.serviceIds.length}
                         >
-                          Clear
+                          {text("Clear")}
                         </button>
                       </div>
                     </div>
@@ -580,7 +577,7 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
                               [member.clientId]: event.target.value,
                             }))
                           }
-                          placeholder="Search services"
+                          placeholder={text("Search services")}
                           aria-label={`Search services for ${member.name || "team member"}`}
                         />
                       </label>
@@ -607,19 +604,19 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
                       ))}
                       {!visibleServices.length ? (
                         <p className="onboarding-search-empty">
-                          No services match that search.
+                          {text("No services match that search.")}
                         </p>
                       ) : null}
                       {!state.services.length ? (
                         <p className="onboarding-search-empty">
-                          Add a service above before assigning eligibility.
+                          {text("Add a service above before assigning eligibility.")}
                         </p>
                       ) : null}
                     </div>
 
                     {missingServices ? (
                       <small className="onboarding-field-error">
-                        Select at least one service for this person.
+                        {text("Select at least one service for this person.")}
                       </small>
                     ) : null}
                   </div>
@@ -632,10 +629,9 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
                 <div className="onboarding-icon-tile is-muted">
                   <Users size={18} />
                 </div>
-                <strong>Add the people customers can book</strong>
+                <strong>{text("Add the people customers can book")}</strong>
                 <p>
-                  You can add staff and receptionists now, then set each
-                  person’s availability next.
+                  {text("You can add staff and receptionists now, then set each person’s availability next.")}
                 </p>
                 <button
                   type="button"
@@ -643,7 +639,7 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
                   className="onboarding-secondary-button"
                 >
                   <Plus size={16} />
-                  Add staff
+                  {text("Add staff")}
                 </button>
               </div>
             ) : null}
@@ -663,7 +659,7 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
           onClick={onBack}
           className="onboarding-secondary-button"
         >
-          ← Back
+          {text("← Back")}
         </button>
         <div className="onboarding-footer-actions">
           <button
@@ -671,7 +667,7 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
             onClick={validateAndNext}
             className="onboarding-primary-button"
           >
-            Continue →
+            {text("Continue →")}
           </button>
         </div>
       </footer>

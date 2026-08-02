@@ -1,5 +1,6 @@
 "use client";
 
+import { usePlatformText } from "@/i18n/usePlatformText";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { LucideIcon } from "lucide-react";
@@ -52,13 +53,14 @@ export function Sidebar({
   open?: boolean;
   onClose?: () => void;
 }) {
+  const text = usePlatformText();
   const pathname = usePathname();
   const { user } = useAuth();
   const copy = usePlatformCopy().operations.shell;
   const { openNewAppointment } = useOperations();
   const { theme, toggleTheme } = useOperationsTheme();
   const ownerView =
-    user?.role === "BusinessAdmin" || user?.role === "SuperAdmin";
+    user?.role === text("BusinessAdmin") || user?.role === text("SuperAdmin");
 
   const navGroups: NavGroup[] = [
     {
@@ -145,8 +147,8 @@ export function Sidebar({
           const items = group.items.filter((item) => !item.ownerOnly || ownerView);
           if (!items.length) return null;
           return (
-            <div className="op-nav-group" key={group.label}>
-              <p className="op-nav-label">{group.label}</p>
+            <div className="op-nav-group" key={text(group.label)}>
+              <p className="op-nav-label">{text(group.label)}</p>
               <div className="space-y-1">
                 {items.map(({ href, label, icon: Icon, exact }) => {
                   const active = exact

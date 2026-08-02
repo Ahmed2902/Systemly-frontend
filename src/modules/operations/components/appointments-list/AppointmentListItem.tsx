@@ -1,3 +1,6 @@
+"use client";
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import Link from "next/link";
 import { Clock3, UserRound } from "lucide-react";
 import type { AppointmentSummary } from "@/modules/operations/appointment.types";
@@ -65,6 +68,7 @@ interface Props {
 }
 
 export function AppointmentListItem({ appointment, staff, timezone }: Props) {
+  const text = usePlatformText();
   const first = appointment.segments[0];
   const last = appointment.segments.at(-1);
   const duration =
@@ -138,7 +142,7 @@ export function AppointmentListItem({ appointment, staff, timezone }: Props) {
             {appointment.customer.phone || "No phone"} ·{" "}
             {appointment.segments.length} service
             {appointment.segments.length === 1 ? "" : "s"} ·{" "}
-            {appointment.isPaid ? "Paid" : "Payment due"}
+            {appointment.isPaid ? text("Paid") : text("Payment due")}
           </div>
         </div>
       </div>

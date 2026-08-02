@@ -1,6 +1,6 @@
-// src/shared/components/ScaledPreview.tsx
 "use client";
 
+// src/shared/components/ScaledPreview.tsx
 import { useEffect, useRef, useState } from "react";
 
 export function ScaledPreview({

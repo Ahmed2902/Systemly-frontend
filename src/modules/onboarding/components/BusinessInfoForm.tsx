@@ -1,6 +1,7 @@
-// src/modules/onboarding/components/BusinessInfoForm.tsx
 "use client";
 
+import { usePlatformText } from "@/i18n/usePlatformText";
+// src/modules/onboarding/components/BusinessInfoForm.tsx
 import { useRouter } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,6 +17,7 @@ import { SlugInput } from "./SlugInput";
 import { useState } from "react";
 
 export function BusinessInfoForm() {
+  const text = usePlatformText();
   const router = useRouter();
   const { accessToken } = useAuth();
   const [serverError, setServerError] = useState<string | null>(null);
@@ -32,25 +34,29 @@ export function BusinessInfoForm() {
   async function onSubmit(data: CreateBusinessInput) {
     setServerError(null);
     if (!accessToken) {
-      setServerError("Your session expired. Please log in again.");
+      setServerError(text("Your session expired. Please log in again."));
       return;
     }
     try {
       await createBusiness(data, accessToken);
-      router.push("/onboarding/customize"); // next wizard step, once website-content module is redesigned
+      router.push("/onboarding/customize");
     } catch (err: unknown) {
       setServerError(
         err instanceof Error
           ? err.message
-          : "Something went wrong. Please try again.",
+          : text("Something went wrong. Please try again."),
       );
     }
   }
 
+  const slugError = errors.slug?.message
+    ? text(errors.slug.message)
+    : undefined;
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div>
-        <label className="text-sm text-muted">Business type</label>
+        <label className="text-sm text-muted">{text("Business type")}</label>
         <Controller
           name="vertical"
           control={control}
@@ -60,20 +66,24 @@ export function BusinessInfoForm() {
             </div>
           )}
         />
-        {errors.vertical && (
-          <p className="mt-1 text-sm text-red-400">{errors.vertical.message}</p>
-        )}
+        {errors.vertical ? (
+          <p className="mt-1 text-sm text-red-400">
+            {text(errors.vertical.message ?? "Choose a business type")}
+          </p>
+        ) : null}
       </div>
 
       <div>
-        <label className="text-sm text-muted">Business name</label>
+        <label className="text-sm text-muted">{text("Business name")}</label>
         <input
           {...register("name")}
           className="mt-1 w-full rounded-md border border-surfaceBorder bg-background px-3 py-2 text-foreground"
         />
-        {errors.name && (
-          <p className="mt-1 text-sm text-red-400">{errors.name.message}</p>
-        )}
+        {errors.name ? (
+          <p className="mt-1 text-sm text-red-400">
+            {text(errors.name.message ?? "Enter your business name")}
+          </p>
+        ) : null}
       </div>
 
       <Controller
@@ -83,25 +93,27 @@ export function BusinessInfoForm() {
           <SlugInput
             value={field.value ?? ""}
             onChange={field.onChange}
-            error={errors.slug?.message}
+            error={slugError}
           />
         )}
       />
 
       <div>
-        <label className="text-sm text-muted">Phone</label>
+        <label className="text-sm text-muted">{text("Phone")}</label>
         <input
           {...register("phone")}
           placeholder="01012345678"
           className="mt-1 w-full rounded-md border border-surfaceBorder bg-background px-3 py-2 text-foreground"
         />
-        {errors.phone && (
-          <p className="mt-1 text-sm text-red-400">{errors.phone.message}</p>
-        )}
+        {errors.phone ? (
+          <p className="mt-1 text-sm text-red-400">
+            {text(errors.phone.message ?? "Enter a phone number")}
+          </p>
+        ) : null}
       </div>
 
       <div>
-        <label className="text-sm text-muted">City</label>
+        <label className="text-sm text-muted">{text("City")}</label>
         <input
           {...register("city")}
           className="mt-1 w-full rounded-md border border-surfaceBorder bg-background px-3 py-2 text-foreground"
@@ -109,21 +121,21 @@ export function BusinessInfoForm() {
       </div>
 
       <div>
-        <label className="text-sm text-muted">Address</label>
+        <label className="text-sm text-muted">{text("Address")}</label>
         <input
           {...register("address")}
           className="mt-1 w-full rounded-md border border-surfaceBorder bg-background px-3 py-2 text-foreground"
         />
       </div>
 
-      {serverError && <p className="text-sm text-red-400">{serverError}</p>}
+      {serverError ? <p className="text-sm text-red-400">{serverError}</p> : null}
 
       <Button
         type="submit"
         disabled={isSubmitting}
         className="w-full bg-accent text-black hover:bg-accent/90"
       >
-        {isSubmitting ? "Creating your business..." : "Continue"}
+        {isSubmitting ? text("Creating your business...") : text("Continue")}
       </Button>
     </form>
   );

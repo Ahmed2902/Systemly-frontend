@@ -1,4 +1,6 @@
 "use client";
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { CalendarDays, Check, ChevronDown, Search } from "lucide-react";
 import { useState } from "react";
 export type SortMode = "soonest" | "latest" | "customer" | "status";
@@ -26,6 +28,7 @@ function FilterDropdown({
   options: Array<{ value: string; label: string }>;
   onChange: (value: string) => void;
 }) {
+  const text = usePlatformText();
   const [open, setOpen] = useState(false);
   const selected =
     options.find((option) => option.value === value)?.label ?? label;
@@ -54,7 +57,7 @@ function FilterDropdown({
               }}
               className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm ${option.value === value ? "bg-blue-50 font-semibold text-blue-700" : "text-slate-700 hover:bg-slate-50"}`}
             >
-              {option.label}
+              {text(option.label)}
               {option.value === value ? <Check size={14} /> : null}
             </button>
           ))}
@@ -76,6 +79,7 @@ export function AppointmentsToolbar({
   onStatusFilterChange,
   onSortChange,
 }: Props) {
+  const text = usePlatformText();
   return (
     <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
       <div className="flex flex-wrap items-center gap-2">
@@ -84,7 +88,7 @@ export function AppointmentsToolbar({
           <input
             value={query}
             onChange={(e) => onQueryChange(e.target.value)}
-            placeholder="Search customers, phone, or services"
+            placeholder={text("Search customers, phone, or services")}
             className="w-full outline-none"
           />
         </label>
@@ -98,11 +102,11 @@ export function AppointmentsToolbar({
           />
         </label>
         <FilterDropdown
-          label="All staff"
+          label={text("All staff")}
           value={staffFilter}
           onChange={onStaffFilterChange}
           options={[
-            { value: "all", label: "All staff" },
+            { value: "all", label: text("All staff") },
             ...staff.map((member) => ({
               value: member.id,
               label: member.name,
@@ -110,28 +114,28 @@ export function AppointmentsToolbar({
           ]}
         />
         <FilterDropdown
-          label="All statuses"
+          label={text("All statuses")}
           value={statusFilter}
           onChange={onStatusFilterChange}
           options={[
-            { value: "all", label: "All statuses" },
-            { value: "pending", label: "Pending" },
-            { value: "confirmed", label: "Confirmed" },
-            { value: "in_progress", label: "In progress" },
-            { value: "no_show", label: "No-show" },
-            { value: "completed", label: "Completed" },
-            { value: "cancelled", label: "Cancelled" },
+            { value: "all", label: text("All statuses") },
+            { value: "pending", label: text("Pending") },
+            { value: "confirmed", label: text("Confirmed") },
+            { value: "in_progress", label: text("In progress") },
+            { value: "no_show", label: text("No-show") },
+            { value: "completed", label: text("Completed") },
+            { value: "cancelled", label: text("Cancelled") },
           ]}
         />
         <FilterDropdown
-          label="Soonest first"
+          label={text("Soonest first")}
           value={sort}
           onChange={(value) => onSortChange(value as SortMode)}
           options={[
-            { value: "soonest", label: "Soonest first" },
-            { value: "latest", label: "Latest first" },
-            { value: "customer", label: "Customer name" },
-            { value: "status", label: "Status" },
+            { value: "soonest", label: text("Soonest first") },
+            { value: "latest", label: text("Latest first") },
+            { value: "customer", label: text("Customer name") },
+            { value: "status", label: text("Status") },
           ]}
         />
       </div>

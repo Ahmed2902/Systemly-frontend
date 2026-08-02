@@ -1,5 +1,6 @@
 "use client";
 
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { useState } from "react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
@@ -12,6 +13,7 @@ import {
 import { ApiError, requestPasswordReset } from "../auth.api";
 
 export function ForgotPasswordForm() {
+  const text = usePlatformText();
   const [sentTo, setSentTo] = useState<string | null>(null);
   const [serverError, setServerError] = useState<string | null>(null);
   const {
@@ -36,15 +38,15 @@ export function ForgotPasswordForm() {
       <div className="auth-state-card">
         <div className="auth-state-icon"><MailCheck size={24} /></div>
         <div>
-          <h2>Check your inbox</h2>
+          <h2>{text("Check your inbox")}</h2>
           <p>
-            If <strong>{sentTo}</strong> belongs to an account, we sent a secure password-reset link.
+            {text("If")} <strong>{sentTo}</strong> {text("belongs to an account, we sent a secure password-reset link.")}
           </p>
         </div>
         <button type="button" className="auth-secondary-button" onClick={() => setSentTo(null)}>
-          Use another email
+          {text("Use another email")}
         </button>
-        <Link href="/login" className="auth-primary-button">Back to login</Link>
+        <Link href="/login" className="auth-primary-button">{text("Back to login")}</Link>
       </div>
     );
   }
@@ -53,7 +55,7 @@ export function ForgotPasswordForm() {
     <div className="auth-stack">
       <form onSubmit={handleSubmit(onSubmit)} className="auth-form" noValidate>
         <div className="auth-field">
-          <label htmlFor="forgot-email" className="auth-label">Account email</label>
+          <label htmlFor="forgot-email" className="auth-label">{text("Account email")}</label>
           <input
             {...register("email")}
             id="forgot-email"
@@ -62,18 +64,22 @@ export function ForgotPasswordForm() {
             placeholder="you@business.com"
             className="auth-input"
           />
-          {errors.email ? <p className="auth-field-error">{errors.email.message}</p> : null}
+          {errors.email ? (
+            <p className="auth-field-error">
+              {text(errors.email.message ?? "Enter a valid email address")}
+            </p>
+          ) : null}
         </div>
 
         {serverError ? <div className="auth-error" role="alert">{serverError}</div> : null}
 
         <button type="submit" disabled={isSubmitting} className="auth-primary-button">
-          {isSubmitting ? "Sending reset link…" : "Send reset link"}
+          {isSubmitting ? text("Sending reset link…") : text("Send reset link")}
         </button>
       </form>
 
       <p className="auth-switch-copy">
-        Remembered your password? <Link href="/login" className="auth-text-link">Back to login</Link>
+        {text("Remembered your password?")} <Link href="/login" className="auth-text-link">{text("Back to login")}</Link>
       </p>
     </div>
   );

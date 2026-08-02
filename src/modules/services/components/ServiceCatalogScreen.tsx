@@ -1,5 +1,6 @@
 "use client";
 
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Activity,
@@ -42,6 +43,7 @@ import { ServiceFormModal } from "./ServiceFormModal";
 import { ServicesTable } from "./ServicesTable";
 
 export default function ServiceCatalogScreen() {
+  const text = usePlatformText();
   const { accessToken, loading: authLoading } = useAuth();
   const { notifyMutation } = useOperations();
   const [catalog, setCatalog] = useState<ServiceCatalogResponse | null>(null);
@@ -78,7 +80,7 @@ export default function ServiceCatalogScreen() {
         );
         setError(null);
       } catch (caught: unknown) {
-        setError(caught instanceof Error ? caught.message : "Unable to load services");
+        setError(caught instanceof Error ? caught.message : text("Unable to load services"));
       } finally {
         setLoading(false);
         setRefreshing(false);
@@ -107,9 +109,9 @@ export default function ServiceCatalogScreen() {
     [catalog?.categories],
   );
   const statusOptions = [
-    { value: "all", label: "All statuses" },
-    { value: "active", label: "Active", tone: "active" as const },
-    { value: "inactive", label: "Inactive", tone: "inactive" as const },
+    { value: "all", label: text("All statuses") },
+    { value: "active", label: text("Active"), tone: "active" as const },
+    { value: "inactive", label: text("Inactive"), tone: "inactive" as const },
   ];
 
   const openCreate = () => {
@@ -142,7 +144,7 @@ export default function ServiceCatalogScreen() {
       setEditingService(null);
       await load(true);
     } catch (caught: unknown) {
-      setFormError(caught instanceof Error ? caught.message : "Unable to save service");
+      setFormError(caught instanceof Error ? caught.message : text("Unable to save service"));
     } finally {
       setSaving(false);
     }
@@ -168,7 +170,7 @@ export default function ServiceCatalogScreen() {
       notifyMutation({ scope: "service", entityId: service.id });
       await load(true);
     } catch (caught: unknown) {
-      setError(caught instanceof Error ? caught.message : "Unable to update service");
+      setError(caught instanceof Error ? caught.message : text("Unable to update service"));
     } finally {
       setActionId(null);
     }
@@ -186,7 +188,7 @@ export default function ServiceCatalogScreen() {
     return (
       <OperationsPage>
         <OperationsPageInner className="flex min-h-full items-center justify-center">
-          <OperationsState loading title="Loading service catalog" />
+          <OperationsState loading title={text("Loading service catalog")} />
         </OperationsPageInner>
       </OperationsPage>
     );
@@ -196,16 +198,16 @@ export default function ServiceCatalogScreen() {
     <OperationsPage>
       <OperationsPageInner>
         <OperationsPageHeader
-          eyebrow="Management / Services"
-          title="Service catalog"
-          description="Manage services, categories, duration, price, and staff eligibility."
+          eyebrow={text("Management / Services")}
+          title={text("Service catalog")}
+          description={text("Manage services, categories, duration, price, and staff eligibility.")}
           actions={
             <>
               <button type="button" className="op-button" disabled={refreshing} onClick={() => void load(true)}>
-                <RefreshCw size={15} className={refreshing ? "animate-spin" : ""} /> Refresh
+                <RefreshCw size={15} className={refreshing ? "animate-spin" : ""} /> {text("Refresh")}
               </button>
               <button type="button" onClick={openCreate} className="op-button op-button-primary">
-                <Plus size={15} /> New service
+                <Plus size={15} /> {text("New service")}
               </button>
             </>
           }
@@ -218,7 +220,7 @@ export default function ServiceCatalogScreen() {
               <input
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search services, descriptions, or categories"
+                placeholder={text("Search services, descriptions, or categories")}
                 className="op-input h-10 min-h-10 pl-10"
               />
             </label>
@@ -227,23 +229,23 @@ export default function ServiceCatalogScreen() {
               onChange={setCategory}
               options={categoryOptions}
               icon={<Layers3 size={16} />}
-              aria-label="Filter by category"
+              aria-label={text("Filter by category")}
             />
             <OperationsDropdown
               value={status}
               onChange={(value) => setStatus(value as ServiceStatusFilter)}
               options={statusOptions}
               icon={<Activity size={16} />}
-              aria-label="Filter by status"
+              aria-label={text("Filter by status")}
             />
             <button type="button" disabled={!hasFilters} onClick={clearFilters} className="op-button">
-              <SlidersHorizontal size={15} /> Clear
+              <SlidersHorizontal size={15} /> {text("Clear")}
             </button>
           </div>
         </OperationsToolbar>
 
         {error ? (
-          <OperationsAlert tone="danger" className="mb-4" action={<button className="op-button" onClick={() => void load(true)}>Retry</button>}>
+          <OperationsAlert tone="danger" className="mb-4" action={<button className="op-button" onClick={() => void load(true)}>{text("Retry")}</button>}>
             {error}
           </OperationsAlert>
         ) : null}
@@ -251,9 +253,9 @@ export default function ServiceCatalogScreen() {
         {catalog ? (
           <>
             <section className="op-metric-grid mb-4">
-              <OperationsMetric icon={<Layers3 size={17} />} label="Total services" value={catalog.total} />
-              <OperationsMetric icon={<Sparkles size={17} />} label="Active & bookable" value={catalog.activeTotal} tone="success" />
-              <OperationsMetric icon={<SlidersHorizontal size={17} />} label="Categories" value={catalog.categories.length} tone="warning" />
+              <OperationsMetric icon={<Layers3 size={17} />} label={text("Total services")} value={catalog.total} />
+              <OperationsMetric icon={<Sparkles size={17} />} label={text("Active & bookable")} value={catalog.activeTotal} tone="success" />
+              <OperationsMetric icon={<SlidersHorizontal size={17} />} label={text("Categories")} value={catalog.categories.length} tone="warning" />
             </section>
 
             <div className="mb-4 [&>section]:border-[var(--op-border)] [&>section]:bg-[var(--op-surface)] [&>section]:shadow-[var(--op-shadow)]">

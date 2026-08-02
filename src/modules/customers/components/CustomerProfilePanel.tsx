@@ -1,5 +1,6 @@
 "use client";
 
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { useState } from "react";
 import {
   CalendarDays,
@@ -80,6 +81,7 @@ export function CustomerProfilePanel({
   onSaveNotes: (notes: string) => Promise<void>;
   onNewAppointment: () => void;
 }) {
+  const text = usePlatformText();
   const { customer, stats, upcoming, history } = workspace;
   const [notes, setNotes] = useState(customer.notes ?? "");
   const notesDirty = notes !== (customer.notes ?? "");
@@ -137,7 +139,7 @@ export function CustomerProfilePanel({
               className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-semibold text-slate-600 transition hover:border-emerald-200 hover:text-emerald-700"
             >
               <MessageCircle size={16} />
-              Message
+              {text("Message")}
             </a>
             <button
               type="button"
@@ -145,7 +147,7 @@ export function CustomerProfilePanel({
               className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-semibold text-slate-600 transition hover:border-blue-200 hover:text-blue-700"
             >
               <Edit3 size={16} />
-              Edit profile
+              {text("Edit profile")}
             </button>
             <button
               type="button"
@@ -153,7 +155,7 @@ export function CustomerProfilePanel({
               className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-blue-600 px-3.5 py-2 text-sm font-semibold text-white transition hover:bg-blue-700"
             >
               <CalendarDays size={16} />
-              Appointment
+              {text("Appointment")}
             </button>
           </div>
         </div>
@@ -162,21 +164,21 @@ export function CustomerProfilePanel({
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <div className="flex items-center gap-2">
           <UserRound size={17} className="text-blue-600" />
-          <h2 className="font-semibold text-slate-950">Customer metrics</h2>
+          <h2 className="font-semibold text-slate-950">{text("Customer metrics")}</h2>
         </div>
         <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <MetricCard label="Completed visits" value={stats.visits} />
+          <MetricCard label={text("Completed visits")} value={stats.visits} />
           <MetricCard
-            label="No-shows"
+            label={text("No-shows")}
             value={stats.noShows}
             warning={stats.noShows > 0}
           />
           <MetricCard
-            label="Last visit"
+            label={text("Last visit")}
             value={formatDate(stats.lastVisitAt, timezone)}
           />
           <MetricCard
-            label="Next appointment"
+            label={text("Next appointment")}
             value={formatDate(stats.nextAppointmentAt, timezone)}
           />
         </div>
@@ -184,26 +186,26 @@ export function CustomerProfilePanel({
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(20rem,.85fr)]">
         <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="font-semibold text-slate-950">Contact and details</h2>
+          <h2 className="font-semibold text-slate-950">{text("Contact and details")}</h2>
           <dl className="mt-4 divide-y divide-slate-100 text-sm">
             <div className="grid grid-cols-[8rem_1fr] gap-3 py-3">
-              <dt className="text-slate-400">Phone</dt>
+              <dt className="text-slate-400">{text("Phone")}</dt>
               <dd className="font-medium text-slate-700">{customer.phone}</dd>
             </div>
             <div className="grid grid-cols-[8rem_1fr] gap-3 py-3">
-              <dt className="text-slate-400">Email</dt>
+              <dt className="text-slate-400">{text("Email")}</dt>
               <dd className="font-medium text-slate-700">
                 {customer.email || "Not provided"}
               </dd>
             </div>
             <div className="grid grid-cols-[8rem_1fr] gap-3 py-3">
-              <dt className="text-slate-400">Source</dt>
+              <dt className="text-slate-400">{text("Source")}</dt>
               <dd className="font-medium text-slate-700">
                 {customer.acquisitionSource || "Unknown"}
               </dd>
             </div>
             <div className="grid grid-cols-[8rem_1fr] gap-3 py-3">
-              <dt className="text-slate-400">Customer since</dt>
+              <dt className="text-slate-400">{text("Customer since")}</dt>
               <dd className="font-medium text-slate-700">
                 {formatDate(customer.createdAt, timezone)}
               </dd>
@@ -214,14 +216,14 @@ export function CustomerProfilePanel({
         <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <h2 className="font-semibold text-slate-950">Internal notes</h2>
+              <h2 className="font-semibold text-slate-950">{text("Internal notes")}</h2>
               <p className="mt-1 text-xs text-slate-500">
-                Visible to the operations team only.
+                {text("Visible to the operations team only.")}
               </p>
             </div>
             {notesDirty ? (
               <span className="text-xs font-semibold text-amber-600">
-                Unsaved changes
+                {text("Unsaved changes")}
               </span>
             ) : null}
           </div>
@@ -229,7 +231,7 @@ export function CustomerProfilePanel({
             value={notes}
             onChange={(event) => setNotes(event.target.value)}
             className="mt-4 min-h-40 w-full resize-y rounded-xl border border-slate-200 bg-slate-50 p-3.5 text-sm text-slate-700 outline-none transition focus:border-blue-300 focus:bg-white focus:ring-4 focus:ring-blue-100/60"
-            placeholder="Add preferences, important context, or reception notes…"
+            placeholder={text("Add preferences, important context, or reception notes…")}
           />
           <div className="mt-3 flex justify-end">
             <button
@@ -238,7 +240,7 @@ export function CustomerProfilePanel({
               onClick={() => void saveNotes()}
               className="rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-45"
             >
-              {savingNotes ? "Saving…" : "Save notes"}
+              {savingNotes ? text("Saving…") : text("Save notes")}
             </button>
           </div>
         </section>

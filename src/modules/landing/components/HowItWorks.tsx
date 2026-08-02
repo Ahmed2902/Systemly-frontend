@@ -1,3 +1,6 @@
+"use client";
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { Building2, HeartPulse, Scissors, Sparkles } from "lucide-react";
 
 const steps = [
@@ -14,15 +17,15 @@ const audiences = [
 ];
 
 export function HowItWorks() {
+  const text = usePlatformText();
   return (
     <section id="how-it-works" className="lp-how">
       <div className="lp-shell">
         <div className="lp-how-intro">
-          <p className="lp-kicker">How it works</p>
-          <h2>Set it up once. Let every part stay connected.</h2>
+          <p className="lp-kicker">{text("How it works")}</p>
+          <h2>{text("Set it up once. Let every part stay connected.")}</h2>
           <p>
-            A change to a service, staff schedule, or price should reach the customer
-            experience and the front desk without re-entering it somewhere else.
+            {text("A change to a service, staff schedule, or price should reach the customer experience and the front desk without re-entering it somewhere else.")}
           </p>
         </div>
 
@@ -37,8 +40,8 @@ export function HowItWorks() {
         </div>
 
         <div id="audiences" className="lp-audience-heading">
-          <p className="lp-kicker">Built for appointment businesses</p>
-          <h2>Different workflows. One clear operating model.</h2>
+          <p className="lp-kicker">{text("Built for appointment businesses")}</p>
+          <h2>{text("Different workflows. One clear operating model.")}</h2>
         </div>
 
         <div className="lp-audience-bento">

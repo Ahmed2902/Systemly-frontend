@@ -9,6 +9,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { useLocale } from "@/i18n/LocaleProvider";
 import { api } from "@/shared/lib/api";
 import { logoutUser, refreshAccessToken } from "./auth.api";
 import {
@@ -30,6 +31,7 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const { locale, setLocale } = useLocale();
   const [user, setUser] = useState<AuthUser | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(() =>
     getAccessToken(),
@@ -41,10 +43,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     storeAccessToken(null);
   }, []);
 
-  const setSession = useCallback((nextUser: AuthUser, token: string) => {
-    setUser(nextUser);
-    storeAccessToken(token);
-  }, []);
+  const syncUserLocale = useCallback(
+    (nextUser: AuthUser) => {
+      if (
+        nextUser.preferredLanguage &&
+        nextUser.preferredLanguage !== locale
+      ) {
+        setLocale(nextUser.preferredLanguage);
+        return true;
+      }
+      return false;
+    },
+    [locale, setLocale],
+  );
+
+  const setSession = useCallback(
+    (nextUser: AuthUser, token: string) => {
+      setUser(nextUser);
+      storeAccessToken(token);
+      syncUserLocale(nextUser);
+    },
+    [syncUserLocale],
+  );
 
   const logout = useCallback(async () => {
     try {
@@ -63,15 +83,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     async function bootstrap() {
       try {
-        // A full browser reload clears the in-memory access token, so restore the
-        // session once from the refresh cookie. Client-side navigation and Fast
-        // Refresh reuse the existing token instead of rotating the cookie again.
         const existingToken = getAccessToken();
         const token = existingToken ?? (await refreshAccessToken()).data.accessToken;
         const currentUser = await api<AuthUser>("/auth/me", token, {}, {
           retryOnUnauthorized: false,
         });
-        if (!cancelled) setUser(currentUser);
+        if (!cancelled) {
+          setUser(currentUser);
+          syncUserLocale(currentUser);
+        }
       } catch {
         if (!cancelled) clearSession();
       } finally {
@@ -83,7 +103,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [clearSession]);
+  }, [clearSession, syncUserLocale]);
 
   useEffect(() => {
     if (!loading && user && !accessToken) setUser(null);

@@ -1,4 +1,6 @@
 "use client";
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
@@ -107,6 +109,7 @@ function shift(value: string, delta: number) {
     .slice(0, 16);
 }
 export default function AppointmentDetailsScreen() {
+  const text = usePlatformText();
   const { user, accessToken, loading: authLoading } = useAuth();
   const { appointmentId } = useParams<{ appointmentId: string }>();
   const timezone = user?.timezone || "Africa/Cairo";
@@ -277,26 +280,26 @@ export default function AppointmentDetailsScreen() {
   if (authLoading || loading || !draft)
     return (
       <div className="flex h-full items-center justify-center text-slate-400">
-        Loading appointment…
+        {text("Loading appointment…")}
       </div>
     );
   if (!raw || !appointment)
     return (
       <div className="p-8">
         <Link href="/operations/appointments" className="text-sm text-blue-600">
-          ← Back to appointments
+          {text("← Back to appointments")}
         </Link>
         <p className="mt-5 text-red-600">{error ?? "Appointment not found."}</p>
       </div>
     );
   const statusOptions = [
-    { value: "pending", label: "Pending" },
-    { value: "confirmed", label: "Confirmed" },
-    { value: "in_progress", label: "In progress" },
-    { value: "no_show", label: "No-show" },
+    { value: "pending", label: text("Pending") },
+    { value: "confirmed", label: text("Confirmed") },
+    { value: "in_progress", label: text("In progress") },
+    { value: "no_show", label: text("No-show") },
     //{ value: "completed", label: "Completed" },
     ...(appointment.status.startsWith("cancelled")
-      ? [{ value: appointment.status, label: "Cancelled" }]
+      ? [{ value: appointment.status, label: text("Cancelled") }]
       : []),
   ];
   const firstStart = draft.segments[0]?.startsAt ?? "";

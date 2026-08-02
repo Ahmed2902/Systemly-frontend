@@ -1,3 +1,6 @@
+"use client";
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { Check, CircleDollarSign, XCircle } from "lucide-react";
 import { AppointmentActionCard } from "./AppointmentActionCard";
 import { OperationsDropdown } from "../OperationsDropdown";
@@ -37,15 +40,16 @@ export function AppointmentQuickActions({
   onNoShow,
   onCancel,
 }: Props) {
+  const text = usePlatformText();
   return (
     <section className="self-start rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
-      <h2 className="font-semibold text-slate-950">Quick Actions</h2>
+      <h2 className="font-semibold text-slate-950">{text("Quick Actions")}</h2>
 
       <div className="mt-4 space-y-2.5">
         {!paid ? (
           <div className="pb-1">
             <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Payment method
+              {text("Payment method")}
             </label>
             <OperationsDropdown
               value={paymentMethod}
@@ -54,20 +58,20 @@ export function AppointmentQuickActions({
               onChange={(value) =>
                 onPaymentMethodChange(value as PaymentMethod)
               }
-              aria-label="Payment method"
+              aria-label={text("Payment method")}
             />
           </div>
         ) : null}
         <AppointmentActionCard
           icon={<CircleDollarSign size={16} />}
-          label={paid ? "Payment collected" : "Collect payment"}
+          label={paid ? text("Payment collected") : text("Collect payment")}
           tone="green"
           disabled={!editable || dirty || paid || actionRunning}
           onClick={onCollect}
         />
         <AppointmentActionCard
           icon={<Check size={16} />}
-          label="Mark no-show"
+          label={text("Mark no-show")}
           disabled={
             !editable ||
             !["pending", "confirmed"].includes(status) ||
@@ -77,7 +81,7 @@ export function AppointmentQuickActions({
         />
         <AppointmentActionCard
           icon={<XCircle size={16} />}
-          label="Cancel appointment"
+          label={text("Cancel appointment")}
           tone="red"
           disabled={!canCancel || actionRunning}
           onClick={onCancel}

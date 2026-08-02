@@ -1,5 +1,6 @@
 "use client";
 
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { Search, UserRoundPlus } from "lucide-react";
 import type {
   CustomerFilter,
@@ -48,12 +49,13 @@ export function CustomerListPanel({
   onSelect: (customerId: string) => void;
   onNewCustomer: () => void;
 }) {
+  const text = usePlatformText();
   return (
     <section className="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-[var(--op-border)] bg-[var(--op-surface)] shadow-[var(--op-shadow)]">
       <div className="border-b border-[var(--op-border)] p-4">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <h2 className="font-semibold text-[var(--op-text)]">Customers</h2>
+            <h2 className="font-semibold text-[var(--op-text)]">{text("Customers")}</h2>
             <p className="mt-0.5 text-xs text-[var(--op-text-muted)]">{total} records</p>
           </div>
           <button
@@ -62,7 +64,7 @@ export function CustomerListPanel({
             className="op-button op-button-primary"
           >
             <UserRoundPlus size={16} />
-            New
+            {text("New")}
           </button>
         </div>
 
@@ -74,7 +76,7 @@ export function CustomerListPanel({
           <input
             value={search}
             onChange={(event) => onSearchChange(event.target.value)}
-            placeholder="Search name, phone, or email"
+            placeholder={text("Search name, phone, or email")}
             className="op-input w-full py-2.5 pl-10 pr-3"
           />
         </label>
@@ -91,7 +93,7 @@ export function CustomerListPanel({
                   : "border-transparent bg-[var(--op-surface-soft)] text-[var(--op-text-muted)] hover:border-[var(--op-border)] hover:bg-[var(--op-hover)] hover:text-[var(--op-text)]"
               }`}
             >
-              {item.label}
+              {text(item.label)}
             </button>
           ))}
         </div>
@@ -109,9 +111,9 @@ export function CustomerListPanel({
           </div>
         ) : customers.length === 0 ? (
           <div className="px-6 py-16 text-center">
-            <p className="font-semibold text-[var(--op-text)]">No customers found</p>
+            <p className="font-semibold text-[var(--op-text)]">{text("No customers found")}</p>
             <p className="mt-1 text-sm text-[var(--op-text-muted)]">
-              Try another search or create a new customer.
+              {text("Try another search or create a new customer.")}
             </p>
           </div>
         ) : (
@@ -147,7 +149,7 @@ export function CustomerListPanel({
                       {customer.email ? ` · ${customer.email}` : ""}
                     </span>
                     <span className="mt-1 block text-xs text-[var(--op-text-faint)]">
-                      {customer.visits} visits · {customer.noShows} no-shows
+                      {customer.visits} {text("visits ·")} {customer.noShows} no-shows
                     </span>
                   </span>
                 </button>

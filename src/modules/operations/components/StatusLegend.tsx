@@ -1,3 +1,6 @@
+"use client";
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 const ITEMS = [
   { label: "Pending", color: "#d97706" },
   { label: "Confirmed", color: "#3b82f6" },
@@ -9,10 +12,11 @@ const ITEMS = [
 ] as const;
 
 export function StatusLegend() {
+  const text = usePlatformText();
   return (
     <div className="flex flex-wrap items-center gap-2 border-b border-[var(--op-border)] bg-[var(--op-surface-soft)] px-4 py-2.5 text-[10px] font-semibold text-[var(--op-text-muted)]">
       <span className="mr-1 text-[9px] font-extrabold uppercase tracking-[0.12em] text-[var(--op-text-faint)]">
-        Status
+        {text("Status")}
       </span>
       {ITEMS.map((item) => (
         <span

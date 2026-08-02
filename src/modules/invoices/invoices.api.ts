@@ -1,3 +1,4 @@
+import type { AppLocale } from "@/i18n/config";
 import { api, apiFetch } from "@/shared/lib/api";
 import type {
   CollectPaymentInput,
@@ -60,9 +61,10 @@ export async function downloadInvoiceReceipt(
   invoiceId: string,
   invoiceNumber: string,
   accessToken: string,
+  locale: AppLocale,
 ) {
   const response = await apiFetch(
-    `/invoices/${encodeURIComponent(invoiceId)}/receipt`,
+    `/invoices/${encodeURIComponent(invoiceId)}/receipt?locale=${locale}`,
     accessToken,
   );
   if (!response.ok) throw new Error("Unable to download receipt");
@@ -70,7 +72,7 @@ export async function downloadInvoiceReceipt(
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
   anchor.href = url;
-  anchor.download = `receipt-${invoiceNumber}.pdf`;
+  anchor.download = `receipt-${invoiceNumber}-${locale}.pdf`;
   document.body.appendChild(anchor);
   anchor.click();
   anchor.remove();

@@ -1,5 +1,6 @@
 "use client";
 
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import type { CalendarDayData } from "../appointment.types";
@@ -25,6 +26,7 @@ interface Props {
 }
 
 export function CalendarGrid({ data, onSelectAppointment }: Props) {
+  const text = usePlatformText();
   const [search, setSearch] = useState("");
   const hours = useMemo(
     () =>
@@ -72,9 +74,9 @@ export function CalendarGrid({ data, onSelectAppointment }: Props) {
     return (
       <div className="op-state h-full rounded-none border-0">
         <div>
-          <p className="font-semibold text-[var(--op-text)]">No staff to schedule</p>
+          <p className="font-semibold text-[var(--op-text)]">{text("No staff to schedule")}</p>
           <p className="mt-1 text-sm text-[var(--op-text-muted)]">
-            Add a staff member before creating appointment rows.
+            {text("Add a staff member before creating appointment rows.")}
           </p>
         </div>
       </div>
@@ -93,7 +95,7 @@ export function CalendarGrid({ data, onSelectAppointment }: Props) {
             type="search"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Find staff member"
+            placeholder={text("Find staff member")}
             className="op-input h-9 min-h-9"
             style={{ paddingLeft: 40 }}
           />
@@ -118,7 +120,7 @@ export function CalendarGrid({ data, onSelectAppointment }: Props) {
             }}
           >
             <div className="sticky left-0 z-50 flex items-center border-r border-[var(--op-border)] bg-[var(--op-surface)] px-4 text-[9px] font-extrabold uppercase tracking-[0.13em] text-[var(--op-text-faint)]">
-              Team member
+              {text("Team member")}
             </div>
             <div className="flex bg-[var(--op-surface)]">
               {hours.map((hour) => (
@@ -159,7 +161,7 @@ export function CalendarGrid({ data, onSelectAppointment }: Props) {
                       {member.name}
                     </p>
                     <p className="mt-0.5 truncate text-[9px] font-semibold uppercase tracking-[0.08em] text-[var(--op-text-muted)]">
-                      {member.role || "Staff"}
+                      {member.role || text("Staff")}
                     </p>
                   </div>
                   <span className="rounded-full border border-[var(--op-border)] bg-[var(--op-surface-soft)] px-2 py-1 text-[9px] font-bold text-[var(--op-text-muted)]">
@@ -240,7 +242,7 @@ export function CalendarGrid({ data, onSelectAppointment }: Props) {
 
       {search && !filteredStaff.length ? (
         <div className="border-t border-[var(--op-border)] px-4 py-3 text-sm text-[var(--op-text-muted)]">
-          No staff match “{search}”.
+          {text("No staff match “")}{search}”.
         </div>
       ) : null}
     </div>

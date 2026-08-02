@@ -1,5 +1,6 @@
 "use client";
 
+import { usePlatformText } from "@/i18n/usePlatformText";
 import Link from "next/link";
 import { useEffect, useState, type ReactNode } from "react";
 import { AlertTriangle, CheckCircle2, UsersRound } from "lucide-react";
@@ -26,6 +27,7 @@ import {
 } from "@/modules/analytics/analytics.formatters";
 
 export default function DashboardOverviewPage() {
+  const text = usePlatformText();
   const { accessToken, user } = useAuth();
   const preset = useAnalyticsPreset();
   const [data, setData] = useState<DashboardAnalytics | null>(null);
@@ -51,39 +53,39 @@ export default function DashboardOverviewPage() {
   return (
     <AnalyticsShell
       title={`Hello, ${firstName}`}
-      subtitle="Here are the latest financial, customer, and operational signals from your business."
+      subtitle={text("Here are the latest financial, customer, and operational signals from your business.")}
     >
       {error ? <AnalyticsState message={error} /> : null}
       {!data && !error ? (
-        <AnalyticsState message="Loading dashboard overview…" />
+        <AnalyticsState message={text("Loading dashboard overview…")} />
       ) : null}
       {data ? (
         <div className="space-y-3">
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
             <MetricCard
-              label="Total revenue"
+              label={text("Total revenue")}
               value={formatEgp(data.revenue.summary.revenueCents)}
               trend={formatPercent(growthPct)}
               tone={growthTone}
-              hint="Collected in the selected period"
+              hint={text("Collected in the selected period")}
             />
             <MetricCard
-              label="Paid invoices"
+              label={text("Paid invoices")}
               value={String(data.revenue.summary.paidInvoiceCount)}
-              hint="Completed payments"
+              hint={text("Completed payments")}
             />
             <MetricCard
-              label="Average paid invoice"
+              label={text("Average paid invoice")}
               value={formatEgp(data.revenue.summary.averageInvoiceCents)}
-              hint="Collected per paid invoice"
+              hint={text("Collected per paid invoice")}
             />
             <MetricCard
-              label="Total bookings"
+              label={text("Total bookings")}
               value={String(data.operations.summary.bookingCount)}
-              hint="Appointments in this period"
+              hint={text("Appointments in this period")}
             />
             <MetricCard
-              label="Active customers"
+              label={text("Active customers")}
               value={String(data.customers.summary.activeCustomers)}
               hint={`${data.customers.summary.newCustomers} new · ${data.customers.summary.returningCustomers} returning`}
             />
@@ -91,13 +93,13 @@ export default function DashboardOverviewPage() {
 
           <div className="grid gap-3 xl:grid-cols-[minmax(0,1.65fr)_minmax(280px,.65fr)]">
             <AnalyticsPanel
-              title="Revenue trend"
+              title={text("Revenue trend")}
               action={
                 <Link
                   href={`/operations/dashboard/revenue?preset=${preset}`}
                   className="analytics-muted text-[11px] font-bold hover:underline"
                 >
-                  View revenue
+                  {text("View revenue")}
                 </Link>
               }
             >
@@ -118,21 +120,21 @@ export default function DashboardOverviewPage() {
                   ),
                   value: row.totalCents,
                   tooltip: [
-                    { label: "Paid invoices", value: String(row.invoiceCount) },
+                    { label: text("Paid invoices"), value: String(row.invoiceCount) },
                   ],
                 }))}
-                valueLabel="Revenue"
+                valueLabel={text("Revenue")}
                 formatValue={formatEgp}
                 formatAxisValue={formatEgp}
                 height={290}
               />
             </AnalyticsPanel>
 
-            <AnalyticsPanel title="Latest signals">
+            <AnalyticsPanel title={text("Latest signals")}>
               <div className="space-y-2 text-[12px]">
                 <Signal
                   icon={<UsersRound size={15} />}
-                  label="Customer mix"
+                  label={text("Customer mix")}
                   detail={`${data.customers.summary.newCustomers} new and ${data.customers.summary.returningCustomers} returning`}
                   tone="info"
                 />
@@ -140,7 +142,7 @@ export default function DashboardOverviewPage() {
                   <Link href="/operations/customers" className="block">
                     <Signal
                       icon={<AlertTriangle size={15} />}
-                      label="Inactive customers"
+                      label={text("Inactive customers")}
                       detail={`${data.customers.summary.lapsedCustomerCount} customers may need follow-up`}
                       tone="warning"
                     />
@@ -153,7 +155,7 @@ export default function DashboardOverviewPage() {
                   >
                     <Signal
                       icon={<AlertTriangle size={15} />}
-                      label="Low utilisation"
+                      label={text("Low utilisation")}
                       detail={`${data.staff.summary.lowUtilizationCount} staff below 40%`}
                       tone="warning"
                     />
@@ -163,7 +165,7 @@ export default function DashboardOverviewPage() {
                 data.staff.summary.lowUtilizationCount === 0 ? (
                   <Signal
                     icon={<CheckCircle2 size={15} />}
-                    label="Everything looks healthy"
+                    label={text("Everything looks healthy")}
                     detail="No urgent customer or staff alerts"
                     tone="success"
                   />
@@ -174,16 +176,16 @@ export default function DashboardOverviewPage() {
 
           <div className="grid gap-3 xl:grid-cols-[minmax(0,1.25fr)_minmax(260px,.75fr)]">
             <AnalyticsPanel
-              title="Peak appointment start times"
+              title={text("Peak appointment start times")}
               action={
                 <span className="analytics-muted text-[11px]">
-                  Each appointment counts once at its first start time
+                  {text("Each appointment counts once at its first start time")}
                 </span>
               }
             >
               <AppointmentStartHeatmap rows={data.operations.heatmap} />
             </AnalyticsPanel>
-            <AnalyticsPanel title="Service mix">
+            <AnalyticsPanel title={text("Service mix")}>
               <DonutChart
                 compact
                 items={data.operations.mostBookedServices
@@ -197,13 +199,13 @@ export default function DashboardOverviewPage() {
           </div>
 
           <AnalyticsPanel
-            title="Staff performance"
+            title={text("Staff performance")}
             action={
               <Link
                 href={`/operations/dashboard/staff?preset=${preset}`}
                 className="analytics-muted text-[11px] font-bold hover:underline"
               >
-                Full staff analytics
+                {text("Full staff analytics")}
               </Link>
             }
           >
@@ -212,7 +214,7 @@ export default function DashboardOverviewPage() {
                 label: row.name,
                 value: row.totalCents,
                 tooltip: [
-                  { label: "Revenue", value: formatEgp(row.totalCents) },
+                  { label: text("Revenue"), value: formatEgp(row.totalCents) },
                   { label: "Jobs", value: String(row.lineItemCount) },
                   {
                     label: "Utilisation",

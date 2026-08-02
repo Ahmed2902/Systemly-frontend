@@ -1,5 +1,6 @@
 "use client";
 
+import { usePlatformText } from "@/i18n/usePlatformText";
 import {
   ArrowRight,
   ChevronLeft,
@@ -45,6 +46,7 @@ export function ServiceCategoryCards({
   onSelect: (category: string) => void;
   selectedCategory?: string;
 }) {
+  const text = usePlatformText();
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [visibleCount, setVisibleCount] = useState(3);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -125,10 +127,10 @@ export function ServiceCategoryCards({
             id="service-categories-heading"
             className="text-lg font-semibold text-[var(--op-text)]"
           >
-            Categories
+            {text("Categories")}
           </h2>
           <p className="mt-1 text-sm text-[var(--op-text-muted)]">
-            {categories.length} {categories.length === 1 ? "category" : "categories"} in your catalog
+            {categories.length} {categories.length === 1 ? "category" : "categories"} {text("in your catalog")}
           </p>
         </div>
 
@@ -137,7 +139,7 @@ export function ServiceCategoryCards({
             type="button"
             onClick={() => goToCategory(activeIndex - 1)}
             disabled={activeIndex === 0}
-            aria-label="Previous categories"
+            aria-label={text("Previous categories")}
             className="op-icon-button disabled:cursor-not-allowed disabled:opacity-35"
           >
             <ChevronLeft size={18} />
@@ -146,7 +148,7 @@ export function ServiceCategoryCards({
             type="button"
             onClick={() => goToCategory(activeIndex + 1)}
             disabled={activeIndex >= maxIndex}
-            aria-label="Next categories"
+            aria-label={text("Next categories")}
             className="op-icon-button disabled:cursor-not-allowed disabled:opacity-35"
           >
             <ChevronRight size={18} />
@@ -203,7 +205,7 @@ export function ServiceCategoryCards({
                       {category.name}
                     </h3>
                     <p className="mt-0.5 text-xs text-[var(--op-text-muted)]">
-                      {category.active} active of {category.total}
+                      {category.active} {text("active of")} {category.total}
                     </p>
                   </div>
                 </div>
@@ -241,7 +243,7 @@ export function ServiceCategoryCards({
                           ? "var(--op-success)"
                           : "var(--op-text-faint)",
                       }}
-                      aria-label={service.isActive ? "Active" : "Inactive"}
+                      aria-label={service.isActive ? text("Active") : text("Inactive")}
                     />
                   </div>
                 ))}
@@ -257,7 +259,7 @@ export function ServiceCategoryCards({
                 className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold transition hover:opacity-75"
                 style={{ color: accent.hex }}
               >
-                View all {category.name.toLowerCase()}
+                {text("View all")} {category.name.toLowerCase()}
                 <ArrowRight size={15} />
               </button>
             </article>

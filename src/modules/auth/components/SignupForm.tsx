@@ -1,6 +1,7 @@
-// src/modules/auth/components/SignupForm.tsx
 "use client";
 
+import { usePlatformText } from "@/i18n/usePlatformText";
+// src/modules/auth/components/SignupForm.tsx
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -14,9 +15,10 @@ import { GoogleAuthButton } from "./GoogleAuthButton";
 import { PasswordField } from "./PasswordField";
 
 export function SignupForm() {
+  const text = usePlatformText();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const [serverError, setServerError] = useState<string | null>(null);
 
   const {
@@ -28,7 +30,7 @@ export function SignupForm() {
   async function onSubmit(data: SignupInput) {
     setServerError(null);
     try {
-      await registerUser(data);
+      await registerUser({ ...data, preferredLanguage: locale });
       const params = new URLSearchParams({ email: data.email, sent: "1" });
       const nextPath = safeNextPath(searchParams.get("next"));
       if (nextPath) params.set("next", nextPath);
@@ -60,7 +62,11 @@ export function SignupForm() {
             className="auth-input"
             dir="auto"
           />
-          {errors.name ? <p className="auth-field-error">{errors.name.message}</p> : null}
+          {errors.name ? (
+            <p className="auth-field-error">
+              {text(errors.name.message ?? "Enter your full name")}
+            </p>
+          ) : null}
         </div>
 
         <div className="auth-field">
@@ -74,7 +80,11 @@ export function SignupForm() {
             className="auth-input"
             dir="ltr"
           />
-          {errors.email ? <p className="auth-field-error">{errors.email.message}</p> : null}
+          {errors.email ? (
+            <p className="auth-field-error">
+              {text(errors.email.message ?? "Enter a valid email address")}
+            </p>
+          ) : null}
         </div>
 
         <div className="auth-field">
@@ -89,7 +99,11 @@ export function SignupForm() {
             className="auth-input"
             dir="ltr"
           />
-          {errors.phone ? <p className="auth-field-error">{errors.phone.message}</p> : null}
+          {errors.phone ? (
+            <p className="auth-field-error">
+              {text(errors.phone.message ?? "Enter a valid Egyptian phone number")}
+            </p>
+          ) : null}
         </div>
 
         <div className="auth-field">
@@ -100,7 +114,11 @@ export function SignupForm() {
             autoComplete="new-password"
             placeholder={t("auth.signup.passwordPlaceholder")}
           />
-          {errors.password ? <p className="auth-field-error">{errors.password.message}</p> : null}
+          {errors.password ? (
+            <p className="auth-field-error">
+              {text(errors.password.message ?? "Password must be at least 8 characters")}
+            </p>
+          ) : null}
         </div>
 
         {serverError ? <div className="auth-error" role="alert">{serverError}</div> : null}

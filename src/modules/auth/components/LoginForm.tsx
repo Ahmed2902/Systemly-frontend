@@ -1,6 +1,7 @@
-// src/modules/auth/components/LoginForm.tsx
 "use client";
 
+import { usePlatformText } from "@/i18n/usePlatformText";
+// src/modules/auth/components/LoginForm.tsx
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -15,6 +16,7 @@ import { PasswordField } from "./PasswordField";
 import { useLocale } from "@/i18n/LocaleProvider";
 
 export function LoginForm() {
+  const text = usePlatformText();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { setSession } = useAuth();
@@ -76,7 +78,11 @@ export function LoginForm() {
             className="auth-input"
             dir="ltr"
           />
-          {errors.email ? <p className="auth-field-error">{errors.email.message}</p> : null}
+          {errors.email ? (
+            <p className="auth-field-error">
+              {text(errors.email.message ?? "Enter a valid email address")}
+            </p>
+          ) : null}
         </div>
 
         <div className="auth-field">
@@ -90,7 +96,11 @@ export function LoginForm() {
             autoComplete="current-password"
             placeholder={t("auth.login.passwordPlaceholder")}
           />
-          {errors.password ? <p className="auth-field-error">{errors.password.message}</p> : null}
+          {errors.password ? (
+            <p className="auth-field-error">
+              {text(errors.password.message ?? "Password is required")}
+            </p>
+          ) : null}
         </div>
 
         {serverError ? (

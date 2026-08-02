@@ -92,7 +92,7 @@ const ar: Record<keyof typeof en, string> = {
   "landing.nav.close": "إغلاق القائمة",
 
   "landing.hero.kicker": "نظام التشغيل للأعمال الخدمية",
-  "landing.hero.title": "النظام الذي يدير عملك من الخلف.",
+  "landing.hero.title": "كل ما تحتاجه لإدارة نشاطك في مكان واحد.",
   "landing.hero.copy": "أنشئ تجربة عملائك، واستقبل الحجوزات، وأدر يوم العمل، وافهم أداء نشاطك من منصة واحدة مترابطة.",
   "landing.hero.startFree": "ابدأ مجاناً",
   "landing.hero.explore": "استكشف المنتج",

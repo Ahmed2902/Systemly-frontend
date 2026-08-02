@@ -1,5 +1,6 @@
 "use client";
 
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { useMemo, useState } from "react";
 import { WEEKDAYS } from "../analytics.formatters";
 
@@ -16,6 +17,7 @@ export function AppointmentStartHeatmap({
   rows: HeatmapRow[];
   hours?: number[];
 }) {
+  const text = usePlatformText();
   const [activeCell, setActiveCell] = useState<HeatmapRow | null>(null);
   const resolvedHours = useMemo(() => {
     if (hours?.length) return hours;
@@ -33,15 +35,15 @@ export function AppointmentStartHeatmap({
 
   const detailTitle = activeCell
     ? `${WEEKDAYS[activeCell.weekday]} · ${String(activeCell.hour).padStart(2, "0")}:00`
-    : "Appointment start times";
+    : text("Appointment start times");
   const detailValue = activeCell
-    ? `${activeCell.count} ${activeCell.count === 1 ? "appointment start" : "appointment starts"}`
-    : "Hover or focus a cell to inspect it";
+    ? `${activeCell.count} ${activeCell.count === 1 ? text("appointment start") : text("appointment starts")}`
+    : text("Hover or focus a cell to inspect it");
   const detailNote = activeCell
     ? total
       ? `${((activeCell.count / total) * 100).toFixed(1)}% of selected-period appointment starts`
-      : "No appointment starts in this period"
-    : "A multi-service appointment counts once, at the appointment's first start time.";
+      : text("No appointment starts in this period")
+    : text("A multi-service appointment counts once, at the appointment's first start time.");
 
   return (
     <div
@@ -93,13 +95,13 @@ export function AppointmentStartHeatmap({
         ))}
       </div>
       <div className="analytics-heatmap-scale">
-        <span>Low</span>
+        <span>{text("Low")}</span>
         <i />
         <i />
         <i />
         <i />
         <i />
-        <span>High</span>
+        <span>{text("High")}</span>
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 "use client";
 
+import { usePlatformText } from "@/i18n/usePlatformText";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { ReactNode } from "react";
@@ -56,6 +57,7 @@ export function AnalyticsShell({
   subtitle: string;
   children: ReactNode;
 }) {
+  const text = usePlatformText();
   const pathname = usePathname();
   const router = useRouter();
   const preset = useAnalyticsPreset();
@@ -65,7 +67,7 @@ export function AnalyticsShell({
       <div className="mx-auto w-full max-w-[1540px] px-4 py-4 lg:px-6 lg:py-5">
         <header className="analytics-header">
           <div>
-            <p className="analytics-eyebrow">WORKSPACE / OWNER OVERVIEW</p>
+            <p className="analytics-eyebrow">{text("WORKSPACE / OWNER OVERVIEW")}</p>
             <h1 className="analytics-title text-[26px] font-bold tracking-[-0.04em] lg:text-[31px]">
               {title}
             </h1>
@@ -92,7 +94,7 @@ export function AnalyticsShell({
           </div>
         </header>
 
-        <nav className="analytics-nav mt-4 flex gap-1 overflow-x-auto rounded-[10px] p-1" aria-label="Analytics sections">
+        <nav className="analytics-nav mt-4 flex gap-1 overflow-x-auto rounded-[10px] p-1" aria-label={text("Analytics sections")}>
           {LINKS.map(([href, label]) => {
             const active =
               href === "/operations/dashboard"

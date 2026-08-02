@@ -1,6 +1,7 @@
-// src/modules/wizard/components/ImageUploader.tsx
 "use client";
 
+import { usePlatformText } from "@/i18n/usePlatformText";
+// src/modules/wizard/components/ImageUploader.tsx
 import imageCompression from "browser-image-compression";
 import { useRef, useState } from "react";
 
@@ -43,6 +44,7 @@ export function ImageUploader({
   currentUrl?: string | null;
   onUpload: (file: File) => Promise<void>;
 }) {
+  const text = usePlatformText();
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [uploading, setUploading] = useState(false);
@@ -64,7 +66,7 @@ export function ImageUploader({
       console.error("Image upload failed:", error);
 
       setError(
-        error instanceof Error ? error.message : "Failed to upload image",
+        error instanceof Error ? error.message : text("Failed to upload image"),
       );
     } finally {
       setUploading(false);
@@ -114,10 +116,10 @@ export function ImageUploader({
 
         <div className="text-sm text-muted">
           {uploading
-            ? "Uploading..."
+            ? text("Uploading...")
             : currentUrl
-              ? "Click to replace"
-              : "Click or drop an image"}
+              ? text("Click to replace")
+              : text("Click or drop an image")}
         </div>
       </div>
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { useMemo, useState } from "react";
 import {
   CalendarDays,
@@ -174,6 +175,7 @@ function appointmentTime(appointment: DemoAppointment) {
 }
 
 export function LiveOperationsDemo() {
+  const text = usePlatformText();
   const [page, setPage] = useState<DemoPage>("calendar");
   const [selectedAppointmentId, setSelectedAppointmentId] = useState<
     string | null
@@ -200,13 +202,12 @@ export function LiveOperationsDemo() {
     <section id="demo" className="lp-section lp-demo-section systemly-demo-section">
       <div className="lp-demo-shell">
         <div className="systemly-demo-intro">
-          <p className="lp-kicker">Operations preview</p>
+          <p className="lp-kicker">{text("Operations preview")}</p>
           <h2 className="lp-title">
-            A focused view of the workspace your team actually uses.
+            {text("A focused view of the workspace your team actually uses.")}
           </h2>
           <p className="lp-copy">
-            Switch between the core operational screens using realistic
-            appointment data from a compact light-mode preview.
+            {text("Switch between the core operational screens using realistic appointment data from a compact light-mode preview.")}
           </p>
         </div>
 
@@ -214,13 +215,13 @@ export function LiveOperationsDemo() {
           <aside className="systemly-demo-sidebar">
             <div className="systemly-demo-brand-block">
               <div className="systemly-demo-wordmark">Systemly</div>
-              <p>Business operations</p>
+              <p>{text("Business operations")}</p>
               <button type="button" className="systemly-demo-new-button">
-                <Plus size={16} /> New Appointment
+                <Plus size={16} /> {text("New Appointment")}
               </button>
             </div>
 
-            <nav aria-label="Demo navigation" className="systemly-demo-nav">
+            <nav aria-label={text("Demo navigation")} className="systemly-demo-nav">
               {navItems.map(([value, label, Icon]) => (
                 <button
                   key={value}
@@ -247,8 +248,8 @@ export function LiveOperationsDemo() {
               <div className="systemly-demo-calendar-page">
                 <header className="systemly-demo-page-header">
                   <div>
-                    <p>Monday</p>
-                    <h3>July 27, 2026</h3>
+                    <p>{text("Monday")}</p>
+                    <h3>{text("July 27, 2026")}</h3>
                   </div>
                   <span>Africa/Cairo</span>
                 </header>
@@ -260,18 +261,18 @@ export function LiveOperationsDemo() {
                 >
                   <div className="systemly-demo-calendar-card">
                     <div className="systemly-demo-calendar-key">
-                      <div aria-label="Appointment statuses">
+                      <div aria-label={text("Appointment statuses")}>
                         <span>
-                          <i /> Confirmed
+                          <i /> {text("Confirmed")}
                         </span>
                         <span>
-                          <i /> In progress
+                          <i /> {text("In progress")}
                         </span>
                         <span>
-                          <i /> Completed
+                          <i /> {text("Completed")}
                         </span>
                       </div>
-                      <strong>3 staff · 3 appointments</strong>
+                      <strong>{text("3 staff · 3 appointments")}</strong>
                     </div>
                     <LandingCalendarBoard
                       variant="workspace"
@@ -294,8 +295,8 @@ export function LiveOperationsDemo() {
               <div className="systemly-demo-list-page">
                 <header className="systemly-demo-page-header">
                   <div>
-                    <p>Operations</p>
-                    <h3>Appointments</h3>
+                    <p>{text("Operations")}</p>
+                    <h3>{text("Appointments")}</h3>
                   </div>
                 </header>
                 <label className="systemly-demo-search">
@@ -303,7 +304,7 @@ export function LiveOperationsDemo() {
                   <input
                     value={query}
                     onChange={(event) => setQuery(event.target.value)}
-                    placeholder="Search customer or service"
+                    placeholder={text("Search customer or service")}
                   />
                 </label>
                 <div className="systemly-demo-split">
@@ -350,16 +351,16 @@ export function LiveOperationsDemo() {
               <div className="systemly-demo-list-page">
                 <header className="systemly-demo-page-header">
                   <div>
-                    <p>Customer records</p>
-                    <h3>Customers</h3>
+                    <p>{text("Customer records")}</p>
+                    <h3>{text("Customers")}</h3>
                   </div>
                 </header>
                 <div className="systemly-demo-table">
                   <div className="systemly-demo-table-head">
-                    <span>Customer</span>
-                    <span>Phone</span>
-                    <span>Visits</span>
-                    <span>No-shows</span>
+                    <span>{text("Customer")}</span>
+                    <span>{text("Phone")}</span>
+                    <span>{text("Visits")}</span>
+                    <span>{text("No-shows")}</span>
                   </div>
                   {customers.map((customer) => (
                     <div key={customer.id} className="systemly-demo-table-row">
@@ -377,17 +378,17 @@ export function LiveOperationsDemo() {
               <div className="systemly-demo-list-page">
                 <header className="systemly-demo-page-header">
                   <div>
-                    <p>Cash invoices</p>
-                    <h3>Invoices</h3>
+                    <p>{text("Cash invoices")}</p>
+                    <h3>{text("Invoices")}</h3>
                   </div>
                 </header>
                 <div className="systemly-demo-table">
                   <div className="systemly-demo-table-head systemly-demo-invoice-grid">
-                    <span>Invoice</span>
-                    <span>Customer</span>
-                    <span>Services</span>
-                    <span>Total</span>
-                    <span>Status</span>
+                    <span>{text("Invoice")}</span>
+                    <span>{text("Customer")}</span>
+                    <span>{text("Services")}</span>
+                    <span>{text("Total")}</span>
+                    <span>{text("Status")}</span>
                   </div>
                   {invoices.map((invoice) => (
                     <div
@@ -418,6 +419,7 @@ function AppointmentPreview({
   appointment: DemoAppointment;
   onClose: () => void;
 }) {
+  const text = usePlatformText();
   const total = appointment.segments.reduce(
     (sum, segment) => sum + segment.price,
     0,
@@ -428,11 +430,11 @@ function AppointmentPreview({
       <button
         type="button"
         onClick={onClose}
-        aria-label="Close appointment details"
+        aria-label={text("Close appointment details")}
       >
         <X size={16} />
       </button>
-      <p className="systemly-demo-eyebrow">Appointment details</p>
+      <p className="systemly-demo-eyebrow">{text("Appointment details")}</p>
       <h4>{appointment.customer.name}</h4>
       <span>{appointment.customer.phone}</span>
       <StatusPill status={appointment.status.replaceAll("_", " ")} />
@@ -448,16 +450,16 @@ function AppointmentPreview({
       </div>
       <dl>
         <div>
-          <dt>Time</dt>
+          <dt>{text("Time")}</dt>
           <dd>{appointmentTime(appointment)}</dd>
         </div>
         <div>
-          <dt>Total</dt>
+          <dt>{text("Total")}</dt>
           <dd>{money(total)}</dd>
         </div>
         <div>
-          <dt>Payment</dt>
-          <dd>{appointment.isPaid ? "Paid in cash" : "Not collected"}</dd>
+          <dt>{text("Payment")}</dt>
+          <dd>{appointment.isPaid ? text("Paid in cash") : text("Not collected")}</dd>
         </div>
       </dl>
     </aside>

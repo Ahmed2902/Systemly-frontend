@@ -1,3 +1,6 @@
+"use client";
+
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { CalendarCheck2, Languages, ShieldCheck } from "lucide-react";
 
 const principles = [
@@ -28,12 +31,13 @@ const faqs = [
 ];
 
 export function FinalCta() {
+  const text = usePlatformText();
   return (
     <section className="lp-final-section">
       <div className="lp-shell">
         <div className="lp-principles-heading">
-          <p className="lp-kicker">Built around real work</p>
-          <h2>Less admin theatre. More clarity for the people doing the work.</h2>
+          <p className="lp-kicker">{text("Built around real work")}</p>
+          <h2>{text("Less admin theatre. More clarity for the people doing the work.")}</h2>
         </div>
 
         <div className="lp-principles-list">
@@ -47,7 +51,7 @@ export function FinalCta() {
         </div>
 
         <div className="lp-faq">
-          <div className="lp-faq-heading"><p className="lp-kicker">FAQ</p><h2>Honest answers to real questions.</h2></div>
+          <div className="lp-faq-heading"><p className="lp-kicker">{text("FAQ")}</p><h2>{text("Honest answers to real questions.")}</h2></div>
           <div>
             {faqs.map(([question, answer]) => (
               <details key={question}>

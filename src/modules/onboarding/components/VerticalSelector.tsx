@@ -1,6 +1,7 @@
-// src/modules/onboarding/components/VerticalSelector.tsx
 "use client";
 
+import { usePlatformText } from "@/i18n/usePlatformText";
+// src/modules/onboarding/components/VerticalSelector.tsx
 const options = [
   {
     value: "salon",
@@ -21,6 +22,7 @@ export function VerticalSelector({
   value: string | undefined;
   onChange: (v: "salon" | "clinic") => void;
 }) {
+  const text = usePlatformText();
   return (
     <div className="grid grid-cols-2 gap-4">
       {options.map((opt) => (
@@ -34,8 +36,8 @@ export function VerticalSelector({
               : "border-surfaceBorder bg-surface hover:border-accent/50"
           }`}
         >
-          <h3 className="font-medium text-foreground">{opt.label}</h3>
-          <p className="mt-1 text-sm text-muted">{opt.description}</p>
+          <h3 className="font-medium text-foreground">{text(opt.label)}</h3>
+          <p className="mt-1 text-sm text-muted">{text(opt.description)}</p>
         </button>
       ))}
     </div>

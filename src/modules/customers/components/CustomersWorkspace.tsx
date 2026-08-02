@@ -1,5 +1,6 @@
 "use client";
 
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, RefreshCw } from "lucide-react";
@@ -37,6 +38,7 @@ export function CustomersWorkspace({
 }: {
   initialCustomerId?: string | null;
 }) {
+  const text = usePlatformText();
   const router = useRouter();
   const { user, accessToken, loading: authLoading } = useAuth();
   const { openNewAppointment, notifyMutation } = useOperations();
@@ -95,7 +97,7 @@ export function CustomersWorkspace({
         setError(null);
       } catch (caught: unknown) {
         setError(
-          caught instanceof Error ? caught.message : "Unable to load customers",
+          caught instanceof Error ? caught.message : text("Unable to load customers"),
         );
       } finally {
         setListLoading(false);
@@ -117,7 +119,7 @@ export function CustomersWorkspace({
         setError(
           caught instanceof Error
             ? caught.message
-            : "Unable to load customer details",
+            : text("Unable to load customer details"),
         );
       } finally {
         setDetailLoading(false);
@@ -187,7 +189,7 @@ export function CustomersWorkspace({
       setModalOpen(false);
     } catch (caught: unknown) {
       setError(
-        caught instanceof Error ? caught.message : "Unable to save customer",
+        caught instanceof Error ? caught.message : text("Unable to save customer"),
       );
     } finally {
       setSavingCustomer(false);
@@ -210,7 +212,7 @@ export function CustomersWorkspace({
       await loadList(true);
     } catch (caught: unknown) {
       setError(
-        caught instanceof Error ? caught.message : "Unable to save notes",
+        caught instanceof Error ? caught.message : text("Unable to save notes"),
       );
     } finally {
       setSavingNotes(false);
@@ -221,7 +223,7 @@ export function CustomersWorkspace({
     return (
       <OperationsPage>
         <OperationsPageInner className="flex min-h-full items-center justify-center">
-          <OperationsState loading title="Loading customers" />
+          <OperationsState loading title={text("Loading customers")} />
         </OperationsPageInner>
       </OperationsPage>
     );
@@ -231,9 +233,9 @@ export function CustomersWorkspace({
     <OperationsPage>
       <OperationsPageInner>
         <OperationsPageHeader
-          eyebrow="Management / Customers"
-          title="Customers"
-          description="Manage customer profiles, notes, visit history, and future appointments."
+          eyebrow={text("Management / Customers")}
+          title={text("Customers")}
+          description={text("Manage customer profiles, notes, visit history, and future appointments.")}
           actions={
             <>
               <button
@@ -246,14 +248,14 @@ export function CustomersWorkspace({
                   size={15}
                   className={refreshing ? "animate-spin" : ""}
                 />{" "}
-                Refresh
+                {text("Refresh")}
               </button>
               <button
                 type="button"
                 className="op-button op-button-primary"
                 onClick={openCreate}
               >
-                <Plus size={15} /> New customer
+                <Plus size={15} /> {text("New customer")}
               </button>
             </>
           }
@@ -268,7 +270,7 @@ export function CustomersWorkspace({
                 className="op-button"
                 onClick={() => void loadList(true)}
               >
-                Retry
+                {text("Retry")}
               </button>
             }
           >
@@ -294,7 +296,7 @@ export function CustomersWorkspace({
             {detailLoading ? (
               <OperationsState
                 loading
-                title="Loading customer profile"
+                title={text("Loading customer profile")}
                 className="min-h-[420px]"
               />
             ) : workspace ? (
@@ -319,10 +321,10 @@ export function CustomersWorkspace({
               <OperationsState
                 title={
                   selectedListCustomer
-                    ? "Unable to load this customer"
-                    : "Select a customer"
+                    ? text("Unable to load this customer")
+                    : text("Select a customer")
                 }
-                description="Choose a customer to review contact details, notes, and appointment history."
+                description={text("Choose a customer to review contact details, notes, and appointment history.")}
                 className="min-h-[420px]"
               />
             )}

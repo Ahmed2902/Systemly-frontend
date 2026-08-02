@@ -1,6 +1,7 @@
-// src/modules/auth/components/AuthLayout.tsx
 "use client";
 
+import { usePlatformText } from "@/i18n/usePlatformText";
+// src/modules/auth/components/AuthLayout.tsx
 import Link from "next/link";
 import { ReactNode } from "react";
 import { Globe2, ShieldCheck } from "lucide-react";
@@ -17,11 +18,12 @@ export function AuthLayout({
   subtitle: string;
   children: ReactNode;
 }) {
+  const text = usePlatformText();
   const { t } = useLocale();
 
   return (
     <main className="systemly-auth">
-      <section className="systemly-auth-visual" aria-label="Systemly product overview">
+      <section className="systemly-auth-visual" aria-label={text("Systemly product overview")}>
         <Link href="/" className="systemly-auth-brand sys-focusable">
           <SystemlyWordmark showDot dotClassName="systemly-auth-brand-dot" />
         </Link>
@@ -33,37 +35,37 @@ export function AuthLayout({
 
           <div className="systemly-auth-product" aria-hidden="true">
             <div className="systemly-auth-product-bar">
-              <span className="systemly-auth-product-status">systemly / operations</span>
-              <span>Today</span>
+              <span className="systemly-auth-product-status">{text("systemly / operations")}</span>
+              <span>{text("Today")}</span>
             </div>
             <div className="systemly-auth-product-body">
               <div className="systemly-auth-product-nav">
                 <div className="systemly-auth-product-wordmark">Systemly</div>
-                <span>Dashboard</span>
-                <span className="is-active">Calendar</span>
-                <span>Appointments</span>
-                <span>Customers</span>
+                <span>{text("Dashboard")}</span>
+                <span className="is-active">{text("Calendar")}</span>
+                <span>{text("Appointments")}</span>
+                <span>{text("Customers")}</span>
               </div>
               <div className="systemly-auth-product-main">
                 <div className="systemly-auth-product-heading">
                   <div>
-                    <small>Monday</small>
-                    <strong>July 27, 2026</strong>
+                    <small>{text("Monday")}</small>
+                    <strong>{text("July 27, 2026")}</strong>
                   </div>
-                  <em>Live workspace</em>
+                  <em>{text("Live workspace")}</em>
                 </div>
                 <div className="systemly-auth-product-grid">
                   <div className="systemly-auth-product-metric">
-                    <small>Bookings</small>
-                    <strong>18 today</strong>
+                    <small>{text("Bookings")}</small>
+                    <strong>{text("18 today")}</strong>
                   </div>
                   <div className="systemly-auth-product-metric">
-                    <small>Available staff</small>
-                    <strong>4 of 5</strong>
+                    <small>{text("Available staff")}</small>
+                    <strong>{text("4 of 5")}</strong>
                   </div>
                   <div className="systemly-auth-product-metric">
-                    <small>Collected</small>
-                    <strong>EGP 6,820</strong>
+                    <small>{text("Collected")}</small>
+                    <strong>{text("EGP 6,820")}</strong>
                   </div>
                 </div>
                 <div className="systemly-auth-product-schedule">
@@ -75,11 +77,11 @@ export function AuthLayout({
                   <div className="systemly-auth-product-bookings">
                     <div className="systemly-auth-booking">
                       <strong>Yasmine Ali</strong>
-                      <small>Hair consultation · Mona</small>
+                      <small>{text("Hair consultation · Mona")}</small>
                     </div>
                     <div className="systemly-auth-booking">
                       <strong>Salma Tarek</strong>
-                      <small>Skin treatment · Lina</small>
+                      <small>{text("Skin treatment · Lina")}</small>
                     </div>
                   </div>
                 </div>

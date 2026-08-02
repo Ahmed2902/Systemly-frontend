@@ -1,5 +1,6 @@
 "use client";
 
+import { usePlatformText } from "@/i18n/usePlatformText";
 import Link from "next/link";
 import { useState } from "react";
 import { Check, CloudUpload, LogOut } from "lucide-react";
@@ -21,6 +22,7 @@ const steps = [
 ];
 
 export function WizardShell() {
+  const text = usePlatformText();
   const [stepIndex, setStepIndex] = useState(0);
   const [saved, setSaved] = useState(false);
   const { saveDraft } = useWizard();
@@ -38,20 +40,20 @@ export function WizardShell() {
     <main className="onboarding-systerra">
       <header className="onboarding-topbar">
         <div className="onboarding-topbar-left">
-          <Link href="/" className="onboarding-brand sys-focusable" aria-label="Systemly home">
+          <Link href="/" className="onboarding-brand sys-focusable" aria-label={text("Systemly home")}>
             <SystemlyWordmark showDot dotClassName="onboarding-brand-dot" />
           </Link>
           <span className="onboarding-topbar-divider" aria-hidden="true" />
           <div className="onboarding-topbar-context">
-            <strong>Set up your business</strong>
-            <small>Your progress is kept in this browser</small>
+            <strong>{text("Set up your business")}</strong>
+            <small>{text("Your progress is kept in this browser")}</small>
           </div>
         </div>
 
         <div className="onboarding-top-actions">
           <Link href="/" className="onboarding-ghost-button">
             <LogOut size={15} />
-            Exit setup
+            {text("Exit setup")}
           </Link>
           <button
             type="button"
@@ -60,19 +62,19 @@ export function WizardShell() {
             aria-live="polite"
           >
             <CloudUpload size={15} />
-            {saved ? "Draft saved" : "Save draft"}
+            {saved ? text("Draft saved") : text("Save draft")}
           </button>
         </div>
       </header>
 
       <div className="onboarding-shell">
         <div className="onboarding-mobile-progress">
-          <span>Step {stepIndex + 1} of {steps.length}</span>
-          <strong>{currentStep.label}</strong>
+          <span>{text("Step")} {stepIndex + 1} of {steps.length}</span>
+          <strong>{text(currentStep.label)}</strong>
           <small>{currentStep.hint}</small>
           <div
             role="progressbar"
-            aria-label="Onboarding progress"
+            aria-label={text("Onboarding progress")}
             aria-valuemin={0}
             aria-valuemax={100}
             aria-valuenow={Math.round(progress)}
@@ -82,13 +84,13 @@ export function WizardShell() {
         </div>
 
         <div className="onboarding-progress-wrap">
-          <nav className="onboarding-progress" aria-label="Onboarding progress">
+          <nav className="onboarding-progress" aria-label={text("Onboarding progress")}>
             {steps.map((step, index) => {
               const status = index < stepIndex ? "is-complete" : index === stepIndex ? "is-active" : "";
               return (
                 <button
                   type="button"
-                  key={step.label}
+                  key={text(step.label)}
                   disabled={index > stepIndex}
                   onClick={() => index <= stepIndex && setStepIndex(index)}
                   className={`onboarding-progress-step ${status}`}
@@ -98,7 +100,7 @@ export function WizardShell() {
                   <span className="onboarding-progress-number">
                     {index < stepIndex ? <Check size={13} /> : index + 1}
                   </span>
-                  <span className="onboarding-progress-label">{step.label}</span>
+                  <span className="onboarding-progress-label">{text(step.label)}</span>
                   <span className="onboarding-progress-hint">{step.hint}</span>
                 </button>
               );

@@ -1,5 +1,6 @@
 "use client";
 
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { ExternalLink, ImagePlus, Save, Trash2 } from "lucide-react";
 import { useAuth } from "@/modules/auth/useAuth";
@@ -51,6 +52,7 @@ function textOrNull(value: string) {
 }
 
 export function SettingsScreen() {
+  const text = usePlatformText();
   const { user, accessToken, loading: authLoading } = useAuth();
   const { notifyMutation } = useOperations();
   const [workspace, setWorkspace] = useState<SettingsWorkspace | null>(null);
@@ -62,7 +64,7 @@ export function SettingsScreen() {
   const [success, setSuccess] = useState<string | null>(null);
 
   const canManage =
-    user?.role === "BusinessAdmin" || user?.role === "SuperAdmin";
+    user?.role === text("BusinessAdmin") || user?.role === text("SuperAdmin");
 
   const load = useCallback(async () => {
     if (!accessToken || !canManage) return;
@@ -81,7 +83,7 @@ export function SettingsScreen() {
       setWebsite({ ...EMPTY_WEBSITE, ...(data.websiteContent ?? {}) });
       setError(null);
     } catch (cause) {
-      setError(errorMessage(cause, "Unable to load settings"));
+      setError(errorMessage(cause, text("Unable to load settings")));
     } finally {
       setLoading(false);
     }
@@ -105,7 +107,7 @@ export function SettingsScreen() {
       await action();
       notifyMutation({ scope: "settings", entityId: workspace?.id });
       await load();
-      setSuccess("Settings saved successfully.");
+      setSuccess(text("Settings saved successfully."));
     } catch (cause) {
       setError(errorMessage(cause, "Unable to save settings"));
     } finally {
@@ -130,7 +132,7 @@ export function SettingsScreen() {
     return (
       <OperationsPage>
         <OperationsPageInner className="flex min-h-full items-center justify-center">
-          <OperationsState loading title="Loading settings" />
+          <OperationsState loading title={text("Loading settings")} />
         </OperationsPageInner>
       </OperationsPage>
     );
@@ -141,8 +143,8 @@ export function SettingsScreen() {
       <OperationsPage>
         <OperationsPageInner className="flex min-h-full items-center justify-center">
           <OperationsState
-            title="Owner access required"
-            description="Business profile, branding, website, and publishing controls are available only to business owners."
+            title={text("Owner access required")}
+            description={text("Business profile, branding, website, and publishing controls are available only to business owners.")}
           />
         </OperationsPageInner>
       </OperationsPage>
@@ -153,7 +155,7 @@ export function SettingsScreen() {
     return (
       <OperationsPage>
         <OperationsPageInner className="flex min-h-full items-center justify-center">
-          <OperationsState title="Settings unavailable" description={error ?? "Settings could not be loaded."} />
+          <OperationsState title={text("Settings unavailable")} description={error ?? "Settings could not be loaded."} />
         </OperationsPageInner>
       </OperationsPage>
     );
@@ -163,13 +165,13 @@ export function SettingsScreen() {
     <OperationsPage>
       <OperationsPageInner className="max-w-[1180px]">
         <OperationsPageHeader
-          eyebrow="Business / Settings"
-          title="Settings"
-          description="Manage the business identity, branding, generated website, and publishing status."
+          eyebrow={text("Business / Settings")}
+          title={text("Settings")}
+          description={text("Manage the business identity, branding, generated website, and publishing status.")}
           actions={
             workspace.isActive ? (
               <a href={publicUrl} target="_blank" rel="noreferrer" className="op-button">
-                View public website <ExternalLink size={15} />
+                {text("View public website")} <ExternalLink size={15} />
               </a>
             ) : undefined
           }
@@ -180,41 +182,41 @@ export function SettingsScreen() {
 
         <div className="space-y-4">
           <SettingsSection
-            title="Business profile"
-            description="Used across Operations, receipts, notifications, and the public website."
+            title={text("Business profile")}
+            description={text("Used across Operations, receipts, notifications, and the public website.")}
             action={
               <button
                 disabled={Boolean(saving)}
                 onClick={() => void run("business", () => updateBusinessSettings(business, accessToken!))}
                 className="op-button op-button-primary"
               >
-                <Save size={15} /> Save profile
+                <Save size={15} /> {text("Save profile")}
               </button>
             }
           >
             <div className="grid gap-4 md:grid-cols-2">
-              <Field label="Business name"><input className="op-input" value={business.name} onChange={(event) => setBusiness({ ...business, name: event.target.value })} /></Field>
-              <Field label="Phone"><input className="op-input" value={business.phone} onChange={(event) => setBusiness({ ...business, phone: event.target.value })} /></Field>
-              <Field label="Address"><input className="op-input" value={business.address ?? ""} onChange={(event) => setBusiness({ ...business, address: textOrNull(event.target.value) })} /></Field>
-              <Field label="City"><input className="op-input" value={business.city ?? ""} onChange={(event) => setBusiness({ ...business, city: textOrNull(event.target.value) })} /></Field>
-              <Field label="Timezone">
+              <Field label={text("Business name")}><input className="op-input" value={business.name} onChange={(event) => setBusiness({ ...business, name: event.target.value })} /></Field>
+              <Field label={text("Phone")}><input className="op-input" value={business.phone} onChange={(event) => setBusiness({ ...business, phone: event.target.value })} /></Field>
+              <Field label={text("Address")}><input className="op-input" value={business.address ?? ""} onChange={(event) => setBusiness({ ...business, address: textOrNull(event.target.value) })} /></Field>
+              <Field label={text("City")}><input className="op-input" value={business.city ?? ""} onChange={(event) => setBusiness({ ...business, city: textOrNull(event.target.value) })} /></Field>
+              <Field label={text("Timezone")}>
                 <select className="op-select" value={business.timezone} onChange={(event) => setBusiness({ ...business, timezone: event.target.value })}>
                   <option value="Africa/Cairo">Africa/Cairo</option>
                   <option value="UTC">UTC</option>
                 </select>
               </Field>
-              <Field label="Default language">
+              <Field label={text("Default language")}>
                 <select className="op-select" value={business.language} onChange={(event) => setBusiness({ ...business, language: event.target.value as "en" | "ar" })}>
-                  <option value="en">English</option>
-                  <option value="ar">Arabic</option>
+                  <option value="en">{text("English")}</option>
+                  <option value="ar">{text("Arabic")}</option>
                 </select>
               </Field>
             </div>
           </SettingsSection>
 
           <SettingsSection
-            title="Branding"
-            description="The logo appears on receipts and the public website. The cover is used in the website hero."
+            title={text("Branding")}
+            description={text("The logo appears on receipts and the public website. The cover is used in the website hero.")}
           >
             <div className="grid gap-4 lg:grid-cols-2">
               {(["logo", "cover"] as BrandingKind[]).map((kind) => {
@@ -235,7 +237,7 @@ export function SettingsScreen() {
                     </div>
                     <div className="mt-3 flex flex-wrap gap-2">
                       <label className="op-button cursor-pointer">
-                        <ImagePlus size={15} /> {url ? "Replace" : "Upload"}
+                        <ImagePlus size={15} /> {url ? text("Replace") : text("Upload")}
                         <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(event) => void handleImage(kind, event.target.files?.[0])} />
                       </label>
                       {url ? (
@@ -244,7 +246,7 @@ export function SettingsScreen() {
                           onClick={() => void run(`remove-${kind}`, () => removeBrandingImage(kind, accessToken!))}
                           className="op-button op-button-danger"
                         >
-                          <Trash2 size={15} /> Remove
+                          <Trash2 size={15} /> {text("Remove")}
                         </button>
                       ) : null}
                     </div>
@@ -255,37 +257,37 @@ export function SettingsScreen() {
           </SettingsSection>
 
           <SettingsSection
-            title="Public website"
-            description="Control the content and appearance of the generated salon or clinic website."
+            title={text("Public website")}
+            description={text("Control the content and appearance of the generated salon or clinic website.")}
             action={
               <button
                 disabled={Boolean(saving)}
                 onClick={() => void run("website", () => updateWebsiteSettings(website, accessToken!))}
                 className="op-button op-button-primary"
               >
-                <Save size={15} /> Save website
+                <Save size={15} /> {text("Save website")}
               </button>
             }
           >
             <div className="grid gap-4 md:grid-cols-2">
-              <Field label="Tagline" className="md:col-span-2"><input className="op-input" value={website.tagline ?? ""} onChange={(event) => setWebsite({ ...website, tagline: textOrNull(event.target.value) })} /></Field>
-              <Field label="About" className="md:col-span-2"><textarea rows={5} className="op-input min-h-32 resize-y" value={website.aboutText ?? ""} onChange={(event) => setWebsite({ ...website, aboutText: textOrNull(event.target.value) })} /></Field>
-              <Field label="Template">
+              <Field label={text("Tagline")} className="md:col-span-2"><input className="op-input" value={website.tagline ?? ""} onChange={(event) => setWebsite({ ...website, tagline: textOrNull(event.target.value) })} /></Field>
+              <Field label={text("About")} className="md:col-span-2"><textarea rows={5} className="op-input min-h-32 resize-y" value={website.aboutText ?? ""} onChange={(event) => setWebsite({ ...website, aboutText: textOrNull(event.target.value) })} /></Field>
+              <Field label={text("Template")}>
                 <select className="op-select" value={website.template ?? (user?.vertical === "clinic" ? "clinic-clarity" : "aura-wellness")} onChange={(event) => setWebsite({ ...website, template: event.target.value })}>
                   <option value="aura-wellness">Aura Wellness — Salon</option>
                   <option value="clinic-clarity">Clinic Clarity — Clinic</option>
                 </select>
               </Field>
-              <Field label="Font">
+              <Field label={text("Font")}>
                 <select className="op-select" value={website.font ?? "Inter"} onChange={(event) => setWebsite({ ...website, font: event.target.value })}>
                   <option>Inter</option>
                   <option>Playfair Display</option>
                 </select>
               </Field>
-              <Field label="Primary colour"><input type="color" className="op-input h-11 p-1" value={website.primaryColor ?? "#6d273f"} onChange={(event) => setWebsite({ ...website, primaryColor: event.target.value })} /></Field>
-              <Field label="Secondary colour"><input type="color" className="op-input h-11 p-1" value={website.secondaryColor ?? "#202223"} onChange={(event) => setWebsite({ ...website, secondaryColor: event.target.value })} /></Field>
-              <Field label="Instagram URL"><input className="op-input" value={website.instagramUrl ?? ""} onChange={(event) => setWebsite({ ...website, instagramUrl: textOrNull(event.target.value) })} /></Field>
-              <Field label="WhatsApp number"><input className="op-input" value={website.whatsappNumber ?? ""} onChange={(event) => setWebsite({ ...website, whatsappNumber: textOrNull(event.target.value) })} /></Field>
+              <Field label={text("Primary colour")}><input type="color" className="op-input h-11 p-1" value={website.primaryColor ?? "#6d273f"} onChange={(event) => setWebsite({ ...website, primaryColor: event.target.value })} /></Field>
+              <Field label={text("Secondary colour")}><input type="color" className="op-input h-11 p-1" value={website.secondaryColor ?? "#202223"} onChange={(event) => setWebsite({ ...website, secondaryColor: event.target.value })} /></Field>
+              <Field label={text("Instagram URL")}><input className="op-input" value={website.instagramUrl ?? ""} onChange={(event) => setWebsite({ ...website, instagramUrl: textOrNull(event.target.value) })} /></Field>
+              <Field label={text("WhatsApp number")}><input className="op-input" value={website.whatsappNumber ?? ""} onChange={(event) => setWebsite({ ...website, whatsappNumber: textOrNull(event.target.value) })} /></Field>
             </div>
             <div className="mt-4 flex flex-wrap gap-2">
               {[["showTeam", "Show team"], ["showFaq", "Show FAQs"], ["showReviews", "Show reviews"]].map(([key, label]) => (
@@ -300,15 +302,15 @@ export function SettingsScreen() {
           <OperationsPanel className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="font-bold text-[var(--op-text)]">Publishing</h2>
+                <h2 className="font-bold text-[var(--op-text)]">{text("Publishing")}</h2>
                 <OperationsStatus tone={workspace.isActive ? "success" : "warning"}>
-                  {workspace.isActive ? "Published" : "Private"}
+                  {workspace.isActive ? text("Published") : text("Private")}
                 </OperationsStatus>
               </div>
               <p className="mt-1 text-sm text-[var(--op-text-muted)]">
                 {workspace.isActive
-                  ? "Customers can open and book through the public website."
-                  : "The public website is currently unavailable to customers."}
+                  ? text("Customers can open and book through the public website.")
+                  : text("The public website is currently unavailable to customers.")}
               </p>
               <p className="mt-2 break-all text-xs font-medium text-[var(--op-text-faint)]">{publicUrl}</p>
             </div>
@@ -317,7 +319,7 @@ export function SettingsScreen() {
               onClick={() => void run("publish", () => updatePublishStatus(!workspace.isActive, accessToken!))}
               className={`op-button ${workspace.isActive ? "op-button-danger" : "op-button-primary"}`}
             >
-              {workspace.isActive ? "Unpublish website" : "Publish website"}
+              {workspace.isActive ? text("Unpublish website") : text("Publish website")}
             </button>
           </OperationsPanel>
         </div>

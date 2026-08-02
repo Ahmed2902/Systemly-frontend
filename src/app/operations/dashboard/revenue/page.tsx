@@ -1,5 +1,6 @@
 "use client";
 
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/modules/auth/useAuth";
 import { getRevenueAnalytics } from "@/modules/analytics/analytics.api";
@@ -27,6 +28,7 @@ import {
 } from "@/modules/analytics/analytics.formatters";
 
 export default function RevenueAnalyticsPage() {
+  const text = usePlatformText();
   const { accessToken } = useAuth();
   const preset = useAnalyticsPreset();
   const [data, setData] = useState<RevenueAnalytics | null>(null);
@@ -55,52 +57,52 @@ export default function RevenueAnalyticsPage() {
 
   return (
     <AnalyticsShell
-      title="Revenue Analytics"
-      subtitle="Revenue, invoice volume, category mix, custom items, and weekday performance"
+      title={text("Revenue Analytics")}
+      subtitle={text("Revenue, invoice volume, category mix, custom items, and weekday performance")}
     >
       {error ? <AnalyticsState message={error} /> : null}
       {!data && !error ? (
-        <AnalyticsState message="Loading revenue analytics…" />
+        <AnalyticsState message={text("Loading revenue analytics…")} />
       ) : null}
       {data ? (
         <div className="space-y-3">
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
             <MetricCard
-              label="Total revenue"
+              label={text("Total revenue")}
               value={formatEgp(data.summary.revenueCents)}
-              hint="Collected in the selected period"
+              hint={text("Collected in the selected period")}
               emoji="↗"
             />
             <MetricCard
-              label="Paid invoices"
+              label={text("Paid invoices")}
               value={String(data.summary.paidInvoiceCount)}
-              hint="Successfully settled invoices"
+              hint={text("Successfully settled invoices")}
               emoji="🧾"
             />
             <MetricCard
-              label="Average paid invoice"
+              label={text("Average paid invoice")}
               value={formatEgp(data.summary.averageInvoiceCents)}
-              hint="Average value per successful payment"
+              hint={text("Average value per successful payment")}
               emoji="◷"
             />
             <MetricCard
-              label="Custom item revenue"
+              label={text("Custom item revenue")}
               value={formatEgp(data.summary.customItemRevenueCents)}
               hint={`${data.summary.customItemQuantity} items sold outside the service catalogue`}
               emoji="＋"
             />
             <MetricCard
-              label="Top revenue category"
+              label={text("Top revenue category")}
               value={data.summary.topCategory?.category ?? "—"}
               hint={
                 data.summary.topCategory
                   ? `${formatEgp(data.summary.topCategory.totalCents)} generated`
-                  : "No category revenue yet"
+                  : text("No category revenue yet")
               }
               emoji="✦"
             />
             <MetricCard
-              label="Best revenue weekday"
+              label={text("Best revenue weekday")}
               value={
                 data.summary.bestWeekday
                   ? WEEKDAYS[data.summary.bestWeekday.weekday]
@@ -109,7 +111,7 @@ export default function RevenueAnalyticsPage() {
               hint={
                 data.summary.bestWeekday
                   ? `${formatEgp(data.summary.bestWeekday.totalCents)} collected`
-                  : "No weekday pattern yet"
+                  : text("No weekday pattern yet")
               }
               emoji="◷"
             />
@@ -127,10 +129,10 @@ export default function RevenueAnalyticsPage() {
                 label: shortDate(row.bucket),
                 value: row.totalCents,
                 tooltip: [
-                  { label: "Paid invoices", value: String(row.invoiceCount) },
+                  { label: text("Paid invoices"), value: String(row.invoiceCount) },
                 ],
               }))}
-              valueLabel="Revenue"
+              valueLabel={text("Revenue")}
               formatValue={formatEgp}
               formatAxisValue={formatEgp}
               height={285}
@@ -138,7 +140,7 @@ export default function RevenueAnalyticsPage() {
           </AnalyticsPanel>
 
           <div className="grid gap-3 xl:grid-cols-[minmax(0,.9fr)_minmax(0,1.6fr)]">
-            <AnalyticsPanel title="Revenue by category">
+            <AnalyticsPanel title={text("Revenue by category")}>
               <SemanticDonutChart
                 items={data.byCategory.slice(0, 6).map((row) => ({
                   label: row.category,
@@ -149,10 +151,10 @@ export default function RevenueAnalyticsPage() {
             </AnalyticsPanel>
 
             <AnalyticsPanel
-              title="Average paid invoice by period"
+              title={text("Average paid invoice by period")}
               action={
                 <span className="analytics-muted text-xs">
-                  Average amount collected per paid invoice
+                  {text("Average amount collected per paid invoice")}
                 </span>
               }
             >
@@ -182,10 +184,10 @@ export default function RevenueAnalyticsPage() {
 
           <div className="grid gap-3 xl:grid-cols-2">
             <AnalyticsPanel
-              title="Custom items"
+              title={text("Custom items")}
               action={
                 <span className="analytics-muted text-xs">
-                  Products and charges added outside the service catalogue
+                  {text("Products and charges added outside the service catalogue")}
                 </span>
               }
             >
@@ -195,23 +197,23 @@ export default function RevenueAnalyticsPage() {
                     label: row.description,
                     value: row.totalCents,
                     tooltip: [
-                      { label: "Revenue", value: formatEgp(row.totalCents) },
+                      { label: text("Revenue"), value: formatEgp(row.totalCents) },
                       { label: "Quantity", value: String(row.quantity) },
                     ],
                   }))}
                   formatValue={formatEgp}
                 />
               ) : (
-                <AnalyticsState message="No custom items were sold in this period." />
+                <AnalyticsState message={text("No custom items were sold in this period.")} />
               )}
             </AnalyticsPanel>
 
-            <AnalyticsPanel title="Paid invoices by period">
+            <AnalyticsPanel title={text("Paid invoices by period")}>
               <MultiLineChart
                 labels={data.trend.map((row) => shortDate(row.bucket))}
                 series={[
                   {
-                    name: "Paid invoices",
+                    name: text("Paid invoices"),
                     colour: "var(--op-success)",
                     values: data.trend.map((row) => row.invoiceCount),
                     formatValue: (value) => String(Math.round(value)),
@@ -219,8 +221,8 @@ export default function RevenueAnalyticsPage() {
                       (row) =>
                         `${row.invoiceCount} ${
                           row.invoiceCount === 1
-                            ? "paid invoice"
-                            : "paid invoices"
+                            ? text("paid invoice")
+                            : text("paid invoices")
                         }`,
                     ),
                   },
@@ -231,14 +233,14 @@ export default function RevenueAnalyticsPage() {
             </AnalyticsPanel>
           </div>
 
-          <AnalyticsPanel title="Revenue by weekday">
+          <AnalyticsPanel title={text("Revenue by weekday")}>
             <SemanticBarList
               items={data.byWeekday.map((row) => ({
                 label: WEEKDAYS[row.weekday],
                 value: row.totalCents,
                 tooltip: [
-                  { label: "Revenue", value: formatEgp(row.totalCents) },
-                  { label: "Paid invoices", value: String(row.invoiceCount) },
+                  { label: text("Revenue"), value: formatEgp(row.totalCents) },
+                  { label: text("Paid invoices"), value: String(row.invoiceCount) },
                 ],
               }))}
               formatValue={formatEgp}

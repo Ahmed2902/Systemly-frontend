@@ -1,5 +1,7 @@
 "use client";
 
+import { usePlatformText } from "@/i18n/usePlatformText";
+import { useLocale } from "@/i18n/LocaleProvider";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CalendarDays, RefreshCw, Search } from "lucide-react";
 import { useAuth } from "@/modules/auth/useAuth";
@@ -45,6 +47,8 @@ const paymentOptions = [
 ];
 
 export default function InvoiceWorkspaceScreen() {
+  const text = usePlatformText();
+  const { locale } = useLocale();
   const { accessToken, loading: authLoading } = useAuth();
   const { notifyMutation } = useOperations();
   const [catalog, setCatalog] = useState<InvoiceListResponse | null>(null);
@@ -88,7 +92,7 @@ export default function InvoiceWorkspaceScreen() {
         );
         setError(null);
       } catch (caught: unknown) {
-        setError(caught instanceof Error ? caught.message : "Unable to load invoices");
+        setError(caught instanceof Error ? caught.message : text("Unable to load invoices"));
       } finally {
         setLoading(false);
         setRefreshing(false);
@@ -118,7 +122,7 @@ export default function InvoiceWorkspaceScreen() {
       })
       .catch((caught: unknown) => {
         if (active) {
-          setError(caught instanceof Error ? caught.message : "Unable to load invoice");
+          setError(caught instanceof Error ? caught.message : text("Unable to load invoice"));
         }
       })
       .finally(() => {
@@ -137,9 +141,9 @@ export default function InvoiceWorkspaceScreen() {
     setActionRunning(true);
     setError(null);
     try {
-      await downloadInvoiceReceipt(selected.id, selected.invoiceNumber, accessToken);
+      await downloadInvoiceReceipt(selected.id, selected.invoiceNumber, accessToken, locale);
     } catch (caught: unknown) {
-      setError(caught instanceof Error ? caught.message : "Unable to download receipt");
+      setError(caught instanceof Error ? caught.message : text("Unable to download receipt"));
     } finally {
       setActionRunning(false);
     }
@@ -148,11 +152,11 @@ export default function InvoiceWorkspaceScreen() {
   const voidSelected = async () => {
     if (!selected || !accessToken) return;
     const reason = window.prompt(
-      "Why are you voiding this invoice? The appointment will return to In progress.",
+      text("Why are you voiding this invoice? The appointment will return to In progress."),
     );
     if (!reason?.trim()) return;
     const confirmed = window.confirm(
-      "Void this invoice and reopen the appointment for editing and payment?",
+      text("Void this invoice and reopen the appointment for editing and payment?"),
     );
     if (!confirmed) return;
     setActionRunning(true);
@@ -164,7 +168,7 @@ export default function InvoiceWorkspaceScreen() {
       notifyMutation({ scope: "appointment", entityId: selected.appointment?.id });
       await loadList(true);
     } catch (caught: unknown) {
-      setError(caught instanceof Error ? caught.message : "Unable to void invoice");
+      setError(caught instanceof Error ? caught.message : text("Unable to void invoice"));
     } finally {
       setActionRunning(false);
     }
@@ -174,7 +178,7 @@ export default function InvoiceWorkspaceScreen() {
     return (
       <OperationsPage>
         <OperationsPageInner className="flex min-h-full items-center justify-center">
-          <OperationsState loading title="Loading invoices" description="Preparing payments and receipts." />
+          <OperationsState loading title={text("Loading invoices")} description={text("Preparing payments and receipts.")} />
         </OperationsPageInner>
       </OperationsPage>
     );
@@ -184,12 +188,12 @@ export default function InvoiceWorkspaceScreen() {
     <OperationsPage>
       <OperationsPageInner>
         <OperationsPageHeader
-          eyebrow="Management / Invoices"
-          title="Invoices"
-          description="Review completed payments, download receipts, and safely void invoices."
+          eyebrow={text("Management / Invoices")}
+          title={text("Invoices")}
+          description={text("Review completed payments, download receipts, and safely void invoices.")}
           actions={
             <button type="button" className="op-button" disabled={refreshing} onClick={() => void loadList(true)}>
-              <RefreshCw size={15} className={refreshing ? "animate-spin" : ""} /> Refresh
+              <RefreshCw size={15} className={refreshing ? "animate-spin" : ""} /> {text("Refresh")}
             </button>
           }
         />
@@ -201,21 +205,21 @@ export default function InvoiceWorkspaceScreen() {
               <input
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search invoice, customer, or phone"
+                placeholder={text("Search invoice, customer, or phone")}
                 className="op-input h-10 min-h-10 pl-10"
               />
             </label>
             <OperationsDropdown
               value={status}
-              options={statusOptions}
+              options={statusOptions.map((option) => ({ ...option, label: text(option.label) }))}
               onChange={(value) => setStatus(value as InvoiceStatus | "")}
-              aria-label="Invoice status"
+              aria-label={text("Invoice status")}
             />
             <OperationsDropdown
               value={paymentMethod}
-              options={paymentOptions}
+              options={paymentOptions.map((option) => ({ ...option, label: text(option.label) }))}
               onChange={(value) => setPaymentMethod(value as PaymentMethod | "")}
-              aria-label="Payment method"
+              aria-label={text("Payment method")}
             />
             <label className="relative">
               <CalendarDays className="pointer-events-none absolute left-3 top-3 text-[var(--op-text-muted)]" size={15} />
@@ -223,7 +227,7 @@ export default function InvoiceWorkspaceScreen() {
                 type="date"
                 value={from}
                 onChange={(event) => setFrom(event.target.value)}
-                aria-label="Invoices from date"
+                aria-label={text("Invoices from date")}
                 className="op-input h-10 min-h-10 pl-9"
               />
             </label>
@@ -231,7 +235,7 @@ export default function InvoiceWorkspaceScreen() {
               type="date"
               value={to}
               onChange={(event) => setTo(event.target.value)}
-              aria-label="Invoices to date"
+              aria-label={text("Invoices to date")}
               className="op-input h-10 min-h-10"
             />
             <button
@@ -246,7 +250,7 @@ export default function InvoiceWorkspaceScreen() {
               }}
               className="op-button"
             >
-              Clear
+              {text("Clear")}
             </button>
           </div>
         </OperationsToolbar>
@@ -254,8 +258,8 @@ export default function InvoiceWorkspaceScreen() {
         {error ? <OperationsAlert tone="danger" className="mb-4">{error}</OperationsAlert> : null}
 
         <div className="mb-3 flex items-center justify-between text-xs text-[var(--op-text-muted)]">
-          <span>{visibleTotal} invoice{visibleTotal === 1 ? "" : "s"}</span>
-          {loading || refreshing ? <span>Refreshing…</span> : null}
+          <span>{visibleTotal} {text(visibleTotal === 1 ? "invoice" : "invoices")}</span>
+          {loading || refreshing ? <span>{text("Refreshing…")}</span> : null}
         </div>
 
         <div className="grid items-start gap-3 xl:grid-cols-[minmax(0,1fr)_25rem] [&>section]:border-[var(--op-border)] [&>section]:bg-[var(--op-surface)] [&>section]:shadow-[var(--op-shadow)]">

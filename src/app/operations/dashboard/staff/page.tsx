@@ -1,5 +1,6 @@
 "use client";
 
+import { usePlatformText } from "@/i18n/usePlatformText";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/modules/auth/useAuth";
 import { getStaffAnalytics } from "@/modules/analytics/analytics.api";
@@ -20,6 +21,7 @@ import {
 } from "@/modules/analytics/analytics.formatters";
 
 export default function StaffAnalyticsPage() {
+  const text = usePlatformText();
   const { accessToken } = useAuth();
   const preset = useAnalyticsPreset();
   const [data, setData] = useState<StaffAnalytics | null>(null);
@@ -48,47 +50,47 @@ export default function StaffAnalyticsPage() {
 
   return (
     <AnalyticsShell
-      title="Staff Analytics"
-      subtitle="Service revenue contribution, commission, booked time, and utilisation"
+      title={text("Staff Analytics")}
+      subtitle={text("Service revenue contribution, commission, booked time, and utilisation")}
     >
       {error ? <AnalyticsState message={error} /> : null}
       {!data && !error ? (
-        <AnalyticsState message="Loading staff analytics…" />
+        <AnalyticsState message={text("Loading staff analytics…")} />
       ) : null}
       {data ? (
         <div className="space-y-3">
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
             <MetricCard
-              label="Service revenue generated"
+              label={text("Service revenue generated")}
               value={formatEgp(data.summary.revenueCents)}
-              hint="Custom items stay in business revenue unless they are explicitly assigned to staff"
+              hint={text("Custom items stay in business revenue unless they are explicitly assigned to staff")}
             />
             <MetricCard
-              label="Total commission"
+              label={text("Total commission")}
               value={formatEgp(data.summary.commissionCents)}
-              hint="Commission calculated from attributed service lines"
+              hint={text("Commission calculated from attributed service lines")}
             />
             <MetricCard
-              label="Average utilisation"
+              label={text("Average utilisation")}
               value={formatPercent(data.summary.averageUtilizationRate)}
             />
             <MetricCard
-              label="Low-utilisation staff"
+              label={text("Low-utilisation staff")}
               value={String(data.summary.lowUtilizationCount)}
               tone="warning"
             />
             <MetricCard
-              label="Top performer"
+              label={text("Top performer")}
               value={top?.name ?? "—"}
               hint={top ? `${formatEgp(top.totalCents)} in service revenue` : undefined}
             />
           </div>
 
           <AnalyticsPanel
-            title="Staff performance"
+            title={text("Staff performance")}
             action={
               <span className="analytics-muted text-xs">
-                Revenue is attributed through service line items; unassigned custom items are excluded
+                {text("Revenue is attributed through service line items; unassigned custom items are excluded")}
               </span>
             }
           >
@@ -96,13 +98,13 @@ export default function StaffAnalyticsPage() {
               <table className="analytics-table w-full min-w-[820px] text-left">
                 <thead>
                   <tr>
-                    <th className="pb-2">Staff</th>
-                    <th className="pb-2">Service revenue</th>
-                    <th className="pb-2">Commission</th>
-                    <th className="pb-2">Jobs</th>
-                    <th className="pb-2">Utilisation</th>
-                    <th className="pb-2">Booked</th>
-                    <th className="pb-2">Available</th>
+                    <th className="pb-2">{text("Staff")}</th>
+                    <th className="pb-2">{text("Service revenue")}</th>
+                    <th className="pb-2">{text("Commission")}</th>
+                    <th className="pb-2">{text("Jobs")}</th>
+                    <th className="pb-2">{text("Utilisation")}</th>
+                    <th className="pb-2">{text("Booked")}</th>
+                    <th className="pb-2">{text("Available")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -123,7 +125,7 @@ export default function StaffAnalyticsPage() {
           </AnalyticsPanel>
 
           <div className="grid gap-3 xl:grid-cols-3">
-            <AnalyticsPanel title="Service revenue by staff">
+            <AnalyticsPanel title={text("Service revenue by staff")}>
               <LollipopChart
                 items={[...data.staffPerformance]
                   .sort((a, b) => b.totalCents - a.totalCents)
@@ -144,7 +146,7 @@ export default function StaffAnalyticsPage() {
               />
             </AnalyticsPanel>
 
-            <AnalyticsPanel title="Utilisation distribution">
+            <AnalyticsPanel title={text("Utilisation distribution")}>
               <SemanticDonutChart
                 items={[
                   {
@@ -177,7 +179,7 @@ export default function StaffAnalyticsPage() {
               />
             </AnalyticsPanel>
 
-            <AnalyticsPanel title="Booked vs available time">
+            <AnalyticsPanel title={text("Booked vs available time")}>
               <div className="space-y-4">
                 {data.staffPerformance.slice(0, 7).map((row) => {
                   const total = Math.max(
