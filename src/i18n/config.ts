@@ -14,6 +14,8 @@ export function getLocaleDirection(locale: AppLocale): "rtl" | "ltr" {
   return locale === "ar" ? "rtl" : "ltr";
 }
 
-export function getLocaleTag(locale: AppLocale): "ar-EG" | "en-EG" {
-  return locale === "ar" ? "ar-EG" : "en-EG";
+export function getLocaleTag(
+  locale: AppLocale,
+): "ar-EG-u-nu-latn" | "en-EG" {
+  return locale === "ar" ? "ar-EG-u-nu-latn" : "en-EG";
 }
