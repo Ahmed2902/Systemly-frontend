@@ -4,6 +4,7 @@ import { useLocale } from "@/i18n/LocaleProvider";
 
 const copy = {
   en: {
+    dateLocale: "en-EG",
     billing: "Billing",
     openBilling: "Open Billing",
     resolvePayment: "Resolve payment",
@@ -39,6 +40,7 @@ const copy = {
       "EasyKash checkout is not configured yet. No card or billing data is required during the free trial, and Systemly will never store raw card details.",
   },
   ar: {
+    dateLocale: "ar-EG",
     billing: "الفوترة",
     openBilling: "فتح الفوترة",
     resolvePayment: "حل مشكلة الدفع",
