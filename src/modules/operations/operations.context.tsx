@@ -8,6 +8,8 @@ import {
   useRef,
   useState,
 } from "react";
+import { useAuth } from "@/modules/auth/useAuth";
+import { canMutateOperations } from "@/modules/subscriptions/subscription-access";
 
 export type OperationsMutationScope =
   | "appointment"
@@ -25,6 +27,7 @@ export type OperationsMutation = {
 type MutationListener = (mutation: OperationsMutation) => void;
 
 interface OperationsContextValue {
+  canMutate: boolean;
   isNewAppointmentOpen: boolean;
   appointmentCustomer: { name: string; phone: string } | null;
   openNewAppointment: (customer?: { name: string; phone: string }) => void;
@@ -42,6 +45,8 @@ export function OperationsProvider({
 }: {
   children: React.ReactNode;
 }) {
+  const { user } = useAuth();
+  const canMutate = canMutateOperations(user?.subscriptionAccess);
   const [isNewAppointmentOpen, setIsNewAppointmentOpen] = useState(false);
   const [appointmentCustomer, setAppointmentCustomer] = useState<{
     name: string;
@@ -52,16 +57,21 @@ export function OperationsProvider({
 
   const openNewAppointment = useCallback(
     (customer?: { name: string; phone: string }) => {
+      if (!canMutate) return;
       setAppointmentCustomer(customer ?? null);
       setIsNewAppointmentOpen(true);
     },
-    [],
+    [canMutate],
   );
 
   const closeNewAppointment = useCallback(() => {
     setIsNewAppointmentOpen(false);
     setAppointmentCustomer(null);
   }, []);
+
+  useEffect(() => {
+    if (!canMutate) closeNewAppointment();
+  }, [canMutate, closeNewAppointment]);
 
   const onAppointmentCreated = useCallback((cb: () => void) => {
     appointmentListenersRef.current.add(cb);
@@ -85,6 +95,7 @@ export function OperationsProvider({
   return (
     <OperationsContext.Provider
       value={{
+        canMutate,
         isNewAppointmentOpen,
         appointmentCustomer,
         openNewAppointment,
@@ -108,7 +119,6 @@ export function useOperations() {
   return ctx;
 }
 
-/** Refresh a page after a manual booking. */
 export function useOnAppointmentCreated(callback: () => void) {
   const { onAppointmentCreated } = useOperations();
   const cbRef = useRef(callback);
@@ -117,7 +127,6 @@ export function useOnAppointmentCreated(callback: () => void) {
   useEffect(() => onAppointmentCreated(() => cbRef.current()), [onAppointmentCreated]);
 }
 
-/** Refresh a page after any matching cross-workspace mutation. */
 export function useOnOperationsMutation(
   scopes: OperationsMutationScope | OperationsMutationScope[],
   callback: (mutation: OperationsMutation) => void,
