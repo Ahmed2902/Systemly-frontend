@@ -1,5 +1,6 @@
 "use client";
 
+import { useLocale } from "@/i18n/LocaleProvider";
 import { usePlatformText } from "@/i18n/usePlatformText";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -36,7 +37,6 @@ import {
   getAppointmentSummary,
 } from "@/modules/operations/Calendar.api";
 import type {
-  AppointmentSummary,
   CalendarDayData,
   ServiceCatalogItem,
 } from "@/modules/operations/appointment.types";
@@ -46,6 +46,7 @@ import type { PaymentMethod } from "@/modules/invoices/invoices.types";
 
 export default function CalendarPage() {
   const text = usePlatformText();
+  const { locale } = useLocale();
   const { user, accessToken, loading: authLoading } = useAuth();
   const { openNewAppointment, notifyMutation } = useOperations();
   const timezone = user?.timezone || "Africa/Cairo";
@@ -83,7 +84,7 @@ export default function CalendarPage() {
         setRefreshing(false);
       }
     },
-    [accessToken, businessId, date],
+    [accessToken, businessId, date, text],
   );
 
   useOnAppointmentCreated(() => void loadWorkspace(null, true));
@@ -106,7 +107,7 @@ export default function CalendarPage() {
       return;
     }
     void loadWorkspace();
-  }, [accessToken, authLoading, businessId, loadWorkspace, user]);
+  }, [accessToken, authLoading, businessId, loadWorkspace, text, user]);
 
   useEffect(() => {
     if (!selectedId || !accessToken || detailLoadedId === selectedId) return;
@@ -137,7 +138,7 @@ export default function CalendarPage() {
     return () => {
       cancelled = true;
     };
-  }, [accessToken, detailLoadedId, selectedId, timezone]);
+  }, [accessToken, detailLoadedId, selectedId, text, timezone]);
 
   const selected = data?.appointments.find((item) => item.id === selectedId) ?? null;
   const selectedDetail = selected && detailLoadedId === selected.id ? selected : null;
@@ -169,6 +170,9 @@ export default function CalendarPage() {
       </div>
     );
   }
+
+  const PreviousIcon = locale === "ar" ? ChevronRight : ChevronLeft;
+  const NextIcon = locale === "ar" ? ChevronLeft : ChevronRight;
 
   return (
     <div className="op-page overflow-hidden">
@@ -208,7 +212,7 @@ export default function CalendarPage() {
               aria-label={text("Previous day")}
               onClick={() => setDate((current) => shift(current, -1))}
             >
-              <ChevronLeft size={16} />
+              <PreviousIcon size={16} />
             </button>
             <button
               type="button"
@@ -223,13 +227,13 @@ export default function CalendarPage() {
               aria-label={text("Next day")}
               onClick={() => setDate((current) => shift(current, 1))}
             >
-              <ChevronRight size={16} />
+              <NextIcon size={16} />
             </button>
           </div>
 
           <div className="flex items-center gap-2 text-sm font-semibold text-[var(--op-text)]">
             <CalendarDays size={16} className="text-[var(--op-text-muted)]" />
-            {formatDate(date)}
+            {formatDate(date, locale)}
           </div>
         </div>
 
@@ -271,7 +275,7 @@ export default function CalendarPage() {
 
               {selectedDetail ? (
                 <div className="fixed inset-0 z-[80] bg-[var(--op-overlay)] xl:static xl:z-auto xl:w-[430px] xl:flex-none xl:bg-transparent">
-                  <div className="ml-auto h-full w-full max-w-[470px] xl:max-w-none">
+                  <div className="h-full w-full max-w-[470px] xl:max-w-none" style={{ marginInlineStart: "auto" }}>
                     <AppointmentEditPanel
                       appointment={selectedDetail}
                       allAppointments={data.appointments}
@@ -354,11 +358,14 @@ function shift(date: string, deltaDays: number): string {
   return value.toISOString().slice(0, 10);
 }
 
-function formatDate(date: string) {
-  return new Date(`${date}T12:00:00Z`).toLocaleDateString(undefined, {
-    weekday: "short",
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  });
+function formatDate(date: string, locale: "en" | "ar") {
+  return new Date(`${date}T12:00:00Z`).toLocaleDateString(
+    locale === "ar" ? "ar-EG-u-nu-latn" : "en-US",
+    {
+      weekday: "short",
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    },
+  );
 }
