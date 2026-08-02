@@ -1,7 +1,6 @@
 "use client";
 
 import { CreditCard, ShieldCheck } from "lucide-react";
-import { useLocale } from "@/i18n/LocaleProvider";
 import { useAuth } from "@/modules/auth/useAuth";
 import {
   daysUntil,
@@ -15,9 +14,9 @@ import {
   OperationsState,
 } from "@/modules/operations/components/OperationsUI";
 
-function formatDate(value: string | null | undefined, locale: string) {
+function formatDate(value: string | null | undefined, dateLocale: string) {
   if (!value) return "—";
-  return new Intl.DateTimeFormat(locale === "ar" ? "ar-EG" : "en-EG", {
+  return new Intl.DateTimeFormat(dateLocale, {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(new Date(value));
@@ -25,7 +24,6 @@ function formatDate(value: string | null | undefined, locale: string) {
 
 export default function BillingStatusPage() {
   const { user, loading } = useAuth();
-  const { locale } = useLocale();
   const copy = useSubscriptionCopy();
   const access = user?.subscriptionAccess;
 
@@ -99,7 +97,7 @@ export default function BillingStatusPage() {
                   {copy.relevantEndDate}
                 </dt>
                 <dd className="mt-2 font-semibold text-[var(--op-text)]">
-                  {formatDate(relevantEnd, locale)}
+                  {formatDate(relevantEnd, copy.dateLocale)}
                 </dd>
                 {remainingDays !== null ? (
                   <p className="mt-1 text-xs text-[var(--op-text-muted)]">
