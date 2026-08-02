@@ -5,10 +5,9 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle2, LoaderCircle, TriangleAlert } from "lucide-react";
-import { ApiError, getCurrentUser } from "../auth.api";
+import { ApiError, getCurrentUser, updatePreferredLanguage } from "../auth.api";
 import { workspacePathForUser } from "../auth-redirect";
 import { useLocale } from "@/i18n/LocaleProvider";
-import { updatePreferredLanguage } from "../auth.api";
 import { useAuth } from "../useAuth";
 
 type OAuthState = "loading" | "success" | "error";
@@ -21,7 +20,9 @@ export function OAuthCallbackPanel() {
   const { locale } = useLocale();
   const startedRef = useRef(false);
   const [state, setState] = useState<OAuthState>("loading");
-  const [message, setMessage] = useState("Completing your secure Google sign-in…");
+  const [message, setMessage] = useState(() =>
+    text("Completing your secure Google sign-in…"),
+  );
   const token = searchParams.get("token")?.trim() ?? "";
 
   useEffect(() => {
@@ -30,32 +31,43 @@ export function OAuthCallbackPanel() {
 
     if (!token) {
       setState("error");
-      setMessage("Google sign-in did not return a valid session.");
+      setMessage(text("Google sign-in did not return a valid session."));
       return;
     }
 
-    void getCurrentUser(token)
-      .then((response) => {
-        const accessToken = token;
-      const sessionUser = response.data;
+    void (async () => {
       try {
-        await updatePreferredLanguage(locale, accessToken);
-      } catch (preferenceError) {
-        console.error("Unable to persist OAuth language preference:", preferenceError);
-      }
-      setSession(
-        { ...sessionUser, preferredLanguage: locale },
-        accessToken,
-      );
+        const response = await getCurrentUser(token);
+        const accessToken = token;
+        const sessionUser = response.data;
+
+        try {
+          await updatePreferredLanguage(locale, accessToken);
+        } catch (preferenceError) {
+          console.error(
+            "Unable to persist OAuth language preference:",
+            preferenceError,
+          );
+        }
+
+        setSession(
+          { ...sessionUser, preferredLanguage: locale },
+          accessToken,
+        );
         setState("success");
-        setMessage("Signed in. Opening your workspace…");
-        router.replace(workspacePathForUser(response.data));
-      })
-      .catch((error: ApiError) => {
+        setMessage(text("Signed in. Opening your workspace…"));
+        router.replace(workspacePathForUser(sessionUser));
+      } catch (error) {
+        const apiError = error as ApiError;
         setState("error");
-        setMessage(error.error ?? error.message ?? "Google sign-in could not be completed.");
-      });
-  }, [router, setSession, token]);
+        setMessage(
+          apiError.error ??
+            apiError.message ??
+            text("Google sign-in could not be completed."),
+        );
+      }
+    })();
+  }, [locale, router, setSession, text, token]);
 
   const icon = state === "loading"
     ? <LoaderCircle size={25} className="animate-spin" />
