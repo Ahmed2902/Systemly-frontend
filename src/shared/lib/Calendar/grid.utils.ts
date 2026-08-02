@@ -1,3 +1,4 @@
+import type { AppLocale } from "../../../i18n/config";
 import type { AppointmentStatus } from "../../../modules/operations/appointment.types";
 
 export const DAY_START_HOUR = 8;
@@ -27,6 +28,16 @@ function dateTimeParts(value: string, timezone: string) {
 function minutesSinceDayStart(value: string, timezone: string): number {
   const parts = dateTimeParts(value, timezone);
   return (parts.hour - DAY_START_HOUR) * 60 + parts.minute;
+}
+
+function periodLabel(hour: number, locale: AppLocale): string {
+  if (locale === "ar") return hour < 12 ? "ص" : "م";
+  return hour < 12 ? "AM" : "PM";
+}
+
+function formatClockTime(hour: number, minute: number, locale: AppLocale): string {
+  const displayHour = hour % 12 || 12;
+  return `${displayHour}:${String(minute).padStart(2, "0")} ${periodLabel(hour, locale)}`;
 }
 
 export function getSegmentPosition(
@@ -75,33 +86,33 @@ export function getNowLineOffset(
   return (minutesNow / SLOT_MINUTES) * SLOT_WIDTH_PX;
 }
 
-export function formatHourLabel(hour: number): string {
-  const period = hour < 12 ? "AM" : "PM";
-  const displayHour = hour % 12 === 0 ? 12 : hour % 12;
-  return `${displayHour}:00 ${period}`;
+export function formatHourLabel(
+  hour: number,
+  locale: AppLocale = "en",
+): string {
+  return formatClockTime(hour, 0, locale);
 }
 
 export function formatTimeRange(
   startsAt: string,
   endsAt: string,
   timezone = "UTC",
+  locale: AppLocale = "en",
 ): string {
-  const fmt = (iso: string) => {
-    const { hour, minute } = dateTimeParts(iso, timezone);
-    const period = hour < 12 ? "AM" : "PM";
-    const displayHour = hour % 12 || 12;
-    return `${displayHour}:${String(minute).padStart(2, "0")} ${period}`;
+  const fmt = (value: string) => {
+    const { hour, minute } = dateTimeParts(value, timezone);
+    return formatClockTime(hour, minute, locale);
   };
   return `${fmt(startsAt)} – ${fmt(endsAt)}`;
 }
 
-export function formatTime12Hour(value: string, timezone: string): string {
-  return new Intl.DateTimeFormat("en-US", {
-    timeZone: timezone,
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  }).format(new Date(value));
+export function formatTime12Hour(
+  value: string,
+  timezone: string,
+  locale: AppLocale = "en",
+): string {
+  const { hour, minute } = dateTimeParts(value, timezone);
+  return formatClockTime(hour, minute, locale);
 }
 
 export function getDurationMinutes(startsAt: string, endsAt: string): number {
