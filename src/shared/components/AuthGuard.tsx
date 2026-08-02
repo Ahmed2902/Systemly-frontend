@@ -1,9 +1,6 @@
 "use client";
 
 import { usePlatformText } from "@/i18n/usePlatformText";
-// src/shared/components/AuthGuard.tsx
-"use client";
-
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/modules/auth/useAuth";
