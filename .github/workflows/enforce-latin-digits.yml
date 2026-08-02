@@ -1,0 +1,37 @@
+name: Enforce Latin digits
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize]
+    paths:
+      - scripts/enforce-latin-digits.mjs
+      - .github/workflows/enforce-latin-digits.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: node scripts/enforce-latin-digits.mjs
+      - name: Commit formatting and remove one-time files
+        run: |
+          rm -f scripts/enforce-latin-digits.mjs
+          rm -f .github/workflows/enforce-latin-digits.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "fix: keep Latin digits in Arabic formatting" || exit 0
+          git push origin HEAD:${{ github.head_ref }}
