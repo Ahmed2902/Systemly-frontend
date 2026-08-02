@@ -1,5 +1,6 @@
 "use client";
 
+import { useLocale } from "@/i18n/LocaleProvider";
 import { usePlatformText } from "@/i18n/usePlatformText";
 import type { CSSProperties } from "react";
 
@@ -120,27 +121,29 @@ export function LandingCalendarBoard({
   onSelectAppointment?: (appointmentId: string) => void;
 }) {
   const text = usePlatformText();
+  const { locale } = useLocale();
   return (
     <div
       className={`landing-calendar-preview landing-calendar-preview-${variant}`}
       aria-label={text("Systemly staff calendar preview")}
+      dir="ltr"
     >
       <div className="landing-calendar-preview-head">
-        <span>{text("Team member")}</span>
+        <span dir={locale === "ar" ? "rtl" : "ltr"}>{text("Team member")}</span>
         <div>
           {HOURS.map((hour) => (
-            <b key={hour}>{hour}</b>
+            <b key={hour}>{localizeTime(hour, locale)}</b>
           ))}
         </div>
       </div>
 
       {ROWS.map((row) => (
         <div className="landing-calendar-preview-row" key={row.id}>
-          <div className="landing-calendar-preview-staff">
+          <div className="landing-calendar-preview-staff" dir={locale === "ar" ? "rtl" : "ltr"}>
             <span>{row.initials}</span>
             <div>
-              <strong>{row.name}</strong>
-              <small>{row.role}</small>
+              <strong>{text(row.name)}</strong>
+              <small>{text(row.role)}</small>
             </div>
           </div>
 
@@ -149,6 +152,7 @@ export function LandingCalendarBoard({
               <PreviewEvent
                 event={event}
                 key={event.id}
+                locale={locale}
                 selected={
                   Boolean(event.appointmentId) &&
                   event.appointmentId === selectedAppointmentId
@@ -165,13 +169,16 @@ export function LandingCalendarBoard({
 
 function PreviewEvent({
   event,
+  locale,
   selected,
   onSelectAppointment,
 }: {
   event: CalendarEvent;
+  locale: "en" | "ar";
   selected: boolean;
   onSelectAppointment?: (appointmentId: string) => void;
 }) {
+  const text = usePlatformText();
   const className = `landing-calendar-preview-event is-${event.tone}${
     selected ? " is-selected" : ""
   }`;
@@ -179,12 +186,15 @@ function PreviewEvent({
     left: event.left,
     width: event.width,
   } satisfies CSSProperties;
+  const customer = text(event.customer);
+  const service = text(event.service);
+  const time = localizeTime(event.time, locale);
   const content = (
     <>
       {event.sequence ? <i>{event.sequence}</i> : null}
-      <span>{event.time}</span>
-      <strong>{event.customer}</strong>
-      <small>{event.service}</small>
+      <span>{time}</span>
+      <strong>{customer}</strong>
+      <small>{service}</small>
     </>
   );
 
@@ -195,7 +205,8 @@ function PreviewEvent({
         className={className}
         style={style}
         onClick={() => onSelectAppointment(event.appointmentId as string)}
-        aria-label={`${event.customer}, ${event.service}, ${event.time}`}
+        aria-label={`${customer}, ${service}, ${time}`}
+        dir={locale === "ar" ? "rtl" : "ltr"}
       >
         {content}
       </button>
@@ -203,8 +214,17 @@ function PreviewEvent({
   }
 
   return (
-    <div className={className} style={style}>
+    <div className={className} style={style} dir={locale === "ar" ? "rtl" : "ltr"}>
       {content}
     </div>
   );
+}
+
+function localizeTime(value: string, locale: "en" | "ar") {
+  if (locale !== "ar") return value;
+  return value
+    .replace(/9:(\d{2})/g, "9:$1 ص")
+    .replace(/10:(\d{2})/g, "10:$1 ص")
+    .replace(/11:(\d{2})/g, "11:$1 ص")
+    .replace(/12:(\d{2})/g, "12:$1 م");
 }
