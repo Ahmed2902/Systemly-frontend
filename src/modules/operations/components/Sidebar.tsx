@@ -23,6 +23,7 @@ import {
 import { useAuth } from "@/modules/auth/useAuth";
 import { usePlatformCopy } from "@/i18n/usePlatformCopy";
 import { isOwnerRole } from "@/modules/subscriptions/subscription-access";
+import { useSubscriptionCopy } from "@/modules/subscriptions/subscription-copy";
 import { LanguageSwitcher } from "@/shared/components/LanguageSwitcher";
 import { useOperations } from "../operations.context";
 import { useOperationsTheme } from "../operations-theme";
@@ -60,6 +61,7 @@ export function Sidebar({
   const pathname = usePathname();
   const { user } = useAuth();
   const copy = usePlatformCopy().operations.shell;
+  const subscriptionCopy = useSubscriptionCopy();
   const { openNewAppointment, canMutate } = useOperations();
   const { theme, toggleTheme } = useOperationsTheme();
   const ownerView = isOwnerRole(user?.role);
@@ -114,7 +116,7 @@ export function Sidebar({
         },
         {
           href: "/operations/settings/billing",
-          label: "Billing",
+          label: subscriptionCopy.billing,
           icon: CreditCard,
           ownerOnly: true,
         },
