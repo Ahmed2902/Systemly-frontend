@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/modules/auth/useAuth";
 import { getSettings } from "@/modules/settings/settings.api";
 import type { AuthUser } from "@/modules/auth/auth.types";
+import { LanguageSwitcher } from "@/shared/components/LanguageSwitcher";
 import { SystemlyWordmark } from "@/shared/components/SystemlyWordmark";
 
 const navLinks = [
@@ -78,6 +79,10 @@ export function LandingNav() {
         </div>
 
         <div className="lp-nav-actions">
+          <LanguageSwitcher
+            compact
+            className="border-white/20 bg-white/5 text-white hover:bg-white/10"
+          />
           <div className="lp-nav-session-actions">
             <SessionActions
               user={user}
@@ -111,6 +116,10 @@ export function LandingNav() {
             </Link>
           ))}
         </div>
+        <LanguageSwitcher
+          compact
+          className="w-full border-white/20 bg-white/5 text-white hover:bg-white/10"
+        />
         <div className="lp-mobile-session-actions">
           <SessionActions
             user={user}
