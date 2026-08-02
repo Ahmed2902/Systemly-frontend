@@ -78,7 +78,11 @@ export function LoginForm() {
             className="auth-input"
             dir="ltr"
           />
-          {errors.email ? <p className="auth-field-error">{text(errors.email.message)}</p> : null}
+          {errors.email ? (
+            <p className="auth-field-error">
+              {text(errors.email.message ?? "Enter a valid email address")}
+            </p>
+          ) : null}
         </div>
 
         <div className="auth-field">
@@ -92,7 +96,11 @@ export function LoginForm() {
             autoComplete="current-password"
             placeholder={t("auth.login.passwordPlaceholder")}
           />
-          {errors.password ? <p className="auth-field-error">{text(errors.password.message)}</p> : null}
+          {errors.password ? (
+            <p className="auth-field-error">
+              {text(errors.password.message ?? "Password is required")}
+            </p>
+          ) : null}
         </div>
 
         {serverError ? (
