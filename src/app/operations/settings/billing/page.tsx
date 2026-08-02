@@ -1,11 +1,13 @@
 "use client";
 
 import { CreditCard, ShieldCheck } from "lucide-react";
+import { useLocale } from "@/i18n/LocaleProvider";
 import { useAuth } from "@/modules/auth/useAuth";
 import {
   daysUntil,
   isOwnerRole,
 } from "@/modules/subscriptions/subscription-access";
+import { useSubscriptionCopy } from "@/modules/subscriptions/subscription-copy";
 import {
   OperationsPage,
   OperationsPageHeader,
@@ -13,9 +15,9 @@ import {
   OperationsState,
 } from "@/modules/operations/components/OperationsUI";
 
-function formatDate(value: string | null | undefined) {
+function formatDate(value: string | null | undefined, locale: string) {
   if (!value) return "—";
-  return new Intl.DateTimeFormat("en-EG", {
+  return new Intl.DateTimeFormat(locale === "ar" ? "ar-EG" : "en-EG", {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(new Date(value));
@@ -23,13 +25,15 @@ function formatDate(value: string | null | undefined) {
 
 export default function BillingStatusPage() {
   const { user, loading } = useAuth();
+  const { locale } = useLocale();
+  const copy = useSubscriptionCopy();
   const access = user?.subscriptionAccess;
 
   if (loading) {
     return (
       <OperationsPage>
         <OperationsPageInner>
-          <OperationsState loading title="Loading Billing" />
+          <OperationsState loading title={copy.loadingBilling} />
         </OperationsPageInner>
       </OperationsPage>
     );
@@ -40,8 +44,8 @@ export default function BillingStatusPage() {
       <OperationsPage>
         <OperationsPageInner>
           <OperationsState
-            title="Owner access required"
-            description="Only the business owner can manage the Systemly subscription."
+            title={copy.ownerRequired}
+            description={copy.ownerRequiredDescription}
           />
         </OperationsPageInner>
       </OperationsPage>
@@ -58,9 +62,9 @@ export default function BillingStatusPage() {
     <OperationsPage>
       <OperationsPageInner>
         <OperationsPageHeader
-          eyebrow="Settings / Billing"
-          title="Billing"
-          description="Review the current Systemly plan and subscription access."
+          eyebrow={copy.billingEyebrow}
+          title={copy.billing}
+          description={copy.billingDescription}
         />
 
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(18rem,.8fr)]">
@@ -70,11 +74,13 @@ export default function BillingStatusPage() {
                 <CreditCard size={18} />
               </span>
               <div>
-                <p className="text-sm text-[var(--op-text-muted)]">Current plan</p>
+                <p className="text-sm text-[var(--op-text-muted)]">
+                  {copy.currentPlan}
+                </p>
                 <h2 className="mt-1 text-xl font-semibold text-[var(--op-text)]">
                   {access?.planCode === "CORE"
-                    ? "Systemly Core"
-                    : access?.planCode || "No plan"}
+                    ? copy.systemlyCore
+                    : access?.planCode || copy.noPlan}
                 </h2>
               </div>
             </div>
@@ -82,22 +88,22 @@ export default function BillingStatusPage() {
             <dl className="mt-6 grid gap-3 sm:grid-cols-2">
               <div className="rounded-xl bg-[var(--op-surface-soft)] p-4">
                 <dt className="text-xs font-semibold uppercase tracking-wide text-[var(--op-text-muted)]">
-                  Status
+                  {copy.status}
                 </dt>
                 <dd className="mt-2 font-semibold text-[var(--op-text)]">
-                  {access?.effectiveStatus?.replaceAll("_", " ") || "Unavailable"}
+                  {access?.effectiveStatus?.replaceAll("_", " ") || "—"}
                 </dd>
               </div>
               <div className="rounded-xl bg-[var(--op-surface-soft)] p-4">
                 <dt className="text-xs font-semibold uppercase tracking-wide text-[var(--op-text-muted)]">
-                  Relevant end date
+                  {copy.relevantEndDate}
                 </dt>
                 <dd className="mt-2 font-semibold text-[var(--op-text)]">
-                  {formatDate(relevantEnd)}
+                  {formatDate(relevantEnd, locale)}
                 </dd>
                 {remainingDays !== null ? (
                   <p className="mt-1 text-xs text-[var(--op-text-muted)]">
-                    {remainingDays} day{remainingDays === 1 ? "" : "s"} remaining
+                    {copy.daysRemaining(remainingDays)}
                   </p>
                 ) : null}
               </div>
@@ -107,12 +113,10 @@ export default function BillingStatusPage() {
           <section className="rounded-2xl border border-[var(--op-border)] bg-[var(--op-surface)] p-6 shadow-[var(--op-shadow)]">
             <ShieldCheck size={20} className="text-emerald-500" />
             <h2 className="mt-4 font-semibold text-[var(--op-text)]">
-              Online payment setup
+              {copy.onlinePaymentSetup}
             </h2>
             <p className="mt-2 text-sm leading-6 text-[var(--op-text-muted)]">
-              EasyKash checkout is not configured yet. No card or billing data is
-              required during the free trial, and Systemly will never store raw
-              card details.
+              {copy.easyKashPlaceholder}
             </p>
           </section>
         </div>
