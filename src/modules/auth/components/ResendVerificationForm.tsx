@@ -71,7 +71,11 @@ export function ResendVerificationForm() {
               placeholder="you@business.com"
               className="auth-input"
             />
-            {errors.email ? <p className="auth-field-error">{text(errors.email.message)}</p> : null}
+            {errors.email ? (
+              <p className="auth-field-error">
+                {text(errors.email.message ?? "Enter a valid email address")}
+              </p>
+            ) : null}
           </div>
 
           {serverError ? <div className="auth-error" role="alert">{serverError}</div> : null}
