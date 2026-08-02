@@ -4,7 +4,6 @@ import type {
   BillingPayment,
   BillingPaymentsResponse,
   BillingPlan,
-  BillingSubscription,
   BillingSubscriptionResponse,
 } from "./billing.types";
 
@@ -56,19 +55,15 @@ export function createBillingCheckout(
 }
 
 export async function cancelBillingSubscription(accessToken: string) {
-  const response = await api<{ subscription: BillingSubscription }>(
-    "/billing/cancel",
-    accessToken,
-    { method: "POST", body: JSON.stringify({}) },
-  );
-  return response.subscription;
+  await api<unknown>("/billing/cancel", accessToken, {
+    method: "POST",
+    body: JSON.stringify({}),
+  });
 }
 
 export async function resumeBillingSubscription(accessToken: string) {
-  const response = await api<{ subscription: BillingSubscription }>(
-    "/billing/resume",
-    accessToken,
-    { method: "POST", body: JSON.stringify({}) },
-  );
-  return response.subscription;
+  await api<unknown>("/billing/resume", accessToken, {
+    method: "POST",
+    body: JSON.stringify({}),
+  });
 }
