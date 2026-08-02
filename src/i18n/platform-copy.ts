@@ -187,7 +187,7 @@ export const platformLiteralPairs: ReadonlyArray<readonly [string, string]> = [
   ["Operations", "إدارة العمل"],
   ["Public site", "الموقع العام"],
   ["The operating system for service businesses", "نظام التشغيل للأعمال الخدمية"],
-  ["The system behind your business.", "النظام الذي يدير نشاطك من الخلف."],
+  ["The system behind your business.", "كل ما تحتاجه لإدارة نشاطك في مكان واحد."],
   ["Build the customer experience, take bookings, run the working day, and understand the business from one connected platform.", "أنشئ تجربة عملائك، واستقبل الحجوزات، وأدر يوم العمل، وافهم أداء نشاطك من منصة واحدة مترابطة."],
   ["Explore the product", "استكشف المنتج"],
   ["Website + booking", "الموقع والحجز"],
