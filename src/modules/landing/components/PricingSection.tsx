@@ -57,8 +57,8 @@ export function PricingSection() {
               <li key={item.title}>
                 <span className="lp-pilot-check"><Check size={15}/></span>
                 <div>
-                  <strong>{item.title}</strong>
-                  <small>{item.copy}</small>
+                  <strong>{text(item.title)}</strong>
+                  <small>{text(item.copy)}</small>
                 </div>
               </li>
             ))}
