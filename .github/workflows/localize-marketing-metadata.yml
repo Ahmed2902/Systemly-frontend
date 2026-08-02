@@ -1,0 +1,37 @@
+name: Localize marketing metadata
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize]
+    paths:
+      - scripts/localize-marketing-metadata.mjs
+      - .github/workflows/localize-marketing-metadata.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: node scripts/localize-marketing-metadata.mjs
+      - name: Commit metadata and remove one-time files
+        run: |
+          rm -f scripts/localize-marketing-metadata.mjs
+          rm -f .github/workflows/localize-marketing-metadata.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "feat: localize marketing metadata" || exit 0
+          git push origin HEAD:${{ github.head_ref }}
