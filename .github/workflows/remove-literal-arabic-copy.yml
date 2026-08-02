@@ -1,0 +1,37 @@
+name: Remove literal Arabic copy
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize]
+    paths:
+      - scripts/remove-literal-arabic-copy.mjs
+      - .github/workflows/remove-literal-arabic-copy.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: node scripts/remove-literal-arabic-copy.mjs
+      - name: Commit copy and remove one-time files
+        run: |
+          rm -f scripts/remove-literal-arabic-copy.mjs
+          rm -f .github/workflows/remove-literal-arabic-copy.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "fix: replace literal Arabic marketing copy" || exit 0
+          git push origin HEAD:${{ github.head_ref }}
