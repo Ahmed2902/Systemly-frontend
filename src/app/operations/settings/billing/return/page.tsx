@@ -35,6 +35,8 @@ export default function BillingReturnPage() {
 
   useEffect(() => {
     if (authLoading || !accessToken || !paymentId) return;
+    const token = accessToken;
+    const activePaymentId = paymentId;
     let cancelled = false;
     let timeout: number | null = null;
     attemptsRef.current = 0;
@@ -42,7 +44,7 @@ export default function BillingReturnPage() {
 
     async function poll() {
       try {
-        const latest = await getBillingPayment(paymentId, accessToken);
+        const latest = await getBillingPayment(activePaymentId, token);
         if (cancelled) return;
         attemptsRef.current += 1;
         setAttempts(attemptsRef.current);
