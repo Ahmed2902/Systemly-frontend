@@ -78,7 +78,11 @@ export function ResetPasswordForm() {
             autoComplete="new-password"
             placeholder={text("At least 8 characters")}
           />
-          {errors.password ? <p className="auth-field-error">{text(errors.password.message)}</p> : null}
+          {errors.password ? (
+            <p className="auth-field-error">
+              {text(errors.password.message ?? "Password must be at least 8 characters")}
+            </p>
+          ) : null}
         </div>
 
         <div className="auth-field">
@@ -89,7 +93,11 @@ export function ResetPasswordForm() {
             autoComplete="new-password"
             placeholder={text("Repeat your new password")}
           />
-          {errors.confirmPassword ? <p className="auth-field-error">{text(errors.confirmPassword.message)}</p> : null}
+          {errors.confirmPassword ? (
+            <p className="auth-field-error">
+              {text(errors.confirmPassword.message ?? "Confirm your new password")}
+            </p>
+          ) : null}
         </div>
 
         {serverError ? <div className="auth-error" role="alert">{serverError}</div> : null}
