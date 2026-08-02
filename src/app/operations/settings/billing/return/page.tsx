@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { CheckCircle2, Clock3, XCircle } from "lucide-react";
 import { useAuth } from "@/modules/auth/useAuth";
@@ -31,23 +31,27 @@ export default function BillingReturnPage() {
   const [payment, setPayment] = useState<BillingPayment | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [attempts, setAttempts] = useState(0);
+  const attemptsRef = useRef(0);
 
   useEffect(() => {
     if (authLoading || !accessToken || !paymentId) return;
     let cancelled = false;
     let timeout: number | null = null;
+    attemptsRef.current = 0;
+    setAttempts(0);
 
     async function poll() {
       try {
         const latest = await getBillingPayment(paymentId!, accessToken!);
         if (cancelled) return;
+        attemptsRef.current += 1;
+        setAttempts(attemptsRef.current);
         setPayment(latest);
         setError(null);
-        setAttempts((value) => value + 1);
 
         if (
           !TERMINAL_STATUSES.has(latest.status) &&
-          attempts + 1 < MAX_POLL_ATTEMPTS
+          attemptsRef.current < MAX_POLL_ATTEMPTS
         ) {
           timeout = window.setTimeout(() => void poll(), POLL_INTERVAL_MS);
         }
@@ -63,7 +67,7 @@ export default function BillingReturnPage() {
       cancelled = true;
       if (timeout !== null) window.clearTimeout(timeout);
     };
-  }, [accessToken, attempts, authLoading, paymentId]);
+  }, [accessToken, authLoading, paymentId]);
 
   if (authLoading) {
     return (
@@ -90,10 +94,14 @@ export default function BillingReturnPage() {
 
   const succeeded = payment?.status === "SUCCEEDED";
   const failed = Boolean(
-    payment && ["FAILED", "EXPIRED", "CANCELED", "REFUNDED"].includes(payment.status),
+    payment &&
+      ["FAILED", "EXPIRED", "CANCELED", "REFUNDED"].includes(payment.status),
   );
-  const timedOut =
-    payment && !TERMINAL_STATUSES.has(payment.status) && attempts >= MAX_POLL_ATTEMPTS;
+  const timedOut = Boolean(
+    payment &&
+      !TERMINAL_STATUSES.has(payment.status) &&
+      attempts >= MAX_POLL_ATTEMPTS,
+  );
 
   return (
     <OperationsPage>
@@ -131,19 +139,25 @@ export default function BillingReturnPage() {
           </p>
 
           <div className="mt-6 flex flex-wrap justify-center gap-2">
-            <Link
-              href="/operations/settings/billing"
-              className="op-button op-button-primary"
-              onClick={() => {
-                if (succeeded) window.location.reload();
-              }}
-            >
-              Return to Billing
-            </Link>
             {succeeded ? (
-              <Link href="/operations" className="op-button">
-                Open Operations
+              <a
+                href="/operations/settings/billing"
+                className="op-button op-button-primary"
+              >
+                Return to Billing
+              </a>
+            ) : (
+              <Link
+                href="/operations/settings/billing"
+                className="op-button op-button-primary"
+              >
+                Return to Billing
               </Link>
+            )}
+            {succeeded ? (
+              <a href="/operations" className="op-button">
+                Open Operations
+              </a>
             ) : null}
           </div>
         </div>
