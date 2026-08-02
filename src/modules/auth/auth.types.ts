@@ -1,4 +1,5 @@
 import type { AppLocale } from "@/i18n/config";
+import type { SubscriptionAccessSnapshot } from "@/modules/subscriptions/subscription-access";
 
 export type AuthUser = {
   id: string;
@@ -9,6 +10,7 @@ export type AuthUser = {
   preferredLanguage?: AppLocale;
   vertical?: string | null;
   timezone?: string | null;
+  subscriptionAccess?: SubscriptionAccessSnapshot | null;
 };
 
 export type AuthSessionResponse = {
