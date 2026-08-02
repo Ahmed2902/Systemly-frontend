@@ -45,7 +45,7 @@ export function FinalCta() {
             <article key={title}>
               <span>0{index + 1}</span>
               <Icon size={23}/>
-              <div><h3>{title}</h3><p>{copy}</p></div>
+              <div><h3>{text(title)}</h3><p>{text(copy)}</p></div>
             </article>
           ))}
         </div>
@@ -55,8 +55,8 @@ export function FinalCta() {
           <div>
             {faqs.map(([question, answer]) => (
               <details key={question}>
-                <summary>{question}<span aria-hidden="true">+</span></summary>
-                <p>{answer}</p>
+                <summary>{text(question)}<span aria-hidden="true">+</span></summary>
+                <p>{text(answer)}</p>
               </details>
             ))}
           </div>
