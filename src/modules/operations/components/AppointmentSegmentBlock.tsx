@@ -1,5 +1,6 @@
 "use client";
 
+import type { AppLocale } from "@/i18n/config";
 import type {
   AppointmentSegment,
   AppointmentStatus,
@@ -15,6 +16,7 @@ interface Props {
   status: AppointmentStatus;
   isLocked: boolean;
   timezone: string;
+  locale: AppLocale;
   onClick: (appointmentId: string) => void;
 }
 
@@ -34,6 +36,7 @@ export function AppointmentSegmentBlock({
   status,
   isLocked,
   timezone,
+  locale,
   onClick,
 }: Props) {
   const { left, width } = getSegmentPosition(
@@ -48,9 +51,9 @@ export function AppointmentSegmentBlock({
     <button
       type="button"
       onClick={() => onClick(segment.appointmentId)}
-      className="group absolute bottom-2 top-2 z-20 overflow-hidden rounded-[10px] border px-3.5 py-2.5 text-left text-[10px] text-[var(--op-text)] transition hover:z-30 hover:-translate-y-px hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--op-focus)]"
+      className="group absolute bottom-2 top-2 z-20 overflow-hidden rounded-[10px] border px-3.5 py-2.5 text-start text-[10px] text-[var(--op-text)] transition hover:z-30 hover:-translate-y-px hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--op-focus)]"
       style={{
-        left,
+        insetInlineStart: left,
         width,
         borderColor: `color-mix(in srgb, ${accent} 52%, var(--op-border))`,
         background: `linear-gradient(135deg, color-mix(in srgb, ${accent} 17%, var(--op-surface)), color-mix(in srgb, ${accent} 7%, var(--op-surface)) 78%)`,
@@ -60,13 +63,14 @@ export function AppointmentSegmentBlock({
     >
       <span
         aria-hidden="true"
-        className="absolute inset-y-0 left-0 w-1"
-        style={{ backgroundColor: accent }}
+        className="absolute inset-y-0 w-1"
+        style={{ insetInlineStart: 0, backgroundColor: accent }}
       />
       {isLinked ? (
         <span
-          className="absolute right-2 top-2 rounded-full border px-1.5 py-0.5 text-[8px] font-extrabold leading-none"
+          className="absolute top-2 rounded-full border px-1.5 py-0.5 text-[8px] font-extrabold leading-none"
           style={{
+            insetInlineEnd: 8,
             background: "var(--op-surface)",
             borderColor: `color-mix(in srgb, ${accent} 48%, var(--op-border))`,
             color: accent,
@@ -75,13 +79,16 @@ export function AppointmentSegmentBlock({
           {segment.segmentIndex}/{segment.segmentCount}
         </span>
       ) : null}
-      <div className="truncate pr-9 text-[9px] font-bold uppercase tracking-[0.04em] text-[var(--op-text-muted)]">
-        {formatTimeRange(segment.startsAt, segment.endsAt, timezone)}
+      <div
+        className="truncate text-[9px] font-bold uppercase tracking-[0.04em] text-[var(--op-text-muted)]"
+        style={{ paddingInlineEnd: 36 }}
+      >
+        {formatTimeRange(segment.startsAt, segment.endsAt, timezone, locale)}
       </div>
-      <div className="mt-1.5 truncate text-xs font-extrabold leading-tight text-[var(--op-text)]">
+      <div className="mt-1.5 truncate text-xs font-extrabold leading-tight text-[var(--op-text)]" dir="auto">
         {customerName}
       </div>
-      <div className="mt-1 truncate text-[10px] font-medium leading-tight text-[var(--op-text-secondary)]">
+      <div className="mt-1 truncate text-[10px] font-medium leading-tight text-[var(--op-text-secondary)]" dir="auto">
         {segment.serviceName}
       </div>
     </button>
