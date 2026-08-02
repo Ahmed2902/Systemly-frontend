@@ -61,4 +61,8 @@ export const naturalArabicFinalPairs: ReadonlyArray<readonly [string, string]> =
   ["Loading account", "جارٍ تحميل الحساب"],
   ["Loading public site link", "جارٍ تحميل رابط الموقع العام"],
   ["Public site link unavailable", "رابط الموقع العام غير متاح"],
+  ["Staff shown: {count}", "فريق العمل المعروض: {count}"],
+  ["Appointments: {count}", "المواعيد: {count}"],
+  ["No staff match “{query}”.", "لا يوجد أحد في فريق العمل يطابق «{query}»."],
+  ["Break", "استراحة"],
 ];

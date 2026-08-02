@@ -33,8 +33,8 @@ export function HowItWorks() {
           {steps.map(([number, title, copy]) => (
             <article key={number}>
               <span>{number}</span>
-              <h3>{title}</h3>
-              <p>{copy}</p>
+              <h3>{text(title)}</h3>
+              <p>{text(copy)}</p>
             </article>
           ))}
         </div>
@@ -48,7 +48,7 @@ export function HowItWorks() {
           {audiences.map(({ icon: Icon, title, copy, className }, index) => (
             <article className={className} key={title}>
               <div className="lp-audience-top"><span>0{index + 1}</span><Icon size={26}/></div>
-              <div><h3>{title}</h3><p>{copy}</p></div>
+              <div><h3>{text(title)}</h3><p>{text(copy)}</p></div>
             </article>
           ))}
         </div>

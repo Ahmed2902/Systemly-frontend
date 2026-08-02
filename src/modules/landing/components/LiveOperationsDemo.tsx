@@ -1,5 +1,7 @@
 "use client";
 
+import { useLocale } from "@/i18n/LocaleProvider";
+import { formatPlatformCurrency, formatPlatformTime } from "@/i18n/format";
 import { usePlatformText } from "@/i18n/usePlatformText";
 import { useMemo, useState } from "react";
 import {
@@ -144,7 +146,7 @@ const invoices = [
     amount: 102000,
     status: "Draft",
   },
-];
+] as const;
 
 const navItems = [
   ["calendar", "Calendar", CalendarDays],
@@ -153,33 +155,21 @@ const navItems = [
   ["invoices", "Invoices", Receipt],
 ] as const;
 
-function money(value: number) {
-  return new Intl.NumberFormat("en-EG", {
-    style: "currency",
-    currency: "EGP",
-    maximumFractionDigits: 0,
-  }).format(value / 100);
-}
-
-function appointmentTime(appointment: DemoAppointment) {
+function appointmentTime(appointment: DemoAppointment, locale: "en" | "ar") {
   const first = appointment.segments[0];
   const last = appointment.segments[appointment.segments.length - 1];
-  const formatter = new Intl.DateTimeFormat("en-EG", {
-    hour: "numeric",
-    minute: "2-digit",
-    timeZone: TIMEZONE,
-  });
-  return `${formatter.format(new Date(first.startsAt))} – ${formatter.format(
-    new Date(last.endsAt),
+  return `${formatPlatformTime(first.startsAt, locale, TIMEZONE)} – ${formatPlatformTime(
+    last.endsAt,
+    locale,
+    TIMEZONE,
   )}`;
 }
 
 export function LiveOperationsDemo() {
   const text = usePlatformText();
+  const { locale } = useLocale();
   const [page, setPage] = useState<DemoPage>("calendar");
-  const [selectedAppointmentId, setSelectedAppointmentId] = useState<
-    string | null
-  >("appt-2");
+  const [selectedAppointmentId, setSelectedAppointmentId] = useState<string | null>("appt-2");
   const [query, setQuery] = useState("");
 
   const selectedAppointment = appointments.find(
@@ -234,10 +224,8 @@ export function LiveOperationsDemo() {
                   }}
                   className={page === value ? "is-active" : ""}
                 >
-                  <span>
-                    <Icon size={16} />
-                  </span>
-                  {label}
+                  <span><Icon size={16} /></span>
+                  {text(label)}
                 </button>
               ))}
             </nav>
@@ -251,26 +239,16 @@ export function LiveOperationsDemo() {
                     <p>{text("Monday")}</p>
                     <h3>{text("July 27, 2026")}</h3>
                   </div>
-                  <span>Africa/Cairo</span>
+                  <span dir="ltr">Africa/Cairo</span>
                 </header>
 
-                <div
-                  className={`systemly-demo-calendar-layout ${
-                    selectedAppointment ? "has-detail" : "is-full"
-                  }`}
-                >
+                <div className={`systemly-demo-calendar-layout ${selectedAppointment ? "has-detail" : "is-full"}`}>
                   <div className="systemly-demo-calendar-card">
                     <div className="systemly-demo-calendar-key">
                       <div aria-label={text("Appointment statuses")}>
-                        <span>
-                          <i /> {text("Confirmed")}
-                        </span>
-                        <span>
-                          <i /> {text("In progress")}
-                        </span>
-                        <span>
-                          <i /> {text("Completed")}
-                        </span>
+                        <span><i /> {text("Confirmed")}</span>
+                        <span><i /> {text("In progress")}</span>
+                        <span><i /> {text("Completed")}</span>
                       </div>
                       <strong>{text("3 staff · 3 appointments")}</strong>
                     </div>
@@ -314,25 +292,15 @@ export function LiveOperationsDemo() {
                         key={appointment.id}
                         type="button"
                         onClick={() => setSelectedAppointmentId(appointment.id)}
-                        className={
-                          selectedAppointmentId === appointment.id
-                            ? "is-selected"
-                            : ""
-                        }
+                        className={selectedAppointmentId === appointment.id ? "is-selected" : ""}
                       >
                         <span>
-                          <strong>{appointment.customer.name}</strong>
-                          <small>
-                            {appointment.segments
-                              .map((segment) => segment.serviceName)
-                              .join(" · ")}
-                          </small>
+                          <strong>{text(appointment.customer.name)}</strong>
+                          <small>{appointment.segments.map((segment) => text(segment.serviceName)).join(" · ")}</small>
                         </span>
                         <span>
-                          <small>{appointmentTime(appointment)}</small>
-                          <StatusPill
-                            status={appointment.status.replaceAll("_", " ")}
-                          />
+                          <small>{appointmentTime(appointment, locale)}</small>
+                          <StatusPill status={appointment.status.replaceAll("_", " ")} />
                         </span>
                       </button>
                     ))}
@@ -364,8 +332,8 @@ export function LiveOperationsDemo() {
                   </div>
                   {customers.map((customer) => (
                     <div key={customer.id} className="systemly-demo-table-row">
-                      <strong>{customer.name}</strong>
-                      <span>{customer.phone}</span>
+                      <strong>{text(customer.name)}</strong>
+                      <span dir="ltr">{customer.phone}</span>
                       <span>{customer.visits}</span>
                       <span>{customer.noShows}</span>
                     </div>
@@ -391,14 +359,11 @@ export function LiveOperationsDemo() {
                     <span>{text("Status")}</span>
                   </div>
                   {invoices.map((invoice) => (
-                    <div
-                      key={invoice.id}
-                      className="systemly-demo-table-row systemly-demo-invoice-grid"
-                    >
-                      <strong>{invoice.number}</strong>
-                      <span>{invoice.customer}</span>
-                      <span>{invoice.services}</span>
-                      <span>{money(invoice.amount)}</span>
+                    <div key={invoice.id} className="systemly-demo-table-row systemly-demo-invoice-grid">
+                      <strong dir="ltr">{invoice.number}</strong>
+                      <span>{text(invoice.customer)}</span>
+                      <span>{text(invoice.services)}</span>
+                      <span>{formatPlatformCurrency(invoice.amount / 100, locale)}</span>
                       <StatusPill status={invoice.status} />
                     </div>
                   ))}
@@ -420,30 +385,24 @@ function AppointmentPreview({
   onClose: () => void;
 }) {
   const text = usePlatformText();
-  const total = appointment.segments.reduce(
-    (sum, segment) => sum + segment.price,
-    0,
-  );
+  const { locale } = useLocale();
+  const total = appointment.segments.reduce((sum, segment) => sum + segment.price, 0);
 
   return (
     <aside className="systemly-demo-detail">
-      <button
-        type="button"
-        onClick={onClose}
-        aria-label={text("Close appointment details")}
-      >
+      <button type="button" onClick={onClose} aria-label={text("Close appointment details")}>
         <X size={16} />
       </button>
       <p className="systemly-demo-eyebrow">{text("Appointment details")}</p>
-      <h4>{appointment.customer.name}</h4>
-      <span>{appointment.customer.phone}</span>
+      <h4>{text(appointment.customer.name)}</h4>
+      <span dir="ltr">{appointment.customer.phone}</span>
       <StatusPill status={appointment.status.replaceAll("_", " ")} />
       <div className="systemly-demo-detail-services">
         {appointment.segments.map((segment) => (
           <div key={segment.id}>
-            <strong>{segment.serviceName}</strong>
+            <strong>{text(segment.serviceName)}</strong>
             <span>
-              {segment.staffName} · {money(segment.price)}
+              {text(segment.staffName)} · {formatPlatformCurrency(segment.price / 100, locale)}
             </span>
           </div>
         ))}
@@ -451,11 +410,11 @@ function AppointmentPreview({
       <dl>
         <div>
           <dt>{text("Time")}</dt>
-          <dd>{appointmentTime(appointment)}</dd>
+          <dd>{appointmentTime(appointment, locale)}</dd>
         </div>
         <div>
           <dt>{text("Total")}</dt>
-          <dd>{money(total)}</dd>
+          <dd>{formatPlatformCurrency(total / 100, locale)}</dd>
         </div>
         <div>
           <dt>{text("Payment")}</dt>
@@ -467,15 +426,11 @@ function AppointmentPreview({
 }
 
 function StatusPill({ status }: { status: string }) {
+  const text = usePlatformText();
   const normalized = status.toLowerCase();
   return (
-    <span
-      className={`systemly-demo-status status-${normalized.replaceAll(
-        " ",
-        "-",
-      )}`}
-    >
-      {status}
+    <span className={`systemly-demo-status status-${normalized.replaceAll(" ", "-")}`}>
+      {text(status)}
     </span>
   );
 }

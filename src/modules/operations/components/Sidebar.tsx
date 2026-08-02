@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/modules/auth/useAuth";
 import { usePlatformCopy } from "@/i18n/usePlatformCopy";
+import { LanguageSwitcher } from "@/shared/components/LanguageSwitcher";
 import { useOperations } from "../operations.context";
 import { useOperationsTheme } from "../operations-theme";
 
@@ -173,20 +174,25 @@ export function Sidebar({
       </nav>
 
       <div className="op-sidebar-footer">
-        <button
-          type="button"
-          onClick={toggleTheme}
-          className="op-theme-switch"
-          aria-label={theme === "dark" ? copy.switchLight : copy.switchDark}
-        >
-          <span className="flex items-center gap-2">
-            {theme === "dark" ? <Moon size={15} /> : <Sun size={15} />}
-            {theme === "dark" ? copy.darkAppearance : copy.lightAppearance}
-          </span>
-          <span className="text-[10px] uppercase tracking-[0.08em] text-[var(--op-text-faint)]">
-            {copy.change}
-          </span>
-        </button>
+        <div className="flex items-stretch gap-2">
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="op-theme-switch min-w-0 flex-1"
+            aria-label={theme === "dark" ? copy.switchLight : copy.switchDark}
+          >
+            <span className="flex min-w-0 items-center gap-2">
+              {theme === "dark" ? <Moon size={15} /> : <Sun size={15} />}
+              <span className="truncate">
+                {theme === "dark" ? copy.darkAppearance : copy.lightAppearance}
+              </span>
+            </span>
+          </button>
+          <LanguageSwitcher
+            compact
+            className="min-w-[78px] border-[var(--op-border)] bg-[var(--op-surface)] text-[var(--op-text-secondary)] hover:bg-[var(--op-hover)] hover:text-[var(--op-text)]"
+          />
+        </div>
 
         <div className="op-account">
           <span className="op-avatar">{initials(user?.name)}</span>

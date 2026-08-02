@@ -3,8 +3,7 @@
 import { usePathname } from "next/navigation";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 
-const PLATFORM_ROOTS = new Set([
-  "",
+const FLOATING_LANGUAGE_ROOTS = new Set([
   "login",
   "signup",
   "forgot-password",
@@ -13,7 +12,6 @@ const PLATFORM_ROOTS = new Set([
   "resend-verification",
   "oauth-callback",
   "onboarding",
-  "operations",
   "invite",
   "contact",
   "privacy",
@@ -24,7 +22,7 @@ export function PlatformLanguageControl() {
   const pathname = usePathname();
   const firstSegment = pathname.split("/").filter(Boolean)[0] ?? "";
 
-  if (!PLATFORM_ROOTS.has(firstSegment)) return null;
+  if (!FLOATING_LANGUAGE_ROOTS.has(firstSegment)) return null;
 
   return (
     <div className="systemly-language-control" data-platform-language-control>
