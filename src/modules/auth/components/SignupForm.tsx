@@ -62,7 +62,11 @@ export function SignupForm() {
             className="auth-input"
             dir="auto"
           />
-          {errors.name ? <p className="auth-field-error">{text(errors.name.message)}</p> : null}
+          {errors.name ? (
+            <p className="auth-field-error">
+              {text(errors.name.message ?? "Enter your full name")}
+            </p>
+          ) : null}
         </div>
 
         <div className="auth-field">
@@ -76,7 +80,11 @@ export function SignupForm() {
             className="auth-input"
             dir="ltr"
           />
-          {errors.email ? <p className="auth-field-error">{text(errors.email.message)}</p> : null}
+          {errors.email ? (
+            <p className="auth-field-error">
+              {text(errors.email.message ?? "Enter a valid email address")}
+            </p>
+          ) : null}
         </div>
 
         <div className="auth-field">
@@ -91,7 +99,11 @@ export function SignupForm() {
             className="auth-input"
             dir="ltr"
           />
-          {errors.phone ? <p className="auth-field-error">{text(errors.phone.message)}</p> : null}
+          {errors.phone ? (
+            <p className="auth-field-error">
+              {text(errors.phone.message ?? "Enter a valid Egyptian phone number")}
+            </p>
+          ) : null}
         </div>
 
         <div className="auth-field">
@@ -102,7 +114,11 @@ export function SignupForm() {
             autoComplete="new-password"
             placeholder={t("auth.signup.passwordPlaceholder")}
           />
-          {errors.password ? <p className="auth-field-error">{text(errors.password.message)}</p> : null}
+          {errors.password ? (
+            <p className="auth-field-error">
+              {text(errors.password.message ?? "Password must be at least 8 characters")}
+            </p>
+          ) : null}
         </div>
 
         {serverError ? <div className="auth-error" role="alert">{serverError}</div> : null}
