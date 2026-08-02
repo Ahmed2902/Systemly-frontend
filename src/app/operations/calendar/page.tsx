@@ -44,6 +44,9 @@ import { dateKeyInTimezone } from "@/shared/lib/Calendar/grid.utils";
 import { errorMessage } from "@/shared/lib/error-message";
 import type { PaymentMethod } from "@/modules/invoices/invoices.types";
 
+const ARABIC_DATE_LOCALE = "ar-EG-u-nu-latn";
+const ENGLISH_DATE_LOCALE = "en-US";
+
 export default function CalendarPage() {
   const text = usePlatformText();
   const { locale } = useLocale();
@@ -359,13 +362,13 @@ function shift(date: string, deltaDays: number): string {
 }
 
 function formatDate(date: string, locale: "en" | "ar") {
-  return new Date(`${date}T12:00:00Z`).toLocaleDateString(
-    locale === "ar" ? "ar-EG-u-nu-latn" : "en-US",
-    {
-      weekday: "short",
-      month: "long",
-      day: "numeric",
-      year: "numeric",
-    },
-  );
+  const dateLocale =
+    locale === "ar" ? ARABIC_DATE_LOCALE : ENGLISH_DATE_LOCALE;
+
+  return new Date(`${date}T12:00:00Z`).toLocaleDateString(dateLocale, {
+    weekday: "short",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
 }
