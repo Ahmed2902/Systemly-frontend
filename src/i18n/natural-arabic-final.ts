@@ -50,4 +50,11 @@ export const naturalArabicFinalPairs: ReadonlyArray<readonly [string, string]> =
   ["Open navigation", "فتح القائمة"],
   ["Close navigation", "إغلاق القائمة"],
   ["Not recorded", "غير مسجل"],
+  ["Show password", "إظهار كلمة المرور"],
+  ["Hide password", "إخفاء كلمة المرور"],
+  ["Primary navigation", "القائمة الرئيسية"],
+  ["Systemly home", "الصفحة الرئيسية لـ Systemly"],
+  ["Loading account", "جارٍ تحميل الحساب"],
+  ["Loading public site link", "جارٍ تحميل رابط الموقع العام"],
+  ["Public site link unavailable", "رابط الموقع العام غير متاح"],
 ];
