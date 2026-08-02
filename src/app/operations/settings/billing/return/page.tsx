@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { useSearchParams } from "next/navigation";
 import { CheckCircle2, Clock3, XCircle } from "lucide-react";
 import { useAuth } from "@/modules/auth/useAuth";
@@ -22,6 +22,11 @@ import { errorMessage } from "@/shared/lib/error-message";
 
 const POLL_INTERVAL_MS = 2_500;
 const MAX_POLL_ATTEMPTS = 48;
+
+function reloadWithFreshSession(event: MouseEvent<HTMLAnchorElement>) {
+  event.preventDefault();
+  window.location.assign(event.currentTarget.href);
+}
 
 export default function BillingReturnPage() {
   const searchParams = useSearchParams();
@@ -141,25 +146,21 @@ export default function BillingReturnPage() {
           </p>
 
           <div className="mt-6 flex flex-wrap justify-center gap-2">
+            <Link
+              href="/operations/settings/billing"
+              className="op-button op-button-primary"
+              onClick={succeeded ? reloadWithFreshSession : undefined}
+            >
+              {copy.returnToBilling}
+            </Link>
             {succeeded ? (
-              <a
-                href="/operations/settings/billing"
-                className="op-button op-button-primary"
-              >
-                {copy.returnToBilling}
-              </a>
-            ) : (
               <Link
-                href="/operations/settings/billing"
-                className="op-button op-button-primary"
+                href="/operations"
+                className="op-button"
+                onClick={reloadWithFreshSession}
               >
-                {copy.returnToBilling}
-              </Link>
-            )}
-            {succeeded ? (
-              <a href="/operations" className="op-button">
                 {copy.openOperations}
-              </a>
+              </Link>
             ) : null}
           </div>
         </div>
