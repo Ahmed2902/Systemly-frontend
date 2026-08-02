@@ -1,5 +1,6 @@
 "use client";
 
+import { useLocale } from "@/i18n/LocaleProvider";
 import { usePlatformText } from "@/i18n/usePlatformText";
 import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
@@ -27,6 +28,7 @@ interface Props {
 
 export function CalendarGrid({ data, onSelectAppointment }: Props) {
   const text = usePlatformText();
+  const { locale } = useLocale();
   const [search, setSearch] = useState("");
   const hours = useMemo(
     () =>
@@ -89,7 +91,8 @@ export function CalendarGrid({ data, onSelectAppointment }: Props) {
         <label className="relative block w-full max-w-xs">
           <Search
             size={15}
-            className="pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2 text-[var(--op-text-muted)]"
+            className="pointer-events-none absolute top-1/2 z-10 -translate-y-1/2 text-[var(--op-text-muted)]"
+            style={{ insetInlineStart: 14 }}
           />
           <input
             type="search"
@@ -97,15 +100,15 @@ export function CalendarGrid({ data, onSelectAppointment }: Props) {
             onChange={(event) => setSearch(event.target.value)}
             placeholder={text("Find staff member")}
             className="op-input h-9 min-h-9"
-            style={{ paddingLeft: 40 }}
+            style={{ paddingInlineStart: 40 }}
           />
         </label>
         <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--op-text-muted)]">
           <span className="rounded-full border border-[var(--op-border)] bg-[var(--op-surface-soft)] px-2.5 py-1">
-            {filteredStaff.length} staff
+            {text("Staff shown: {count}", { count: filteredStaff.length })}
           </span>
           <span className="rounded-full border border-[var(--op-border)] bg-[var(--op-surface-soft)] px-2.5 py-1">
-            {data.appointments.length} appointments
+            {text("Appointments: {count}", { count: data.appointments.length })}
           </span>
         </div>
       </div>
@@ -119,18 +122,33 @@ export function CalendarGrid({ data, onSelectAppointment }: Props) {
               gridTemplateColumns: `${STAFF_COL_WIDTH}px ${GRID_WIDTH_PX}px`,
             }}
           >
-            <div className="sticky left-0 z-50 flex items-center border-r border-[var(--op-border)] bg-[var(--op-surface)] px-4 text-[9px] font-extrabold uppercase tracking-[0.13em] text-[var(--op-text-faint)]">
+            <div
+              className="sticky z-50 flex items-center bg-[var(--op-surface)] px-4 text-[9px] font-extrabold uppercase tracking-[0.13em] text-[var(--op-text-faint)]"
+              style={{
+                insetInlineStart: 0,
+                borderInlineEnd: "1px solid var(--op-border)",
+              }}
+            >
               {text("Team member")}
             </div>
             <div className="flex bg-[var(--op-surface)]">
               {hours.map((hour) => (
                 <div
                   key={hour}
-                  className="relative flex-shrink-0 border-r border-[var(--op-border)] px-2 pt-3 text-center text-[10px] font-semibold text-[var(--op-text-muted)]"
-                  style={{ width: SLOT_WIDTH_PX * 4 }}
+                  className="relative flex-shrink-0 px-2 pt-3 text-center text-[10px] font-semibold text-[var(--op-text-muted)]"
+                  style={{
+                    width: SLOT_WIDTH_PX * 4,
+                    borderInlineEnd: "1px solid var(--op-border)",
+                  }}
                 >
-                  {formatHourLabel(hour)}
-                  <span className="absolute bottom-0 left-1/2 top-7 border-l border-dashed border-[var(--op-border)] opacity-45" />
+                  {formatHourLabel(hour, locale)}
+                  <span
+                    className="absolute bottom-0 top-7 border-dashed border-[var(--op-border)] opacity-45"
+                    style={{
+                      insetInlineStart: "50%",
+                      borderInlineStartWidth: 1,
+                    }}
+                  />
                 </div>
               ))}
             </div>
@@ -154,13 +172,19 @@ export function CalendarGrid({ data, onSelectAppointment }: Props) {
                   gridTemplateColumns: `${STAFF_COL_WIDTH}px ${GRID_WIDTH_PX}px`,
                 }}
               >
-                <div className="sticky left-0 z-30 flex min-w-0 items-center gap-3 border-r border-[var(--op-border)] bg-[var(--op-surface)] px-4 transition group-hover:bg-[var(--op-hover)]">
+                <div
+                  className="sticky z-30 flex min-w-0 items-center gap-3 bg-[var(--op-surface)] px-4 transition group-hover:bg-[var(--op-hover)]"
+                  style={{
+                    insetInlineStart: 0,
+                    borderInlineEnd: "1px solid var(--op-border)",
+                  }}
+                >
                   <span className="op-avatar">{initials(member.name)}</span>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold text-[var(--op-text)]">
+                    <p className="truncate text-sm font-semibold text-[var(--op-text)]" dir="auto">
                       {member.name}
                     </p>
-                    <p className="mt-0.5 truncate text-[9px] font-semibold uppercase tracking-[0.08em] text-[var(--op-text-muted)]">
+                    <p className="mt-0.5 truncate text-[9px] font-semibold uppercase tracking-[0.08em] text-[var(--op-text-muted)]" dir="auto">
                       {member.role || text("Staff")}
                     </p>
                   </div>
@@ -173,14 +197,19 @@ export function CalendarGrid({ data, onSelectAppointment }: Props) {
                   {hours.map((hour) => (
                     <div
                       key={hour}
-                      className="absolute inset-y-0 border-r border-[var(--op-border)]"
+                      className="absolute inset-y-0"
                       style={{
-                        left: (hour - DAY_START_HOUR) * 4 * SLOT_WIDTH_PX,
+                        insetInlineStart:
+                          (hour - DAY_START_HOUR) * 4 * SLOT_WIDTH_PX,
+                        borderInlineEnd: "1px solid var(--op-border)",
                       }}
                     >
                       <span
-                        className="absolute inset-y-0 border-r border-dashed border-[var(--op-border)] opacity-40"
-                        style={{ left: SLOT_WIDTH_PX * 2 }}
+                        className="absolute inset-y-0 border-dashed border-[var(--op-border)] opacity-40"
+                        style={{
+                          insetInlineStart: SLOT_WIDTH_PX * 2,
+                          borderInlineEndWidth: 1,
+                        }}
                       />
                     </div>
                   ))}
@@ -191,21 +220,22 @@ export function CalendarGrid({ data, onSelectAppointment }: Props) {
                       staffBreak.endsAt,
                       data.timezone,
                     );
+                    const breakLabel = staffBreak.label ?? text("Break");
                     return (
                       <div
                         key={staffBreak.id}
                         className="absolute bottom-4 top-4 z-10 flex items-center justify-center rounded-[8px] border px-2 text-[9px] font-semibold text-[var(--op-text-muted)]"
                         style={{
-                          left,
+                          insetInlineStart: left,
                           width,
                           borderColor: "var(--op-border-strong)",
                           background:
                             "repeating-linear-gradient(135deg, var(--op-surface-soft) 0 6px, var(--op-surface) 6px 12px)",
                         }}
-                        title={`${staffBreak.label ?? "Break"}: ${formatTime12Hour(staffBreak.startsAt, data.timezone)} – ${formatTime12Hour(staffBreak.endsAt, data.timezone)}`}
+                        title={`${breakLabel}: ${formatTime12Hour(staffBreak.startsAt, data.timezone, locale)} – ${formatTime12Hour(staffBreak.endsAt, data.timezone, locale)}`}
                       >
-                        <span className="truncate">
-                          {staffBreak.label ?? "Break"}
+                        <span className="truncate" dir="auto">
+                          {breakLabel}
                         </span>
                       </div>
                     );
@@ -220,6 +250,7 @@ export function CalendarGrid({ data, onSelectAppointment }: Props) {
                         status={status}
                         isLocked={isLocked}
                         timezone={data.timezone}
+                        locale={locale}
                         onClick={onSelectAppointment}
                       />
                     ),
@@ -228,9 +259,12 @@ export function CalendarGrid({ data, onSelectAppointment }: Props) {
                   {nowOffset !== null ? (
                     <div
                       className="pointer-events-none absolute inset-y-0 z-30 w-px bg-[var(--op-danger)] shadow-[0_0_0_1px_color-mix(in_srgb,var(--op-danger)_20%,transparent)]"
-                      style={{ left: nowOffset }}
+                      style={{ insetInlineStart: nowOffset }}
                     >
-                      <span className="absolute -left-[4px] -top-1 h-[9px] w-[9px] rounded-full border-2 border-[var(--op-surface)] bg-[var(--op-danger)]" />
+                      <span
+                        className="absolute -top-1 h-[9px] w-[9px] rounded-full border-2 border-[var(--op-surface)] bg-[var(--op-danger)]"
+                        style={{ insetInlineStart: -4 }}
+                      />
                     </div>
                   ) : null}
                 </div>
@@ -242,7 +276,7 @@ export function CalendarGrid({ data, onSelectAppointment }: Props) {
 
       {search && !filteredStaff.length ? (
         <div className="border-t border-[var(--op-border)] px-4 py-3 text-sm text-[var(--op-text-muted)]">
-          {text("No staff match “")}{search}”.
+          {text("No staff match “{query}”.", { query: search })}
         </div>
       ) : null}
     </div>
