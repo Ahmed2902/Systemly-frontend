@@ -70,7 +70,7 @@ export default function InviteStaffPage() {
         <OperationsPageHeader
           eyebrow={text("Management / Staff / Invitation")}
           title={text("Invite a team account")}
-          description={text("Create a secure invitation link and send it manually until production email delivery is active.")}
+          description={text("The invitation expires automatically. You can copy and send it through WhatsApp or another trusted channel.")}
           actions={<Link href="/operations/staff" className="op-button">{text("Back to staff")}</Link>}
         />
 
