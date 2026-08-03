@@ -1,4 +1,5 @@
 import { api } from "@/shared/lib/api";
+import { isDemoApiTransportActive } from "@/shared/lib/api-transport";
 import type {
   BrandingKind,
   BusinessSettingsInput,
@@ -42,6 +43,10 @@ export async function uploadBrandingImage(
   file: File,
   accessToken: string,
 ) {
+  if (isDemoApiTransportActive()) {
+    return { kind, publicUrl: URL.createObjectURL(file) };
+  }
+
   const ticket = await api<{
     uploadUrl: string;
     publicUrl: string;

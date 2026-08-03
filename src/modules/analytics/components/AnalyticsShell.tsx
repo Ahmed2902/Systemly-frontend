@@ -5,6 +5,10 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { ReactNode } from "react";
 import { CalendarDays } from "lucide-react";
+import {
+  resolveOperationsHref,
+  useOperationsRuntime,
+} from "@/modules/operations/runtime/operations-runtime";
 import { ANALYTICS_PRESETS, type AnalyticsPreset } from "../analytics.types";
 
 const LINKS = [
@@ -60,6 +64,7 @@ export function AnalyticsShell({
   const text = usePlatformText();
   const pathname = usePathname();
   const router = useRouter();
+  const runtime = useOperationsRuntime();
   const preset = useAnalyticsPreset();
 
   return (
@@ -96,14 +101,16 @@ export function AnalyticsShell({
 
         <nav className="analytics-nav mt-4 flex gap-1 overflow-x-auto rounded-[10px] p-1" aria-label={text("Analytics sections")}>
           {LINKS.map(([href, label]) => {
+            const resolvedHref = resolveOperationsHref(runtime, href);
+            const overviewHref = resolveOperationsHref(runtime, "/operations/dashboard");
             const active =
-              href === "/operations/dashboard"
-                ? pathname === href
-                : pathname.startsWith(href);
+              resolvedHref === overviewHref
+                ? pathname === resolvedHref
+                : pathname.startsWith(resolvedHref);
             return (
               <Link
-                key={href}
-                href={`${href}?preset=${preset}`}
+                key={resolvedHref}
+                href={`${resolvedHref}?preset=${preset}`}
                 aria-current={active ? "page" : undefined}
                 className={`whitespace-nowrap rounded-[7px] px-3 py-1.5 text-[12px] font-bold transition ${
                   active ? "is-active" : ""

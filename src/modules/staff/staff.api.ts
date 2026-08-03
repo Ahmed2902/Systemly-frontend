@@ -1,4 +1,5 @@
 import { api } from "@/shared/lib/api";
+import { isDemoApiTransportActive } from "@/shared/lib/api-transport";
 import type {
   CommissionType,
   StaffAvailabilityEntry,
@@ -72,6 +73,10 @@ export async function uploadStaffPhoto(
   file: File,
   accessToken: string,
 ) {
+  if (isDemoApiTransportActive()) {
+    return { id: staffId, photoUrl: URL.createObjectURL(file) };
+  }
+
   const encodedStaffId = encodeURIComponent(staffId);
   const ticket = await api<{
     uploadUrl: string;

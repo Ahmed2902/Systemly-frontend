@@ -10,6 +10,10 @@ import {
   useOperations,
 } from "@/modules/operations/operations.context";
 import {
+  resolveOperationsHref,
+  useOperationsRuntime,
+} from "@/modules/operations/runtime/operations-runtime";
+import {
   OperationsAlert,
   OperationsPage,
   OperationsPageHeader,
@@ -40,6 +44,7 @@ export function CustomersWorkspace({
 }) {
   const text = usePlatformText();
   const router = useRouter();
+  const runtime = useOperationsRuntime();
   const { user, accessToken, loading: authLoading } = useAuth();
   const { openNewAppointment, notifyMutation } = useOperations();
   const timezone = user?.timezone || "Africa/Cairo";
@@ -104,7 +109,7 @@ export function CustomersWorkspace({
         setRefreshing(false);
       }
     },
-    [accessToken, debouncedSearch, filter, initialCustomerId],
+    [accessToken, debouncedSearch, filter, initialCustomerId, text],
   );
 
   const loadWorkspace = useCallback(
@@ -125,7 +130,7 @@ export function CustomersWorkspace({
         setDetailLoading(false);
       }
     },
-    [accessToken],
+    [accessToken, text],
   );
 
   useEffect(() => {
@@ -147,9 +152,13 @@ export function CustomersWorkspace({
     [customers, selectedId],
   );
 
+  function customerHref(customerId: string) {
+    return resolveOperationsHref(runtime, `/operations/customers/${customerId}`);
+  }
+
   function selectCustomer(customerId: string) {
     setSelectedId(customerId);
-    router.push(`/operations/customers/${customerId}`);
+    router.push(customerHref(customerId));
   }
 
   function openCreate() {
@@ -184,7 +193,7 @@ export function CustomersWorkspace({
         notifyMutation({ scope: "customer", entityId: created.id });
         await loadList(true);
         setSelectedId(created.id);
-        router.push(`/operations/customers/${created.id}`);
+        router.push(customerHref(created.id));
       }
       setModalOpen(false);
     } catch (caught: unknown) {

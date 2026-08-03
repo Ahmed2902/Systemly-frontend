@@ -1,5 +1,6 @@
 import { refreshAccessToken } from "@/modules/auth/auth.api";
 import { getAccessToken } from "@/modules/auth/auth.store";
+import { getInstalledApiTransport } from "./api-transport";
 import { apiUrl } from "./api-url";
 
 const MAX_IN_FLIGHT_GETS = 100;
@@ -45,11 +46,17 @@ function headersFor(init: RequestInit, token: string | null) {
 }
 
 function send(path: string, token: string | null, init: RequestInit) {
-  return fetch(apiUrl(path), {
+  const requestInit: RequestInit = {
     ...init,
     credentials: "include",
     headers: headersFor(init, token),
-  });
+  };
+  const url = apiUrl(path);
+  const transport = getInstalledApiTransport();
+
+  return transport
+    ? transport.request({ path, url, token, init: requestInit })
+    : fetch(url, requestInit);
 }
 
 async function request(
@@ -62,14 +69,11 @@ async function request(
   const response = await send(path, tokenUsed, init);
   if (response.status !== 401 || !retryOnUnauthorized) return response;
 
-  // Another request may have completed a refresh while this request was in
-  // flight. Reuse that token before starting another refresh-cookie rotation.
   const currentToken = getAccessToken();
   if (currentToken && currentToken !== tokenUsed) {
     return send(path, currentToken, init);
   }
 
-  // refreshAccessToken itself coalesces concurrent refresh attempts.
   const refreshed = await refreshAccessToken();
   return send(path, refreshed.data.accessToken, init);
 }
@@ -119,9 +123,6 @@ export function api<T>(
 
   if (!canCoalesceGet(init, effectiveToken)) return execute();
 
-  // Token scoping prevents data from one authenticated session being shared
-  // with another. The hard cap prevents an attacker-controlled path stream from
-  // growing this temporary map without bound.
   const key = `${effectiveToken}\n${retryOnUnauthorized ? "1" : "0"}\n${path}`;
   const existing = inFlightGets.get(key) as Promise<T> | undefined;
   if (existing) return existing;
