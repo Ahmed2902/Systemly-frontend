@@ -1,6 +1,7 @@
 import { LandingNav } from "@/modules/landing/components/LandingNav";
 import { LandingHero } from "@/modules/landing/components/LandingHero";
 import { LiveOperationsDemo } from "@/modules/landing/components/LiveOperationsDemo";
+import { FullOperationsDemoCta } from "@/modules/landing/components/FullOperationsDemoCta";
 import { FeatureGrid } from "@/modules/landing/components/FeatureGrid";
 import { HowItWorks } from "@/modules/landing/components/HowItWorks";
 import { PricingSection } from "@/modules/landing/components/PricingSection";
@@ -21,6 +22,7 @@ export default function LandingPage() {
       <LandingNav />
       <LandingHero />
       <LiveOperationsDemo />
+      <FullOperationsDemoCta />
       <FeatureGrid />
       <HowItWorks />
       <PricingSection />
