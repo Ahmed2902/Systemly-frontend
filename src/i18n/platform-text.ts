@@ -1,5 +1,4 @@
 import type { AppLocale } from "./config";
-import { demoArabicPairs } from "./demo-arabic";
 import { naturalArabicPairs } from "./natural-arabic";
 import { naturalArabicMorePairs } from "./natural-arabic-more";
 import { naturalArabicFinalPairs } from "./natural-arabic-final";
@@ -11,7 +10,6 @@ const naturalPairs = [
   ...naturalArabicPairs,
   ...naturalArabicMorePairs,
   ...naturalArabicFinalPairs,
-  ...demoArabicPairs,
 ] as const;
 
 function buildArabicMap() {
