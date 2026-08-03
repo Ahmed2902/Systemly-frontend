@@ -7,6 +7,7 @@ import type { LucideIcon } from "lucide-react";
 import {
   CalendarDays,
   ClipboardList,
+  CreditCard,
   LayoutDashboard,
   Moon,
   Plus,
@@ -21,6 +22,8 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/modules/auth/useAuth";
 import { usePlatformCopy } from "@/i18n/usePlatformCopy";
+import { isOwnerRole } from "@/modules/subscriptions/subscription-access";
+import { useSubscriptionCopy } from "@/modules/subscriptions/subscription-copy";
 import { LanguageSwitcher } from "@/shared/components/LanguageSwitcher";
 import { useOperations } from "../operations.context";
 import { useOperationsTheme } from "../operations-theme";
@@ -58,10 +61,10 @@ export function Sidebar({
   const pathname = usePathname();
   const { user } = useAuth();
   const copy = usePlatformCopy().operations.shell;
-  const { openNewAppointment } = useOperations();
+  const subscriptionCopy = useSubscriptionCopy();
+  const { openNewAppointment, canMutate } = useOperations();
   const { theme, toggleTheme } = useOperationsTheme();
-  const ownerView =
-    user?.role === text("BusinessAdmin") || user?.role === text("SuperAdmin");
+  const ownerView = isOwnerRole(user?.role);
 
   const navGroups: NavGroup[] = [
     {
@@ -109,6 +112,13 @@ export function Sidebar({
           label: copy.settings,
           icon: Settings,
           ownerOnly: true,
+          exact: true,
+        },
+        {
+          href: "/operations/settings/billing",
+          label: subscriptionCopy.billing,
+          icon: CreditCard,
+          ownerOnly: true,
         },
       ],
     },
@@ -133,11 +143,12 @@ export function Sidebar({
         </div>
         <button
           type="button"
+          disabled={!canMutate}
           onClick={() => {
             openNewAppointment();
             onClose?.();
           }}
-          className="op-new-appointment"
+          className="op-new-appointment disabled:cursor-not-allowed disabled:opacity-45"
         >
           <Plus size={16} /> {copy.newAppointment}
         </button>
