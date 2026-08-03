@@ -27,6 +27,10 @@ import { useSubscriptionCopy } from "@/modules/subscriptions/subscription-copy";
 import { LanguageSwitcher } from "@/shared/components/LanguageSwitcher";
 import { useOperations } from "../operations.context";
 import { useOperationsTheme } from "../operations-theme";
+import {
+  resolveOperationsHref,
+  useOperationsRuntime,
+} from "../runtime/operations-runtime";
 
 type NavItem = {
   href: string;
@@ -34,6 +38,7 @@ type NavItem = {
   icon: LucideIcon;
   ownerOnly?: boolean;
   exact?: boolean;
+  hideInDemo?: boolean;
 };
 
 type NavGroup = {
@@ -64,6 +69,7 @@ export function Sidebar({
   const subscriptionCopy = useSubscriptionCopy();
   const { openNewAppointment, canMutate } = useOperations();
   const { theme, toggleTheme } = useOperationsTheme();
+  const runtime = useOperationsRuntime();
   const ownerView = isOwnerRole(user?.role);
 
   const navGroups: NavGroup[] = [
@@ -100,6 +106,7 @@ export function Sidebar({
           label: copy.inviteTeam,
           icon: UserPlus,
           ownerOnly: true,
+          hideInDemo: true,
         },
         { href: "/operations/services", label: copy.services, icon: Sparkles },
       ],
@@ -119,6 +126,7 @@ export function Sidebar({
           label: subscriptionCopy.billing,
           icon: CreditCard,
           ownerOnly: true,
+          hideInDemo: true,
         },
       ],
     },
@@ -130,7 +138,11 @@ export function Sidebar({
         <div className="op-wordmark">
           <div className="min-w-0">
             <div className="op-wordmark-name">Systemly</div>
-            <p className="op-wordmark-meta">{copy.businessOperations}</p>
+            <p className="op-wordmark-meta">
+              {runtime.mode === "demo"
+                ? `${runtime.vertical === "clinic" ? "Clinic" : "Salon"} demo`
+                : copy.businessOperations}
+            </p>
           </div>
           <button
             type="button"
@@ -156,20 +168,25 @@ export function Sidebar({
 
       <nav className="op-nav">
         {navGroups.map((group) => {
-          const items = group.items.filter((item) => !item.ownerOnly || ownerView);
+          const items = group.items.filter(
+            (item) =>
+              (!item.ownerOnly || ownerView) &&
+              !(runtime.mode === "demo" && item.hideInDemo),
+          );
           if (!items.length) return null;
           return (
             <div className="op-nav-group" key={text(group.label)}>
               <p className="op-nav-label">{text(group.label)}</p>
               <div className="space-y-1">
                 {items.map(({ href, label, icon: Icon, exact }) => {
+                  const resolvedHref = resolveOperationsHref(runtime, href);
                   const active = exact
-                    ? pathname === href
-                    : pathname === href || pathname?.startsWith(`${href}/`);
+                    ? pathname === resolvedHref
+                    : pathname === resolvedHref || pathname?.startsWith(`${resolvedHref}/`);
                   return (
                     <Link
-                      key={href}
-                      href={href}
+                      key={resolvedHref}
+                      href={resolvedHref}
                       aria-current={active ? "page" : undefined}
                       className={`op-nav-link ${active ? "is-active" : ""}`}
                     >
@@ -201,7 +218,7 @@ export function Sidebar({
           </button>
           <LanguageSwitcher
             compact
-            className="min-w-[78px] border-[var(--op-border)] bg-[var(--op-surface)] text-[var(--op-text-secondary)] hover:bg-[var(--op-hover)] hover:text-[var(--op-text)]"
+            className="min-w-[52px] border-[var(--op-border)] bg-[var(--op-surface)] px-2 text-[var(--op-text-secondary)] hover:bg-[var(--op-hover)] hover:text-[var(--op-text)]"
           />
         </div>
 
