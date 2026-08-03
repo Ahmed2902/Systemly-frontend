@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Languages } from "lucide-react";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { useAuth } from "@/modules/auth/useAuth";
 import { updatePreferredLanguage } from "@/modules/auth/auth.api";
@@ -19,8 +18,6 @@ export function LanguageSwitcher({
   const { user, accessToken } = useAuth();
   const [saving, setSaving] = useState(false);
   const nextLocale = locale === "en" ? "ar" : "en";
-  const label =
-    nextLocale === "ar" ? t("language.arabic") : t("language.english");
   const ariaLabel =
     nextLocale === "ar"
       ? t("language.switchToArabic")
@@ -37,6 +34,7 @@ export function LanguageSwitcher({
       console.error("Unable to persist language preference:", error);
     } finally {
       setLocale(nextLocale);
+      setSaving(false);
     }
   }
 
@@ -49,8 +47,7 @@ export function LanguageSwitcher({
       aria-label={ariaLabel}
       title={ariaLabel}
     >
-      <Languages size={compact ? 15 : 16} aria-hidden="true" />
-      <span>{label}</span>
+      <span className="uppercase">{nextLocale}</span>
     </button>
   );
 }
