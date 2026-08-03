@@ -8,6 +8,7 @@ import type { BackendAppointment } from "../../shared/lib/Calendar/adapter";
 import type { PaymentMethod } from "@/modules/invoices/invoices.types";
 import type { ServiceCatalogResponse } from "@/modules/services/services.types";
 import { api } from "@/shared/lib/api";
+import { isDemoApiTransportActive } from "@/shared/lib/api-transport";
 import { getCalendarWorkspace } from "./CalendarWorkspace.api";
 
 export async function getCalendarDay(
@@ -44,6 +45,15 @@ export async function uploadAppointmentPhoto(
   file: File,
   accessToken: string,
 ): Promise<unknown> {
+  if (isDemoApiTransportActive()) {
+    return {
+      id: `demo-photo-${Date.now()}`,
+      appointmentId,
+      type: "progress",
+      url: URL.createObjectURL(file),
+    };
+  }
+
   const path = `/appointments/${encodeURIComponent(appointmentId)}/photos`;
   const ticket = await api<{ uploadUrl: string; publicId: string }>(
     `${path}/presign`,
