@@ -9,6 +9,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { usePathname } from "next/navigation";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { api } from "@/shared/lib/api";
 import { logoutUser, refreshAccessToken } from "./auth.api";
@@ -19,7 +20,7 @@ import {
 } from "./auth.store";
 import type { AuthUser } from "./auth.types";
 
-type AuthContextType = {
+export type AuthContextValue = {
   user: AuthUser | null;
   accessToken: string | null;
   loading: boolean;
@@ -28,9 +29,12 @@ type AuthContextType = {
   logout: () => Promise<void>;
 };
 
-const AuthContext = createContext<AuthContextType | null>(null);
+const AuthContext = createContext<AuthContextValue | null>(null);
+const AuthOverrideContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  const skipRemoteBootstrap = pathname?.startsWith("/demo/operations/") ?? false;
   const { locale, setLocale } = useLocale();
   const [user, setUser] = useState<AuthUser | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(() =>
@@ -79,7 +83,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => subscribeAccessToken(setAccessToken), []);
 
   useEffect(() => {
+    if (skipRemoteBootstrap) {
+      setLoading(false);
+      return;
+    }
+
     let cancelled = false;
+    setLoading(true);
 
     async function bootstrap() {
       try {
@@ -103,11 +113,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [clearSession, syncUserLocale]);
+  }, [clearSession, skipRemoteBootstrap, syncUserLocale]);
 
   useEffect(() => {
-    if (!loading && user && !accessToken) setUser(null);
-  }, [accessToken, loading, user]);
+    if (!loading && user && !accessToken && !skipRemoteBootstrap) setUser(null);
+  }, [accessToken, loading, skipRemoteBootstrap, user]);
 
   const value = useMemo(
     () => ({ user, accessToken, loading, setSession, clearSession, logout }),
@@ -117,8 +127,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
+export function AuthOverrideProvider({
+  user,
+  accessToken,
+  children,
+}: {
+  user: AuthUser;
+  accessToken: string;
+  children: ReactNode;
+}) {
+  const value = useMemo<AuthContextValue>(
+    () => ({
+      user,
+      accessToken,
+      loading: false,
+      setSession: () => undefined,
+      clearSession: () => undefined,
+      logout: async () => undefined,
+    }),
+    [accessToken, user],
+  );
+
+  return (
+    <AuthOverrideContext.Provider value={value}>
+      {children}
+    </AuthOverrideContext.Provider>
+  );
+}
+
 export function useAuth() {
+  const override = useContext(AuthOverrideContext);
   const context = useContext(AuthContext);
+  if (override) return override;
   if (!context) throw new Error("useAuth must be used within AuthProvider");
   return context;
 }
