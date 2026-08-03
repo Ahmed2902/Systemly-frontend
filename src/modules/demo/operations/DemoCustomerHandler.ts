@@ -108,7 +108,7 @@ export class DemoCustomerHandler implements DemoRequestHandler {
     const state = this.store.read();
     return state.appointments
       .filter((item) => item.customerId === customerId)
-      .map((appointment) => {
+      .map((appointment): CustomerAppointment => {
         const segments = appointment.appointmentServices ?? [];
         return {
           id: appointment.id,
