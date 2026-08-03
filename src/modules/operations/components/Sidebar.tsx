@@ -71,6 +71,9 @@ export function Sidebar({
   const { theme, toggleTheme } = useOperationsTheme();
   const runtime = useOperationsRuntime();
   const ownerView = isOwnerRole(user?.role);
+  const demoLabel = runtime.vertical === "clinic"
+    ? text("Clinic demo")
+    : text("Salon demo");
 
   const navGroups: NavGroup[] = [
     {
@@ -139,9 +142,7 @@ export function Sidebar({
           <div className="min-w-0">
             <div className="op-wordmark-name">Systemly</div>
             <p className="op-wordmark-meta">
-              {runtime.mode === "demo"
-                ? `${runtime.vertical === "clinic" ? "Clinic" : "Salon"} demo`
-                : copy.businessOperations}
+              {runtime.mode === "demo" ? demoLabel : copy.businessOperations}
             </p>
           </div>
           <button
