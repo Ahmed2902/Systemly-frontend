@@ -2,7 +2,14 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
-import { ExternalLink, Menu, Plus, RotateCcw } from "lucide-react";
+import {
+  ExternalLink,
+  Globe2,
+  LayoutGrid,
+  Menu,
+  Plus,
+  RotateCcw,
+} from "lucide-react";
 import { usePathname } from "next/navigation";
 import { usePlatformCopy } from "@/i18n/usePlatformCopy";
 import { usePlatformText } from "@/i18n/usePlatformText";
@@ -32,9 +39,12 @@ export function OperationsShell({ children }: { children: ReactNode }) {
 
   if (blocked) return <SubscriptionBlockedState />;
 
-  const demoTitle = runtime.vertical === "clinic"
-    ? text("Interactive clinic demo")
-    : text("Interactive salon demo");
+  const demoTitle =
+    runtime.vertical === "clinic"
+      ? text("Interactive clinic demo")
+      : text("Interactive salon demo");
+  const demoHubHref = `/demo/${runtime.vertical}`;
+  const publicWebsiteHref = `/demo/websites/${runtime.vertical}`;
 
   return (
     <div className="op-shell">
@@ -68,21 +78,45 @@ export function OperationsShell({ children }: { children: ReactNode }) {
         </header>
 
         {runtime.mode === "demo" ? (
-          <div className="flex flex-none flex-wrap items-center justify-between gap-2 border-b border-amber-300/70 bg-amber-50 px-3 py-2 text-xs text-amber-950 sm:px-5">
-            <div>
-              <strong>{demoTitle}</strong>
-              <span className="ms-2 text-amber-800">
-                {text("All people, appointments, and financial records are fictional.")}
-              </span>
+          <div className="flex flex-none flex-col gap-3 border-b border-white/10 bg-[#17141a] px-3 py-3 text-white sm:flex-row sm:items-center sm:justify-between sm:px-5">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                <strong className="text-xs font-bold uppercase tracking-[0.14em] text-[#f0b4cf]">
+                  {demoTitle}
+                </strong>
+                <span className="text-xs text-white/62">
+                  {text(
+                    "All people, appointments, and financial records are fictional.",
+                  )}
+                </span>
+              </div>
+              <p className="mt-1 text-[11px] leading-5 text-white/42">
+                {text(
+                  "Some demo functionality, integrations, and external actions are simplified or disabled and may not behave exactly like the live product.",
+                )}
+              </p>
             </div>
-            <div className="flex items-center gap-2">
-              <Link href="/" className="inline-flex items-center gap-1 rounded-lg border border-amber-300 bg-white px-2.5 py-1.5 font-semibold transition hover:bg-amber-100">
-                {text("Systemly.me")} <ExternalLink size={13} />
+
+            <div className="flex shrink-0 flex-wrap items-center gap-2">
+              <Link
+                href={demoHubHref}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-white/12 bg-white/[0.06] px-2.5 py-1.5 text-xs font-semibold text-white transition hover:bg-white/[0.11]"
+              >
+                <LayoutGrid size={13} /> {text("Demo hub")}
+              </Link>
+              <Link
+                href={publicWebsiteHref}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-[#b74b79]/55 bg-[#8f2e59] px-2.5 py-1.5 text-xs font-semibold text-white transition hover:bg-[#a43a67]"
+              >
+                <Globe2 size={13} /> {text("Public website")}
+                <ExternalLink size={12} />
               </Link>
               <button
                 type="button"
                 onClick={runtime.reset}
-                className="inline-flex items-center gap-1 rounded-lg bg-amber-950 px-2.5 py-1.5 font-semibold text-white transition hover:bg-amber-900"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-white/12 bg-white/[0.06] px-2.5 py-1.5 text-xs font-semibold text-white transition hover:bg-white/[0.11]"
               >
                 <RotateCcw size={13} /> {text("Reset demo")}
               </button>
