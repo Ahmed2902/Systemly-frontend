@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeftRight, ExternalLink, House } from "lucide-react";
+import { ArrowLeftRight, ExternalLink, House, LayoutDashboard } from "lucide-react";
 import { notFound } from "next/navigation";
 import {
   DEMO_WEBSITE_VERTICALS,
@@ -22,6 +22,7 @@ export default async function DemoPublicWebsitePage({
 
   const data = getDemoWebsiteData(vertical);
   const otherVertical = vertical === "salon" ? "clinic" : "salon";
+  const demoHubHref = `/demo/${vertical}`;
   const operationsHref = `/demo/operations/${vertical}/calendar`;
   const otherWebsiteHref = `/demo/websites/${otherVertical}`;
 
@@ -29,16 +30,16 @@ export default async function DemoPublicWebsitePage({
     <div className="relative">
       <aside className="fixed right-3 top-3 z-[120] max-w-[calc(100vw-1.5rem)] rounded-2xl border border-black/10 bg-white/95 p-2 shadow-[0_16px_50px_rgba(0,0,0,0.16)] backdrop-blur-xl sm:right-5 sm:top-5">
         <div className="flex flex-wrap items-center justify-end gap-2">
-          <span className="hidden px-2 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400 md:inline">
-            Fictional Systemly demo
+          <span className="hidden px-2 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400 lg:inline">
+            Fictional demo · Some actions are simplified
           </span>
           <Link
-            href="/demo/websites"
-            aria-label="All website demos"
-            title="All website demos"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-600 transition hover:bg-slate-100 hover:text-slate-950"
+            href={demoHubHref}
+            aria-label="Back to demo hub"
+            title="Back to demo hub"
+            className="inline-flex min-h-9 items-center gap-1.5 rounded-xl border border-slate-200 px-3 text-xs font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-950"
           >
-            <House size={15} />
+            <House size={14} /> Demo hub
           </Link>
           <Link
             href={otherWebsiteHref}
@@ -49,9 +50,12 @@ export default async function DemoPublicWebsitePage({
           </Link>
           <Link
             href={operationsHref}
-            className="inline-flex min-h-9 items-center gap-2 rounded-xl bg-slate-950 px-3 text-xs font-semibold text-white transition hover:bg-slate-800"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex min-h-9 items-center gap-2 rounded-xl bg-[#17141a] px-3 text-xs font-semibold text-white transition hover:bg-[#2a222c]"
           >
-            Operations demo <ExternalLink size={13} />
+            <LayoutDashboard size={14} /> Operations
+            <ExternalLink size={12} />
           </Link>
         </div>
       </aside>
