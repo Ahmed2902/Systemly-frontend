@@ -2,8 +2,14 @@
 
 import { useState } from "react";
 import { useLocale } from "@/i18n/LocaleProvider";
+import {
+  getLocaleDirection,
+  LOCALE_COOKIE,
+  LOCALE_COOKIE_MAX_AGE,
+} from "@/i18n/config";
 import { useAuth } from "@/modules/auth/useAuth";
 import { updatePreferredLanguage } from "@/modules/auth/auth.api";
+import { isDemoApiTransportActive } from "@/shared/lib/api-transport";
 
 type LanguageSwitcherProps = {
   className?: string;
@@ -26,6 +32,19 @@ export function LanguageSwitcher({
   async function switchLanguage() {
     if (saving) return;
     setSaving(true);
+
+    const demoMode = isDemoApiTransportActive();
+    if (demoMode) {
+      document.cookie = `${LOCALE_COOKIE}=${nextLocale}; Path=/; Max-Age=${LOCALE_COOKIE_MAX_AGE}; SameSite=Lax`;
+      document.documentElement.lang = nextLocale;
+      document.documentElement.dir = getLocaleDirection(nextLocale);
+      document.documentElement.dataset.locale = nextLocale;
+
+      const currentDemoUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+      window.location.replace(currentDemoUrl);
+      return;
+    }
+
     try {
       if (user && accessToken) {
         await updatePreferredLanguage(nextLocale, accessToken);
