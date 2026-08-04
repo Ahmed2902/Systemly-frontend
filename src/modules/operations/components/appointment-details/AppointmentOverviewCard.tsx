@@ -31,6 +31,15 @@ const TIME_OPTIONS = Array.from({ length: 96 }, (_, index) => {
   };
 });
 
+function formatCreatedAt(value: string) {
+  const date = new Date(value);
+  if (!Number.isFinite(date.getTime())) return "—";
+  return date.toLocaleString([], {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+}
+
 export function AppointmentOverviewCard({
   status,
   startsAt,
@@ -53,7 +62,9 @@ export function AppointmentOverviewCard({
             <CalendarClock size={19} />
           </span>
           <div>
-            <h2 className="font-semibold text-[var(--op-text)]">{text("Appointment")}</h2>
+            <h2 className="font-semibold text-[var(--op-text)]">
+              {text("Appointment")}
+            </h2>
             <p className="text-xs text-[var(--op-text-muted)]">
               {text("Timing and appointment status")}
             </p>
@@ -113,11 +124,7 @@ export function AppointmentOverviewCard({
       </div>
 
       <p className="mt-5 border-t border-[var(--op-border)] pt-4 text-xs text-[var(--op-text-faint)]">
-        {text("Created")}{" "}
-        {new Date(createdAt).toLocaleString([], {
-          dateStyle: "medium",
-          timeStyle: "short",
-        })}
+        {text("Created")} {formatCreatedAt(createdAt)}
       </p>
     </section>
   );
