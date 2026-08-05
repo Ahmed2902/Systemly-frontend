@@ -1,4 +1,6 @@
-export const naturalArabicAnalyticsPeriodPairs = [
+export const naturalArabicAnalyticsPeriodPairs: ReadonlyArray<
+  readonly [string, string]
+> = [
   ["Rolling", "فترة متحركة"],
   ["Completed periods", "فترات مكتملة"],
   ["Custom", "فترة مخصصة"],
@@ -11,4 +13,4 @@ export const naturalArabicAnalyticsPeriodPairs = [
     "Grouping is selected automatically · no comparison",
     "يتم اختيار التجميع تلقائياً · بدون مقارنة",
   ],
-] as const;
+];
