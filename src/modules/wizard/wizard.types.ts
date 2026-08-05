@@ -29,6 +29,7 @@ export type WizardStaffMember = {
   bio?: string;
   yearsExperience?: number;
   photoUrl?: string;
+  photoObjectPath?: string;
   serviceIds: string[];
   availability: AvailabilityEntry[];
 };
@@ -56,8 +57,11 @@ export type WizardState = {
   heroCardText: string;
   aboutText: string;
   heroPhotoUrl: string | null;
+  heroPhotoObjectPath: string | null;
   logoUrl: string | null;
+  logoObjectPath: string | null;
   galleryPhotoUrls: string[];
+  galleryPhotoObjectPaths: string[];
   primaryColor: string;
   sectionOrder: string[];
   showTeam: boolean;
