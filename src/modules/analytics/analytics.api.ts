@@ -1,6 +1,6 @@
 import { api } from "@/shared/lib/api";
 import type {
-  AnalyticsPreset,
+  AnalyticsPeriodSelection,
   CustomerAnalytics,
   DashboardAnalytics,
   GrowthAnalytics,
@@ -9,18 +9,64 @@ import type {
   StaffAnalytics,
 } from "./analytics.types";
 
-const path = (domain: string, preset: AnalyticsPreset) =>
-  `/analytics/${domain}?preset=${encodeURIComponent(preset)}`;
+export function analyticsPeriodSearchParams(
+  selection: AnalyticsPeriodSelection,
+): URLSearchParams {
+  const params = new URLSearchParams({ mode: selection.mode });
 
-export const getDashboardAnalytics = (preset: AnalyticsPreset, token: string | null) =>
-  api<DashboardAnalytics>(path("dashboard", preset), token);
-export const getRevenueAnalytics = (preset: AnalyticsPreset, token: string | null) =>
-  api<RevenueAnalytics>(path("revenue", preset), token);
-export const getCustomerAnalytics = (preset: AnalyticsPreset, token: string | null) =>
-  api<CustomerAnalytics>(path("customers", preset), token);
-export const getStaffAnalytics = (preset: AnalyticsPreset, token: string | null) =>
-  api<StaffAnalytics>(path("staff", preset), token);
-export const getOperationsAnalytics = (preset: AnalyticsPreset, token: string | null) =>
-  api<OperationsAnalytics>(path("operations", preset), token);
-export const getGrowthAnalytics = (preset: AnalyticsPreset, token: string | null) =>
-  api<GrowthAnalytics>(path("growth", preset), token);
+  if (selection.mode === "rolling") {
+    params.set("preset", selection.preset);
+  } else if (selection.mode === "completed") {
+    params.set("unit", selection.unit);
+    params.set("count", String(selection.count));
+  } else {
+    params.set("from", selection.from);
+    params.set("to", selection.to);
+  }
+
+  return params;
+}
+
+export function analyticsPeriodQuery(selection: AnalyticsPeriodSelection) {
+  return analyticsPeriodSearchParams(selection).toString();
+}
+
+export function analyticsPeriodHref(
+  pathname: string,
+  selection: AnalyticsPeriodSelection,
+) {
+  return `${pathname}?${analyticsPeriodQuery(selection)}`;
+}
+
+const path = (domain: string, selection: AnalyticsPeriodSelection) =>
+  `/analytics/${domain}?${analyticsPeriodQuery(selection)}`;
+
+export const getDashboardAnalytics = (
+  selection: AnalyticsPeriodSelection,
+  token: string | null,
+) => api<DashboardAnalytics>(path("dashboard", selection), token);
+
+export const getRevenueAnalytics = (
+  selection: AnalyticsPeriodSelection,
+  token: string | null,
+) => api<RevenueAnalytics>(path("revenue", selection), token);
+
+export const getCustomerAnalytics = (
+  selection: AnalyticsPeriodSelection,
+  token: string | null,
+) => api<CustomerAnalytics>(path("customers", selection), token);
+
+export const getStaffAnalytics = (
+  selection: AnalyticsPeriodSelection,
+  token: string | null,
+) => api<StaffAnalytics>(path("staff", selection), token);
+
+export const getOperationsAnalytics = (
+  selection: AnalyticsPeriodSelection,
+  token: string | null,
+) => api<OperationsAnalytics>(path("operations", selection), token);
+
+export const getGrowthAnalytics = (
+  selection: AnalyticsPeriodSelection,
+  token: string | null,
+) => api<GrowthAnalytics>(path("growth", selection), token);
