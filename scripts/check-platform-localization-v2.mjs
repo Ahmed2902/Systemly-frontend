@@ -36,6 +36,10 @@ const ARABIC_CATALOGUES = [
   ["src/i18n/natural-arabic-more.ts", "naturalArabicMorePairs"],
   ["src/i18n/natural-arabic-final.ts", "naturalArabicFinalPairs"],
   ["src/i18n/natural-arabic-demo.ts", "naturalArabicDemoPairs"],
+  [
+    "src/i18n/natural-arabic-analytics-periods.ts",
+    "naturalArabicAnalyticsPeriodPairs",
+  ],
 ];
 const BANNED_LITERAL_ARABIC = [
   "النظام الذي يدير نشاطك من الخلف",
