@@ -55,17 +55,23 @@ export async function uploadAppointmentPhoto(
   }
 
   const path = `/appointments/${encodeURIComponent(appointmentId)}/photos`;
-  const ticket = await api<{ uploadUrl: string; publicId: string }>(
-    `${path}/presign`,
-    accessToken,
-    {
-      method: "POST",
-      body: JSON.stringify({ contentType: file.type, type: "progress" }),
-    },
-  );
+  const ticket = await api<{
+    uploadUrl: string;
+    publicId: string;
+    contentType: string;
+    maxBytes: number;
+  }>(`${path}/presign`, accessToken, {
+    method: "POST",
+    body: JSON.stringify({ contentType: file.type, type: "progress" }),
+  });
+
+  if (file.size > ticket.maxBytes) {
+    throw new Error("The selected image is larger than the allowed upload size.");
+  }
+
   const upload = await fetch(ticket.uploadUrl, {
     method: "PUT",
-    headers: { "Content-Type": file.type },
+    headers: { "Content-Type": ticket.contentType },
     body: file,
   });
   if (!upload.ok) {
@@ -73,7 +79,11 @@ export async function uploadAppointmentPhoto(
   }
   return api<unknown>(`${path}/confirm`, accessToken, {
     method: "POST",
-    body: JSON.stringify({ publicId: ticket.publicId, type: "progress" }),
+    body: JSON.stringify({
+      publicId: ticket.publicId,
+      contentType: ticket.contentType,
+      type: "progress",
+    }),
   });
 }
 
@@ -266,17 +276,17 @@ export function collectPayment(
 export function revertAppointment(
   appointmentId: string,
   accessToken: string,
-  businessId: string,
+  _businessId: string,
 ) {
-  return appointmentAction(appointmentId, "revert", accessToken, { businessId });
+  return appointmentAction(appointmentId, "revert", accessToken);
 }
 
 export function uncancelAppointment(
   appointmentId: string,
   accessToken: string,
-  businessId: string,
+  _businessId: string,
 ) {
-  return appointmentAction(appointmentId, "uncancel", accessToken, { businessId });
+  return appointmentAction(appointmentId, "uncancel", accessToken);
 }
 
 export function markNoShow(appointmentId: string, accessToken: string) {
