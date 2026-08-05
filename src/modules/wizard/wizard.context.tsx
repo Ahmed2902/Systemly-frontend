@@ -39,8 +39,11 @@ const initialState: WizardState = {
   heroCardText: "",
   aboutText: "",
   heroPhotoUrl: null,
+  heroPhotoObjectPath: null,
   logoUrl: null,
+  logoObjectPath: null,
   galleryPhotoUrls: [],
+  galleryPhotoObjectPaths: [],
   primaryColor: VERTICAL_DEFAULT_COLOURS.salon,
   sectionOrder: completePublicSectionOrder([]),
   showTeam: true,
@@ -86,6 +89,7 @@ function reducer(state: WizardState, action: Action): WizardState {
                   action.payload.vertical as "salon" | "clinic"
                 ],
               heroPhotoUrl: null,
+              heroPhotoObjectPath: null,
               heroDescription: "",
               heroCardText: "",
             }
