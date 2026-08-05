@@ -1,9 +1,13 @@
 import type {
+  AnalyticsGranularity,
   AnalyticsMeta,
-  AnalyticsPreset,
+  AnalyticsPeriodSelection,
+  ComparisonState,
   CustomerAnalytics,
   DashboardAnalytics,
   GrowthAnalytics,
+  GrowthRow,
+  NumericComparison,
   OperationsAnalytics,
   RevenueAnalytics,
   StaffAnalytics,
@@ -11,17 +15,27 @@ import type {
 import type { DemoOperationsState } from "./demo-fixtures";
 import { DEMO_TIMEZONE } from "./demo-fixtures";
 
+const DAY_MS = 86_400_000;
+
 export function buildDashboardAnalytics(
   state: DemoOperationsState,
-  preset: AnalyticsPreset,
+  selection: AnalyticsPeriodSelection,
 ): DashboardAnalytics {
-  const meta = buildMeta(preset);
-  const paidInvoices = state.invoices.filter((invoice) => invoice.status === "paid");
+  const meta = buildMeta(selection);
+  const paidInvoices = state.invoices.filter(
+    (invoice) => invoice.status === "paid",
+  );
   const revenueCents = paidInvoices.reduce(
     (sum, invoice) => sum + invoice.totalCents,
     0,
   );
-  const categories = new Map<string, { totalCents: number; itemCount: number }>();
+  const averageInvoiceCents = paidInvoices.length
+    ? Math.round(revenueCents / paidInvoices.length)
+    : 0;
+  const categories = new Map<
+    string,
+    { totalCents: number; itemCount: number }
+  >();
   const staffRevenue = new Map<
     string,
     { name: string; totalCents: number; count: number; minutes: number }
@@ -56,46 +70,68 @@ export function buildDashboardAnalytics(
     }
   }
 
+  const customItemRevenueCents = paidInvoices.reduce(
+    (sum, invoice) =>
+      sum +
+      invoice.lineItems
+        .filter((line) => !line.service)
+        .reduce((lineSum, line) => lineSum + line.totalCents, 0),
+    0,
+  );
+  const customItemQuantity = paidInvoices.reduce(
+    (sum, invoice) =>
+      sum +
+      invoice.lineItems
+        .filter((line) => !line.service)
+        .reduce((lineSum, line) => lineSum + line.quantity, 0),
+    0,
+  );
+  const revenueTrend = trendRows(
+    revenueCents,
+    paidInvoices.length,
+    meta,
+  );
+
   const revenue: RevenueAnalytics = {
     ...meta,
+    comparison: meta.comparisonPeriod
+      ? {
+          revenue: demoComparison(revenueCents),
+          paidInvoices: demoComparison(paidInvoices.length),
+          averageInvoice: demoComparison(averageInvoiceCents),
+          customItemRevenue: demoComparison(customItemRevenueCents),
+        }
+      : null,
     summary: {
       revenueCents,
       paidInvoiceCount: paidInvoices.length,
-      averageInvoiceCents: paidInvoices.length
-        ? Math.round(revenueCents / paidInvoices.length)
-        : 0,
-      customItemRevenueCents: paidInvoices.reduce(
-        (sum, invoice) =>
-          sum +
-          invoice.lineItems
-            .filter((line) => !line.service)
-            .reduce((lineSum, line) => lineSum + line.totalCents, 0),
-        0,
-      ),
-      customItemQuantity: paidInvoices.reduce(
-        (sum, invoice) =>
-          sum +
-          invoice.lineItems
-            .filter((line) => !line.service)
-            .reduce((lineSum, line) => lineSum + line.quantity, 0),
-        0,
-      ),
+      averageInvoiceCents,
+      customItemRevenueCents,
+      customItemQuantity,
       topCategory:
         [...categories.entries()]
           .sort((a, b) => b[1].totalCents - a[1].totalCents)
-          .map(([category, row]) => ({ category, totalCents: row.totalCents }))[0] ??
-        null,
-      bestWeekday: { weekday: 1, totalCents: Math.round(revenueCents * 0.28) },
+          .map(([category, row]) => ({
+            category,
+            totalCents: row.totalCents,
+          }))[0] ?? null,
+      bestWeekday: revenueCents
+        ? { weekday: 1, totalCents: Math.round(revenueCents * 0.28) }
+        : null,
     },
-    trend: trendRows(revenueCents, paidInvoices.length),
+    trend: revenueTrend,
     byCategory: [...categories.entries()].map(([category, row]) => ({
       category,
       ...row,
     })),
     byWeekday: [0, 1, 2, 3, 4, 6].map((weekday, index) => ({
       weekday,
-      totalCents: Math.round(revenueCents * [0.1, 0.18, 0.2, 0.16, 0.22, 0.14][index]),
-      invoiceCount: Math.max(1, Math.round(paidInvoices.length / 4)),
+      totalCents: Math.round(
+        revenueCents * [0.1, 0.18, 0.2, 0.16, 0.22, 0.14][index],
+      ),
+      invoiceCount: paidInvoices.length
+        ? Math.max(1, Math.round(paidInvoices.length / 4))
+        : 0,
     })),
     customItems: paidInvoices.flatMap((invoice) =>
       invoice.lineItems
@@ -106,15 +142,17 @@ export function buildDashboardAnalytics(
           totalCents: line.totalCents,
         })),
     ),
-    averageInvoiceValueTrend: trendRows(revenueCents, paidInvoices.length).map(
-      (row) => ({
-        bucket: row.bucket,
-        averageCents: row.invoiceCount
-          ? Math.round(row.totalCents / row.invoiceCount)
-          : null,
-        invoiceCount: row.invoiceCount,
-      }),
-    ),
+    averageInvoiceValue: {
+      averageCents: averageInvoiceCents,
+      invoiceCount: paidInvoices.length,
+    },
+    averageInvoiceValueTrend: revenueTrend.map((row) => ({
+      bucket: row.bucket,
+      averageCents: row.invoiceCount
+        ? Math.round(row.totalCents / row.invoiceCount)
+        : null,
+      invoiceCount: row.invoiceCount,
+    })),
   };
 
   const completedAppointments = state.appointments.filter(
@@ -130,45 +168,62 @@ export function buildDashboardAnalytics(
     0,
     state.customers.length - Math.ceil(state.customers.length * 0.35),
   );
+  const newCustomers = state.customers.length - returningCustomers;
 
   const customers: CustomerAnalytics = {
     ...meta,
+    comparison: meta.comparisonPeriod
+      ? {
+          activeCustomers: demoComparison(state.customers.length),
+          newCustomers: demoComparison(newCustomers),
+          returningCustomers: demoComparison(returningCustomers),
+        }
+      : null,
     summary: {
       activeCustomers: state.customers.length,
-      newCustomers: state.customers.length - returningCustomers,
+      newCustomers,
       returningCustomers,
       lapsedCustomerCount: 3,
       noShowRate: state.appointments.length
-        ? noShows.length / state.appointments.length
+        ? roundPercentage(noShows.length / state.appointments.length)
         : 0,
       noShowCount: noShows.length,
       completedCount: completedAppointments.length,
       cancellationRate: state.appointments.length
-        ? cancelled.length / state.appointments.length
+        ? roundPercentage(cancelled.length / state.appointments.length)
         : 0,
       cancellationCount: cancelled.length,
       appointmentOutcomeCount: state.appointments.length,
+      rateDefinitions: {
+        noShow: "No-shows divided by completed appointments plus no-shows.",
+        cancellation:
+          "Customer and business cancellations divided by all appointment outcomes.",
+      },
     },
-    retentionSummary: { day30Rate: 0.72, day60Rate: 0.61, day90Rate: 0.49 },
-    newVsReturning: trendRows(state.customers.length * 100, state.customers.length).map(
-      (row, index) => ({
-        bucket: row.bucket,
-        newCustomers: 1 + (index % 3),
-        returningCustomers: 2 + ((index + 1) % 4),
-      }),
-    ),
+    retentionSummary: { day30Rate: 72, day60Rate: 61, day90Rate: 49 },
+    newVsReturning: trendRows(
+      state.customers.length * 100,
+      state.customers.length,
+      meta,
+    ).map((row, index) => ({
+      bucket: row.bucket,
+      newCustomers: 1 + (index % 3),
+      returningCustomers: 2 + ((index + 1) % 4),
+    })),
     lifetimeValue: state.customers.slice(0, 8).map((customer, index) => ({
       id: customer.id,
       name: customer.name,
       totalCents: 35_000 + index * 18_500,
       invoiceCount: 2 + (index % 6),
     })),
-    lifetimeValueAllTime: state.customers.slice(0, 10).map((customer, index) => ({
-      id: customer.id,
-      name: customer.name,
-      totalCents: 85_000 + index * 37_000,
-      invoiceCount: 4 + (index % 9),
-    })),
+    lifetimeValueAllTime: state.customers
+      .slice(0, 10)
+      .map((customer, index) => ({
+        id: customer.id,
+        name: customer.name,
+        totalCents: 85_000 + index * 37_000,
+        invoiceCount: 4 + (index % 9),
+      })),
     acquisitionSources: [
       { source: "Instagram", count: 5 },
       { source: "Referral", count: 4 },
@@ -192,13 +247,13 @@ export function buildDashboardAnalytics(
       retained60: 5 + index,
       retained90: 3 + index,
     })),
-    noShowRate: trendRows(100, 8).map((row, index) => ({
+    noShowRate: trendRows(100, 8, meta).map((row, index) => ({
       bucket: row.bucket,
       noShowCount: index % 3 === 0 ? 1 : 0,
       completedCount: 3 + (index % 4),
-      rate: index % 3 === 0 ? 0.2 : 0,
+      rate: index % 3 === 0 ? 20 : 0,
     })),
-    cancellationRate: trendRows(100, 8).map((row, index) => ({
+    cancellationRate: trendRows(100, 8, meta).map((row, index) => ({
       bucket: row.bucket,
       customerCancelled: index % 4 === 0 ? 1 : 0,
       businessCancelled: 0,
@@ -206,7 +261,7 @@ export function buildDashboardAnalytics(
       completedCount: 3 + (index % 3),
       noShowCount: index % 5 === 0 ? 1 : 0,
       outcomeCount: 4 + (index % 3),
-      rate: index % 4 === 0 ? 0.2 : 0,
+      rate: index % 4 === 0 ? 20 : 0,
     })),
   };
 
@@ -225,23 +280,38 @@ export function buildDashboardAnalytics(
         lineItemCount: row?.count ?? 3 + index,
         bookedMinutes,
         availableMinutes,
-        utilizationRate: bookedMinutes / availableMinutes,
+        utilizationRate: roundPercentage(bookedMinutes / availableMinutes),
       };
     });
+  const staffRevenueCents = staffPerformance.reduce(
+    (sum, row) => sum + row.totalCents,
+    0,
+  );
+  const totalAvailableMinutes = staffPerformance.reduce(
+    (sum, row) => sum + row.availableMinutes,
+    0,
+  );
+  const totalBookedMinutes = staffPerformance.reduce(
+    (sum, row) => sum + row.bookedMinutes,
+    0,
+  );
 
   const staff: StaffAnalytics = {
     ...meta,
+    comparison: meta.comparisonPeriod
+      ? { revenue: demoComparison(staffRevenueCents) }
+      : null,
     summary: {
-      revenueCents: staffPerformance.reduce((sum, row) => sum + row.totalCents, 0),
+      revenueCents: staffRevenueCents,
       commissionCents: staffPerformance.reduce(
         (sum, row) => sum + row.commissionEarnedCents,
         0,
       ),
-      averageUtilizationRate:
-        staffPerformance.reduce((sum, row) => sum + row.utilizationRate, 0) /
-        Math.max(1, staffPerformance.length),
+      averageUtilizationRate: totalAvailableMinutes
+        ? roundPercentage(totalBookedMinutes / totalAvailableMinutes)
+        : 0,
       lowUtilizationCount: staffPerformance.filter(
-        (row) => row.utilizationRate < 0.4,
+        (row) => row.utilizationRate < 40,
       ).length,
     },
     staffPerformance,
@@ -260,14 +330,19 @@ export function buildDashboardAnalytics(
       0,
     ),
   }));
-  const mostBookedServices = [...serviceCounts].sort((a, b) => b.count - a.count);
+  const mostBookedServices = [...serviceCounts].sort(
+    (a, b) => b.count - a.count,
+  );
 
   const operations: OperationsAnalytics = {
     ...meta,
+    comparison: meta.comparisonPeriod
+      ? { bookingCount: demoComparison(state.appointments.length) }
+      : null,
     summary: {
       bookingCount: state.appointments.length,
-      busiestWeekday: 1,
-      busiestHour: 10,
+      busiestWeekday: state.appointments.length ? 1 : null,
+      busiestHour: state.appointments.length ? 10 : null,
       mostBookedService: mostBookedServices[0] ?? null,
     },
     heatmap: [0, 1, 2, 3, 4, 6].flatMap((weekday) =>
@@ -287,20 +362,54 @@ export function buildDashboardAnalytics(
     ],
   };
 
-  const monthlyGrowth = [5, 4, 3, 2, 1, 0].map((monthsAgo, index) => ({
-    bucket: monthStart(monthsAgo),
-    totalCents: Math.round(revenueCents * (0.56 + index * 0.1)),
-    invoiceCount: 7 + index * 2,
-    growthPct: index === 0 ? null : 0.08 + index * 0.015,
-  }));
+  const monthlyGrowth = [5, 4, 3, 2, 1, 0].map(
+    (monthsAgo, index): GrowthRow => ({
+      bucket: monthStart(monthsAgo),
+      totalCents: Math.round(revenueCents * (0.56 + index * 0.1)),
+      invoiceCount: 7 + index * 2,
+      growthPct: index === 0 ? null : 8 + index * 1.5,
+    }),
+  );
+  const periodComparison = meta.comparisonPeriod
+    ? demoComparison(revenueCents)
+    : null;
+  const currentMonthRevenueCents =
+    monthlyGrowth.at(-1)?.totalCents ?? revenueCents;
+  const previousMonthRevenueCents =
+    monthlyGrowth.at(-2)?.totalCents ?? currentMonthRevenueCents;
+  const periodGrowthPct = periodComparison?.percentageChange ?? null;
   const growth: GrowthAnalytics = {
     ...meta,
     summary: {
-      currentMonthRevenueCents: monthlyGrowth.at(-1)?.totalCents ?? revenueCents,
-      previousMonthRevenueCents: monthlyGrowth.at(-2)?.totalCents ?? revenueCents,
-      monthOverMonthGrowthPct: 0.126,
-      bestGrowthMonth: monthlyGrowth[4] ?? null,
+      currentPeriodRevenueCents: revenueCents,
+      previousPeriodRevenueCents: periodComparison?.previous ?? null,
+      periodGrowthPct,
+      periodComparisonState: periodComparison?.comparisonState ?? null,
+      bestGrowthPeriod:
+        [...revenueTrend]
+          .map((row, index) => ({
+            ...row,
+            growthPct: index === 0 ? null : 8 + index,
+          }))
+          .sort((a, b) => (b.growthPct ?? -Infinity) - (a.growthPct ?? -Infinity))[0] ??
+        null,
+      currentMonthRevenueCents,
+      previousMonthRevenueCents,
+      monthOverMonthGrowthPct: percentageChange(
+        currentMonthRevenueCents,
+        previousMonthRevenueCents,
+      ),
+      bestGrowthMonth:
+        [...monthlyGrowth].sort(
+          (a, b) => (b.growthPct ?? -Infinity) - (a.growthPct ?? -Infinity),
+        )[0] ?? null,
     },
+    comparison: periodComparison,
+    trend: revenueTrend,
+    bucketGrowth: revenueTrend.map((row, index) => ({
+      ...row,
+      growthPct: index === 0 ? null : 7 + index * 1.2,
+    })),
     monthlyGrowth,
     acquisitionSources: customers.acquisitionSources,
     retentionCohorts: customers.retentionCohorts,
@@ -310,7 +419,7 @@ export function buildDashboardAnalytics(
     businessId: state.settings.id,
     businessName: state.businessName,
     timezone: DEMO_TIMEZONE,
-    generatedAt: new Date().toISOString(),
+    generatedAt: meta.generatedAt,
     revenue,
     customers,
     staff,
@@ -319,31 +428,198 @@ export function buildDashboardAnalytics(
   };
 }
 
-function buildMeta(preset: AnalyticsPreset): AnalyticsMeta {
+function buildMeta(selection: AnalyticsPeriodSelection): AnalyticsMeta {
   const now = new Date();
+  const { from, toExclusive, granularity, label, isComplete } =
+    resolvePeriod(selection, now);
+  const durationMs = Math.max(
+    DAY_MS,
+    toExclusive.getTime() - from.getTime(),
+  );
+  const comparisonPeriod =
+    selection.mode === "custom"
+      ? null
+      : {
+          from: new Date(from.getTime() - durationMs).toISOString(),
+          toExclusive: from.toISOString(),
+        };
+
   return {
+    period: {
+      mode: selection.mode,
+      input: selection,
+      label,
+      from: from.toISOString(),
+      toExclusive: toExclusive.toISOString(),
+      granularity,
+      isComplete,
+    },
+    comparisonPeriod,
     range: {
-      preset,
-      from: daysAgo(preset === "today" ? 0 : preset === "last_week" ? 7 : 30),
-      to: now.toISOString(),
-      granularity: preset === "today" ? "hour" : "day",
+      from: from.toISOString(),
+      to: new Date(toExclusive.getTime() - 1).toISOString(),
+      toExclusive: toExclusive.toISOString(),
+      granularity,
     },
     timezone: DEMO_TIMEZONE,
     generatedAt: now.toISOString(),
   };
 }
 
-function trendRows(total: number, count: number) {
+function resolvePeriod(
+  selection: AnalyticsPeriodSelection,
+  now: Date,
+): {
+  from: Date;
+  toExclusive: Date;
+  granularity: AnalyticsGranularity;
+  label: string;
+  isComplete: boolean;
+} {
+  if (selection.mode === "custom") {
+    const from = startOfUtcDay(new Date(`${selection.from}T00:00:00.000Z`));
+    const toExclusive = addUtcDays(
+      startOfUtcDay(new Date(`${selection.to}T00:00:00.000Z`)),
+      1,
+    );
+    const days = Math.max(
+      1,
+      Math.ceil((toExclusive.getTime() - from.getTime()) / DAY_MS),
+    );
+    return {
+      from,
+      toExclusive,
+      granularity: granularityForDays(days),
+      label: `${selection.from} – ${selection.to}`,
+      isComplete: true,
+    };
+  }
+
+  if (selection.mode === "completed") {
+    const toExclusive =
+      selection.unit === "week"
+        ? startOfUtcWeek(now)
+        : startOfUtcMonth(now);
+    const from = new Date(toExclusive);
+    if (selection.unit === "week") {
+      from.setUTCDate(from.getUTCDate() - selection.count * 7);
+    } else {
+      from.setUTCMonth(from.getUTCMonth() - selection.count);
+    }
+    return {
+      from,
+      toExclusive,
+      granularity: selection.unit,
+      label: `${selection.count} completed ${selection.unit}s`,
+      isComplete: true,
+    };
+  }
+
+  const rollingDays: Readonly<Record<string, number>> = {
+    today: 1,
+    last_7_days: 7,
+    last_30_days: 30,
+    last_90_days: 90,
+    last_12_months: 365,
+    all_time: 730,
+  };
+  const days = rollingDays[selection.preset] ?? 30;
+  const toExclusive = new Date(now);
+  const from =
+    selection.preset === "today"
+      ? startOfUtcDay(now)
+      : new Date(toExclusive.getTime() - days * DAY_MS);
+  return {
+    from,
+    toExclusive,
+    granularity:
+      selection.preset === "today" ? "hour" : granularityForDays(days),
+    label: selection.preset.replaceAll("_", " "),
+    isComplete: false,
+  };
+}
+
+function demoComparison(current: number): NumericComparison {
+  const previous = current === 0 ? 0 : Math.max(0, Math.round(current * 0.82));
+  const absoluteChange = current - previous;
+  const comparisonState: ComparisonState =
+    previous === 0
+      ? current === 0
+        ? "no_activity"
+        : "new_activity"
+      : "comparable";
+  return {
+    current,
+    previous,
+    absoluteChange,
+    percentageChange:
+      comparisonState === "comparable"
+        ? percentageChange(current, previous)
+        : null,
+    direction:
+      absoluteChange === 0
+        ? "flat"
+        : absoluteChange > 0
+          ? "increase"
+          : "decrease",
+    comparisonState,
+  };
+}
+
+function percentageChange(current: number, previous: number) {
+  if (previous === 0) return null;
+  return Math.round(((current - previous) / previous) * 1_000) / 10;
+}
+
+function roundPercentage(ratio: number) {
+  return Math.round(ratio * 1_000) / 10;
+}
+
+function trendRows(total: number, count: number, meta: AnalyticsMeta) {
   const weights = [0.08, 0.11, 0.09, 0.14, 0.12, 0.16, 0.13, 0.17];
+  const fromMs = new Date(meta.range.from).getTime();
+  const toMs = new Date(meta.range.toExclusive).getTime();
+  const stepMs = Math.max(1, (toMs - fromMs) / weights.length);
+
   return weights.map((weight, index) => ({
-    bucket: daysAgo(weights.length - index - 1),
+    bucket: new Date(fromMs + stepMs * index).toISOString(),
     totalCents: Math.round(total * weight),
-    invoiceCount: Math.max(0, Math.round((count * weight * 10) / 2)),
+    invoiceCount: Math.max(0, Math.round(count * weight)),
   }));
 }
 
+function granularityForDays(days: number): AnalyticsGranularity {
+  if (days <= 14) return "day";
+  if (days <= 90) return "week";
+  return "month";
+}
+
+function startOfUtcDay(value: Date) {
+  const result = new Date(value);
+  result.setUTCHours(0, 0, 0, 0);
+  return result;
+}
+
+function startOfUtcWeek(value: Date) {
+  const result = startOfUtcDay(value);
+  const day = result.getUTCDay();
+  const daysSinceMonday = day === 0 ? 6 : day - 1;
+  result.setUTCDate(result.getUTCDate() - daysSinceMonday);
+  return result;
+}
+
+function startOfUtcMonth(value: Date) {
+  const result = startOfUtcDay(value);
+  result.setUTCDate(1);
+  return result;
+}
+
+function addUtcDays(value: Date, days: number) {
+  return new Date(value.getTime() + days * DAY_MS);
+}
+
 function daysAgo(days: number) {
-  return new Date(Date.now() - days * 86_400_000).toISOString();
+  return new Date(Date.now() - days * DAY_MS).toISOString();
 }
 
 function monthStart(monthsAgo: number) {
