@@ -80,16 +80,21 @@ export async function uploadStaffPhoto(
   const encodedStaffId = encodeURIComponent(staffId);
   const ticket = await api<{
     uploadUrl: string;
-    publicUrl: string;
     publicId: string;
+    contentType: string;
+    maxBytes: number;
   }>(`/staff/${encodedStaffId}/photo/presign`, accessToken, {
     method: "POST",
     body: JSON.stringify({ contentType: file.type }),
   });
 
+  if (file.size > ticket.maxBytes) {
+    throw new Error("The selected image is larger than the allowed upload size.");
+  }
+
   const upload = await fetch(ticket.uploadUrl, {
     method: "PUT",
-    headers: { "Content-Type": file.type },
+    headers: { "Content-Type": ticket.contentType },
     body: file,
   });
   if (!upload.ok) throw new Error(`Image upload failed: ${upload.status}`);
@@ -98,7 +103,7 @@ export async function uploadStaffPhoto(
     method: "POST",
     body: JSON.stringify({
       publicId: ticket.publicId,
-      publicUrl: ticket.publicUrl,
+      contentType: ticket.contentType,
     }),
   });
 }
