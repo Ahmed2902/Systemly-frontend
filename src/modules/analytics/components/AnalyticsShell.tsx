@@ -96,7 +96,10 @@ function parsePeriod(search: URLSearchParams): AnalyticsPeriodSelection {
   if (mode === "custom") {
     const from = search.get("from");
     const to = search.get("to");
-    if (/^\d{4}-\d{2}-\d{2}$/.test(from ?? "") && /^\d{4}-\d{2}-\d{2}$/.test(to ?? "")) {
+    if (
+      /^\d{4}-\d{2}-\d{2}$/.test(from ?? "") &&
+      /^\d{4}-\d{2}-\d{2}$/.test(to ?? "")
+    ) {
       return { mode: "custom", from: from!, to: to! };
     }
     return defaultCustomPeriod();
@@ -131,10 +134,14 @@ function PeriodSelector({
   period: AnalyticsPeriodSelection;
   onChange: (next: AnalyticsPeriodSelection) => void;
 }) {
-  const modes: Array<{ value: AnalyticsPeriodSelection["mode"]; label: string }> = [
-    { value: "rolling", label: "Rolling" },
-    { value: "completed", label: "Completed periods" },
-    { value: "custom", label: "Custom" },
+  const text = usePlatformText();
+  const modes: Array<{
+    value: AnalyticsPeriodSelection["mode"];
+    label: string;
+  }> = [
+    { value: "rolling", label: text("Rolling") },
+    { value: "completed", label: text("Completed periods") },
+    { value: "custom", label: text("Custom") },
   ];
 
   const selectMode = (mode: AnalyticsPeriodSelection["mode"]) => {
@@ -182,7 +189,7 @@ function PeriodSelector({
                   period.preset === preset ? "is-active" : ""
                 }`}
               >
-                {ROLLING_LABELS[preset]}
+                {text(ROLLING_LABELS[preset])}
               </button>
             ))
           : null}
@@ -190,7 +197,7 @@ function PeriodSelector({
         {period.mode === "completed" ? (
           <>
             <label className="analytics-muted ml-1 flex items-center gap-2 whitespace-nowrap text-[11px] font-semibold">
-              Period
+              {text("Period")}
               <select
                 value={period.unit}
                 onChange={(event) =>
@@ -201,18 +208,20 @@ function PeriodSelector({
                 }
                 className="rounded-[7px] border border-[var(--analytics-border)] bg-[var(--analytics-panel)] px-2 py-1.5 text-[var(--analytics-text)]"
               >
-                <option value="week">Week</option>
-                <option value="month">Month</option>
+                <option value="week">{text("Week")}</option>
+                <option value="month">{text("Month")}</option>
               </select>
             </label>
             <label className="analytics-muted flex items-center gap-2 whitespace-nowrap text-[11px] font-semibold">
-              Count
+              {text("Count")}
               <select
                 value={period.count}
                 onChange={(event) =>
                   onChange({
                     ...period,
-                    count: Number(event.target.value) as CompletedAnalyticsCount,
+                    count: Number(
+                      event.target.value,
+                    ) as CompletedAnalyticsCount,
                   })
                 }
                 className="rounded-[7px] border border-[var(--analytics-border)] bg-[var(--analytics-panel)] px-2 py-1.5 text-[var(--analytics-text)]"
@@ -225,7 +234,7 @@ function PeriodSelector({
               </select>
             </label>
             <span className="analytics-subtle whitespace-nowrap px-2 text-[11px]">
-              Excludes the current incomplete {period.unit}
+              {text("Excludes the current incomplete period")}
             </span>
           </>
         ) : null}
@@ -233,7 +242,7 @@ function PeriodSelector({
         {period.mode === "custom" ? (
           <>
             <label className="analytics-muted ml-1 flex items-center gap-2 whitespace-nowrap text-[11px] font-semibold">
-              From
+              {text("From")}
               <input
                 type="date"
                 value={period.from}
@@ -246,7 +255,7 @@ function PeriodSelector({
               />
             </label>
             <label className="analytics-muted flex items-center gap-2 whitespace-nowrap text-[11px] font-semibold">
-              To
+              {text("To")}
               <input
                 type="date"
                 value={period.to}
@@ -260,7 +269,7 @@ function PeriodSelector({
               />
             </label>
             <span className="analytics-subtle whitespace-nowrap px-2 text-[11px]">
-              Grouping is selected automatically · no comparison
+              {text("Grouping is selected automatically · no comparison")}
             </span>
           </>
         ) : null}
@@ -330,7 +339,7 @@ export function AnalyticsShell({
                   active ? "is-active" : ""
                 }`}
               >
-                {label}
+                {text(label)}
               </Link>
             );
           })}
