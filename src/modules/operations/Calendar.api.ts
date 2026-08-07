@@ -59,6 +59,7 @@ export async function uploadAppointmentPhoto(
     uploadUrl: string;
     objectPath?: string;
     publicId: string;
+    contentType: string;
   }>(
     `${path}/presign`,
     accessToken,
