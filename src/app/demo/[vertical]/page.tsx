@@ -67,7 +67,7 @@ export default async function DemoExperiencePage({
   ] as const;
 
   return (
-    <main className="min-h-screen bg-[#111114] px-5 py-10 text-white sm:px-8 lg:py-16">
+    <main className="min-h-screen bg-[#0b0f19] px-5 py-10 text-white sm:px-8 lg:py-16">
       <div className="mx-auto max-w-6xl">
         <Link
           href="/demo"
@@ -77,11 +77,11 @@ export default async function DemoExperiencePage({
         </Link>
 
         <section className="mt-12 flex max-w-4xl items-start gap-4 sm:mt-16">
-          <span className="grid h-13 w-13 shrink-0 place-items-center rounded-2xl bg-[#8f2e59] text-white shadow-lg shadow-[#8f2e59]/20">
+          <span className="grid h-13 w-13 shrink-0 place-items-center rounded-2xl bg-[#008060] text-white shadow-lg shadow-[#008060]/20">
             <VerticalIcon size={24} />
           </span>
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#d9a9be]">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#63c9aa]">
               {config.businessName}
             </p>
             <h1 className="mt-3 text-4xl font-semibold tracking-[-0.05em] sm:text-6xl">
@@ -102,7 +102,7 @@ export default async function DemoExperiencePage({
                 href={href}
                 target="_blank"
                 rel="noreferrer"
-                className="group flex min-h-[330px] flex-col justify-between rounded-[30px] border border-white/10 bg-white/[0.055] p-7 transition hover:-translate-y-1 hover:border-[#c55a89]/45 hover:bg-white/[0.075] sm:p-9"
+                className="group flex min-h-[330px] flex-col justify-between rounded-[30px] border border-white/10 bg-white/[0.055] p-7 transition hover:-translate-y-1 hover:border-[#008060]/45 hover:bg-white/[0.075] sm:p-9"
               >
                 <div>
                   <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-[#181318]">
@@ -116,7 +116,7 @@ export default async function DemoExperiencePage({
                   </p>
                 </div>
 
-                <span className="mt-10 inline-flex items-center gap-2 text-sm font-bold text-[#efb4ce]">
+                <span className="mt-10 inline-flex items-center gap-2 text-sm font-bold text-[#63c9aa]">
                   {action}
                   <ArrowUpRight
                     size={17}
@@ -129,7 +129,7 @@ export default async function DemoExperiencePage({
         </section>
 
         <div className="mt-8 flex items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm leading-6 text-white/52">
-          <ShieldAlert size={18} className="mt-0.5 shrink-0 text-[#efb4ce]" />
+          <ShieldAlert size={18} className="mt-0.5 shrink-0 text-[#63c9aa]" />
           <p>
             Demo data is fictional. Some functionality, integrations, uploads,
             and external actions are simplified or disabled and may not behave

@@ -57,18 +57,16 @@ export async function uploadAppointmentPhoto(
   const path = `/appointments/${encodeURIComponent(appointmentId)}/photos`;
   const ticket = await api<{
     uploadUrl: string;
+    objectPath?: string;
     publicId: string;
-    contentType: string;
-    maxBytes: number;
-  }>(`${path}/presign`, accessToken, {
-    method: "POST",
-    body: JSON.stringify({ contentType: file.type, type: "progress" }),
-  });
-
-  if (file.size > ticket.maxBytes) {
-    throw new Error("The selected image is larger than the allowed upload size.");
-  }
-
+  }>(
+    `${path}/presign`,
+    accessToken,
+    {
+      method: "POST",
+      body: JSON.stringify({ contentType: file.type, type: "progress" }),
+    },
+  );
   const upload = await fetch(ticket.uploadUrl, {
     method: "PUT",
     headers: { "Content-Type": ticket.contentType },
@@ -80,8 +78,8 @@ export async function uploadAppointmentPhoto(
   return api<unknown>(`${path}/confirm`, accessToken, {
     method: "POST",
     body: JSON.stringify({
+      objectPath: ticket.objectPath ?? ticket.publicId,
       publicId: ticket.publicId,
-      contentType: ticket.contentType,
       type: "progress",
     }),
   });

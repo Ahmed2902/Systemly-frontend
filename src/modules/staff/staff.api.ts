@@ -80,6 +80,8 @@ export async function uploadStaffPhoto(
   const encodedStaffId = encodeURIComponent(staffId);
   const ticket = await api<{
     uploadUrl: string;
+    publicUrl: string;
+    objectPath?: string;
     publicId: string;
     contentType: string;
     maxBytes: number;
@@ -102,6 +104,7 @@ export async function uploadStaffPhoto(
   return api(`/staff/${encodedStaffId}/photo/confirm`, accessToken, {
     method: "POST",
     body: JSON.stringify({
+      objectPath: ticket.objectPath ?? ticket.publicId,
       publicId: ticket.publicId,
       contentType: ticket.contentType,
     }),

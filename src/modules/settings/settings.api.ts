@@ -49,6 +49,8 @@ export async function uploadBrandingImage(
 
   const ticket = await api<{
     uploadUrl: string;
+    publicUrl: string;
+    objectPath?: string;
     publicId: string;
     contentType: string;
     maxBytes: number;
@@ -71,6 +73,7 @@ export async function uploadBrandingImage(
   return api(`/settings/branding/${kind}/confirm`, accessToken, {
     method: "POST",
     body: JSON.stringify({
+      objectPath: ticket.objectPath ?? ticket.publicId,
       publicId: ticket.publicId,
       contentType: ticket.contentType,
     }),
