@@ -62,7 +62,7 @@ function InviteAcceptanceContent() {
         icon={<Loader2 className="animate-spin" size={24} />}
         title={text("Checking invitation")}
       >
-        {text("Please wait while Hgezli checks your account.")}
+        {text("Please wait while Systemly checks your account.")}
       </InviteCard>
     );
   }
@@ -77,13 +77,13 @@ function InviteAcceptanceContent() {
         <div className="mt-5 flex justify-center gap-3">
           <Link
             href={`/login?next=${encodeURIComponent(returnPath)}`}
-            className="rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white"
+            className="rounded-xl bg-[#202223] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0b0f19] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#008060] focus-visible:ring-offset-2"
           >
             {text("Log in")}
           </Link>
           <Link
             href={`/signup?next=${encodeURIComponent(returnPath)}`}
-            className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700"
+            className="rounded-xl border border-[#dfe1dd] bg-white px-4 py-2.5 text-sm font-semibold text-[#202223] transition hover:bg-[#f4f4f1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#008060] focus-visible:ring-offset-2"
           >
             {text("Create account")}
           </Link>
@@ -99,7 +99,7 @@ function InviteAcceptanceContent() {
         title={text("Invitation could not be accepted")}
       >
         <p>{error}</p>
-        <p className="mt-2 text-xs text-slate-500">
+        <p className="mt-2 text-xs text-[#68706c]">
           {text("Confirm that you signed in with the invited email, or ask the owner for a new link.")}
         </p>
       </InviteCard>
@@ -133,7 +133,7 @@ export default function InviteAcceptancePage() {
           icon={<Loader2 className="animate-spin" size={24} />}
           title={text("Checking invitation")}
         >
-          {text("Please wait while Hgezli checks the invitation.")}
+          {text("Please wait while Systemly checks the invitation.")}
         </InviteCard>
       }
     >
@@ -152,13 +152,16 @@ function InviteCard({
   children: ReactNode;
 }) {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-50 p-6">
-      <section className="w-full max-w-lg rounded-3xl border border-slate-200 bg-white p-7 text-center shadow-sm">
-        <span className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-violet-100 text-violet-700">
+    <main className="flex min-h-screen items-center justify-center bg-[#f4f4f1] p-6">
+      <section className="w-full max-w-lg rounded-3xl border border-[#dfe1dd] bg-white p-7 text-center shadow-sm">
+        <div className="mb-6 text-left text-lg font-semibold tracking-tight text-[#202223]">
+          Systemly
+        </div>
+        <span className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-[#e7f4ef] text-[#008060]">
           {icon}
         </span>
-        <h1 className="mt-4 text-2xl font-bold text-slate-950">{title}</h1>
-        <div className="mt-2 text-sm leading-6 text-slate-600">{children}</div>
+        <h1 className="mt-4 text-2xl font-bold text-[#202223]">{title}</h1>
+        <div className="mt-2 text-sm leading-6 text-[#68706c]">{children}</div>
       </section>
     </main>
   );
