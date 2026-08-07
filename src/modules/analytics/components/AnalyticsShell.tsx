@@ -1,15 +1,28 @@
 "use client";
 
 import { usePlatformText } from "@/i18n/usePlatformText";
-import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import type { ReactNode } from "react";
-import { CalendarDays } from "lucide-react";
+import {
+  analyticsPeriodHref,
+  analyticsPeriodQuery,
+} from "@/modules/analytics/analytics.api";
+import type {
+  AnalyticsPeriodSelection,
+  CompletedAnalyticsCount,
+  CompletedAnalyticsUnit,
+  RollingAnalyticsPreset,
+} from "@/modules/analytics/analytics.types";
+import {
+  COMPLETED_ANALYTICS_COUNTS,
+  ROLLING_ANALYTICS_PRESETS,
+} from "@/modules/analytics/analytics.types";
 import {
   resolveOperationsHref,
   useOperationsRuntime,
 } from "@/modules/operations/runtime/operations-runtime";
-import { ANALYTICS_PRESETS, type AnalyticsPreset } from "../analytics.types";
+import { CalendarDays } from "lucide-react";
+import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useMemo, type ReactNode } from "react";
 
 const LINKS = [
   ["/operations/dashboard", "Overview"],
@@ -20,13 +33,20 @@ const LINKS = [
   ["/operations/dashboard/growth", "Growth"],
 ] as const;
 
-const LABELS: Record<AnalyticsPreset, string> = {
+const ROLLING_LABELS: Record<RollingAnalyticsPreset, string> = {
   today: "Today",
-  last_week: "7 days",
-  last_month: "30 days",
-  last_3_months: "3 months",
-  last_year: "1 year",
+  last_7_days: "7 days",
+  last_30_days: "30 days",
+  last_90_days: "90 days",
+  last_12_months: "12 months",
   all_time: "All time",
+};
+
+const LEGACY_PRESETS: Record<string, RollingAnalyticsPreset> = {
+  last_week: "last_7_days",
+  last_month: "last_30_days",
+  last_3_months: "last_90_days",
+  last_year: "last_12_months",
 };
 
 const METRIC_META: Array<{
@@ -44,12 +64,218 @@ const METRIC_META: Array<{
   { match: /weekday|day/i, emoji: "◷", copy: "Best-performing time" },
 ];
 
-export function useAnalyticsPreset(): AnalyticsPreset {
+function isoDate(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function defaultCustomPeriod(): AnalyticsPeriodSelection {
+  const to = new Date();
+  const from = new Date(to);
+  from.setDate(from.getDate() - 29);
+  return { mode: "custom", from: isoDate(from), to: isoDate(to) };
+}
+
+function parsePeriod(search: URLSearchParams): AnalyticsPeriodSelection {
+  const mode = search.get("mode");
+
+  if (mode === "completed") {
+    const unit: CompletedAnalyticsUnit =
+      search.get("unit") === "week" ? "week" : "month";
+    const parsedCount = Number(search.get("count"));
+    const count = COMPLETED_ANALYTICS_COUNTS.includes(
+      parsedCount as CompletedAnalyticsCount,
+    )
+      ? (parsedCount as CompletedAnalyticsCount)
+      : 3;
+    return { mode: "completed", unit, count };
+  }
+
+  if (mode === "custom") {
+    const from = search.get("from");
+    const to = search.get("to");
+    if (
+      /^\d{4}-\d{2}-\d{2}$/.test(from ?? "") &&
+      /^\d{4}-\d{2}-\d{2}$/.test(to ?? "")
+    ) {
+      return { mode: "custom", from: from!, to: to! };
+    }
+    return defaultCustomPeriod();
+  }
+
+  const rawPreset = search.get("preset") ?? "last_30_days";
+  const preset = LEGACY_PRESETS[rawPreset] ?? rawPreset;
+  return {
+    mode: "rolling",
+    preset: ROLLING_ANALYTICS_PRESETS.includes(
+      preset as RollingAnalyticsPreset,
+    )
+      ? (preset as RollingAnalyticsPreset)
+      : "last_30_days",
+  };
+}
+
+/** Compatibility name retained for dashboard pages. */
+export function useAnalyticsPreset(): AnalyticsPeriodSelection {
   const search = useSearchParams();
-  const raw = search.get("preset");
-  return ANALYTICS_PRESETS.includes(raw as AnalyticsPreset)
-    ? (raw as AnalyticsPreset)
-    : "last_month";
+  const serialized = search.toString();
+  return useMemo(
+    () => parsePeriod(new URLSearchParams(serialized)),
+    [serialized],
+  );
+}
+
+function PeriodSelector({
+  period,
+  onChange,
+}: {
+  period: AnalyticsPeriodSelection;
+  onChange: (next: AnalyticsPeriodSelection) => void;
+}) {
+  const text = usePlatformText();
+  const modes: Array<{
+    value: AnalyticsPeriodSelection["mode"];
+    label: string;
+  }> = [
+    { value: "rolling", label: text("Rolling") },
+    { value: "completed", label: text("Completed periods") },
+    { value: "custom", label: text("Custom") },
+  ];
+
+  const selectMode = (mode: AnalyticsPeriodSelection["mode"]) => {
+    if (mode === period.mode) return;
+    if (mode === "rolling") {
+      onChange({ mode: "rolling", preset: "last_30_days" });
+    } else if (mode === "completed") {
+      onChange({ mode: "completed", unit: "month", count: 3 });
+    } else {
+      onChange(defaultCustomPeriod());
+    }
+  };
+
+  return (
+    <div className="analytics-preset max-w-full rounded-[10px] p-1">
+      <div className="flex max-w-full items-center gap-1 overflow-x-auto">
+        <CalendarDays
+          size={14}
+          className="mx-1 flex-none text-[var(--analytics-muted)]"
+        />
+        {modes.map((mode) => (
+          <button
+            key={mode.value}
+            type="button"
+            onClick={() => selectMode(mode.value)}
+            aria-pressed={period.mode === mode.value}
+            className={`whitespace-nowrap rounded-[7px] px-3 py-1.5 text-[11px] font-bold transition ${
+              period.mode === mode.value ? "is-active" : ""
+            }`}
+          >
+            {mode.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="mt-1 flex max-w-full items-center gap-1 overflow-x-auto border-t border-[var(--analytics-border)] pt-1">
+        {period.mode === "rolling"
+          ? ROLLING_ANALYTICS_PRESETS.map((preset) => (
+              <button
+                key={preset}
+                type="button"
+                onClick={() => onChange({ mode: "rolling", preset })}
+                aria-pressed={period.preset === preset}
+                className={`whitespace-nowrap rounded-[7px] px-3 py-1.5 text-[11px] font-semibold transition ${
+                  period.preset === preset ? "is-active" : ""
+                }`}
+              >
+                {text(ROLLING_LABELS[preset])}
+              </button>
+            ))
+          : null}
+
+        {period.mode === "completed" ? (
+          <>
+            <label className="analytics-muted ml-1 flex items-center gap-2 whitespace-nowrap text-[11px] font-semibold">
+              {text("Period")}
+              <select
+                value={period.unit}
+                onChange={(event) =>
+                  onChange({
+                    ...period,
+                    unit: event.target.value as CompletedAnalyticsUnit,
+                  })
+                }
+                className="rounded-[7px] border border-[var(--analytics-border)] bg-[var(--analytics-panel)] px-2 py-1.5 text-[var(--analytics-text)]"
+              >
+                <option value="week">{text("Week")}</option>
+                <option value="month">{text("Month")}</option>
+              </select>
+            </label>
+            <label className="analytics-muted flex items-center gap-2 whitespace-nowrap text-[11px] font-semibold">
+              {text("Count")}
+              <select
+                value={period.count}
+                onChange={(event) =>
+                  onChange({
+                    ...period,
+                    count: Number(
+                      event.target.value,
+                    ) as CompletedAnalyticsCount,
+                  })
+                }
+                className="rounded-[7px] border border-[var(--analytics-border)] bg-[var(--analytics-panel)] px-2 py-1.5 text-[var(--analytics-text)]"
+              >
+                {COMPLETED_ANALYTICS_COUNTS.map((count) => (
+                  <option key={count} value={count}>
+                    {count}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <span className="analytics-subtle whitespace-nowrap px-2 text-[11px]">
+              {text("Excludes the current incomplete period")}
+            </span>
+          </>
+        ) : null}
+
+        {period.mode === "custom" ? (
+          <>
+            <label className="analytics-muted ml-1 flex items-center gap-2 whitespace-nowrap text-[11px] font-semibold">
+              {text("From")}
+              <input
+                type="date"
+                value={period.from}
+                max={period.to}
+                onChange={(event) =>
+                  event.target.value &&
+                  onChange({ ...period, from: event.target.value })
+                }
+                className="rounded-[7px] border border-[var(--analytics-border)] bg-[var(--analytics-panel)] px-2 py-1 text-[var(--analytics-text)]"
+              />
+            </label>
+            <label className="analytics-muted flex items-center gap-2 whitespace-nowrap text-[11px] font-semibold">
+              {text("To")}
+              <input
+                type="date"
+                value={period.to}
+                min={period.from}
+                max={isoDate(new Date())}
+                onChange={(event) =>
+                  event.target.value &&
+                  onChange({ ...period, to: event.target.value })
+                }
+                className="rounded-[7px] border border-[var(--analytics-border)] bg-[var(--analytics-panel)] px-2 py-1 text-[var(--analytics-text)]"
+              />
+            </label>
+            <span className="analytics-subtle whitespace-nowrap px-2 text-[11px]">
+              {text("Grouping is selected automatically · no comparison")}
+            </span>
+          </>
+        ) : null}
+      </div>
+    </div>
+  );
 }
 
 export function AnalyticsShell({
@@ -65,14 +291,20 @@ export function AnalyticsShell({
   const pathname = usePathname();
   const router = useRouter();
   const runtime = useOperationsRuntime();
-  const preset = useAnalyticsPreset();
+  const period = useAnalyticsPreset();
+
+  const updatePeriod = (next: AnalyticsPeriodSelection) => {
+    router.push(`${pathname}?${analyticsPeriodQuery(next)}`, { scroll: false });
+  };
 
   return (
     <div className="analytics-page">
       <div className="mx-auto w-full max-w-[1540px] px-4 py-4 lg:px-6 lg:py-5">
-        <header className="analytics-header">
+        <header className="analytics-header gap-3">
           <div>
-            <p className="analytics-eyebrow">{text("WORKSPACE / OWNER OVERVIEW")}</p>
+            <p className="analytics-eyebrow">
+              {text("WORKSPACE / OWNER OVERVIEW")}
+            </p>
             <h1 className="analytics-title text-[26px] font-bold tracking-[-0.04em] lg:text-[31px]">
               {title}
             </h1>
@@ -81,28 +313,19 @@ export function AnalyticsShell({
             </p>
           </div>
 
-          <div className="analytics-preset flex max-w-full items-center gap-1 overflow-x-auto rounded-[10px] p-1">
-            <CalendarDays size={14} className="mx-1 flex-none text-[var(--analytics-muted)]" />
-            {ANALYTICS_PRESETS.map((item) => (
-              <button
-                key={item}
-                type="button"
-                onClick={() => router.push(`${pathname}?preset=${item}`)}
-                aria-pressed={preset === item}
-                className={`whitespace-nowrap rounded-[7px] px-3 py-1.5 text-[11px] font-bold transition ${
-                  preset === item ? "is-active" : ""
-                }`}
-              >
-                {LABELS[item]}
-              </button>
-            ))}
-          </div>
+          <PeriodSelector period={period} onChange={updatePeriod} />
         </header>
 
-        <nav className="analytics-nav mt-4 flex gap-1 overflow-x-auto rounded-[10px] p-1" aria-label={text("Analytics sections")}>
+        <nav
+          className="analytics-nav mt-4 flex gap-1 overflow-x-auto rounded-[10px] p-1"
+          aria-label={text("Analytics sections")}
+        >
           {LINKS.map(([href, label]) => {
             const resolvedHref = resolveOperationsHref(runtime, href);
-            const overviewHref = resolveOperationsHref(runtime, "/operations/dashboard");
+            const overviewHref = resolveOperationsHref(
+              runtime,
+              "/operations/dashboard",
+            );
             const active =
               resolvedHref === overviewHref
                 ? pathname === resolvedHref
@@ -110,13 +333,13 @@ export function AnalyticsShell({
             return (
               <Link
                 key={resolvedHref}
-                href={`${resolvedHref}?preset=${preset}`}
+                href={analyticsPeriodHref(resolvedHref, period)}
                 aria-current={active ? "page" : undefined}
                 className={`whitespace-nowrap rounded-[7px] px-3 py-1.5 text-[12px] font-bold transition ${
                   active ? "is-active" : ""
                 }`}
               >
-                {label}
+                {text(label)}
               </Link>
             );
           })}
@@ -159,14 +382,19 @@ export function MetricCard({
           </p>
         </div>
         {trend ? (
-          <span className={`analytics-trend analytics-trend-${tone}`}>{trend}</span>
+          <span className={`analytics-trend analytics-trend-${tone}`}>
+            {trend}
+          </span>
         ) : null}
       </div>
       <p className="analytics-title mt-3 text-[22px] font-bold tracking-[-0.04em]">
         {value}
       </p>
       <p className="analytics-subtle mt-1 flex items-center gap-1.5 text-[11px]">
-        <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-[var(--analytics-accent-2)]" />
+        <span
+          aria-hidden="true"
+          className="h-1.5 w-1.5 rounded-full bg-[var(--analytics-accent-2)]"
+        />
         {helper}
       </p>
     </article>

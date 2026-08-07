@@ -5,7 +5,10 @@ import Link from "next/link";
 import { useEffect, useState, type ReactNode } from "react";
 import { AlertTriangle, CheckCircle2, UsersRound } from "lucide-react";
 import { useAuth } from "@/modules/auth/useAuth";
-import { getDashboardAnalytics } from "@/modules/analytics/analytics.api";
+import {
+  analyticsPeriodHref,
+  getDashboardAnalytics,
+} from "@/modules/analytics/analytics.api";
 import type { DashboardAnalytics } from "@/modules/analytics/analytics.types";
 import {
   AnalyticsPanel,
@@ -21,6 +24,7 @@ import {
 } from "@/modules/analytics/components/AnalyticsCharts";
 import { AppointmentStartHeatmap } from "@/modules/analytics/components/AppointmentStartHeatmap";
 import {
+  analyticsGroupingLabel,
   formatAnalyticsBucketForPreset,
   formatEgp,
   formatPercent,
@@ -29,26 +33,39 @@ import {
 export default function DashboardOverviewPage() {
   const text = usePlatformText();
   const { accessToken, user } = useAuth();
-  const preset = useAnalyticsPreset();
+  const period = useAnalyticsPreset();
   const [data, setData] = useState<DashboardAnalytics | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
-    setData(null);
+    setRefreshing(true);
     setError(null);
-    getDashboardAnalytics(preset, accessToken)
+    getDashboardAnalytics(period, accessToken)
       .then((value) => !cancelled && setData(value))
-      .catch((reason: Error) => !cancelled && setError(reason.message));
+      .catch((reason: Error) => !cancelled && setError(reason.message))
+      .finally(() => !cancelled && setRefreshing(false));
     return () => {
       cancelled = true;
     };
-  }, [accessToken, preset]);
+  }, [accessToken, period]);
 
   const firstName = user?.name?.trim().split(/\s+/)[0] || "there";
-  const growthPct = data?.growth.summary.monthOverMonthGrowthPct ?? null;
+  const revenueComparison = data?.revenue.comparison?.revenue ?? null;
+  const growthPct = revenueComparison?.percentageChange ?? null;
   const growthTone =
-    growthPct == null ? "neutral" : growthPct >= 0 ? "positive" : "negative";
+    revenueComparison?.direction === "increase"
+      ? "positive"
+      : revenueComparison?.direction === "decrease"
+        ? "negative"
+        : "neutral";
+  const growthLabel =
+    revenueComparison?.comparisonState === "new_activity"
+      ? text("New")
+      : revenueComparison
+        ? formatPercent(growthPct)
+        : undefined;
 
   return (
     <AnalyticsShell
@@ -60,12 +77,12 @@ export default function DashboardOverviewPage() {
         <AnalyticsState message={text("Loading dashboard overview…")} />
       ) : null}
       {data ? (
-        <div className="space-y-3">
+        <div className={`space-y-3 transition-opacity ${refreshing ? "opacity-70" : "opacity-100"}`}>
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
             <MetricCard
               label={text("Total revenue")}
               value={formatEgp(data.revenue.summary.revenueCents)}
-              trend={formatPercent(growthPct)}
+              trend={growthLabel}
               tone={growthTone}
               hint={text("Collected in the selected period")}
             />
@@ -95,28 +112,39 @@ export default function DashboardOverviewPage() {
             <AnalyticsPanel
               title={text("Revenue trend")}
               action={
-                <Link
-                  href={`/operations/dashboard/revenue?preset=${preset}`}
-                  className="analytics-muted text-[11px] font-bold hover:underline"
-                >
-                  {text("View revenue")}
-                </Link>
+                <div className="flex items-center gap-3">
+                  <span className="analytics-subtle text-[11px]">
+                    {analyticsGroupingLabel(data.revenue.period.granularity)}
+                  </span>
+                  <Link
+                    href={analyticsPeriodHref(
+                      "/operations/dashboard/revenue",
+                      period,
+                    )}
+                    className="analytics-muted text-[11px] font-bold hover:underline"
+                  >
+                    {text("View revenue")}
+                  </Link>
+                </div>
               }
             >
               <div className="mb-3 flex items-baseline gap-3">
                 <strong className="analytics-title text-3xl tracking-[-0.045em]">
                   {formatEgp(data.revenue.summary.revenueCents)}
                 </strong>
-                <span className={`analytics-trend analytics-trend-${growthTone}`}>
-                  {formatPercent(growthPct)}
-                </span>
+                {growthLabel ? (
+                  <span className={`analytics-trend analytics-trend-${growthTone}`}>
+                    {growthLabel}
+                  </span>
+                ) : null}
               </div>
               <AreaChart
                 data={data.revenue.trend.map((row) => ({
                   label: formatAnalyticsBucketForPreset(
                     row.bucket,
                     data.revenue.timezone,
-                    preset,
+                    period,
+                    data.revenue.period.granularity,
                   ),
                   value: row.totalCents,
                   tooltip: [
@@ -150,7 +178,10 @@ export default function DashboardOverviewPage() {
                 ) : null}
                 {data.staff.summary.lowUtilizationCount > 0 ? (
                   <Link
-                    href={`/operations/dashboard/staff?preset=${preset}`}
+                    href={analyticsPeriodHref(
+                      "/operations/dashboard/staff",
+                      period,
+                    )}
                     className="block"
                   >
                     <Signal
@@ -202,7 +233,10 @@ export default function DashboardOverviewPage() {
             title={text("Staff performance")}
             action={
               <Link
-                href={`/operations/dashboard/staff?preset=${preset}`}
+                href={analyticsPeriodHref(
+                  "/operations/dashboard/staff",
+                  period,
+                )}
                 className="analytics-muted text-[11px] font-bold hover:underline"
               >
                 {text("Full staff analytics")}

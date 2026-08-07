@@ -59,6 +59,7 @@ export async function uploadAppointmentPhoto(
     uploadUrl: string;
     objectPath?: string;
     publicId: string;
+    contentType: string;
   }>(
     `${path}/presign`,
     accessToken,
@@ -69,7 +70,7 @@ export async function uploadAppointmentPhoto(
   );
   const upload = await fetch(ticket.uploadUrl, {
     method: "PUT",
-    headers: { "Content-Type": file.type },
+    headers: { "Content-Type": ticket.contentType },
     body: file,
   });
   if (!upload.ok) {
@@ -274,17 +275,17 @@ export function collectPayment(
 export function revertAppointment(
   appointmentId: string,
   accessToken: string,
-  businessId: string,
+  _businessId: string,
 ) {
-  return appointmentAction(appointmentId, "revert", accessToken, { businessId });
+  return appointmentAction(appointmentId, "revert", accessToken);
 }
 
 export function uncancelAppointment(
   appointmentId: string,
   accessToken: string,
-  businessId: string,
+  _businessId: string,
 ) {
-  return appointmentAction(appointmentId, "uncancel", accessToken, { businessId });
+  return appointmentAction(appointmentId, "uncancel", accessToken);
 }
 
 export function markNoShow(appointmentId: string, accessToken: string) {

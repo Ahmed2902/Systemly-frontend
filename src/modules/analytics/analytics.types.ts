@@ -1,27 +1,80 @@
-export const ANALYTICS_PRESETS = [
+export const ROLLING_ANALYTICS_PRESETS = [
   "today",
-  "last_week",
-  "last_month",
-  "last_3_months",
-  "last_year",
+  "last_7_days",
+  "last_30_days",
+  "last_90_days",
+  "last_12_months",
   "all_time",
 ] as const;
 
-export type AnalyticsPreset = (typeof ANALYTICS_PRESETS)[number];
+export const COMPLETED_ANALYTICS_COUNTS = [2, 3, 4, 6, 12] as const;
+
+export type RollingAnalyticsPreset =
+  (typeof ROLLING_ANALYTICS_PRESETS)[number];
+export type CompletedAnalyticsCount =
+  (typeof COMPLETED_ANALYTICS_COUNTS)[number];
+export type CompletedAnalyticsUnit = "week" | "month";
 export type AnalyticsGranularity = "hour" | "day" | "week" | "month";
 
+export type AnalyticsPeriodSelection =
+  | { mode: "rolling"; preset: RollingAnalyticsPreset }
+  | {
+      mode: "completed";
+      unit: CompletedAnalyticsUnit;
+      count: CompletedAnalyticsCount;
+    }
+  | { mode: "custom"; from: string; to: string };
+
+/** Compatibility name retained while dashboard pages migrate. */
+export type AnalyticsPreset = AnalyticsPeriodSelection;
+
+export type ComparisonDirection = "increase" | "decrease" | "flat";
+export type ComparisonState =
+  | "comparable"
+  | "new_activity"
+  | "no_activity";
+
+export type NumericComparison = {
+  current: number;
+  previous: number;
+  absoluteChange: number;
+  percentageChange: number | null;
+  direction: ComparisonDirection;
+  comparisonState: ComparisonState;
+};
+
+export type AnalyticsPeriodMeta = {
+  mode: AnalyticsPeriodSelection["mode"];
+  input: AnalyticsPeriodSelection;
+  label: string;
+  from: string;
+  toExclusive: string;
+  granularity: AnalyticsGranularity;
+  isComplete: boolean;
+};
+
 export type AnalyticsMeta = {
+  period: AnalyticsPeriodMeta;
+  comparisonPeriod: { from: string; toExclusive: string } | null;
   range: {
-    preset: AnalyticsPreset;
     from: string;
     to: string;
+    toExclusive: string;
     granularity: AnalyticsGranularity;
   };
   timezone: string;
   generatedAt: string;
 };
 
+export type RevenueComparison = {
+  revenue: NumericComparison;
+  paidInvoices: NumericComparison;
+  averageInvoice: NumericComparison;
+  customItemRevenue: NumericComparison;
+};
+
 export type RevenueAnalytics = AnalyticsMeta & {
+  comparison: RevenueComparison | null;
   summary: {
     revenueCents: number;
     paidInvoiceCount: number;
@@ -39,6 +92,7 @@ export type RevenueAnalytics = AnalyticsMeta & {
     quantity: number;
     totalCents: number;
   }[];
+  averageInvoiceValue: { averageCents: number; invoiceCount: number };
   averageInvoiceValueTrend: {
     bucket: string;
     averageCents: number | null;
@@ -47,6 +101,11 @@ export type RevenueAnalytics = AnalyticsMeta & {
 };
 
 export type CustomerAnalytics = AnalyticsMeta & {
+  comparison: {
+    activeCustomers: NumericComparison;
+    newCustomers: NumericComparison;
+    returningCustomers: NumericComparison;
+  } | null;
   summary: {
     activeCustomers: number;
     newCustomers: number;
@@ -58,6 +117,10 @@ export type CustomerAnalytics = AnalyticsMeta & {
     cancellationRate: number;
     cancellationCount: number;
     appointmentOutcomeCount: number;
+    rateDefinitions?: {
+      noShow: string;
+      cancellation: string;
+    };
   };
   retentionSummary: {
     day30Rate: number | null;
@@ -114,7 +177,7 @@ export type CancellationRateRow = {
   totalCancelled: number;
   completedCount: number;
   noShowCount: number;
-  outcomeCount: number;
+  outcomeCount?: number;
   rate: number;
 };
 
@@ -130,6 +193,7 @@ export type StaffPerformanceRow = {
 };
 
 export type StaffAnalytics = AnalyticsMeta & {
+  comparison: { revenue: NumericComparison } | null;
   summary: {
     revenueCents: number;
     commissionCents: number;
@@ -140,6 +204,7 @@ export type StaffAnalytics = AnalyticsMeta & {
 };
 
 export type OperationsAnalytics = AnalyticsMeta & {
+  comparison: { bookingCount: NumericComparison } | null;
   summary: {
     bookingCount: number;
     busiestWeekday: number | null;
@@ -171,11 +236,19 @@ export type OperationsAnalytics = AnalyticsMeta & {
 
 export type GrowthAnalytics = AnalyticsMeta & {
   summary: {
+    currentPeriodRevenueCents: number;
+    previousPeriodRevenueCents: number | null;
+    periodGrowthPct: number | null;
+    periodComparisonState: ComparisonState | null;
+    bestGrowthPeriod: GrowthRow | null;
     currentMonthRevenueCents: number;
     previousMonthRevenueCents: number;
     monthOverMonthGrowthPct: number | null;
     bestGrowthMonth: GrowthRow | null;
   };
+  comparison: NumericComparison | null;
+  trend: { bucket: string; totalCents: number; invoiceCount: number }[];
+  bucketGrowth: GrowthRow[];
   monthlyGrowth: GrowthRow[];
   acquisitionSources: { source: string; count: number }[];
   retentionCohorts: CustomerAnalytics["retentionCohorts"];

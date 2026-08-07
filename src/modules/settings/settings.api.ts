@@ -52,14 +52,20 @@ export async function uploadBrandingImage(
     publicUrl: string;
     objectPath?: string;
     publicId: string;
+    contentType: string;
+    maxBytes: number;
   }>(`/settings/branding/${kind}/presign`, accessToken, {
     method: "POST",
     body: JSON.stringify({ contentType: file.type }),
   });
 
+  if (file.size > ticket.maxBytes) {
+    throw new Error("The selected image is larger than the allowed upload size.");
+  }
+
   const upload = await fetch(ticket.uploadUrl, {
     method: "PUT",
-    headers: { "Content-Type": file.type },
+    headers: { "Content-Type": ticket.contentType },
     body: file,
   });
   if (!upload.ok) throw new Error(`Image upload failed: ${upload.status}`);
@@ -69,7 +75,7 @@ export async function uploadBrandingImage(
     body: JSON.stringify({
       objectPath: ticket.objectPath ?? ticket.publicId,
       publicId: ticket.publicId,
-      publicUrl: ticket.publicUrl,
+      contentType: ticket.contentType,
     }),
   });
 }
