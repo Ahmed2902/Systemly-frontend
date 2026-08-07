@@ -62,7 +62,7 @@ function InviteAcceptanceContent() {
         icon={<Loader2 className="animate-spin" size={24} />}
         title={text("Checking invitation")}
       >
-        {text("Please wait while Systemly checks your account.")}
+        {text("Checking invitation")}
       </InviteCard>
     );
   }
@@ -133,7 +133,7 @@ export default function InviteAcceptancePage() {
           icon={<Loader2 className="animate-spin" size={24} />}
           title={text("Checking invitation")}
         >
-          {text("Please wait while Systemly checks the invitation.")}
+          {text("Checking invitation")}
         </InviteCard>
       }
     >
