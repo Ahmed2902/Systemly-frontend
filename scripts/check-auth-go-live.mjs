@@ -49,15 +49,20 @@ assert(
   `${authApiPath} must send browser cookies on auth requests`,
 );
 
-// User-facing authentication and invitation surfaces must use the Systemly identity.
-const identityRoots = ["src/app/(auth)", "src/app/invite", "src/modules/auth"];
+// User-facing go-live surfaces must use the Systemly identity.
+const identityRoots = [
+  "src/app/(auth)",
+  "src/app/invite",
+  "src/modules/auth",
+  "src/modules/wizard/components/LivePreviewPane.tsx",
+];
 const staleBrandFiles = identityRoots
   .flatMap(collectFiles)
   .filter((file) => /hgezli/i.test(read(file)));
 
 assert(
   staleBrandFiles.length === 0,
-  `stale Hgezli branding remains in auth surfaces: ${staleBrandFiles.join(", ")}`,
+  `stale Hgezli branding remains in go-live surfaces: ${staleBrandFiles.join(", ")}`,
 );
 
 if (!process.exitCode) {
