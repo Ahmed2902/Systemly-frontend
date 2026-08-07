@@ -55,7 +55,11 @@ export async function uploadAppointmentPhoto(
   }
 
   const path = `/appointments/${encodeURIComponent(appointmentId)}/photos`;
-  const ticket = await api<{ uploadUrl: string; publicId: string }>(
+  const ticket = await api<{
+    uploadUrl: string;
+    objectPath?: string;
+    publicId: string;
+  }>(
     `${path}/presign`,
     accessToken,
     {
@@ -73,7 +77,11 @@ export async function uploadAppointmentPhoto(
   }
   return api<unknown>(`${path}/confirm`, accessToken, {
     method: "POST",
-    body: JSON.stringify({ publicId: ticket.publicId, type: "progress" }),
+    body: JSON.stringify({
+      objectPath: ticket.objectPath ?? ticket.publicId,
+      publicId: ticket.publicId,
+      type: "progress",
+    }),
   });
 }
 

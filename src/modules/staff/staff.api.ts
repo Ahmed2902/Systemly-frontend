@@ -81,6 +81,7 @@ export async function uploadStaffPhoto(
   const ticket = await api<{
     uploadUrl: string;
     publicUrl: string;
+    objectPath?: string;
     publicId: string;
   }>(`/staff/${encodedStaffId}/photo/presign`, accessToken, {
     method: "POST",
@@ -97,6 +98,7 @@ export async function uploadStaffPhoto(
   return api(`/staff/${encodedStaffId}/photo/confirm`, accessToken, {
     method: "POST",
     body: JSON.stringify({
+      objectPath: ticket.objectPath ?? ticket.publicId,
       publicId: ticket.publicId,
       publicUrl: ticket.publicUrl,
     }),

@@ -50,6 +50,7 @@ export async function uploadBrandingImage(
   const ticket = await api<{
     uploadUrl: string;
     publicUrl: string;
+    objectPath?: string;
     publicId: string;
   }>(`/settings/branding/${kind}/presign`, accessToken, {
     method: "POST",
@@ -66,6 +67,7 @@ export async function uploadBrandingImage(
   return api(`/settings/branding/${kind}/confirm`, accessToken, {
     method: "POST",
     body: JSON.stringify({
+      objectPath: ticket.objectPath ?? ticket.publicId,
       publicId: ticket.publicId,
       publicUrl: ticket.publicUrl,
     }),

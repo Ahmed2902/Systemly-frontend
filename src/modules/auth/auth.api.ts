@@ -61,13 +61,19 @@ async function publicRequest<T>(path: string, init: RequestInit = {}) {
   return handle<T>(response);
 }
 
-function isInvalidCsrf(error: unknown): error is ApiError {
-  return (
-    typeof error === "object" &&
-    error !== null &&
-    "code" in error &&
-    (error as ApiError).code === "EBADCSRFTOKEN"
-  );
+function isInvalidCsrf(error: unknown): boolean {
+  if (typeof error !== "object" || error === null) return false;
+
+  const response = error as { code?: unknown; error?: unknown };
+  const nestedCode =
+    typeof response.error === "object" &&
+    response.error !== null &&
+    "code" in response.error &&
+    typeof response.error.code === "string"
+      ? response.error.code
+      : undefined;
+
+  return response.code === "CSRF_INVALID" || nestedCode === "CSRF_INVALID";
 }
 
 async function requestWithCsrf<T>(
@@ -77,7 +83,7 @@ async function requestWithCsrf<T>(
   for (let attempt = 0; attempt < 2; attempt += 1) {
     const csrfToken = await getCsrfToken();
     const headers = new Headers(init.headers);
-    headers.set("CSRF-Token", csrfToken);
+    headers.set("x-csrf-token", csrfToken);
 
     if (init.body && !headers.has("Content-Type")) {
       headers.set("Content-Type", "application/json");

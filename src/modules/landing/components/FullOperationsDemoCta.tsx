@@ -13,10 +13,10 @@ export function FullOperationsDemoCta() {
   const text = usePlatformText();
 
   return (
-    <div className="bg-[#0d0d0f] px-5 pb-16 text-white sm:px-8 lg:pb-24">
+    <div className="bg-[#0b0f19] px-5 py-16 text-white sm:px-8 lg:py-24">
       <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-7 rounded-[28px] border border-white/10 bg-white/[0.055] p-6 shadow-2xl backdrop-blur sm:p-8 lg:flex-row lg:items-center">
         <div className="flex max-w-3xl items-start gap-4">
-          <span className="mt-1 grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#8f2e59] text-white">
+          <span className="mt-1 grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#008060] text-white">
             <MousePointerClick size={20} />
           </span>
           <div>
@@ -47,7 +47,7 @@ export function FullOperationsDemoCta() {
 
         <Link
           href="/demo"
-          className="inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#8f2e59] px-5 py-3 text-sm font-bold !text-white shadow-lg shadow-black/20 transition hover:-translate-y-0.5 hover:bg-[#a43a67]"
+          className="inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#008060] px-5 py-3 text-sm font-bold !text-white shadow-lg shadow-black/20 transition hover:-translate-y-0.5 hover:bg-[#00a47c]"
           style={{ color: "#ffffff" }}
         >
           {text("Explore all demos")}
