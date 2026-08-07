@@ -42,7 +42,7 @@ export function LivePreviewPane({ expanded = false }: { expanded?: boolean }) {
         <div className="h-2 w-2 rounded-full bg-yellow-400" />
         <div className="h-2 w-2 rounded-full bg-green-400" />
         <span className="ml-2 text-xs text-[var(--onboarding-muted)]">
-          hgezli.com/{state.slug || "your-business"}
+          systemly.com/{state.slug || "your-business"}
         </span>
       </div>
 
