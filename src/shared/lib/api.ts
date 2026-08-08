@@ -25,11 +25,19 @@ export class ApiRequestError extends Error {
   }
 }
 
+type ApiErrorPayload = {
+  code?: string;
+  message?: string;
+  requestId?: string;
+  fieldErrors?: unknown;
+  details?: unknown;
+};
+
 type ApiEnvelope<T> = {
   success?: boolean;
   data?: T;
   message?: string;
-  error?: string;
+  error?: string | ApiErrorPayload;
   code?: string;
   details?: unknown;
 };
@@ -81,12 +89,20 @@ async function request(
 async function parseEnvelope<T>(response: Response): Promise<T> {
   const body = (await response.json().catch(() => ({}))) as ApiEnvelope<T>;
   if (!response.ok || body.success === false) {
-    throw new ApiRequestError(
-      body.message ?? body.error ?? `Request failed: ${response.status}`,
-      response.status,
-      body.code,
-      body.details,
-    );
+    const nestedError =
+      typeof body.error === "object" && body.error !== null
+        ? body.error
+        : undefined;
+    const message =
+      body.message ??
+      nestedError?.message ??
+      (typeof body.error === "string" ? body.error : undefined) ??
+      `Request failed: ${response.status}`;
+    const code = body.code ?? nestedError?.code;
+    const details =
+      body.details ?? nestedError?.details ?? nestedError?.fieldErrors;
+
+    throw new ApiRequestError(message, response.status, code, details);
   }
   return body.data !== undefined ? body.data : (body as T);
 }

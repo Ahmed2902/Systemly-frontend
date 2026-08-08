@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   quality:
-    name: Typecheck, lint and build
+    name: Typecheck, lint, audit, build and smoke
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -38,7 +38,27 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
+
       - name: Build
         run: npm run build
         env:
           NEXT_PUBLIC_BACKEND_URL: http://localhost:3001
+
+      - name: Smoke-test production server
+        run: |
+          set -euo pipefail
+          npm run start -- -p 3000 > /tmp/systemly-next.log 2>&1 &
+          pid=$!
+          trap 'kill "$pid" 2>/dev/null || true' EXIT
+
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:3000/ >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+
+          cat /tmp/systemly-next.log
+          exit 1

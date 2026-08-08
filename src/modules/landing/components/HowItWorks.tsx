@@ -12,7 +12,7 @@ const steps = [
 const audiences = [
   { icon: Scissors, title: "Salons", copy: "Sequential services, staff calendars, pricing, payments, and customer preferences.", className: "is-large" },
   { icon: HeartPulse, title: "Clinics", copy: "Practitioners, consultations, visit history, notes, and customer records.", className: "is-large" },
-  { icon: Sparkles, title: "Spa & wellness", copy: "Packages, availability, reminders, and capacity without timing confusion.", className: "" },
+  { icon: Sparkles, title: "Spa & wellness", copy: "Appointments, service segments, staff eligibility, payment state, and customer context remain connected instead of becoming separate tools.", className: "" },
   { icon: Building2, title: "Growing teams", copy: "Clear roles, shared daily operations, and owner-only performance insight.", className: "" },
 ];
 

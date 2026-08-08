@@ -13,7 +13,7 @@ export type PublicService = {
 export type PublicStaffMember = {
   id: string;
   name: string;
-  role: string;
+  role?: string;
   jobTitle?: string | null;
   bio?: string | null;
   yearsExperience?: number | null;

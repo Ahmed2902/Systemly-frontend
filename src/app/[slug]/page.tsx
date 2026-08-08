@@ -28,7 +28,6 @@ type PublicBusinessService = {
 type PublicBusinessStaffMember = {
   id: string;
   name: string;
-  role: string;
   jobTitle?: string | null;
   bio?: string | null;
   yearsExperience?: number | null;
@@ -42,15 +41,12 @@ type PublicBusinessFaq = {
 
 type PublicBusinessWebsiteContent = {
   tagline?: string | null;
-  heroDescription?: string | null;
-  heroCardText?: string | null;
   aboutText?: string | null;
   template?: string | null;
   primaryColor?: string | null;
   sectionOrder?: string[] | null;
   showTeam?: boolean | null;
   showFaq?: boolean | null;
-  showServicePrices?: boolean | null;
   instagramUrl?: string | null;
   whatsappNumber?: string | null;
 };
@@ -122,8 +118,8 @@ export default async function PublicBusinessPage({
     businessName: business.name,
     tagline: content?.tagline ?? "",
     template: template.id,
-    heroDescription: content?.heroDescription ?? "",
-    heroCardText: content?.heroCardText ?? "",
+    heroDescription: "",
+    heroCardText: "",
     aboutText: content?.aboutText ?? "",
     logoUrl: business.logoUrl ?? null,
     heroPhotoUrl: business.coverUrl ?? legacyHeroUrl ?? null,
@@ -136,7 +132,7 @@ export default async function PublicBusinessPage({
     sectionOrder: completePublicSectionOrder(content?.sectionOrder ?? []),
     showTeam: content?.showTeam ?? true,
     showFaq: content?.showFaq ?? true,
-    showServicePrices: content?.showServicePrices ?? true,
+    showServicePrices: true,
     services: business.services.map((service) => ({
       id: service.id,
       name: service.name,
@@ -148,7 +144,6 @@ export default async function PublicBusinessPage({
     staff: business.staff.map((staff) => ({
       id: staff.id,
       name: staff.name,
-      role: staff.role,
       jobTitle: staff.jobTitle ?? null,
       bio: staff.bio ?? null,
       yearsExperience: staff.yearsExperience ?? null,

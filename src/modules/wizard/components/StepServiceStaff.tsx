@@ -58,7 +58,7 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
       clientId: uid(),
       name: "",
       durationMin: 30,
-      priceEgp: 0,
+      priceEgp: 1,
       category: "",
     };
     patch({ services: [...state.services, next] });
@@ -183,7 +183,7 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
     else if (
       state.staff.some(
         (member) =>
-          member.role !== text("Receptionist") && member.serviceIds.length === 0,
+          member.role !== "Receptionist" && member.serviceIds.length === 0,
       )
     )
       nextError = "Assign at least one service to every service provider";
@@ -301,14 +301,14 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
                     <span>{text("Price (EGP)")}</span>
                     <input
                       type="number"
-                      min={0}
+                      min={1}
                       step={10}
                       value={service.priceEgp}
                       onChange={(event) =>
                         updateService(service.clientId, {
                           priceEgp: Math.max(
-                            0,
-                            Number(event.target.value) || 0,
+                            1,
+                            Number(event.target.value) || 1,
                           ),
                         })
                       }
@@ -411,7 +411,7 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
           <div className="onboarding-team-list">
             {state.staff.map((member, index) => {
               const missingName = attemptedSubmit && !member.name.trim();
-              const isReceptionist = member.role === text("Receptionist");
+              const isReceptionist = member.role === "Receptionist";
               const missingServices =
                 attemptedSubmit &&
                 !isReceptionist &&

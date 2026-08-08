@@ -64,6 +64,10 @@ function normalizeState(value: Partial<WizardState>): WizardState {
   return {
     ...merged,
     template,
+    services: merged.services.map((service) => ({
+      ...service,
+      priceEgp: Math.max(1, Number(service.priceEgp) || 1),
+    })),
     sectionOrder: completePublicSectionOrder(merged.sectionOrder),
   };
 }

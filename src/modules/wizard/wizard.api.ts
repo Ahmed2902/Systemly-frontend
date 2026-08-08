@@ -2,6 +2,25 @@ import type { WizardState } from "./wizard.types";
 import { api } from "@/shared/lib/api";
 import { apiUrl } from "@/shared/lib/api-url";
 
+const ALLOWED_ONBOARDING_IMAGE_TYPES = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+]);
+
+type OnboardingUploadTicket = {
+  objectPath: string;
+  uploadUrl: string;
+  contentType: string;
+};
+
+type ConfirmedOnboardingUpload = {
+  objectPath: string;
+  publicId: string;
+  publicUrl: string;
+  url: string;
+};
+
 function normalizeCategory(value: string) {
   const trimmed = value.trim().replace(/\s+/g, " ");
   if (!trimmed) return "";
@@ -18,34 +37,38 @@ export async function checkSlugAvailability(slug: string): Promise<boolean> {
 export async function uploadImage(
   file: File,
 ): Promise<{ url: string; publicId: string }> {
-  const fileExt = file.name.split(".").pop() || "jpg";
-  const uniqueId =
-    typeof crypto.randomUUID === "function"
-      ? crypto.randomUUID()
-      : Math.random().toString(36).slice(2);
-  const storagePath = `gallery/${uniqueId}.${fileExt}`;
+  if (!ALLOWED_ONBOARDING_IMAGE_TYPES.has(file.type)) {
+    throw new Error("Use a JPEG, PNG, or WebP image.");
+  }
 
-  const presignRes = await fetch(apiUrl("/photos/gallery/presign"), {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify({ filePath: storagePath, contentType: file.type }),
-  });
+  const ticket = await api<OnboardingUploadTicket>(
+    "/onboarding/media/asset/presign",
+    null,
+    {
+      method: "POST",
+      body: JSON.stringify({ contentType: file.type }),
+    },
+  );
 
-  const presignJson = await presignRes.json();
-  if (!presignRes.ok || presignJson.success === false) throw presignJson;
-
-  const { uploadUrl, publicUrl } = presignJson.data;
-  const cloudRes = await fetch(uploadUrl, {
+  const cloudRes = await fetch(ticket.uploadUrl, {
     method: "PUT",
-    headers: { "Content-Type": file.type },
+    headers: { "Content-Type": ticket.contentType },
     body: file,
   });
   if (!cloudRes.ok) {
     throw new Error("Direct cloud storage delivery transaction failed.");
   }
 
-  return { url: publicUrl, publicId: storagePath };
+  const confirmed = await api<ConfirmedOnboardingUpload>(
+    "/onboarding/media/asset/confirm",
+    null,
+    {
+      method: "POST",
+      body: JSON.stringify({ objectPath: ticket.objectPath }),
+    },
+  );
+
+  return { url: confirmed.url, publicId: confirmed.publicId };
 }
 
 export async function submitOnboarding(state: WizardState) {
@@ -60,8 +83,6 @@ export async function submitOnboarding(state: WizardState) {
     timezone: state.timezone,
     language: state.language,
     tagline: state.tagline,
-    heroDescription: state.heroDescription.trim() || undefined,
-    heroCardText: state.heroCardText.trim() || undefined,
     aboutText: state.aboutText,
     logoUrl: state.logoUrl || undefined,
     heroPhotoUrl: state.heroPhotoUrl || undefined,
@@ -70,7 +91,6 @@ export async function submitOnboarding(state: WizardState) {
     sectionOrder: state.sectionOrder,
     showTeam: state.showTeam,
     showFaq: state.showFaq,
-    showServicePrices: state.showServicePrices,
     instagram: state.instagram || undefined,
     whatsapp: state.whatsapp || undefined,
     services: state.services.map((service) => ({
