@@ -31,14 +31,12 @@ export function getAvailability(
   services: ServiceSelection[],
   date: string,
   accessToken: string,
-  timezone?: string,
 ): Promise<AvailableSlot[]> {
   const params = new URLSearchParams({
     businessId,
     date,
     services: JSON.stringify(services),
   });
-  if (timezone) params.set("timezone", timezone);
   return api<AvailableSlot[]>(
     `/bookings/availability?${params.toString()}`,
     accessToken,
