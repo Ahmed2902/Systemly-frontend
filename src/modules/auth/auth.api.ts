@@ -17,6 +17,13 @@ export type ApiError = {
   details?: unknown;
 };
 
+type BackendErrorPayload = {
+  code?: string;
+  message?: string;
+  details?: unknown;
+  fieldErrors?: unknown;
+};
+
 type RefreshResponse = {
   success: true;
   data: { accessToken: string };
@@ -42,9 +49,37 @@ type LanguagePreferenceResponse = {
   data: { preferredLanguage: AppLocale };
 };
 
+function normalizeApiError(json: unknown, status: number): ApiError {
+  const response =
+    typeof json === "object" && json !== null
+      ? (json as Record<string, unknown>)
+      : {};
+  const nested =
+    typeof response.error === "object" && response.error !== null
+      ? (response.error as BackendErrorPayload)
+      : undefined;
+  const message =
+    (typeof response.message === "string" ? response.message : undefined) ??
+    nested?.message ??
+    (typeof response.error === "string" ? response.error : undefined) ??
+    `Request failed: ${status}`;
+
+  return {
+    success: false,
+    error: message,
+    message,
+    code:
+      (typeof response.code === "string" ? response.code : undefined) ??
+      nested?.code,
+    details: response.details ?? nested?.details ?? nested?.fieldErrors,
+  };
+}
+
 async function handle<T>(res: Response): Promise<T> {
   const json = await res.json().catch(() => ({}));
-  if (!res.ok || json.success === false) throw json as ApiError;
+  if (!res.ok || json.success === false) {
+    throw normalizeApiError(json, res.status);
+  }
   return json as T;
 }
 
@@ -62,18 +97,12 @@ async function publicRequest<T>(path: string, init: RequestInit = {}) {
 }
 
 function isInvalidCsrf(error: unknown): boolean {
-  if (typeof error !== "object" || error === null) return false;
-
-  const response = error as { code?: unknown; error?: unknown };
-  const nestedCode =
-    typeof response.error === "object" &&
-    response.error !== null &&
-    "code" in response.error &&
-    typeof response.error.code === "string"
-      ? response.error.code
-      : undefined;
-
-  return response.code === "CSRF_INVALID" || nestedCode === "CSRF_INVALID";
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    error.code === "CSRF_INVALID"
+  );
 }
 
 async function requestWithCsrf<T>(
