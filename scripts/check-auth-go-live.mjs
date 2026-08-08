@@ -28,8 +28,17 @@ function collectFiles(relativePath) {
 
 const callbackPath = "src/modules/auth/components/OAuthCallbackPanel.tsx";
 const authApiPath = "src/modules/auth/auth.api.ts";
+const sharedApiPath = "src/shared/lib/api.ts";
+const bookingApiPath = "src/modules/booking/booking.api.ts";
+const manualBookingApiPath = "src/modules/operations/NewAppointment.api.ts";
+const wizardApiPath = "src/modules/wizard/wizard.api.ts";
+
 const callback = read(callbackPath);
 const authApi = read(authApiPath);
+const sharedApi = read(sharedApiPath);
+const bookingApi = read(bookingApiPath);
+const manualBookingApi = read(manualBookingApiPath);
+const wizardApi = read(wizardApiPath);
 
 // The OAuth callback must never recover a Systemly access token from the URL.
 assert(!callback.includes("useSearchParams"), `${callbackPath} must not read callback query parameters`);
@@ -47,6 +56,45 @@ assert(
 assert(
   /credentials:\s*["']include["']/.test(authApi),
   `${authApiPath} must send browser cookies on auth requests`,
+);
+
+// Backend main uses a nested error envelope: { success:false, error:{ code, message, ... } }.
+assert(
+  sharedApi.includes("nestedError?.message"),
+  `${sharedApiPath} must read nested backend error messages`,
+);
+assert(
+  sharedApi.includes("nestedError?.code"),
+  `${sharedApiPath} must preserve nested backend error codes`,
+);
+
+// Scheduling timezone is owned by the business on backend main, never the browser.
+for (const [file, source] of [
+  [bookingApiPath, bookingApi],
+  [manualBookingApiPath, manualBookingApi],
+]) {
+  assert(
+    !/params\.set\(\s*["']timezone["']/.test(source),
+    `${file} must not send a browser timezone to booking availability`,
+  );
+}
+assert(
+  !/timezone\??:\s*string/.test(bookingApi),
+  `${bookingApiPath} booking payload must not expose a browser timezone override`,
+);
+
+// Pre-business onboarding media must use the dedicated authenticated onboarding flow.
+assert(
+  wizardApi.includes("/onboarding/media/asset/presign"),
+  `${wizardApiPath} must presign onboarding uploads through /onboarding/media`,
+);
+assert(
+  wizardApi.includes("/onboarding/media/asset/confirm"),
+  `${wizardApiPath} must confirm onboarding uploads before persisting their URLs`,
+);
+assert(
+  !wizardApi.includes("/photos/gallery/presign"),
+  `${wizardApiPath} must not use post-onboarding /photos routes before a business exists`,
 );
 
 // User-facing go-live surfaces must use the Systemly identity.
