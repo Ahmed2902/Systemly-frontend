@@ -203,7 +203,7 @@ export function StepCustomizePreview({ onNext, onBack }: StepProps) {
               />
             </div>
 
-            <div className="onboarding-field">
+            <div className="onboarding-field hidden">
               <label>{text("Hero introduction")}</label>
               <textarea
                 value={state.heroDescription}
@@ -219,7 +219,7 @@ export function StepCustomizePreview({ onNext, onBack }: StepProps) {
               />
             </div>
 
-            <div className="onboarding-field">
+            <div className="onboarding-field hidden">
               <label>{text("Hero image highlight")}</label>
               <input
                 value={state.heroCardText}
@@ -235,7 +235,7 @@ export function StepCustomizePreview({ onNext, onBack }: StepProps) {
               />
             </div>
 
-            <label className="flex items-center justify-between rounded-2xl border border-[var(--onboarding-border)] bg-[#fafaf8] p-4">
+            <label className="hidden items-center justify-between rounded-2xl border border-[var(--onboarding-border)] bg-[#fafaf8] p-4">
               <span>
                 <strong className="block text-sm">{text("Show service prices")}</strong>
                 <small className="mt-1 block text-[var(--onboarding-muted)]">
