@@ -67,6 +67,14 @@ assert(
   sharedApi.includes("nestedError?.code"),
   `${sharedApiPath} must preserve nested backend error codes`,
 );
+assert(
+  authApi.includes("normalizeApiError"),
+  `${authApiPath} must normalize nested backend errors for auth forms`,
+);
+assert(
+  authApi.includes("nested?.code"),
+  `${authApiPath} must preserve nested auth error codes such as EMAIL_NOT_VERIFIED and CSRF_INVALID`,
+);
 
 // Scheduling timezone is owned by the business on backend main, never the browser.
 for (const [file, source] of [
