@@ -42,9 +42,11 @@ test("tenant A cannot read a tenant B resource", async ({ request }) => {
     process.env.E2E_OWNER_EMAIL,
     process.env.E2E_OWNER_PASSWORD,
   );
-  const { response } = await apiJson(request, `/api/staff/${process.env.E2E_FOREIGN_STAFF_ID}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const { response } = await apiJson(
+    request,
+    `/api/staff/${process.env.E2E_FOREIGN_STAFF_ID}/workspace`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
 
   expect([403, 404]).toContain(response.status());
 });
