@@ -576,16 +576,52 @@ function roundPercentage(ratio: number) {
 }
 
 function trendRows(total: number, count: number, meta: AnalyticsMeta) {
-  const weights = [0.08, 0.11, 0.09, 0.14, 0.12, 0.16, 0.13, 0.17];
-  const fromMs = new Date(meta.range.from).getTime();
-  const toMs = new Date(meta.range.toExclusive).getTime();
-  const stepMs = Math.max(1, (toMs - fromMs) / weights.length);
+  const buckets = trendBucketStarts(meta);
+  const rawWeights = buckets.map((_, index) =>
+    1 + index / Math.max(buckets.length - 1, 1),
+  );
+  const weightTotal = rawWeights.reduce((sum, weight) => sum + weight, 0);
 
-  return weights.map((weight, index) => ({
-    bucket: new Date(fromMs + stepMs * index).toISOString(),
-    totalCents: Math.round(total * weight),
-    invoiceCount: Math.max(0, Math.round(count * weight)),
+  return buckets.map((bucket, index) => ({
+    bucket: bucket.toISOString(),
+    totalCents: Math.round((total * rawWeights[index]) / weightTotal),
+    invoiceCount: Math.max(0, Math.round((count * rawWeights[index]) / weightTotal)),
   }));
+}
+
+function trendBucketStarts(meta: AnalyticsMeta) {
+  const end = new Date(meta.range.toExclusive);
+  const cursor = new Date(meta.range.from);
+  const buckets: Date[] = [];
+
+  if (meta.range.granularity === "hour") {
+    cursor.setUTCMinutes(0, 0, 0);
+  } else if (meta.range.granularity === "day") {
+    cursor.setUTCHours(0, 0, 0, 0);
+  } else if (meta.range.granularity === "week") {
+    const day = cursor.getUTCDay();
+    const daysSinceMonday = day === 0 ? 6 : day - 1;
+    cursor.setUTCHours(0, 0, 0, 0);
+    cursor.setUTCDate(cursor.getUTCDate() - daysSinceMonday);
+  } else {
+    cursor.setUTCDate(1);
+    cursor.setUTCHours(0, 0, 0, 0);
+  }
+
+  while (cursor < end) {
+    buckets.push(new Date(cursor));
+    if (meta.range.granularity === "hour") {
+      cursor.setUTCHours(cursor.getUTCHours() + 1);
+    } else if (meta.range.granularity === "day") {
+      cursor.setUTCDate(cursor.getUTCDate() + 1);
+    } else if (meta.range.granularity === "week") {
+      cursor.setUTCDate(cursor.getUTCDate() + 7);
+    } else {
+      cursor.setUTCMonth(cursor.getUTCMonth() + 1);
+    }
+  }
+
+  return buckets;
 }
 
 function granularityForDays(days: number): AnalyticsGranularity {

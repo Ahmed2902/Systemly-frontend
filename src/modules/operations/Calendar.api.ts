@@ -60,14 +60,10 @@ export async function uploadAppointmentPhoto(
     objectPath?: string;
     publicId: string;
     contentType: string;
-  }>(
-    `${path}/presign`,
-    accessToken,
-    {
-      method: "POST",
-      body: JSON.stringify({ contentType: file.type, type: "progress" }),
-    },
-  );
+  }>(`${path}/presign`, accessToken, {
+    method: "POST",
+    body: JSON.stringify({ contentType: file.type, type: "progress" }),
+  });
   const upload = await fetch(ticket.uploadUrl, {
     method: "PUT",
     headers: { "Content-Type": ticket.contentType },
@@ -114,7 +110,9 @@ export async function getServiceCatalog(
   }));
 }
 
-function clinicText(value: string | Record<string, unknown> | null | undefined) {
+function clinicText(
+  value: string | Record<string, unknown> | null | undefined,
+) {
   if (!value) return undefined;
   return typeof value === "string" ? value : JSON.stringify(value, null, 2);
 }
@@ -144,7 +142,8 @@ function appointmentUpdateBody(appointment: AppointmentSummary) {
           clinicalSessionNotes:
             clinical.clinicalSessionNotes ?? clinical.notes ?? undefined,
           planAndPrescription:
-            clinical.planAndPrescription ?? clinicText(clinical.prescriptionJson),
+            clinical.planAndPrescription ??
+            clinicText(clinical.prescriptionJson),
         }
       : undefined,
   };
@@ -184,7 +183,10 @@ async function appointmentAction(
   return getAppointmentSummary(appointmentId, accessToken);
 }
 
-export function completeAppointment(appointmentId: string, accessToken: string) {
+export function completeAppointment(
+  appointmentId: string,
+  accessToken: string,
+) {
   return appointmentAction(appointmentId, "finish", accessToken, {});
 }
 

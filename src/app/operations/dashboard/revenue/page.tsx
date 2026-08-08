@@ -13,9 +13,9 @@ import {
   useAnalyticsPreset,
 } from "@/modules/analytics/components/AnalyticsShell";
 import {
-  AreaChart,
   MultiLineChart,
 } from "@/modules/analytics/components/AnalyticsCharts";
+import { RevenueTrendChart } from "@/modules/analytics/components/RevenueTrendChart";
 import {
   SemanticBarList,
   SemanticDonutChart,
@@ -51,6 +51,7 @@ export default function RevenueAnalyticsPage() {
       value,
       data?.timezone ?? "Africa/Cairo",
       preset,
+      data?.period.granularity,
     );
   const averageInvoicePoints =
     data?.averageInvoiceValueTrend.filter((row) => row.invoiceCount > 0) ?? [];
@@ -124,19 +125,7 @@ export default function RevenueAnalyticsPage() {
               data.timezone,
             )}`}
           >
-            <AreaChart
-              data={data.trend.map((row) => ({
-                label: shortDate(row.bucket),
-                value: row.totalCents,
-                tooltip: [
-                  { label: text("Paid invoices"), value: String(row.invoiceCount) },
-                ],
-              }))}
-              valueLabel={text("Revenue")}
-              formatValue={formatEgp}
-              formatAxisValue={formatEgp}
-              height={285}
-            />
+            <RevenueTrendChart data={data} height={285} />
           </AnalyticsPanel>
 
           <div className="grid gap-3 xl:grid-cols-[minmax(0,.9fr)_minmax(0,1.6fr)]">

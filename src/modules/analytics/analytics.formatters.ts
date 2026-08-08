@@ -45,9 +45,8 @@ function inferredGranularity(selection: AnalyticsPeriodSelection) {
     if (
       selection.preset === "last_30_days" ||
       selection.preset === "last_90_days"
-    ) {
+    )
       return "week";
-    }
     return "month";
   }
 
@@ -78,9 +77,39 @@ export function formatAnalyticsBucketForPreset(
           hour12: true,
         }
       : granularity === "month"
-        ? { month: "short", year: "2-digit" }
+        ? { month: "short", year: "numeric" }
         : { day: "numeric", month: "short" },
   );
+}
+
+export function formatAnalyticsBucketTooltip(
+  value: string,
+  timezone: string,
+  granularity: AnalyticsGranularity,
+  nextBucket?: string,
+  rangeEnd?: string,
+) {
+  if (granularity === "month") {
+    return formatAnalyticsBucket(value, timezone, {
+      month: "long",
+      year: "numeric",
+    });
+  }
+
+  const start = new Date(value);
+  const endExclusive = nextBucket ?? rangeEnd;
+  const end = endExclusive
+    ? new Date(new Date(endExclusive).getTime() - 1)
+    : start;
+  const formatter = new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: timezone,
+  });
+  const startLabel = formatter.format(start);
+  const endLabel = formatter.format(end);
+  return startLabel === endLabel ? startLabel : `${startLabel} – ${endLabel}`;
 }
 
 export function analyticsGroupingLabel(granularity: AnalyticsGranularity) {

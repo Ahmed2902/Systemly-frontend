@@ -12,6 +12,7 @@ export type TooltipLine = {
 export type ChartDatum = {
   label: string;
   value: number;
+  tooltipLabel?: string;
   tooltip?: TooltipLine[];
 };
 
@@ -61,14 +62,15 @@ function smoothPath(
 }
 
 function activeIndexFromPointer(
-  event: PointerEvent<SVGSVGElement>,
+  event: PointerEvent<SVGSVGElement | SVGRectElement>,
   width: number,
   marginLeft: number,
   innerWidth: number,
   itemCount: number,
 ) {
   if (itemCount <= 1) return 0;
-  const rect = event.currentTarget.getBoundingClientRect();
+  const svg = event.currentTarget.ownerSVGElement ?? event.currentTarget;
+  const rect = svg.getBoundingClientRect();
   const viewX = ((event.clientX - rect.left) / rect.width) * width;
   const ratio = clamp((viewX - marginLeft) / innerWidth, 0, 1);
   return Math.round(ratio * (itemCount - 1));
@@ -133,6 +135,12 @@ export function AreaChart({
   const labelStep = Math.max(Math.ceil(data.length / 7), 1);
   const activePoint = activeIndex == null ? null : points[activeIndex];
   const activeDatum = activeIndex == null ? null : data[activeIndex];
+  const handlePointerMove = (
+    event: PointerEvent<SVGSVGElement | SVGRectElement>,
+  ) =>
+    setActiveIndex(
+      activeIndexFromPointer(event, width, margin.left, innerWidth, data.length),
+    );
 
   if (data.length === 0) return <ChartEmpty />;
 
@@ -142,11 +150,7 @@ export function AreaChart({
         viewBox={`0 0 ${width} ${height}`}
         role="img"
         aria-label={text("Area chart")}
-        onPointerMove={(event) =>
-          setActiveIndex(
-            activeIndexFromPointer(event, width, margin.left, innerWidth, data.length),
-          )
-        }
+        onPointerMove={handlePointerMove}
         onPointerLeave={() => setActiveIndex(null)}
       >
         <defs>
@@ -202,6 +206,20 @@ export function AreaChart({
             </g>
           );
         })}
+
+        {/* Keep the whole plot area interactive, including gaps between the
+            visible X-axis labels and the line itself. The SVG handler still
+            resolves the pointer to the nearest real data bucket. */}
+        <rect
+          x={0}
+          y={0}
+          width={width}
+          height={height}
+          fill="transparent"
+          pointerEvents="all"
+          onPointerMove={handlePointerMove}
+          onPointerLeave={() => setActiveIndex(null)}
+        />
       </svg>
 
       {activePoint && activeDatum && activeIndex != null ? (
@@ -209,7 +227,7 @@ export function AreaChart({
           className={tooltipPositionClass(activeIndex, data.length)}
           left={(activePoint.x / width) * 100}
           top={(activePoint.y / height) * 100}
-          title={text(activeDatum.label)}
+          title={text(activeDatum.tooltipLabel ?? activeDatum.label)}
           lines={[
             { label: valueLabel, value: formatValue(activeDatum.value) },
             ...(activeDatum.tooltip ?? []),

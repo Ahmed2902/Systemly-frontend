@@ -18,14 +18,13 @@ import {
   useAnalyticsPreset,
 } from "@/modules/analytics/components/AnalyticsShell";
 import {
-  AreaChart,
   DonutChart,
   LollipopChart,
 } from "@/modules/analytics/components/AnalyticsCharts";
+import { RevenueTrendChart } from "@/modules/analytics/components/RevenueTrendChart";
 import { AppointmentStartHeatmap } from "@/modules/analytics/components/AppointmentStartHeatmap";
 import {
   analyticsGroupingLabel,
-  formatAnalyticsBucketForPreset,
   formatEgp,
   formatPercent,
 } from "@/modules/analytics/analytics.formatters";
@@ -138,24 +137,7 @@ export default function DashboardOverviewPage() {
                   </span>
                 ) : null}
               </div>
-              <AreaChart
-                data={data.revenue.trend.map((row) => ({
-                  label: formatAnalyticsBucketForPreset(
-                    row.bucket,
-                    data.revenue.timezone,
-                    period,
-                    data.revenue.period.granularity,
-                  ),
-                  value: row.totalCents,
-                  tooltip: [
-                    { label: text("Paid invoices"), value: String(row.invoiceCount) },
-                  ],
-                }))}
-                valueLabel={text("Revenue")}
-                formatValue={formatEgp}
-                formatAxisValue={formatEgp}
-                height={290}
-              />
+              <RevenueTrendChart data={data.revenue} height={290} />
             </AnalyticsPanel>
 
             <AnalyticsPanel title={text("Latest signals")}>
