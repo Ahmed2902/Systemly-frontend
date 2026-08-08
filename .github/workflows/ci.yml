@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   quality:
-    name: Typecheck, lint and build
+    name: Typecheck, lint, audit and build
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -37,6 +37,9 @@ jobs:
 
       - name: Lint
         run: npm run lint
+
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
 
       - name: Build
         run: npm run build
