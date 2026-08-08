@@ -5,14 +5,12 @@ export async function getAvailability(
   businessId: string,
   services: ServiceSelection[],
   date: string,
-  timezone?: string,
 ): Promise<AvailableSlot[]> {
   const params = new URLSearchParams({
     businessId,
     date,
     services: JSON.stringify(services),
   });
-  if (timezone) params.set("timezone", timezone);
 
   const res = await fetch(
     apiUrl(`/bookings/availability?${params.toString()}`),
@@ -29,7 +27,6 @@ export async function submitBooking(payload: {
   businessId: string;
   services: ServiceSelection[];
   startsAt: string;
-  timezone?: string;
   customerName: string;
   customerPhone: string;
   notes?: string;
