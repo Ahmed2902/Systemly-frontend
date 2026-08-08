@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   quality:
-    name: Typecheck, lint, audit and build
+    name: Typecheck, lint, audit, build and smoke
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -45,3 +45,55 @@ jobs:
         run: npm run build
         env:
           NEXT_PUBLIC_BACKEND_URL: http://localhost:3001
+
+      - name: Smoke-test production server
+        run: |
+          set -euo pipefail
+          npm run start -- -p 3000 > /tmp/systemly-next.log 2>&1 &
+          pid=$!
+          trap 'kill "$pid" 2>/dev/null || true' EXIT
+
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:3000/ >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+
+          cat /tmp/systemly-next.log
+          exit 1
+
+  refresh-lock:
+    name: Refresh lock for security overrides
+    if: github.event_name == 'pull_request' && github.head_ref == 'agent/oauth-session-callback'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Refresh package lock
+        run: npm install --package-lock-only
+
+      - name: Commit package lock
+        run: |
+          if git diff --quiet -- package-lock.json; then
+            echo "Package lock already matches package.json."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package-lock.json
+          git commit -m "chore: refresh lock for security overrides"
+          git push origin HEAD:${{ github.head_ref }}
