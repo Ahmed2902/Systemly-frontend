@@ -1,0 +1,83 @@
+name: Full-stack E2E
+
+on:
+  workflow_dispatch:
+    inputs:
+      frontend_url:
+        description: Deployed frontend origin, for example https://app.example.com
+        required: true
+        type: string
+      backend_url:
+        description: Deployed backend origin, for example https://api.example.com
+        required: true
+        type: string
+
+concurrency:
+  group: full-stack-e2e-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  e2e:
+    name: Browser, security, concurrency and real-email E2E
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: staging-e2e
+    env:
+      E2E_FRONTEND_URL: ${{ inputs.frontend_url }}
+      E2E_BACKEND_URL: ${{ inputs.backend_url }}
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+      E2E_EXISTING_USER_EMAIL: ${{ secrets.E2E_EXISTING_USER_EMAIL }}
+      E2E_OWNER_EMAIL: ${{ secrets.E2E_OWNER_EMAIL }}
+      E2E_OWNER_PASSWORD: ${{ secrets.E2E_OWNER_PASSWORD }}
+      E2E_FOREIGN_STAFF_ID: ${{ secrets.E2E_FOREIGN_STAFF_ID }}
+      E2E_BOOKING_PAYLOAD_JSON: ${{ secrets.E2E_BOOKING_PAYLOAD_JSON }}
+      E2E_PAYMENT_APPOINTMENT_ID: ${{ secrets.E2E_PAYMENT_APPOINTMENT_ID }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install application dependencies
+        run: npm ci
+
+      - name: Install Playwright runner for E2E job
+        run: npm install --no-save --package-lock=false @playwright/test@1.55.0
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Verify target URLs are production-like
+        shell: bash
+        run: |
+          set -euo pipefail
+          for value in "$E2E_FRONTEND_URL" "$E2E_BACKEND_URL"; do
+            case "$value" in
+              https://*) ;;
+              *) echo "E2E target must use https: $value" >&2; exit 1 ;;
+            esac
+            if echo "$value" | grep -Eqi 'localhost|127\.0\.0\.1|0\.0\.0\.0'; then
+              echo "Refusing to run deployed E2E against a local URL: $value" >&2
+              exit 1
+            fi
+          done
+
+      - name: Run Playwright full-stack suite
+        run: npx playwright test
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report
+          if-no-files-found: ignore
+          retention-days: 14
