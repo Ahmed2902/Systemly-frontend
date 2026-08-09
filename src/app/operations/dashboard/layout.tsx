@@ -1,5 +1,5 @@
 "use client";
-
+<meta name="google-site-verification" content="eJTHVDziI132sDuQ2QnwYjJ05dbnwFWHRrVmfUokKkM" />
 import { usePlatformText } from "@/i18n/usePlatformText";
 import { useEffect, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
