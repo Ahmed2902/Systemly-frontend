@@ -1,10 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { AlertTriangle, CalendarClock, LockKeyhole } from "lucide-react";
+import { AlertTriangle, LockKeyhole } from "lucide-react";
 import {
   daysUntil,
-  trialDaysRemaining,
   type SubscriptionAccessSnapshot,
 } from "../subscription-access";
 import { useSubscriptionCopy } from "../subscription-copy";
@@ -53,31 +52,7 @@ export function SubscriptionAccessNotice({
     );
   }
 
-  const trialDays = trialDaysRemaining(access);
-  if (trialDays === null) return null;
-
-  const urgent = trialDays <= 3;
-  return (
-    <div
-      className={`border-b px-4 py-3 sm:px-6 ${
-        urgent
-          ? "border-amber-500/25 bg-amber-500/10 text-amber-600"
-          : "border-[var(--op-border)] bg-[var(--op-surface-soft)] text-[var(--op-text-secondary)]"
-      }`}
-    >
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3">
-        <p className="flex items-center gap-2 text-sm font-medium">
-          <CalendarClock size={16} />
-          {trialDays === 0
-            ? copy.trialEndsToday
-            : copy.trialDaysLeft(trialDays)}
-        </p>
-        <Link href="/operations/settings/billing" className="op-button">
-          {copy.viewPlan}
-        </Link>
-      </div>
-    </div>
-  );
+  return null;
 }
 
 export function SubscriptionBlockedState() {
