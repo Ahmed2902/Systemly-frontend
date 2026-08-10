@@ -15,6 +15,7 @@ const REVEAL_GROUPS = [
   ".lp-audience-heading > *",
   ".lp-audience-bento article",
   ".lp-green-grid > *",
+  ".lp-pricing-v2-shell > *",
   ".lp-final-section .lp-shell > *",
 ] as const;
 
@@ -24,6 +25,7 @@ const SOFT_SCALE_SELECTORS = new Set([
   ".lp-chapter",
   ".lp-audience-bento article",
   ".lp-green-grid > *",
+  ".lp-pricing-v2-shell > *",
 ]);
 
 function easeInOutCubic(progress: number) {
