@@ -4,6 +4,7 @@ import { usePlatformText } from "@/i18n/usePlatformText";
 import { useEffect, useMemo, useState } from "react";
 import { X, Search } from "lucide-react";
 import { useAuth } from "@/modules/auth/useAuth";
+import type { CustomerGender } from "@/modules/customers/customers.types";
 import { useOperations } from "../operations.context";
 import {
   getAvailability,
@@ -11,6 +12,7 @@ import {
   getStaffRoster,
   searchCustomers,
   createManualAppointment,
+  saveCustomerDemographicsByPhone,
   type CustomerSearchResult,
 } from "../NewAppointment.api";
 import type {
@@ -29,6 +31,7 @@ export function NewAppointmentModal() {
   } = useOperations();
   const { user, accessToken } = useAuth();
   const businessId = user?.businessId ?? null;
+  const isClinic = user?.vertical === "clinic";
 
   const [catalog, setCatalog] = useState<ServiceCatalogItem[]>([]);
   const [staff, setStaff] = useState<StaffMember[]>([]);
@@ -46,6 +49,8 @@ export function NewAppointmentModal() {
 
   const [customerPhone, setCustomerPhone] = useState("");
   const [customerName, setCustomerName] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState("");
+  const [gender, setGender] = useState<CustomerGender | "">("");
   const [notes, setNotes] = useState("");
   const [phoneMatches, setPhoneMatches] = useState<CustomerSearchResult[]>([]);
   const [searchingPhone, setSearchingPhone] = useState(false);
@@ -101,7 +106,6 @@ export function NewAppointmentModal() {
     [selectedServiceIds, staffChoices],
   );
 
-  // Reset everything when the modal closes
   useEffect(() => {
     if (!isNewAppointmentOpen) {
       setActiveStep(1);
@@ -111,6 +115,8 @@ export function NewAppointmentModal() {
       setSelectedSlot(null);
       setCustomerPhone("");
       setCustomerName("");
+      setDateOfBirth("");
+      setGender("");
       setNotes("");
       setPhoneMatches([]);
       setError(null);
@@ -121,6 +127,8 @@ export function NewAppointmentModal() {
     if (!isNewAppointmentOpen || !appointmentCustomer) return;
     setCustomerName(appointmentCustomer.name);
     setCustomerPhone(appointmentCustomer.phone);
+    setDateOfBirth(appointmentCustomer.dateOfBirth?.slice(0, 10) ?? "");
+    setGender(appointmentCustomer.gender ?? "");
     setPhoneMatches([]);
     setError(null);
   }, [isNewAppointmentOpen, appointmentCustomer]);
@@ -132,7 +140,6 @@ export function NewAppointmentModal() {
     }
   }, [isNewAppointmentOpen, activeStep, selectedServiceIds.length]);
 
-  // Load catalog + staff once when opened
   useEffect(() => {
     if (!isNewAppointmentOpen || !businessId || !accessToken) return;
     setLoadingCatalog(true);
@@ -161,7 +168,6 @@ export function NewAppointmentModal() {
       .finally(() => setLoadingCatalog(false));
   }, [isNewAppointmentOpen, businessId, accessToken]);
 
-  // Fetch availability whenever selections or date change
   useEffect(() => {
     if (!businessId || !accessToken || selections.length === 0) {
       setSlots([]);
@@ -174,11 +180,10 @@ export function NewAppointmentModal() {
         .then(setSlots)
         .catch((e) => setError(e.message ?? "Failed to load availability"))
         .finally(() => setLoadingSlots(false));
-    }, 250); // debounce rapid staff/service toggles
+    }, 250);
     return () => clearTimeout(timer);
   }, [businessId, accessToken, date, selections]);
 
-  // Debounced customer lookup by phone
   useEffect(() => {
     if (!accessToken || customerPhone.trim().length < 4) {
       setPhoneMatches([]);
@@ -267,6 +272,16 @@ export function NewAppointmentModal() {
         },
         accessToken,
       );
+      if (isClinic && (dateOfBirth || gender)) {
+        await saveCustomerDemographicsByPhone(
+          customerPhone.trim(),
+          {
+            dateOfBirth: dateOfBirth || null,
+            gender: gender || null,
+          },
+          accessToken,
+        );
+      }
       notifyAppointmentCreated();
       closeNewAppointment();
     } catch (e: unknown) {
@@ -302,13 +317,11 @@ export function NewAppointmentModal() {
               <div className="text-sm font-semibold uppercase tracking-[0.18em] text-blue-700">
                 <h2 className="text-2xl font-semibold ">{text("New Appointment")}</h2>
               </div>
-
               <p className="text-sm text-slate-500">
                 {text("Keep everything in the modal while you build the booking step by step.")}
               </p>
             </div>
           </div>
-
           <div className="text-sm font-medium text-slate-500">
             {text("Step")} {activeStep} {text("of 5")}
           </div>
@@ -324,9 +337,7 @@ export function NewAppointmentModal() {
                   key={step.id}
                   type="button"
                   onClick={() => {
-                    if (step.id === 1 || step.id < activeStep) {
-                      setActiveStep(step.id);
-                    }
+                    if (step.id === 1 || step.id < activeStep) setActiveStep(step.id);
                   }}
                   className="flex items-center gap-3"
                 >
@@ -341,9 +352,7 @@ export function NewAppointmentModal() {
                   </div>
                   <span
                     className={`text-sm font-medium ${
-                      isActive || isComplete
-                        ? "text-slate-900"
-                        : "text-slate-400"
+                      isActive || isComplete ? "text-slate-900" : "text-slate-400"
                     }`}
                   >
                     {text(step.label)}
@@ -363,7 +372,6 @@ export function NewAppointmentModal() {
               {error}
             </div>
           )}
-
           {loadingCatalog && activeStep <= 2 && (
             <div className="mb-4 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-500">
               {text("Loading services and staff…")}
@@ -381,17 +389,13 @@ export function NewAppointmentModal() {
                     {text("Search an existing customer or create a fresh profile.")}
                   </p>
                 </div>
-
                 <div className="space-y-4">
                   <div>
                     <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
                       {text("Search existing")}
                     </div>
                     <div className="relative">
-                      <Search
-                        size={16}
-                        className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                      />
+                      <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                       <input
                         type="tel"
                         value={customerPhone}
@@ -400,11 +404,7 @@ export function NewAppointmentModal() {
                         className="w-full rounded-2xl border border-slate-300 bg-white py-3 pl-10 pr-4 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                       />
                     </div>
-                    {searchingPhone && (
-                      <div className="mt-2 text-xs text-slate-400">
-                        {text("Searching…")}
-                      </div>
-                    )}
+                    {searchingPhone && <div className="mt-2 text-xs text-slate-400">{text("Searching…")}</div>}
                     {phoneMatches.length > 0 && (
                       <div className="mt-3 space-y-2">
                         {phoneMatches.map((customer) => (
@@ -414,22 +414,18 @@ export function NewAppointmentModal() {
                             onClick={() => {
                               setCustomerPhone(customer.phone);
                               setCustomerName(customer.name);
+                              setDateOfBirth(customer.dateOfBirth?.slice(0, 10) ?? "");
+                              setGender(customer.gender ?? "");
                               setPhoneMatches([]);
                               setError(null);
                             }}
                             className="flex w-full items-center justify-between rounded-2xl border border-slate-200 px-4 py-3 text-left transition hover:border-blue-300 hover:bg-blue-50/60"
                           >
                             <div>
-                              <div className="font-medium text-slate-950">
-                                {customer.name || "Unnamed customer"}
-                              </div>
-                              <div className="text-xs text-slate-500">
-                                {customer.phone} · {customer.visitCount} visits
-                              </div>
+                              <div className="font-medium text-slate-950">{customer.name || "Unnamed customer"}</div>
+                              <div className="text-xs text-slate-500">{customer.phone} · {customer.visitCount} visits</div>
                             </div>
-                            <div className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
-                              {text("Use")}
-                            </div>
+                            <div className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">{text("Use")}</div>
                           </button>
                         ))}
                       </div>
@@ -440,58 +436,43 @@ export function NewAppointmentModal() {
 
               <section className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
                 <div className="mb-5">
-                  <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                    {text("Or add new customer")}
-                  </div>
-                  <h3 className="mt-1 text-xl font-semibold text-slate-950">
-                    {text("Customer details")}
-                  </h3>
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">{text("Or add new customer")}</div>
+                  <h3 className="mt-1 text-xl font-semibold text-slate-950">{text("Customer details")}</h3>
                 </div>
-
                 <div className="space-y-4">
                   <div>
-                    <label className="mb-1 block text-sm font-medium text-slate-700">
-                      {text("Full name")}
-                    </label>
-                    <input
-                      type="text"
-                      value={customerName}
-                      onChange={(e) => setCustomerName(e.target.value)}
-                      placeholder={text("e.g. Sarah Jenkins")}
-                      className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    />
+                    <label className="mb-1 block text-sm font-medium text-slate-700">{text("Full name")}</label>
+                    <input type="text" value={customerName} onChange={(e) => setCustomerName(e.target.value)} placeholder={text("e.g. Sarah Jenkins")} className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
                   </div>
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-slate-700">{text("Phone number")}</label>
+                    <input type="tel" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} placeholder="+20..." className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+                  </div>
+
+                  {isClinic ? (
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div>
+                        <label className="mb-1 block text-sm font-medium text-slate-700">{text("Date of birth")} <span className="font-normal text-slate-400">({text("optional")})</span></label>
+                        <input type="date" max={new Date().toISOString().slice(0, 10)} value={dateOfBirth} onChange={(e) => setDateOfBirth(e.target.value)} className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+                      </div>
+                      <div>
+                        <label className="mb-1 block text-sm font-medium text-slate-700">{text("Gender")} <span className="font-normal text-slate-400">({text("optional")})</span></label>
+                        <select value={gender} onChange={(e) => setGender(e.target.value as CustomerGender | "")} className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                          <option value="">{text("Not provided")}</option>
+                          <option value="female">{text("Female")}</option>
+                          <option value="male">{text("Male")}</option>
+                        </select>
+                      </div>
+                    </div>
+                  ) : null}
 
                   <div>
-                    <label className="mb-1 block text-sm font-medium text-slate-700">
-                      {text("Phone number")}
-                    </label>
-                    <input
-                      type="tel"
-                      value={customerPhone}
-                      onChange={(e) => setCustomerPhone(e.target.value)}
-                      placeholder="+1..."
-                      className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    />
+                    <label className="mb-1 block text-sm font-medium text-slate-700">{text("Notes")}</label>
+                    <textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder={text("Optional booking notes")} rows={4} className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
                   </div>
-
-                  <div>
-                    <label className="mb-1 block text-sm font-medium text-slate-700">
-                      {text("Notes")}
-                    </label>
-                    <textarea
-                      value={notes}
-                      onChange={(e) => setNotes(e.target.value)}
-                      placeholder={text("Optional booking notes")}
-                      rows={4}
-                      className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    />
-                  </div>
-
                   {(customerName.trim() || customerPhone.trim()) && (
                     <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
-                      {customerName.trim() || "Unnamed customer"} ·{" "}
-                      {customerPhone.trim() || "No phone"}
+                      {customerName.trim() || "Unnamed customer"} · {customerPhone.trim() || "No phone"}
                     </div>
                   )}
                 </div>
@@ -503,63 +484,27 @@ export function NewAppointmentModal() {
             <section className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
               <div className="mb-5 flex items-start justify-between gap-4">
                 <div>
-                  <h3 className="text-xl font-semibold text-slate-950">
-                    {text("Choose services")}
-                  </h3>
-                  <p className="mt-1 text-sm text-slate-500">
-                    {text("Select the services this appointment should include.")}
-                  </p>
+                  <h3 className="text-xl font-semibold text-slate-950">{text("Choose services")}</h3>
+                  <p className="mt-1 text-sm text-slate-500">{text("Select the services this appointment should include.")}</p>
                 </div>
-                <div className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-600">
-                  {selectedServiceIds.length} selected
-                </div>
+                <div className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-600">{selectedServiceIds.length} selected</div>
               </div>
-
               <div className="grid gap-3 md:grid-cols-2">
                 {catalog.map((svc) => {
                   const eligible = eligibleStaffFor(svc.id);
                   const hasEligibleStaff = eligible.length > 0;
                   const checked = selectedServiceIds.includes(svc.id);
                   return (
-                    <button
-                      key={svc.id}
-                      type="button"
-                      onClick={() => hasEligibleStaff && toggleService(svc.id)}
-                      className={`rounded-2xl border p-4 text-left transition ${
-                        !hasEligibleStaff
-                          ? "cursor-not-allowed border-slate-200 bg-slate-50 opacity-60"
-                          : checked
-                            ? "border-blue-500 bg-blue-50 shadow-sm"
-                            : "border-slate-200 bg-white hover:border-blue-300 hover:bg-slate-50"
-                      }`}
-                    >
+                    <button key={svc.id} type="button" onClick={() => hasEligibleStaff && toggleService(svc.id)} className={`rounded-2xl border p-4 text-left transition ${!hasEligibleStaff ? "cursor-not-allowed border-slate-200 bg-slate-50 opacity-60" : checked ? "border-blue-500 bg-blue-50 shadow-sm" : "border-slate-200 bg-white hover:border-blue-300 hover:bg-slate-50"}`}>
                       <div className="flex items-start justify-between gap-3">
                         <div>
-                          <div className="text-sm font-semibold text-slate-950">
-                            {svc.name}
-                          </div>
-                          <div className="mt-1 text-xs text-slate-500">
-                            {svc.defaultDurationMinutes} {text("min ·")}{" "}
-                            {(svc.defaultPrice / 100).toFixed(0)} EGP
-                          </div>
+                          <div className="text-sm font-semibold text-slate-950">{svc.name}</div>
+                          <div className="mt-1 text-xs text-slate-500">{svc.defaultDurationMinutes} {text("min ·")} {(svc.defaultPrice / 100).toFixed(0)} EGP</div>
                         </div>
-                        <div
-                          className={`mt-0.5 flex h-5 w-5 items-center justify-center rounded-full border text-[11px] font-semibold ${
-                            checked
-                              ? "border-blue-600 bg-blue-600 text-white"
-                              : "border-slate-300 bg-white text-slate-400"
-                          }`}
-                        >
-                          {checked ? "✓" : ""}
-                        </div>
+                        <div className={`mt-0.5 flex h-5 w-5 items-center justify-center rounded-full border text-[11px] font-semibold ${checked ? "border-blue-600 bg-blue-600 text-white" : "border-slate-300 bg-white text-slate-400"}`}>{checked ? "✓" : ""}</div>
                       </div>
-
                       <div className="mt-4 flex items-center justify-between text-xs text-slate-500">
-                        <span>
-                          {hasEligibleStaff
-                            ? `${eligible.length} eligible staff`
-                            : text("No staff assigned to this service")}
-                        </span>
+                        <span>{hasEligibleStaff ? `${eligible.length} eligible staff` : text("No staff assigned to this service")}</span>
                         <span>{checked ? text("Selected") : text("Tap to add")}</span>
                       </div>
                     </button>
@@ -572,78 +517,26 @@ export function NewAppointmentModal() {
           {activeStep === 3 && (
             <section className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
               <div className="mb-5">
-                <h3 className="text-xl font-semibold text-slate-950">
-                  {text("Assign staff")}
-                </h3>
-                <p className="mt-1 text-sm text-slate-500">
-                  {text("Pick an eligible staff member for each selected service.")}
-                </p>
+                <h3 className="text-xl font-semibold text-slate-950">{text("Assign staff")}</h3>
+                <p className="mt-1 text-sm text-slate-500">{text("Pick an eligible staff member for each selected service.")}</p>
               </div>
-
               <div className="space-y-4">
                 {selectedServices.map((service) => {
                   const eligible = eligibleStaffFor(service.id);
                   const current = staffChoices[service.id] ?? "any";
                   return (
-                    <div
-                      key={service.id}
-                      className="rounded-2xl border border-slate-200 p-4"
-                    >
+                    <div key={service.id} className="rounded-2xl border border-slate-200 p-4">
                       <div className="mb-3 flex items-center justify-between gap-3">
-                        <div>
-                          <div className="text-sm font-semibold text-slate-950">
-                            {service.name}
-                          </div>
-                          <div className="text-xs text-slate-500">
-                            {service.defaultDurationMinutes} {text("min ·")}{" "}
-                            {(service.defaultPrice / 100).toFixed(0)} EGP
-                          </div>
-                        </div>
-                        <div className="text-xs text-slate-500">
-                          {eligible.length} available
-                        </div>
+                        <div><div className="text-sm font-semibold text-slate-950">{service.name}</div><div className="text-xs text-slate-500">{service.defaultDurationMinutes} {text("min ·")} {(service.defaultPrice / 100).toFixed(0)} EGP</div></div>
+                        <div className="text-xs text-slate-500">{eligible.length} available</div>
                       </div>
-
                       {eligible.length === 0 ? (
-                        <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                          {text("No staff assigned to this service")}
-                        </div>
+                        <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">{text("No staff assigned to this service")}</div>
                       ) : (
                         <div className="flex flex-wrap gap-2">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setStaffChoices((prev) => ({
-                                ...prev,
-                                [service.id]: "any",
-                              }))
-                            }
-                            className={`rounded-full border px-4 py-2 text-xs font-medium transition ${
-                              current === "any"
-                                ? "border-blue-600 bg-blue-600 text-white"
-                                : "border-slate-300 bg-white text-slate-600 hover:border-blue-300"
-                            }`}
-                          >
-                            {text("Any available")}
-                          </button>
+                          <button type="button" onClick={() => setStaffChoices((prev) => ({ ...prev, [service.id]: "any" }))} className={`rounded-full border px-4 py-2 text-xs font-medium transition ${current === "any" ? "border-blue-600 bg-blue-600 text-white" : "border-slate-300 bg-white text-slate-600 hover:border-blue-300"}`}>{text("Any available")}</button>
                           {eligible.map((member) => (
-                            <button
-                              key={member.id}
-                              type="button"
-                              onClick={() =>
-                                setStaffChoices((prev) => ({
-                                  ...prev,
-                                  [service.id]: member.id,
-                                }))
-                              }
-                              className={`rounded-full border px-4 py-2 text-xs font-medium transition ${
-                                current === member.id
-                                  ? "border-blue-600 bg-blue-600 text-white"
-                                  : "border-slate-300 bg-white text-slate-600 hover:border-blue-300"
-                              }`}
-                            >
-                              {member.name}
-                            </button>
+                            <button key={member.id} type="button" onClick={() => setStaffChoices((prev) => ({ ...prev, [service.id]: member.id }))} className={`rounded-full border px-4 py-2 text-xs font-medium transition ${current === member.id ? "border-blue-600 bg-blue-600 text-white" : "border-slate-300 bg-white text-slate-600 hover:border-blue-300"}`}>{member.name}</button>
                           ))}
                         </div>
                       )}
@@ -657,49 +550,19 @@ export function NewAppointmentModal() {
           {activeStep === 4 && (
             <section className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
               <div className="mb-5 flex items-center justify-between gap-4">
-                <div>
-                  <h3 className="text-xl font-semibold text-slate-950">
-                    {text("Pick a time")}
-                  </h3>
-                  <p className="mt-1 text-sm text-slate-500">
-                    {text("Available slots for the selected services.")}
-                  </p>
-                </div>
-                <input
-                  type="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                />
+                <div><h3 className="text-xl font-semibold text-slate-950">{text("Pick a time")}</h3><p className="mt-1 text-sm text-slate-500">{text("Available slots for the selected services.")}</p></div>
+                <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
               </div>
-
               {selectedServiceIds.length === 0 ? (
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-500">
-                  {text("Select at least one service first.")}
-                </div>
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-500">{text("Select at least one service first.")}</div>
               ) : loadingSlots ? (
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-500">
-                  {text("Loading slots…")}
-                </div>
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-500">{text("Loading slots…")}</div>
               ) : slots.length === 0 ? (
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-500">
-                  {text("No available slots for this date.")}
-                </div>
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-500">{text("No available slots for this date.")}</div>
               ) : (
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
                   {slots.map((slot) => (
-                    <button
-                      key={slot.time}
-                      type="button"
-                      onClick={() => setSelectedSlot(slot)}
-                      className={`rounded-2xl border px-4 py-3 text-sm font-medium transition ${
-                        selectedSlot?.time === slot.time
-                          ? "border-blue-600 bg-blue-600 text-white"
-                          : "border-slate-300 bg-white text-slate-700 hover:border-blue-300 hover:bg-slate-50"
-                      }`}
-                    >
-                      {slot.display}
-                    </button>
+                    <button key={slot.time} type="button" onClick={() => setSelectedSlot(slot)} className={`rounded-2xl border px-4 py-3 text-sm font-medium transition ${selectedSlot?.time === slot.time ? "border-blue-600 bg-blue-600 text-white" : "border-slate-300 bg-white text-slate-700 hover:border-blue-300 hover:bg-slate-50"}`}>{slot.display}</button>
                   ))}
                 </div>
               )}
@@ -710,126 +573,50 @@ export function NewAppointmentModal() {
             <section className="grid gap-5 lg:grid-cols-[1fr_0.9fr]">
               <div className="space-y-5">
                 <div className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
-                  <h3 className="text-xl font-semibold text-slate-950">
-                    {text("Review appointment")}
-                  </h3>
-                  <p className="mt-1 text-sm text-slate-500">
-                    {text("Check the summary before creating the booking.")}
-                  </p>
-
+                  <h3 className="text-xl font-semibold text-slate-950">{text("Review appointment")}</h3>
+                  <p className="mt-1 text-sm text-slate-500">{text("Check the summary before creating the booking.")}</p>
                   <div className="mt-5 grid gap-3 sm:grid-cols-2">
                     <div className="rounded-2xl bg-slate-50 px-4 py-3">
-                      <div className="text-xs uppercase tracking-wide text-slate-500">
-                        {text("Customer")}
-                      </div>
-                      <div className="mt-1 font-medium text-slate-950">
-                        {customerName.trim() || "Unnamed customer"}
-                      </div>
-                      <div className="text-sm text-slate-500">
-                        {customerPhone.trim() || "No phone"}
-                      </div>
+                      <div className="text-xs uppercase tracking-wide text-slate-500">{text("Customer")}</div>
+                      <div className="mt-1 font-medium text-slate-950">{customerName.trim() || "Unnamed customer"}</div>
+                      <div className="text-sm text-slate-500">{customerPhone.trim() || "No phone"}</div>
+                      {isClinic && (dateOfBirth || gender) ? <div className="mt-1 text-xs text-slate-400">{[dateOfBirth || null, gender ? text(gender === "female" ? "Female" : "Male") : null].filter(Boolean).join(" · ")}</div> : null}
                     </div>
                     <div className="rounded-2xl bg-slate-50 px-4 py-3">
-                      <div className="text-xs uppercase tracking-wide text-slate-500">
-                        {text("Date & time")}
-                      </div>
-                      <div className="mt-1 font-medium text-slate-950">
-                        {date}
-                      </div>
-                      <div className="text-sm text-slate-500">
-                        {selectedSlot?.display ?? "No slot selected"}
-                      </div>
+                      <div className="text-xs uppercase tracking-wide text-slate-500">{text("Date & time")}</div>
+                      <div className="mt-1 font-medium text-slate-950">{date}</div>
+                      <div className="text-sm text-slate-500">{selectedSlot?.display ?? "No slot selected"}</div>
                     </div>
                   </div>
                 </div>
-
                 <div className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
-                  <div className="mb-4 flex items-center justify-between">
-                    <h4 className="text-lg font-semibold text-slate-950">
-                      {text("Booked services")}
-                    </h4>
-                    <button
-                      type="button"
-                      onClick={() => setActiveStep(2)}
-                      className="text-sm font-medium text-blue-700 hover:underline"
-                    >
-                      {text("Edit")}
-                    </button>
-                  </div>
-
+                  <div className="mb-4 flex items-center justify-between"><h4 className="text-lg font-semibold text-slate-950">{text("Booked services")}</h4><button type="button" onClick={() => setActiveStep(2)} className="text-sm font-medium text-blue-700 hover:underline">{text("Edit")}</button></div>
                   <div className="space-y-3">
                     {selectedServices.map((service) => (
-                      <div
-                        key={service.id}
-                        className="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-3"
-                      >
-                        <div>
-                          <div className="font-medium text-slate-950">
-                            {service.name}
-                          </div>
-                          <div className="text-xs text-slate-500">
-                            {service.defaultDurationMinutes} {text("mins ·")}{" "}
-                            {(service.defaultPrice / 100).toFixed(0)} EGP
-                          </div>
-                        </div>
-                        <div className="text-right text-xs text-slate-500">
-                          {selectedStaffByServiceId.get(service.id)?.name ??
-                            "Any available staff"}
-                        </div>
+                      <div key={service.id} className="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-3">
+                        <div><div className="font-medium text-slate-950">{service.name}</div><div className="text-xs text-slate-500">{service.defaultDurationMinutes} {text("mins ·")} {(service.defaultPrice / 100).toFixed(0)} EGP</div></div>
+                        <div className="text-right text-xs text-slate-500">{selectedStaffByServiceId.get(service.id)?.name ?? "Any available staff"}</div>
                       </div>
                     ))}
                   </div>
                 </div>
               </div>
-
               <div className="space-y-5">
-                <div className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
-                  <h4 className="text-lg font-semibold text-slate-950">
-                    {text("Notes")}
-                  </h4>
-                  <div className="mt-3 rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-600">
-                    {notes.trim() || "No additional notes"}
-                  </div>
-                </div>
-
-                <div className="rounded-[24px] border border-blue-200 bg-blue-50 p-5">
-                  <div className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-700">
-                    {text("Ready to book")}
-                  </div>
-                  <div className="mt-2 text-sm text-blue-900/80">
-                    {text("You can submit the appointment now or go back and change any step.")}
-                  </div>
-                </div>
+                <div className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm"><h4 className="text-lg font-semibold text-slate-950">{text("Notes")}</h4><div className="mt-3 rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-600">{notes.trim() || "No additional notes"}</div></div>
+                <div className="rounded-[24px] border border-blue-200 bg-blue-50 p-5"><div className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-700">{text("Ready to book")}</div><div className="mt-2 text-sm text-blue-900/80">{text("You can submit the appointment now or go back and change any step.")}</div></div>
               </div>
             </section>
           )}
         </div>
 
         <div className="flex items-center justify-between border-t border-slate-200 bg-white px-6 py-4">
+          <button onClick={activeStep === 1 ? closeNewAppointment : goBack} className="rounded-2xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50">{activeStep === 1 ? text("Cancel") : text("Back")}</button>
           <button
-            onClick={activeStep === 1 ? closeNewAppointment : goBack}
-            className="rounded-2xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-          >
-            {activeStep === 1 ? text("Cancel") : text("Back")}
-          </button>
-
-          <button
-            onClick={
-              activeStep === 5
-                ? handleSubmit
-                : () => {
-                    if (!validateStep(activeStep)) return;
-                    setActiveStep((step) => Math.min(5, step + 1));
-                  }
-            }
+            onClick={activeStep === 5 ? handleSubmit : () => { if (!validateStep(activeStep)) return; setActiveStep((step) => Math.min(5, step + 1)); }}
             disabled={submitting || (activeStep === 5 && !readyToSubmit)}
             className="rounded-2xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {activeStep === 5
-              ? submitting
-                ? text("Booking…")
-                : text("Book appointment")
-              : text("Next step")}
+            {activeStep === 5 ? (submitting ? text("Booking…") : text("Book appointment")) : text("Next step")}
           </button>
         </div>
       </div>
