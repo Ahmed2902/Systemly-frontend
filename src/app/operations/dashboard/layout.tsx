@@ -1,5 +1,4 @@
 "use client";
-<meta name="google-site-verification" content="eJTHVDziI132sDuQ2QnwYjJ05dbnwFWHRrVmfUokKkM" />
 import { usePlatformText } from "@/i18n/usePlatformText";
 import { useEffect, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
@@ -10,7 +9,11 @@ import {
   OperationsState,
 } from "@/modules/operations/components/OperationsUI";
 
-export default function OwnerAnalyticsLayout({ children }: { children: ReactNode }) {
+export default function OwnerAnalyticsLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
   const text = usePlatformText();
   const router = useRouter();
   const { user, loading } = useAuth();
@@ -39,7 +42,9 @@ export default function OwnerAnalyticsLayout({ children }: { children: ReactNode
         <OperationsPageInner className="flex min-h-full items-center justify-center">
           <OperationsState
             title={text("Owner access required")}
-            description={text("Financial and owner analytics are restricted to the business owner. Redirecting to the calendar…")}
+            description={text(
+              "Financial and owner analytics are restricted to the business owner. Redirecting to the calendar…",
+            )}
           />
         </OperationsPageInner>
       </OperationsPage>

@@ -2,6 +2,7 @@
 import "./globals.css";
 import "./systemly-shared.css";
 import { cookies, headers } from "next/headers";
+import type { Metadata } from "next";
 import { AuthProvider } from "@/modules/auth/useAuth";
 import { LocaleProvider } from "@/i18n/LocaleProvider";
 import {
@@ -13,6 +14,12 @@ import {
 } from "@/i18n/config";
 import { PlatformLanguageControl } from "@/shared/components/PlatformLanguageControl";
 import { Cairo, Inter, Playfair_Display } from "next/font/google";
+
+export const metadata: Metadata = {
+  verification: {
+    google: "eJTHVDziI132sDuQ2QnwYjJ05dbnwFWHRrVmfUokKkM",
+  },
+};
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
