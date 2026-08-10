@@ -29,6 +29,8 @@ export async function submitBooking(payload: {
   startsAt: string;
   customerName: string;
   customerPhone: string;
+  dateOfBirth?: string;
+  gender?: "male" | "female";
   notes?: string;
   acquisitionSource?: string;
 }) {

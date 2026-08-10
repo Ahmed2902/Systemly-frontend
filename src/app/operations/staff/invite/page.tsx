@@ -17,19 +17,14 @@ import {
 } from "@/modules/operations/components/OperationsUI";
 import {
   createStaffInvite,
-  type InviteRole,
   type StaffInviteResult,
 } from "@/modules/staff/staff-invites.api";
-
-const inviteRoles: InviteRole[] = ["Receptionist", "Staff"];
-const receptionistRole = inviteRoles[0];
 
 export default function InviteStaffPage() {
   const text = usePlatformText();
   const { locale } = useLocale();
   const { user, accessToken } = useAuth();
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState<InviteRole>(receptionistRole);
   const [result, setResult] = useState<StaffInviteResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -42,7 +37,7 @@ export default function InviteStaffPage() {
     setError(null);
     setResult(null);
     try {
-      setResult(await createStaffInvite({ email: email.trim(), role }, accessToken));
+      setResult(await createStaffInvite({ email: email.trim() }, accessToken));
     } catch (caught: unknown) {
       setError(caught instanceof Error ? caught.message : text("Unable to create invitation"));
     } finally {
@@ -100,37 +95,6 @@ export default function InviteStaffPage() {
                 dir="ltr"
               />
             </label>
-
-            <fieldset>
-              <legend className="text-sm font-semibold text-[var(--op-text-secondary)]">{text("Account role")}</legend>
-              <div className="mt-2 grid gap-3 sm:grid-cols-2">
-                {inviteRoles.map((value) => (
-                  <label
-                    key={value}
-                    className={`cursor-pointer rounded-[11px] border p-4 transition ${
-                      role === value
-                        ? "border-[var(--op-border-strong)] bg-[var(--op-selected)] shadow-[inset_2px_0_0_var(--op-text)]"
-                        : "border-[var(--op-border)] bg-[var(--op-surface)] hover:bg-[var(--op-hover)]"
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="role"
-                      value={value}
-                      checked={role === value}
-                      onChange={() => setRole(value)}
-                      className="sr-only"
-                    />
-                    <strong className="text-sm text-[var(--op-text)]">{text(value)}</strong>
-                    <p className="mt-1 text-xs leading-5 text-[var(--op-text-muted)]">
-                      {value === receptionistRole
-                        ? text("Manage bookings, customers, payments, and the daily calendar.")
-                        : text("Use the operational workspace without owner analytics or business settings.")}
-                    </p>
-                  </label>
-                ))}
-              </div>
-            </fieldset>
 
             {error ? <OperationsAlert tone="danger">{error}</OperationsAlert> : null}
 

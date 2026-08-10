@@ -44,6 +44,8 @@ export function StepConfirm({ onBack }: StepProps) {
         startsAt: state.selectedSlot.time,
         customerName: state.customerName,
         customerPhone: state.customerPhone,
+        dateOfBirth: state.dateOfBirth || undefined,
+        gender: state.gender || undefined,
         notes: state.notes || undefined,
       });
       setDone(true);
@@ -76,7 +78,7 @@ export function StepConfirm({ onBack }: StepProps) {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       <div>
         <h2 className="text-xl font-bold tracking-tight text-[var(--booking-text)]">
           Confirm your booking
@@ -88,7 +90,7 @@ export function StepConfirm({ onBack }: StepProps) {
 
       {/* Summary Panel with working math totals */}
       <div
-        className="rounded-xl border p-5 space-y-4 shadow-inner"
+        className="space-y-4 rounded-lg border p-4 sm:p-5"
         style={{
           borderColor: "var(--booking-border)",
           backgroundColor: "var(--booking-bg)",
@@ -99,17 +101,17 @@ export function StepConfirm({ onBack }: StepProps) {
           {selectedServices.map((s, index) => (
             <div
               key={s.id}
-              className={`flex justify-between items-center text-sm ${index > 0 ? "pt-3" : ""}`}
+              className={`flex items-center justify-between gap-3 text-sm ${index > 0 ? "pt-3" : ""}`}
             >
-              <div className="flex flex-col">
-                <span className="font-semibold text-[var(--booking-text)] capitalize">
+              <div className="min-w-0 flex flex-col">
+                <span className="break-words font-semibold text-[var(--booking-text)] capitalize">
                   {s.name}
                 </span>
                 <span className="text-xs text-[var(--booking-muted)]">
                   {s.durationMin} min
                 </span>
               </div>
-              <span className="font-mono font-medium text-[var(--booking-text)]">
+              <span className="shrink-0 font-mono font-medium text-[var(--booking-text)]">
                 {s.priceEgp} EGP
               </span>
             </div>
@@ -137,7 +139,7 @@ export function StepConfirm({ onBack }: StepProps) {
 
       {/* Date & Time display box */}
       <div
-        className="flex items-center gap-3 rounded-xl px-4 py-3.5 text-sm font-semibold border"
+          className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border px-4 py-3.5 text-sm font-semibold"
         style={{
           backgroundColor: "rgba(0, 0, 0, 0.01)",
           borderColor: "var(--booking-border)",
@@ -165,7 +167,7 @@ export function StepConfirm({ onBack }: StepProps) {
             value={state.customerName}
             onChange={(e) => patch({ customerName: e.target.value })}
             placeholder="" // FIX: Removed generic placeholders
-            className="mt-1.5 w-full rounded-xl border px-4 py-3 text-sm transition-colors focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
+            className="mt-1.5 min-h-12 w-full rounded-lg border px-4 py-3 text-sm transition-colors focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
             style={{
               borderColor: "var(--booking-border)",
               backgroundColor: "rgba(0, 0, 0, 0.01)",
@@ -183,13 +185,53 @@ export function StepConfirm({ onBack }: StepProps) {
             value={state.customerPhone}
             onChange={(e) => patch({ customerPhone: e.target.value })}
             placeholder=""
-            className="mt-1.5 w-full rounded-xl border px-4 py-3 text-sm transition-colors focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
+            className="mt-1.5 min-h-12 w-full rounded-lg border px-4 py-3 text-sm transition-colors focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
             style={{
               borderColor: "var(--booking-border)",
               backgroundColor: "rgba(0, 0, 0, 0.01)",
               color: "var(--booking-text)",
             }}
           />
+        </div>
+
+        <div className="grid gap-5 sm:grid-cols-2">
+          <div>
+            <label className="text-xs font-bold uppercase tracking-wider text-[var(--booking-text)] opacity-80">
+              Date of birth <span className="normal-case font-medium">(optional)</span>
+            </label>
+            <input
+              type="date"
+              max={new Date().toISOString().slice(0, 10)}
+              value={state.dateOfBirth}
+              onChange={(e) => patch({ dateOfBirth: e.target.value })}
+              className="mt-1.5 min-h-12 w-full rounded-lg border px-4 py-3 text-sm transition-colors focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
+              style={{
+                borderColor: "var(--booking-border)",
+                backgroundColor: "rgba(0, 0, 0, 0.01)",
+                color: "var(--booking-text)",
+              }}
+            />
+          </div>
+
+          <div>
+            <label className="text-xs font-bold uppercase tracking-wider text-[var(--booking-text)] opacity-80">
+              Gender <span className="normal-case font-medium">(optional)</span>
+            </label>
+            <select
+              value={state.gender}
+              onChange={(e) => patch({ gender: e.target.value as "" | "male" | "female" })}
+              className="mt-1.5 min-h-12 w-full rounded-lg border px-4 py-3 text-sm transition-colors focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
+              style={{
+                borderColor: "var(--booking-border)",
+                backgroundColor: "rgba(0, 0, 0, 0.01)",
+                color: "var(--booking-text)",
+              }}
+            >
+              <option value="">Select</option>
+              <option value="female">Female</option>
+              <option value="male">Male</option>
+            </select>
+          </div>
         </div>
 
         <div>
@@ -201,7 +243,7 @@ export function StepConfirm({ onBack }: StepProps) {
             onChange={(e) => patch({ notes: e.target.value })}
             placeholder=""
             rows={2}
-            className="mt-1.5 w-full rounded-xl border px-4 py-3 text-sm resize-none transition-colors focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
+            className="mt-1.5 w-full resize-none rounded-lg border px-4 py-3 text-sm transition-colors focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
             style={{
               borderColor: "var(--booking-border)",
               backgroundColor: "rgba(0, 0, 0, 0.01)",
@@ -214,11 +256,11 @@ export function StepConfirm({ onBack }: StepProps) {
       {error && <p className="text-sm font-medium text-red-500">{error}</p>}
 
       {/* Action Controls */}
-      <div className="flex gap-4 pt-2">
+      <div className="grid grid-cols-[minmax(5rem,0.7fr)_minmax(0,1.3fr)] gap-3 pt-2 sm:flex sm:gap-4">
         <button
           onClick={onBack}
           disabled={submitting}
-          className="flex-1 rounded-xl border py-3.5 text-sm font-semibold tracking-wide transition-all active:scale-[0.99] disabled:opacity-50"
+          className="min-h-12 rounded-lg border px-3 py-3 text-sm font-semibold tracking-wide transition-all active:scale-[0.99] disabled:opacity-50 sm:flex-1"
           style={{
             borderColor: "var(--booking-border)",
             backgroundColor: "var(--booking-surface)",
@@ -230,7 +272,7 @@ export function StepConfirm({ onBack }: StepProps) {
         <button
           onClick={handleConfirm}
           disabled={submitting || !state.customerName || !state.customerPhone}
-          className="flex-1 rounded-xl py-3.5 text-sm font-bold tracking-wide transition-all active:scale-[0.99] disabled:opacity-50 shadow-sm"
+          className="min-h-12 rounded-lg px-3 py-3 text-sm font-bold tracking-wide transition-all active:scale-[0.99] disabled:opacity-50 sm:flex-1"
           style={{
             backgroundColor: "var(--accent)",
             color: "var(--accent-text)",

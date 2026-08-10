@@ -43,6 +43,8 @@ export type BookingState = {
 
   customerName: string;
   customerPhone: string;
+  dateOfBirth: string;
+  gender: "" | "male" | "female";
   notes: string;
 };
 

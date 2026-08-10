@@ -1,7 +1,5 @@
 import { api } from "@/shared/lib/api";
 
-export type InviteRole = "Staff" | "Receptionist";
-
 export type StaffInviteResult = {
   id: string;
   expiresAt: string;
@@ -9,7 +7,7 @@ export type StaffInviteResult = {
 };
 
 export function createStaffInvite(
-  input: { email: string; role: InviteRole; expiresInDays?: number },
+  input: { email: string; expiresInDays?: number },
   accessToken: string,
 ) {
   return api<StaffInviteResult>("/staff/invites", accessToken, {

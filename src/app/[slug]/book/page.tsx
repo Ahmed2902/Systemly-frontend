@@ -39,6 +39,9 @@ export default async function BookPage({
     business.websiteContent?.template ?? "aura-wellness",
   );
   const theme = template?.theme;
+  const primary = business.websiteContent?.primaryColor ?? theme?.primary ?? (
+    template?.vertical === "clinic" ? "#0B6B68" : "#6A3048"
+  );
   const accent = business.websiteContent?.secondaryColor ?? (
     template?.vertical === "clinic" ? "#074947" : "#482131"
   );
@@ -52,6 +55,8 @@ export default async function BookPage({
           "--booking-text": theme?.text ?? "#111111",
           "--booking-muted": theme?.muted ?? "#666666",
           "--booking-border": theme?.border ?? "#E5E5E5",
+          "--booking-brand": primary,
+          "--booking-brand-text": contrastText(primary),
           "--accent": accent,
           "--accent-text": contrastText(accent),
         } as React.CSSProperties
@@ -65,6 +70,8 @@ export default async function BookPage({
         <BookingShell
           businessName={business.name}
           logoUrl={business.logoUrl}
+          tagline={business.websiteContent?.tagline ?? null}
+          language={business.language === "ar" ? "ar" : "en"}
           slug={slug}
         />
       </BookingProvider>

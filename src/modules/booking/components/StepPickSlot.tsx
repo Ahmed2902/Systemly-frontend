@@ -40,7 +40,7 @@ export function StepPickSlot({ onNext, onBack }: StepProps) {
   }, [state.date]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 sm:space-y-6">
       <div>
         <h2 className="text-xl font-semibold text-[var(--booking-text)]">
           Pick a time
@@ -55,7 +55,7 @@ export function StepPickSlot({ onNext, onBack }: StepProps) {
         value={state.date}
         min={new Date().toISOString().slice(0, 10)}
         onChange={(e) => patch({ date: e.target.value, selectedSlot: null })}
-        className="rounded-lg border px-3 py-2 text-sm"
+        className="min-h-11 w-full rounded-lg border px-3 py-2 text-sm sm:w-auto"
         style={{
           borderColor: "var(--booking-border)",
           backgroundColor: "var(--booking-surface)",
@@ -74,13 +74,13 @@ export function StepPickSlot({ onNext, onBack }: StepProps) {
         </p>
       )}
 
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
         {slots.map((slot) => (
           <button
             key={slot.time}
             type="button"
             onClick={() => patch({ selectedSlot: slot })}
-            className="rounded-lg border px-3 py-2 text-sm font-medium"
+            className="min-h-11 rounded-lg border px-3 py-2 text-sm font-medium"
             style={
               state.selectedSlot?.time === slot.time
                 ? {
@@ -100,10 +100,10 @@ export function StepPickSlot({ onNext, onBack }: StepProps) {
         ))}
       </div>
 
-      <div className="flex gap-3">
+      <div className="grid grid-cols-[minmax(5rem,0.7fr)_minmax(0,1.3fr)] gap-3 sm:flex">
         <button
           onClick={onBack}
-          className="flex-1 rounded-lg border py-3 text-sm font-medium"
+          className="min-h-12 rounded-lg border px-3 py-3 text-sm font-medium sm:flex-1"
           style={{
             borderColor: "var(--booking-border)",
             backgroundColor: "var(--booking-surface)",
@@ -115,7 +115,7 @@ export function StepPickSlot({ onNext, onBack }: StepProps) {
         <button
           onClick={onNext}
           disabled={!state.selectedSlot}
-          className="flex-1 rounded-lg py-3 text-sm font-medium disabled:opacity-50"
+          className="min-h-12 rounded-lg px-3 py-3 text-sm font-semibold disabled:opacity-50 sm:flex-1"
           style={{
             backgroundColor: "var(--accent)",
             color: "var(--accent-text)",

@@ -40,6 +40,8 @@ export function BookingProvider({
     selectedSlot: null,
     customerName: "",
     customerPhone: "",
+    dateOfBirth: "",
+    gender: "",
     notes: "",
   };
 

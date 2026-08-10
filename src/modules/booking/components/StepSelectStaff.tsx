@@ -15,7 +15,7 @@ export function StepSelectStaff({ onNext, onBack }: StepProps) {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       <div>
         <h2 className="text-xl font-semibold text-[var(--booking-text)]">
           Choose your staff
@@ -33,14 +33,14 @@ export function StepSelectStaff({ onNext, onBack }: StepProps) {
 
         return (
           <div key={service.id}>
-            <h3 className="mb-2 text-sm font-medium text-[var(--booking-text)]">
+            <h3 className="mb-2 break-words text-sm font-medium text-[var(--booking-text)]">
               {service.name}
             </h3>
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
                 onClick={() => choose(service.id, "any")}
-                className="rounded-full border px-4 py-2 text-xs font-medium"
+                className="min-h-11 rounded-full border px-4 py-2 text-xs font-medium"
                 style={
                   current === "any"
                     ? {
@@ -62,7 +62,7 @@ export function StepSelectStaff({ onNext, onBack }: StepProps) {
                   key={st.id}
                   type="button"
                   onClick={() => choose(service.id, st.id)}
-                  className="rounded-full border px-4 py-2 text-xs font-medium"
+                  className="min-h-11 max-w-full break-words rounded-full border px-4 py-2 text-xs font-medium"
                   style={
                     current === st.id
                       ? {
@@ -85,10 +85,10 @@ export function StepSelectStaff({ onNext, onBack }: StepProps) {
         );
       })}
 
-      <div className="flex gap-3">
+      <div className="grid grid-cols-[minmax(5rem,0.7fr)_minmax(0,1.3fr)] gap-3 sm:flex">
         <button
           onClick={onBack}
-          className="flex-1 rounded-lg border py-3 text-sm font-medium"
+          className="min-h-12 rounded-lg border px-3 py-3 text-sm font-medium sm:flex-1"
           style={{
             borderColor: "var(--booking-border)",
             backgroundColor: "var(--booking-surface)",
@@ -99,7 +99,7 @@ export function StepSelectStaff({ onNext, onBack }: StepProps) {
         </button>
         <button
           onClick={onNext}
-          className="flex-1 rounded-lg py-3 text-sm font-medium"
+          className="min-h-12 rounded-lg px-3 py-3 text-sm font-semibold sm:flex-1"
           style={{
             backgroundColor: "var(--accent)",
             color: "var(--accent-text)",
