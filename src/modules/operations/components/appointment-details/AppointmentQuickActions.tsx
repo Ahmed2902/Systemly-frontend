@@ -58,6 +58,8 @@ export function AppointmentQuickActions({
     try {
       await revertAppointment(appointmentId, accessToken, user.businessId);
       window.location.reload();
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Unable to revert appointment.");
     } finally {
       setReverting(false);
     }
@@ -71,7 +73,7 @@ export function AppointmentQuickActions({
         {canRevert ? (
           <AppointmentActionCard
             icon={<RotateCcw size={16} />}
-            label={reverting ? text("Reverting…") : text("Revert")}
+            label={text("Revert")}
             disabled={actionRunning || reverting}
             onClick={() => void handleRevert()}
           />
