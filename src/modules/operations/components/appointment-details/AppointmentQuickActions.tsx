@@ -59,7 +59,7 @@ export function AppointmentQuickActions({
       await revertAppointment(appointmentId, accessToken, user.businessId);
       window.location.reload();
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Unable to revert appointment.");
+      alert(error instanceof Error ? error.message : text("Action failed."));
     } finally {
       setReverting(false);
     }
