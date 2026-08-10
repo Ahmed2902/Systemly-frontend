@@ -10,6 +10,7 @@ import {
 } from "react";
 import { useAuth } from "@/modules/auth/useAuth";
 import { canMutateOperations } from "@/modules/subscriptions/subscription-access";
+import type { CustomerGender } from "@/modules/customers/customers.types";
 
 export type OperationsMutationScope =
   | "appointment"
@@ -24,13 +25,20 @@ export type OperationsMutation = {
   entityId?: string;
 };
 
+export type AppointmentCustomerPrefill = {
+  name: string;
+  phone: string;
+  dateOfBirth?: string | null;
+  gender?: CustomerGender | null;
+};
+
 type MutationListener = (mutation: OperationsMutation) => void;
 
 interface OperationsContextValue {
   canMutate: boolean;
   isNewAppointmentOpen: boolean;
-  appointmentCustomer: { name: string; phone: string } | null;
-  openNewAppointment: (customer?: { name: string; phone: string }) => void;
+  appointmentCustomer: AppointmentCustomerPrefill | null;
+  openNewAppointment: (customer?: AppointmentCustomerPrefill) => void;
   closeNewAppointment: () => void;
   notifyAppointmentCreated: () => void;
   onAppointmentCreated: (cb: () => void) => () => void;
@@ -48,15 +56,13 @@ export function OperationsProvider({
   const { user } = useAuth();
   const canMutate = canMutateOperations(user?.subscriptionAccess);
   const [isNewAppointmentOpen, setIsNewAppointmentOpen] = useState(false);
-  const [appointmentCustomer, setAppointmentCustomer] = useState<{
-    name: string;
-    phone: string;
-  } | null>(null);
+  const [appointmentCustomer, setAppointmentCustomer] =
+    useState<AppointmentCustomerPrefill | null>(null);
   const appointmentListenersRef = useRef<Set<() => void>>(new Set());
   const mutationListenersRef = useRef<Set<MutationListener>>(new Set());
 
   const openNewAppointment = useCallback(
-    (customer?: { name: string; phone: string }) => {
+    (customer?: AppointmentCustomerPrefill) => {
       if (!canMutate) return;
       setAppointmentCustomer(customer ?? null);
       setIsNewAppointmentOpen(true);
