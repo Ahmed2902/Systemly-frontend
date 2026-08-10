@@ -1,5 +1,6 @@
 import type { ApiTransportRequest } from "@/shared/lib/api-transport";
 import { DemoAppointmentHandler } from "./DemoAppointmentHandler";
+import { DemoAppointmentListHandler } from "./DemoAppointmentListHandler";
 import { DemoCalendarHandler } from "./DemoCalendarHandler";
 import { DemoCustomerHandler } from "./DemoCustomerHandler";
 import { DemoInvoiceHandler } from "./DemoInvoiceHandler";
@@ -14,6 +15,7 @@ export class DemoOperationsRouter {
   constructor(store: DemoOperationsStore) {
     this.handlers = [
       new DemoCalendarHandler(store),
+      new DemoAppointmentListHandler(store),
       new DemoAppointmentHandler(store),
       new DemoCustomerHandler(store),
       new DemoInvoiceHandler(store),
