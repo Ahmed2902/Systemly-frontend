@@ -22,12 +22,16 @@ export type BookingChannel =
   | "PHONE"
   | "OTHER";
 
+export type CustomerGender = "male" | "female";
+
 export interface CustomerProfile {
   id: string;
   businessId: string;
   name: string;
   phone: string;
   email: string | null;
+  dateOfBirth: string | null;
+  gender: CustomerGender | null;
   acquisitionSource: string | null;
   notes: string | null;
   createdAt: string;
@@ -98,6 +102,8 @@ export interface CustomerInput {
   name: string;
   phone: string;
   email?: string | null;
+  dateOfBirth?: string | null;
+  gender?: CustomerGender | null;
   acquisitionSource?: string | null;
   notes?: string | null;
 }
