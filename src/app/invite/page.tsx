@@ -11,14 +11,17 @@ import {
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle2, Loader2, ShieldAlert } from "lucide-react";
+import { getCurrentUser } from "@/modules/auth/auth.api";
 import { useAuth } from "@/modules/auth/useAuth";
 import { acceptStaffInvite } from "@/modules/staff/staff-invites.api";
+
+const PENDING_INVITE_KEY = "systemly.pendingStaffInvite";
 
 function InviteAcceptanceContent() {
   const text = usePlatformText();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user, accessToken, loading } = useAuth();
+  const { user, accessToken, loading, setSession } = useAuth();
   const token = searchParams.get("token") ?? "";
   const [state, setState] = useState<"idle" | "accepting" | "success" | "error">(
     "idle",
@@ -31,12 +34,20 @@ function InviteAcceptanceContent() {
   );
 
   useEffect(() => {
+    if (!token) return;
+    window.localStorage.setItem(PENDING_INVITE_KEY, token);
+  }, [token]);
+
+  useEffect(() => {
     if (loading || !user || !accessToken || !token || state !== "idle") return;
     setState("accepting");
     acceptStaffInvite(token, accessToken)
-      .then(() => {
+      .then(async (accepted) => {
+        const currentUser = await getCurrentUser(accepted.accessToken);
+        setSession(currentUser.data, accepted.accessToken);
+        window.localStorage.removeItem(PENDING_INVITE_KEY);
         setState("success");
-        window.setTimeout(() => router.replace("/operations"), 1000);
+        window.setTimeout(() => router.replace("/operations"), 500);
       })
       .catch((caught: unknown) => {
         setError(
@@ -46,7 +57,7 @@ function InviteAcceptanceContent() {
         );
         setState("error");
       });
-  }, [accessToken, loading, router, state, token, user]);
+  }, [accessToken, loading, router, setSession, state, text, token, user]);
 
   if (!token) {
     return (
