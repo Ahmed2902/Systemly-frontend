@@ -18,5 +18,11 @@ export default async function DemoPublicWebsitePage({
   const { vertical } = await params;
   if (!isDemoWebsiteVertical(vertical)) notFound();
 
-  return renderTemplate(getDemoWebsiteData(vertical));
+  const data = {
+    ...getDemoWebsiteData(vertical),
+    bookingHref: `/demo/websites/${vertical}/book`,
+    previewMode: false,
+  };
+
+  return renderTemplate(data);
 }
