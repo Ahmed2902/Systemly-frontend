@@ -1,71 +1,219 @@
 "use client";
 
-import { usePlatformText } from "@/i18n/usePlatformText";
+import { useLocale } from "@/i18n/LocaleProvider";
 import Link from "next/link";
-import { ArrowRight, Check } from "lucide-react";
+import {
+  ArrowRight,
+  Check,
+  CreditCard,
+  LockKeyhole,
+  MessageCircleMore,
+  ShieldCheck,
+  Sparkles,
+} from "lucide-react";
 
-const included = [
-  {
-    title: "Website and service catalogue",
-    copy: "Publish the customer experience from the same services and content your team manages.",
+const copy = {
+  en: {
+    kicker: "Simple pricing",
+    title: "One plan. Everything you need to run the business.",
+    intro:
+      "Start with the complete Systemly workflow today. WhatsApp automation is the next layer, not a requirement to get started.",
+    trial: "14-day free trial",
+    noBilling: "No card or billing details required",
+    start: "Start free",
+    demo: "Explore the live demo",
+    core: "Systemly Core",
+    available: "Available now",
+    price: "799",
+    currency: "EGP",
+    perMonth: "/ month",
+    coreDescription:
+      "The complete operating system for an appointment-based business.",
+    included: "Everything in Core",
+    features: [
+      "Business website & online booking",
+      "Appointments & operations calendar",
+      "Staff, services & availability",
+      "Customer records",
+      "Invoices & payment tracking",
+      "Owner analytics",
+      "Email confirmations & reminders",
+      "Arabic & English experience",
+    ],
+    comingSoon: "Coming soon",
+    futureTitle: "WhatsApp automation",
+    futureCopy:
+      "Confirmations and reminders first, followed by a WhatsApp booking assistant that can handle reservations.",
+    connect: "Connect",
+    connectCopy: "Automated WhatsApp reminders",
+    ai: "AI Receptionist",
+    aiCopy: "WhatsApp reservation handling",
+    futureNote: "No need to wait — Core is ready now.",
+    privacyLead: "Your trial starts without payment information.",
+    privacy: "Privacy Policy",
   },
-  {
-    title: "Real-time online booking",
-    copy: "Let customers choose from actual staff availability instead of a disconnected request form.",
+  ar: {
+    kicker: "سعر واضح وبسيط",
+    title: "خطة واحدة تضم كل ما تحتاجه لإدارة نشاطك.",
+    intro:
+      "ابدأ الآن بنظام Systemly الكامل. أتمتة واتساب هي الخطوة القادمة، وليست شرطاً للاستفادة من النظام اليوم.",
+    trial: "تجربة مجانية لمدة 14 يوماً",
+    noBilling: "من دون بطاقة أو بيانات دفع",
+    start: "ابدأ مجاناً",
+    demo: "جرّب العرض المباشر",
+    core: "Systemly Core",
+    available: "متاحة الآن",
+    price: "799",
+    currency: "جنيه",
+    perMonth: "/ شهرياً",
+    coreDescription: "النظام المتكامل للأنشطة التي تعتمد على المواعيد.",
+    included: "كل ما تحتاجه في Core",
+    features: [
+      "موقع للنشاط وحجز إلكتروني",
+      "المواعيد وتقويم إدارة العمل",
+      "الفريق والخدمات ومواعيد التوفر",
+      "سجلات العملاء",
+      "الفواتير ومتابعة المدفوعات",
+      "تحليلات خاصة بالمالك",
+      "تأكيدات وتذكيرات عبر البريد الإلكتروني",
+      "تجربة بالعربية والإنجليزية",
+    ],
+    comingSoon: "قريباً",
+    futureTitle: "أتمتة واتساب",
+    futureCopy:
+      "تأكيدات وتذكيرات تلقائية أولاً، ثم مساعد حجز عبر واتساب يمكنه التعامل مع الحجوزات.",
+    connect: "Connect",
+    connectCopy: "تذكيرات واتساب تلقائية",
+    ai: "AI Receptionist",
+    aiCopy: "إدارة الحجوزات عبر واتساب",
+    futureNote: "لا تحتاج إلى الانتظار — Core جاهزة الآن.",
+    privacyLead: "تبدأ تجربتك من دون إدخال بيانات دفع.",
+    privacy: "سياسة الخصوصية",
   },
-  {
-    title: "Operations workspace",
-    copy: "Run appointments, customers, invoices, staff, and services from one working system.",
-  },
-  {
-    title: "Arabic and English",
-    copy: "Prepare the public customer journey for both directions from the start.",
-  },
-  {
-    title: "Owner reporting",
-    copy: "Keep revenue and performance insight private while the team focuses on daily work.",
-  },
-] as const;
+} as const;
 
 export function PricingSection() {
-  const text = usePlatformText();
+  const { locale } = useLocale();
+  const text = copy[locale];
+
   return (
-    <section id="pricing" className="lp-green-cta">
-      <div className="lp-shell lp-green-grid">
-        <div className="lp-green-copy">
-          <p className="lp-green-kicker">{text("Founding pilot")}</p>
-          <h2>{text("Your business already has a workflow. Put it on one system.")}</h2>
-          <p>
-            {text("Join before commercial plans are locked in. Use the real workflow with your team and help decide what must be ready for public launch.")}
-          </p>
-          <div className="lp-green-actions">
+    <section id="pricing" className="lp-green-cta lp-pricing-v2">
+      <div className="lp-shell lp-pricing-v2-shell">
+        <div className="lp-pricing-v2-copy lp-reveal">
+          <p className="lp-green-kicker">{text.kicker}</p>
+          <h2>{text.title}</h2>
+          <p>{text.intro}</p>
+
+          <div className="lp-pricing-trust-row" aria-label={text.trial}>
+            <span>
+              <ShieldCheck size={16} />
+              {text.trial}
+            </span>
+            <span>
+              <CreditCard size={16} />
+              {text.noBilling}
+            </span>
+          </div>
+
+          <div className="lp-green-actions lp-pricing-actions">
             <Link href="/signup" className="lp-green-primary">
-              {text("Apply for early access")} <ArrowRight size={17}/>
+              {text.start} <ArrowRight size={17} />
             </Link>
-            <a href="#demo" className="lp-green-secondary">{text("Explore the live demo")}</a>
+            <a href="#demo" className="lp-green-secondary">
+              {text.demo}
+            </a>
+          </div>
+
+          <div className="lp-pricing-privacy-note">
+            <LockKeyhole size={15} />
+            <span>{text.privacyLead}</span>
+            <Link href="/privacy">{text.privacy}</Link>
           </div>
         </div>
 
-        <div className="lp-green-details">
-          <div className="lp-pilot-card-header">
-            <span className="lp-pilot-badge">{text("Founding pilot")}</span>
-            <h3>{text("Everything needed to run the first real workflow.")}</h3>
-            <p>{text("Start with the connected product, not a stripped-down concept demo.")}</p>
-          </div>
-          <ul>
-            {included.map((item) => (
-              <li key={item.title}>
-                <span className="lp-pilot-check"><Check size={15}/></span>
+        <div className="lp-pricing-stage lp-reveal lp-reveal-soft-scale">
+          <article className="lp-core-plan-card">
+            <header className="lp-core-plan-head">
+              <div>
+                <span className="lp-plan-eyebrow">{text.core}</span>
+                <h3>{text.core}</h3>
+              </div>
+              <span className="lp-plan-available">
+                <span aria-hidden="true" />
+                {text.available}
+              </span>
+            </header>
+
+            <div className="lp-core-price" aria-label={`${text.price} ${text.currency} ${text.perMonth}`}>
+              <strong>{text.price}</strong>
+              <div>
+                <span>{text.currency}</span>
+                <small>{text.perMonth}</small>
+              </div>
+            </div>
+
+            <p className="lp-core-description">{text.coreDescription}</p>
+
+            <div className="lp-core-divider" />
+            <p className="lp-core-included">{text.included}</p>
+
+            <ul className="lp-core-feature-list">
+              {text.features.map((feature) => (
+                <li key={feature}>
+                  <span className="lp-core-check" aria-hidden="true">
+                    <Check size={13} strokeWidth={2.5} />
+                  </span>
+                  {feature}
+                </li>
+              ))}
+            </ul>
+
+            <Link href="/signup" className="lp-core-card-cta">
+              {text.start} <ArrowRight size={16} />
+            </Link>
+
+            <div className="lp-core-card-foot">
+              <ShieldCheck size={14} />
+              <span>{text.trial}</span>
+              <i aria-hidden="true" />
+              <span>{text.noBilling}</span>
+            </div>
+          </article>
+
+          <aside className="lp-coming-plan-card" aria-label={`${text.futureTitle} — ${text.comingSoon}`}>
+            <div className="lp-coming-plan-glow" aria-hidden="true" />
+            <div className="lp-coming-plan-top">
+              <span className="lp-coming-icon">
+                <MessageCircleMore size={20} />
+              </span>
+              <span className="lp-coming-badge">{text.comingSoon}</span>
+            </div>
+
+            <div className="lp-coming-content">
+              <p className="lp-plan-eyebrow">Systemly</p>
+              <h3>{text.futureTitle}</h3>
+              <p>{text.futureCopy}</p>
+
+              <div className="lp-coming-preview-list">
                 <div>
-                  <strong>{text(item.title)}</strong>
-                  <small>{text(item.copy)}</small>
+                  <Sparkles size={15} />
+                  <span>
+                    <strong>{text.connect}</strong>
+                    <small>{text.connectCopy}</small>
+                  </span>
                 </div>
-              </li>
-            ))}
-          </ul>
-          <div className="lp-pilot-note">
-            {text("Exact pricing, trial length, payment support, custom-domain terms, and onboarding assistance will be confirmed before activation.")}
-          </div>
+                <div>
+                  <Sparkles size={15} />
+                  <span>
+                    <strong>{text.ai}</strong>
+                    <small>{text.aiCopy}</small>
+                  </span>
+                </div>
+              </div>
+
+              <p className="lp-coming-note">{text.futureNote}</p>
+            </div>
+          </aside>
         </div>
       </div>
     </section>

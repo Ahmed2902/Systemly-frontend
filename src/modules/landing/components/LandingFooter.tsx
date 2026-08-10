@@ -6,7 +6,7 @@ import { ArrowUpRight } from "lucide-react";
 import { SystemlyWordmark } from "@/shared/components/SystemlyWordmark";
 
 const columns = [
-  ["Product", [["Features", "#features"], ["Live demo", "#demo"], ["Early access", "#pricing"], ["How it works", "#how-it-works"]]],
+  ["Product", [["Features", "#features"], ["Live demo", "#demo"], ["Pricing", "#pricing"], ["How it works", "#how-it-works"]]],
   ["Business types", [["Salons", "#audiences"], ["Clinics", "#audiences"], ["Spa & wellness", "#audiences"]]],
   ["Company", [["Contact", "/contact"], ["Privacy", "/privacy"], ["Terms", "/terms"]]],
 ] as const;
