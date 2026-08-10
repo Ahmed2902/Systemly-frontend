@@ -8,6 +8,7 @@ import {
   CreditCard,
   LockKeyhole,
   MessageCircleMore,
+  ScrollText,
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
@@ -51,6 +52,7 @@ const copy = {
     futureNote: "No need to wait — Core is ready now.",
     privacyLead: "Your trial starts without payment information.",
     privacy: "Privacy Policy",
+    terms: "Terms of Service",
   },
   ar: {
     kicker: "سعر واضح وبسيط",
@@ -89,6 +91,7 @@ const copy = {
     futureNote: "لا تحتاج إلى الانتظار — Core جاهزة الآن.",
     privacyLead: "تبدأ تجربتك من دون إدخال بيانات دفع.",
     privacy: "سياسة الخصوصية",
+    terms: "شروط الاستخدام",
   },
 } as const;
 
@@ -99,7 +102,7 @@ export function PricingSection() {
   return (
     <section id="pricing" className="lp-green-cta lp-pricing-v2">
       <div className="lp-shell lp-pricing-v2-shell">
-        <div className="lp-pricing-v2-copy lp-reveal">
+        <div className="lp-pricing-v2-copy">
           <p className="lp-green-kicker">{text.kicker}</p>
           <h2>{text.title}</h2>
           <p>{text.intro}</p>
@@ -127,11 +130,21 @@ export function PricingSection() {
           <div className="lp-pricing-privacy-note">
             <LockKeyhole size={15} />
             <span>{text.privacyLead}</span>
-            <Link href="/privacy">{text.privacy}</Link>
+          </div>
+
+          <div className="lp-pricing-legal-actions">
+            <Link href="/privacy" className="lp-pricing-legal-button">
+              <ShieldCheck size={15} />
+              {text.privacy}
+            </Link>
+            <Link href="/terms" className="lp-pricing-legal-button">
+              <ScrollText size={15} />
+              {text.terms}
+            </Link>
           </div>
         </div>
 
-        <div className="lp-pricing-stage lp-reveal lp-reveal-soft-scale">
+        <div className="lp-pricing-stage">
           <article className="lp-core-plan-card">
             <header className="lp-core-plan-head">
               <div>
