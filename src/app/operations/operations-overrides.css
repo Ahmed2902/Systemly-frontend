@@ -64,16 +64,35 @@
 }
 
 /* Selected services and customer search results use light-blue utilities in the
-   legacy modal. Map those states to the dark information surface so their light
-   text remains readable instead of appearing on a near-white card. */
-.operations-dark .new-appointment-modal [class~="bg-blue-50"],
-.operations-dark .new-appointment-modal [class~="bg-blue-50/60"] {
-  background-color: var(--op-info-soft) !important;
+   legacy modal. Map those states to the normal Operations selection surface. */
+.new-appointment-modal [class~="bg-blue-50"],
+.new-appointment-modal [class~="bg-blue-50/60"] {
+  background-color: var(--op-selected) !important;
 }
 
-.operations-dark .new-appointment-modal [class~="hover:bg-blue-50/60"]:hover,
-.operations-dark .new-appointment-modal [class~="hover:bg-blue-50"]:hover {
-  background-color: var(--op-info-soft) !important;
+.new-appointment-modal [class~="hover:bg-blue-50/60"]:hover,
+.new-appointment-modal [class~="hover:bg-blue-50"]:hover {
+  background-color: var(--op-hover) !important;
+}
+
+.new-appointment-modal [class*="bg-blue-600"] {
+  background-color: var(--op-primary) !important;
+  color: var(--op-primary-text) !important;
+}
+
+.new-appointment-modal [class*="text-blue-700"],
+.new-appointment-modal [class*="text-blue-600"] {
+  color: var(--op-text) !important;
+}
+
+.new-appointment-modal [class*="border-blue-"],
+.new-appointment-modal [class*="focus:border-blue-"] {
+  border-color: var(--op-border-strong) !important;
+}
+
+.new-appointment-modal [class*="ring-blue-"],
+.new-appointment-modal [class*="focus:ring-blue-"] {
+  --tw-ring-color: color-mix(in srgb, var(--op-focus) 25%, transparent) !important;
 }
 
 .operations-dark .new-appointment-modal [class*="border-slate-"],
@@ -109,6 +128,21 @@
 .operations-dark .new-appointment-modal input::placeholder,
 .operations-dark .new-appointment-modal textarea::placeholder {
   color: var(--op-text-faint) !important;
+}
+
+/* Appointment details: soften legacy light rings/borders in dark mode. */
+.operations-dark .operations-workspace [class*="ring-slate-"] {
+  --tw-ring-color: var(--op-border) !important;
+}
+
+.operations-dark .operations-workspace [class*="border-slate-"] {
+  border-color: var(--op-border) !important;
+}
+
+/* Keep service/staff/time controls aligned at their top edge even when service
+   price or duration adds a second line. */
+.operations-workspace div:has(> button[aria-label^="Delete service"]) {
+  align-items: start !important;
 }
 
 /* Staff form modal theme parity, including the permission-role section. */
