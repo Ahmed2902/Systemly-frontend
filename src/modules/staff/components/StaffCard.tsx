@@ -14,6 +14,7 @@ import {
 import type { StaffDirectoryItem } from "../staff.types";
 
 const DAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+const CARD_COLOURS = ["#4d9bd8", "#d69a45", "#3fae8a", "#d96c7b", "#8c78c6", "#58b7bd"];
 const SERVICE_COLOURS = ["#4d9bd8", "#d69a45", "#3fae8a", "#d96c7b"];
 
 function initials(name: string) {
@@ -24,6 +25,14 @@ function initials(name: string) {
     .join("")
     .slice(0, 2)
     .toUpperCase();
+}
+
+function colourForStaff(id: string) {
+  let hash = 0;
+  for (let index = 0; index < id.length; index += 1) {
+    hash = (hash * 31 + id.charCodeAt(index)) >>> 0;
+  }
+  return CARD_COLOURS[hash % CARD_COLOURS.length];
 }
 
 function statusCopy(member: StaffDirectoryItem) {
@@ -53,7 +62,8 @@ export function StaffCard({
   const text = usePlatformText();
   const inactive = !member.isActive;
   const onLeave = Boolean(member.currentTimeOff);
-  const accent = inactive
+  const accent = inactive ? "var(--op-text-faint)" : colourForStaff(member.id);
+  const statusAccent = inactive
     ? "var(--op-text-faint)"
     : onLeave
       ? "var(--op-warning)"
@@ -167,9 +177,9 @@ export function StaffCard({
           <span
             className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold"
             style={{
-              background: `color-mix(in srgb, ${accent} 11%, var(--op-surface))`,
-              borderColor: `color-mix(in srgb, ${accent} 34%, var(--op-border))`,
-              color: accent,
+              background: `color-mix(in srgb, ${statusAccent} 11%, var(--op-surface))`,
+              borderColor: `color-mix(in srgb, ${statusAccent} 34%, var(--op-border))`,
+              color: statusAccent,
             }}
           >
             {inactive ? (
@@ -195,9 +205,9 @@ export function StaffCard({
                 style={
                   working && member.isActive
                     ? {
-                        background: "var(--op-primary)",
-                        borderColor: "var(--op-primary)",
-                        color: "var(--op-primary-text)",
+                        background: accent,
+                        borderColor: accent,
+                        color: "white",
                       }
                     : {
                         background: "var(--op-surface)",
@@ -229,7 +239,8 @@ export function StaffCard({
       <div className="flex items-center justify-between gap-3 bg-[var(--op-surface)] px-5 py-3.5">
         <Link
           href={`/operations/staff/${member.id}`}
-          className="text-sm font-semibold text-[var(--op-info)] transition hover:opacity-75"
+          className="text-sm font-semibold transition hover:opacity-75"
+          style={{ color: accent }}
         >
           {text("View profile")}
         </Link>

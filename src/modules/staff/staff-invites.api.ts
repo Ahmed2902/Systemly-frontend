@@ -6,6 +6,15 @@ export type StaffInviteResult = {
   acceptUrl: string;
 };
 
+export type AcceptedStaffInvite = {
+  user: {
+    id: string;
+    businessId: string | null;
+    role: string;
+  };
+  accessToken: string;
+};
+
 export function createStaffInvite(
   input: { email: string; expiresInDays?: number },
   accessToken: string,
@@ -17,12 +26,8 @@ export function createStaffInvite(
 }
 
 export function acceptStaffInvite(token: string, accessToken: string) {
-  return api<{ userId: string; staff: { id: string; name: string } }>(
-    "/staff/invites/accept",
-    accessToken,
-    {
-      method: "POST",
-      body: JSON.stringify({ token }),
-    },
-  );
+  return api<AcceptedStaffInvite>("/staff/invites/accept", accessToken, {
+    method: "POST",
+    body: JSON.stringify({ token }),
+  });
 }

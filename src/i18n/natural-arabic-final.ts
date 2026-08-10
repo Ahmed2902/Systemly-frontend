@@ -83,4 +83,13 @@ export const naturalArabicFinalPairs: ReadonlyArray<readonly [string, string]> =
   ["Female", "أنثى"],
   ["Male", "ذكر"],
   ["Patient details", "بيانات المريض"],
+  ["Primary colour — backgrounds", "اللون الأساسي — الخلفيات"],
+  ["Secondary colour — buttons", "اللون الثانوي — الأزرار"],
+  ["Primary colour presets", "اقتراحات اللون الأساسي"],
+  ["Secondary colour presets", "اقتراحات اللون الثانوي"],
+  ["Suggested colour pairs", "مجموعات ألوان مقترحة"],
+  ["Reset to default colours", "إعادة الألوان الافتراضية"],
+  ["Choose a custom primary colour", "اختر لونًا أساسيًا مخصصًا"],
+  ["Choose a custom secondary colour", "اختر لونًا ثانويًا مخصصًا"],
+  ["Choose a pair to replace both colours at once.", "اختر مجموعة لتغيير اللونين معًا."],
 ];

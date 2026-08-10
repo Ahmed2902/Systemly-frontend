@@ -103,13 +103,6 @@ export function Sidebar({
           icon: UserRound,
           exact: true,
         },
-        {
-          href: "/operations/staff/invite",
-          label: copy.inviteTeam,
-          icon: UserPlus,
-          ownerOnly: true,
-          hideInDemo: true,
-        },
         { href: "/operations/services", label: copy.services, icon: Sparkles },
       ],
     },
@@ -122,6 +115,13 @@ export function Sidebar({
           icon: Settings,
           ownerOnly: true,
           exact: true,
+        },
+        {
+          href: "/operations/staff/invite",
+          label: copy.inviteTeam,
+          icon: UserPlus,
+          ownerOnly: true,
+          hideInDemo: true,
         },
         {
           href: "/operations/settings/billing",
