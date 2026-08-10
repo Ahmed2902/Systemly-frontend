@@ -1,5 +1,6 @@
 "use client";
 
+import { useLocale } from "@/i18n/LocaleProvider";
 import { usePlatformText } from "@/i18n/usePlatformText";
 import Link from "next/link";
 import { ArrowRight, ExternalLink, Menu, X } from "lucide-react";
@@ -15,11 +16,12 @@ const navLinks = [
   { label: "Product", href: "#features" },
   { label: "How it works", href: "#how-it-works" },
   { label: "Live demo", href: "#demo" },
-  { label: "Early access", href: "#pricing" },
-];
+  { label: "Pricing", arLabel: "الأسعار", href: "#pricing" },
+] as const;
 
 export function LandingNav() {
   const text = usePlatformText();
+  const { locale } = useLocale();
   const router = useRouter();
   const { user, accessToken, loading, logout } = useAuth();
   const [publicSlug, setPublicSlug] = useState<string | null>(null);
@@ -63,6 +65,10 @@ export function LandingNav() {
     setMobileOpen(false);
   }
 
+  function navLabel(link: (typeof navLinks)[number]) {
+    return "arLabel" in link && locale === "ar" ? link.arLabel : text(link.label);
+  }
+
   return (
     <header className="lp-nav-wrap">
       <nav className="lp-nav-shell" aria-label={text("Primary navigation")}>
@@ -73,7 +79,7 @@ export function LandingNav() {
         <div className="lp-nav-links">
           {navLinks.map((link) => (
             <Link key={link.href} href={link.href}>
-              {text(link.label)}
+              {navLabel(link)}
             </Link>
           ))}
         </div>
@@ -112,7 +118,7 @@ export function LandingNav() {
         <div className="lp-mobile-nav-links">
           {navLinks.map((link) => (
             <Link key={link.href} href={link.href} onClick={closeMobileMenu}>
-              {text(link.label)}
+              {navLabel(link)}
             </Link>
           ))}
         </div>
