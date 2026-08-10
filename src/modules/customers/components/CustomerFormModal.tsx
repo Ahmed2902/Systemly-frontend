@@ -1,6 +1,7 @@
 "use client";
 
 import { usePlatformText } from "@/i18n/usePlatformText";
+import { useAuth } from "@/modules/auth/useAuth";
 import { useEffect, useState } from "react";
 import { Loader2, X } from "lucide-react";
 import type { CustomerInput, CustomerProfile } from "../customers.types";
@@ -9,7 +10,6 @@ interface Props {
   open: boolean;
   customer?: CustomerProfile | null;
   saving: boolean;
-  isClinic: boolean;
   onClose: () => void;
   onSubmit: (input: CustomerInput) => Promise<void>;
 }
@@ -25,11 +25,12 @@ export function CustomerFormModal({
   open,
   customer,
   saving,
-  isClinic,
   onClose,
   onSubmit,
 }: Props) {
   const text = usePlatformText();
+  const { user } = useAuth();
+  const isClinic = user?.vertical === "clinic";
   const [form, setForm] = useState<CustomerInput>({
     name: "",
     phone: "",
