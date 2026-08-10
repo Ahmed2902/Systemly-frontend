@@ -22,12 +22,21 @@ const principles = [
 ];
 
 const faqs = [
-  ["Is the operations demo the real product UI?", "Yes. It reuses the same core calendar and operational components as Systemly Operations, with local fictional data instead of backend calls."],
-  ["Does the demo contain real customer information?", "No. All names, appointments, invoices, notes, and payment references are fictional local examples."],
-  ["Can one appointment contain services from different staff?", "Yes. Systemly models an appointment as service segments, so one customer journey can move between eligible staff while remaining one appointment."],
-  ["Can staff see revenue analytics?", "No. The owner dashboard and business analytics remain restricted to the business owner."],
-  ["Is Systemly only for salons?", "The first verticals are salons and clinics. The same model also fits spas, wellness businesses, and other appointment teams."],
-  ["What is the final price and trial period?", "They are not final yet. Early-access businesses will receive the exact scope, price, trial terms, and onboarding support before activation."],
+  [
+    "Is the operations demo the real product UI?",
+    "Yes. It reuses the same core calendar and operational components as Systemly Operations, with local fictional data instead of backend calls.",
+  ],
+  // ["Does the demo contain real customer information?", "No. All names, appointments, invoices, notes, and payment references are fictional local examples."],
+  [
+    "Can one appointment contain services from different staff?",
+    "Yes. Systemly models an appointment as service segments, so one customer journey can move between eligible staff while remaining one appointment.",
+  ],
+  [
+    "Can staff see revenue analytics?",
+    "No. The owner dashboard and business analytics remain restricted to the business owner.",
+  ],
+  //["Is Systemly only for salons?", "The first verticals are salons and clinics. The same model also fits spas, wellness businesses, and other appointment teams."],
+  // ["What is the final price and trial period?", "They are not final yet. Early-access businesses will receive the exact scope, price, trial terms, and onboarding support before activation."],
 ];
 
 export function FinalCta() {
@@ -37,25 +46,38 @@ export function FinalCta() {
       <div className="lp-shell">
         <div className="lp-principles-heading">
           <p className="lp-kicker">{text("Built around real work")}</p>
-          <h2>{text("Less admin theatre. More clarity for the people doing the work.")}</h2>
+          <h2>
+            {text(
+              "Less admin theatre. More clarity for the people doing the work.",
+            )}
+          </h2>
         </div>
 
         <div className="lp-principles-list">
           {principles.map(({ icon: Icon, title, copy }, index) => (
             <article key={title}>
               <span>0{index + 1}</span>
-              <Icon size={23}/>
-              <div><h3>{text(title)}</h3><p>{text(copy)}</p></div>
+              <Icon size={23} />
+              <div>
+                <h3>{text(title)}</h3>
+                <p>{text(copy)}</p>
+              </div>
             </article>
           ))}
         </div>
 
         <div className="lp-faq">
-          <div className="lp-faq-heading"><p className="lp-kicker">{text("FAQ")}</p><h2>{text("Honest answers to real questions.")}</h2></div>
+          <div className="lp-faq-heading">
+            <p className="lp-kicker">{text("FAQ")}</p>
+            <h2>{text("Honest answers to real questions.")}</h2>
+          </div>
           <div>
             {faqs.map(([question, answer]) => (
               <details key={question}>
-                <summary>{text(question)}<span aria-hidden="true">+</span></summary>
+                <summary>
+                  {text(question)}
+                  <span aria-hidden="true">+</span>
+                </summary>
                 <p>{text(answer)}</p>
               </details>
             ))}

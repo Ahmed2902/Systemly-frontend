@@ -38,7 +38,7 @@ const copy = {
       "Customer records",
       "Invoices & payment tracking",
       "Owner analytics",
-      "Email confirmations & reminders",
+      //"Email confirmations & reminders",
       "Arabic & English experience",
     ],
     comingSoon: "Coming soon",
@@ -157,7 +157,10 @@ export function PricingSection() {
               </span>
             </header>
 
-            <div className="lp-core-price" aria-label={`${text.price} ${text.currency} ${text.perMonth}`}>
+            <div
+              className="lp-core-price"
+              aria-label={`${text.price} ${text.currency} ${text.perMonth}`}
+            >
               <strong>{text.price}</strong>
               <div>
                 <span>{text.currency}</span>
@@ -193,7 +196,10 @@ export function PricingSection() {
             </div>
           </article>
 
-          <aside className="lp-coming-plan-card" aria-label={`${text.futureTitle} — ${text.comingSoon}`}>
+          <aside
+            className="lp-coming-plan-card"
+            aria-label={`${text.futureTitle} — ${text.comingSoon}`}
+          >
             <div className="lp-coming-plan-glow" aria-hidden="true" />
             <div className="lp-coming-plan-top">
               <span className="lp-coming-icon">
