@@ -16,6 +16,11 @@ const naturalPairs = [
   ...naturalArabicAnalyticsPeriodPairs,
 ] as const;
 
+// These are persisted backend enum values, not user-facing copy. Keeping them
+// locale-independent prevents authorization/routing logic from changing when
+// the Operations UI switches to Arabic.
+const NON_TRANSLATABLE_IDENTIFIERS = new Set(["BusinessAdmin", "SuperAdmin"]);
+
 function buildArabicMap() {
   const map = getPlatformLiteralMap("ar");
   for (const [english, arabic] of naturalPairs) map.set(english, arabic);
@@ -52,6 +57,9 @@ export function translatePlatformText(
   values?: TranslationValues,
 ): string {
   if (!source) return "";
+  if (NON_TRANSLATABLE_IDENTIFIERS.has(source)) {
+    return interpolate(source, values);
+  }
   const translated = maps[locale].get(source) ?? source;
   return interpolate(translated, values);
 }

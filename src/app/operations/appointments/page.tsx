@@ -7,6 +7,11 @@ import { useAuth } from "@/modules/auth/useAuth";
 import { getCalendarWorkspace } from "@/modules/operations/CalendarWorkspace.api";
 import type { AppointmentSummary } from "@/modules/operations/appointment.types";
 import { dateKeyInTimezone } from "@/shared/lib/Calendar/grid.utils";
+import { api } from "@/shared/lib/api";
+import {
+  mapBackendAppointment,
+  type BackendAppointment,
+} from "@/shared/lib/Calendar/adapter";
 import {
   AppointmentsToolbar,
   type SortMode,
@@ -24,6 +29,29 @@ import {
   useOnOperationsMutation,
   useOperations,
 } from "@/modules/operations/operations.context";
+
+type AppointmentListResponse = {
+  items?: BackendAppointment[];
+};
+
+async function getAppointmentsForDate(
+  date: string,
+  accessToken: string,
+  timezone: string,
+) {
+  const params = new URLSearchParams({
+    date,
+    page: "1",
+    perPage: "500",
+  });
+  const result = await api<AppointmentListResponse>(
+    `/appointments?${params.toString()}`,
+    accessToken,
+  );
+  return (result.items ?? []).map((appointment) =>
+    mapBackendAppointment(appointment, timezone),
+  );
+}
 
 export default function AppointmentsPage() {
   const text = usePlatformText();
@@ -49,8 +77,11 @@ export default function AppointmentsPage() {
       if (background) setRefreshing(true);
       else setLoading(true);
       try {
-        const workspace = await getCalendarWorkspace(date, accessToken);
-        setAppointments(workspace.day.appointments);
+        const [workspace, dayAppointments] = await Promise.all([
+          getCalendarWorkspace(date, accessToken),
+          getAppointmentsForDate(date, accessToken, timezone),
+        ]);
+        setAppointments(dayAppointments);
         setStaff(workspace.day.staff.map(({ id, name }) => ({ id, name })));
         setError(null);
       } catch (cause: unknown) {
@@ -62,7 +93,7 @@ export default function AppointmentsPage() {
         setRefreshing(false);
       }
     },
-    [accessToken, date, user?.businessId],
+    [accessToken, date, text, timezone, user?.businessId],
   );
 
   useEffect(() => {

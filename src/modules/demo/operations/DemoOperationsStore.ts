@@ -8,15 +8,66 @@ import {
 
 const PUBLIC_BOOKINGS_KEY = "systemly-demo-public-bookings-v1";
 
+const PUBLIC_WEBSITE_STAFF_NAMES: Record<OperationsVertical, string[]> = {
+  salon: [
+    "Nour Khalil",
+    "Mona Adel",
+    "Salma Tarek",
+    "Yasmine Ali",
+    "Dina Magdy",
+  ],
+  clinic: [
+    "Dr. Mariam Hassan",
+    "Dr. Omar Fathy",
+    "Dr. Lina Hassan",
+    "Dr. Farah Nabil",
+    "Youssef Adel",
+  ],
+};
+
 type PublicDemoBooking = {
   id: string;
   vertical: OperationsVertical;
   customerName: string;
   customerPhone: string;
   serviceIndex: number;
+  serviceName?: string;
   staffIndex: number;
+  staffName?: string;
   startsAt: string;
 };
+
+function createAlignedDemoState(vertical: OperationsVertical) {
+  const state = createDemoOperationsState(vertical);
+  const names = PUBLIC_WEBSITE_STAFF_NAMES[vertical];
+  state.staff.forEach((member, index) => {
+    if (names[index]) member.name = names[index];
+  });
+  return state;
+}
+
+function readPublicBookings(): PublicDemoBooking[] {
+  if (typeof window === "undefined") return [];
+  try {
+    return JSON.parse(
+      window.sessionStorage.getItem(PUBLIC_BOOKINGS_KEY) || "[]",
+    ) as PublicDemoBooking[];
+  } catch {
+    return [];
+  }
+}
+
+function removePublicBookingsForVertical(vertical: OperationsVertical) {
+  if (typeof window === "undefined") return;
+  const remaining = readPublicBookings().filter(
+    (booking) => booking.vertical !== vertical,
+  );
+  if (remaining.length > 0) {
+    window.sessionStorage.setItem(PUBLIC_BOOKINGS_KEY, JSON.stringify(remaining));
+  } else {
+    window.sessionStorage.removeItem(PUBLIC_BOOKINGS_KEY);
+  }
+}
 
 export class DemoOperationsStore {
   private readonly vertical: OperationsVertical;
@@ -26,7 +77,7 @@ export class DemoOperationsStore {
 
   constructor(vertical: OperationsVertical) {
     this.vertical = vertical;
-    this.initialState = createDemoOperationsState(vertical);
+    this.initialState = createAlignedDemoState(vertical);
     this.state = cloneDemoState(this.initialState);
   }
 
@@ -39,15 +90,7 @@ export class DemoOperationsStore {
   }
 
   syncPublicBookings() {
-    if (typeof window === "undefined") return;
-    let records: PublicDemoBooking[] = [];
-    try {
-      records = JSON.parse(
-        window.localStorage.getItem(PUBLIC_BOOKINGS_KEY) || "[]",
-      ) as PublicDemoBooking[];
-    } catch {
-      return;
-    }
+    const records = readPublicBookings();
 
     for (const record of records.filter((item) => item.vertical === this.vertical)) {
       if (this.state.appointments.some((item) => item.id === record.id)) continue;
@@ -100,7 +143,7 @@ export class DemoOperationsStore {
             startsAt: start.toISOString(),
             endsAt: end.toISOString(),
             priceEgpSnapshot: Number(service.priceEgp),
-            service: { name: service.name },
+            service: { name: record.serviceName || service.name },
           },
         ],
       };
@@ -109,10 +152,10 @@ export class DemoOperationsStore {
   }
 
   reset() {
-    this.initialState = createDemoOperationsState(this.vertical);
+    removePublicBookingsForVertical(this.vertical);
+    this.initialState = createAlignedDemoState(this.vertical);
     this.state = cloneDemoState(this.initialState);
     this.counters.clear();
-    this.syncPublicBookings();
   }
 
   nextId(prefix: string) {
