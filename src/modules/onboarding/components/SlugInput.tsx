@@ -5,6 +5,8 @@ import { usePlatformText } from "@/i18n/usePlatformText";
 import { useEffect, useState } from "react";
 import { checkSlugAvailability } from "../onboarding.api";
 
+const PUBLIC_SITE_PREFIX = "systemly.me/";
+
 export function SlugInput({
   value,
   onChange,
@@ -38,7 +40,7 @@ export function SlugInput({
     <div className="onboarding-field">
       <label>{text("Public website address")}</label>
       <div className="onboarding-input flex items-center overflow-hidden p-0">
-        <span className="border-r border-[var(--onboarding-border)] bg-[#f6f6f3] px-3.5 text-sm text-[var(--onboarding-muted)]">systemly.me/</span>
+        <span className="border-r border-[var(--onboarding-border)] bg-[#f6f6f3] px-3.5 text-sm text-[var(--onboarding-muted)]">{PUBLIC_SITE_PREFIX}</span>
         <input
           value={value}
           onChange={(event) => onChange(event.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
