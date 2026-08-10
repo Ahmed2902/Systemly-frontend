@@ -285,7 +285,6 @@ export function SettingsScreen() {
                 </select>
               </Field>
               <Field label={text("Primary colour")}><input type="color" className="op-input h-11 p-1" value={website.primaryColor ?? "#6d273f"} onChange={(event) => setWebsite({ ...website, primaryColor: event.target.value })} /></Field>
-              <Field label={text("Secondary colour")}><input type="color" className="op-input h-11 p-1" value={website.secondaryColor ?? "#202223"} onChange={(event) => setWebsite({ ...website, secondaryColor: event.target.value })} /></Field>
               <Field label={text("Instagram URL")}><input className="op-input" value={website.instagramUrl ?? ""} onChange={(event) => setWebsite({ ...website, instagramUrl: textOrNull(event.target.value) })} /></Field>
               <Field label={text("WhatsApp number")}><input className="op-input" value={website.whatsappNumber ?? ""} onChange={(event) => setWebsite({ ...website, whatsappNumber: textOrNull(event.target.value) })} /></Field>
             </div>
