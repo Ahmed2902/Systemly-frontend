@@ -200,7 +200,7 @@ export default function PrivacyPage() {
     <main className="landing-premium lp-legal-page">
       <header className="lp-legal-nav">
         <div className="lp-shell lp-legal-nav-inner">
-          <Link href="/" aria-label="Systemly home">
+          <Link href="/">
             <SystemlyWordmark className="systemly-brand text-[1.35rem]" />
           </Link>
           <Link href="/" className="lp-legal-back">
