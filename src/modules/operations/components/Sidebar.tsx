@@ -18,7 +18,6 @@ import {
   UserPlus,
   UserRound,
   Users,
-  X,
 } from "lucide-react";
 import { useAuth } from "@/modules/auth/useAuth";
 import { usePlatformCopy } from "@/i18n/usePlatformCopy";
@@ -145,14 +144,6 @@ export function Sidebar({
               {runtime.mode === "demo" ? demoLabel : copy.businessOperations}
             </p>
           </div>
-          <button
-            type="button"
-            className="op-icon-button lg:hidden"
-            aria-label={copy.closeNavigation}
-            onClick={onClose}
-          >
-            <X size={17} />
-          </button>
         </div>
         <button
           type="button"
