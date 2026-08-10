@@ -5,9 +5,12 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle2, Link2Off, LoaderCircle } from "lucide-react";
-import { ApiError, verifyEmail } from "../auth.api";
+import { ApiError, getCurrentUser, verifyEmail } from "../auth.api";
 import { safeNextPath, workspacePathForUser } from "../auth-redirect";
 import { useAuth } from "../useAuth";
+import { acceptStaffInvite } from "@/modules/staff/staff-invites.api";
+
+const PENDING_INVITE_KEY = "systemly.pendingStaffInvite";
 
 type VerificationState = "loading" | "success" | "error";
 
@@ -32,13 +35,25 @@ export function VerifyEmailPanel() {
     }
 
     void verifyEmail(token)
-      .then((response) => {
-        const { accessToken, user } = response.data;
+      .then(async (response) => {
+        let { accessToken, user } = response.data;
+        const pendingInvite = window.localStorage.getItem(PENDING_INVITE_KEY);
+
+        if (pendingInvite) {
+          const accepted = await acceptStaffInvite(pendingInvite, accessToken);
+          const currentUser = await getCurrentUser(accepted.accessToken);
+          accessToken = accepted.accessToken;
+          user = currentUser.data;
+          window.localStorage.removeItem(PENDING_INVITE_KEY);
+        }
+
         setSession(user, accessToken);
         setState("success");
         setMessage("Email verified. Opening your workspace…");
         router.replace(
-          safeNextPath(searchParams.get("next")) ?? workspacePathForUser(user),
+          pendingInvite
+            ? "/operations"
+            : safeNextPath(searchParams.get("next")) ?? workspacePathForUser(user),
         );
       })
       .catch((error: ApiError) => {
