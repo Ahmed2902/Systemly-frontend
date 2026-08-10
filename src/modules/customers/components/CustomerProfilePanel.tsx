@@ -28,12 +28,28 @@ function initials(name: string) {
     .toUpperCase();
 }
 
-function formatDate(value: string | null, timezone: string) {
+function formatDate(value: string | null | undefined, timezone: string) {
   if (!value) return "—";
   return new Intl.DateTimeFormat("en-US", {
     timeZone: timezone,
     dateStyle: "medium",
   }).format(new Date(value));
+}
+
+function ageFromDateOfBirth(value: string | null | undefined) {
+  if (!value) return null;
+  const birth = new Date(value);
+  if (Number.isNaN(birth.getTime())) return null;
+  const today = new Date();
+  let age = today.getUTCFullYear() - birth.getUTCFullYear();
+  const monthDelta = today.getUTCMonth() - birth.getUTCMonth();
+  if (
+    monthDelta < 0 ||
+    (monthDelta === 0 && today.getUTCDate() < birth.getUTCDate())
+  ) {
+    age -= 1;
+  }
+  return age >= 0 ? age : null;
 }
 
 function MetricCard({
@@ -85,6 +101,7 @@ export function CustomerProfilePanel({
   const { customer, stats, upcoming, history } = workspace;
   const [notes, setNotes] = useState(customer.notes ?? "");
   const notesDirty = notes !== (customer.notes ?? "");
+  const age = ageFromDateOfBirth(customer.dateOfBirth);
 
   async function saveNotes() {
     await onSaveNotes(notes);
@@ -186,7 +203,9 @@ export function CustomerProfilePanel({
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(20rem,.85fr)]">
         <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="font-semibold text-slate-950">{text("Contact and details")}</h2>
+          <h2 className="font-semibold text-slate-950">
+            {isClinic ? text("Patient details") : text("Contact and details")}
+          </h2>
           <dl className="mt-4 divide-y divide-slate-100 text-sm">
             <div className="grid grid-cols-[8rem_1fr] gap-3 py-3">
               <dt className="text-slate-400">{text("Phone")}</dt>
@@ -198,6 +217,24 @@ export function CustomerProfilePanel({
                 {customer.email || "Not provided"}
               </dd>
             </div>
+            {isClinic ? (
+              <>
+                <div className="grid grid-cols-[8rem_1fr] gap-3 py-3">
+                  <dt className="text-slate-400">{text("Date of birth")}</dt>
+                  <dd className="font-medium text-slate-700">
+                    {customer.dateOfBirth
+                      ? `${formatDate(customer.dateOfBirth, "UTC")}${age !== null ? ` · ${age} ${text("years")}` : ""}`
+                      : text("Not provided")}
+                  </dd>
+                </div>
+                <div className="grid grid-cols-[8rem_1fr] gap-3 py-3">
+                  <dt className="text-slate-400">{text("Gender")}</dt>
+                  <dd className="font-medium capitalize text-slate-700">
+                    {customer.gender ? text(customer.gender === "female" ? "Female" : "Male") : text("Not provided")}
+                  </dd>
+                </div>
+              </>
+            ) : null}
             <div className="grid grid-cols-[8rem_1fr] gap-3 py-3">
               <dt className="text-slate-400">{text("Source")}</dt>
               <dd className="font-medium text-slate-700">

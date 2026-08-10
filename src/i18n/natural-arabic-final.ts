@@ -76,4 +76,11 @@ export const naturalArabicFinalPairs: ReadonlyArray<readonly [string, string]> =
   ["Reset demo", "إعادة ضبط العرض"],
   ["Salon demo", "عرض الصالون"],
   ["Clinic demo", "عرض العيادة"],
+  ["Keep patient contact and optional reception details up to date.", "حافظ على بيانات المريض ومعلومات الاستقبال الاختيارية محدثة."],
+  ["Date of birth", "تاريخ الميلاد"],
+  ["Gender", "النوع"],
+  ["Not provided", "غير مُسجل"],
+  ["Female", "أنثى"],
+  ["Male", "ذكر"],
+  ["Patient details", "بيانات المريض"],
 ];

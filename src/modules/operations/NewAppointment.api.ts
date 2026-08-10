@@ -1,5 +1,6 @@
 import { api } from "@/shared/lib/api";
 import type { ServiceSelection, AvailableSlot } from "../booking/booking.types";
+import type { CustomerGender } from "@/modules/customers/customers.types";
 import type {
   AppointmentSummary,
   ServiceCatalogItem,
@@ -111,6 +112,8 @@ export interface CustomerSearchResult {
   phone: string;
   visitCount: number;
   lastVisitAt: string | null;
+  dateOfBirth?: string | null;
+  gender?: CustomerGender | null;
 }
 
 export function searchCustomers(
@@ -126,6 +129,23 @@ export function searchCustomers(
     view: "search",
   });
   return api(`/customers?${params.toString()}`, accessToken);
+}
+
+export async function saveCustomerDemographicsByPhone(
+  phone: string,
+  demographics: { dateOfBirth?: string | null; gender?: CustomerGender | null },
+  accessToken: string,
+) {
+  const result = await searchCustomers(phone, accessToken, 1, 10);
+  const normalized = phone.replace(/\D/g, "");
+  const customer =
+    result.items.find((item) => item.phone.replace(/\D/g, "") === normalized) ??
+    result.items[0];
+  if (!customer) return;
+  await api(`/customers/${customer.id}`, accessToken, {
+    method: "PATCH",
+    body: JSON.stringify(demographics),
+  });
 }
 
 export interface CreateManualAppointmentPayload {

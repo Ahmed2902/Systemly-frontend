@@ -20,6 +20,10 @@ export class DemoApiTransport implements ApiTransport {
     return this.router.handle(input);
   }
 
+  syncPublicBookings() {
+    this.store.syncPublicBookings();
+  }
+
   reset() {
     this.store.reset();
   }

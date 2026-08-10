@@ -1,6 +1,7 @@
 "use client";
 
 import { usePlatformText } from "@/i18n/usePlatformText";
+import { useAuth } from "@/modules/auth/useAuth";
 import { useEffect, useState } from "react";
 import { Loader2, X } from "lucide-react";
 import type { CustomerInput, CustomerProfile } from "../customers.types";
@@ -16,6 +17,10 @@ interface Props {
 const inputClass =
   "mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-800 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-100/60";
 
+function dateInputValue(value: string | null | undefined) {
+  return value ? value.slice(0, 10) : "";
+}
+
 export function CustomerFormModal({
   open,
   customer,
@@ -24,10 +29,14 @@ export function CustomerFormModal({
   onSubmit,
 }: Props) {
   const text = usePlatformText();
+  const { user } = useAuth();
+  const isClinic = user?.vertical === "clinic";
   const [form, setForm] = useState<CustomerInput>({
     name: "",
     phone: "",
     email: "",
+    dateOfBirth: null,
+    gender: null,
     acquisitionSource: "",
     notes: "",
   });
@@ -39,6 +48,8 @@ export function CustomerFormModal({
       name: customer?.name ?? "",
       phone: customer?.phone ?? "",
       email: customer?.email ?? "",
+      dateOfBirth: dateInputValue(customer?.dateOfBirth),
+      gender: customer?.gender ?? null,
       acquisitionSource: customer?.acquisitionSource ?? "",
       notes: customer?.notes ?? "",
     });
@@ -60,6 +71,12 @@ export function CustomerFormModal({
         name: form.name.trim(),
         phone: form.phone.trim(),
         email: form.email?.trim() || null,
+        ...(isClinic
+          ? {
+              dateOfBirth: form.dateOfBirth?.trim() || null,
+              gender: form.gender ?? null,
+            }
+          : {}),
         acquisitionSource: form.acquisitionSource?.trim() || null,
         notes: form.notes?.trim() || null,
       });
@@ -80,7 +97,9 @@ export function CustomerFormModal({
               {customer ? text("Edit customer") : text("New customer")}
             </h2>
             <p className="mt-1 text-sm text-slate-500">
-              {text("Keep contact information, acquisition source, and internal notes up to date.")}
+              {isClinic
+                ? text("Keep patient contact and optional reception details up to date.")
+                : text("Keep contact information, acquisition source, and internal notes up to date.")}
             </p>
           </div>
           <button
@@ -131,6 +150,53 @@ export function CustomerFormModal({
               className={inputClass}
             />
           </label>
+
+          {isClinic ? (
+            <>
+              <label className="text-sm font-medium text-slate-700">
+                {text("Date of birth")}
+                <input
+                  type="date"
+                  max={new Date().toISOString().slice(0, 10)}
+                  value={form.dateOfBirth ?? ""}
+                  onChange={(event) =>
+                    setForm((current) => ({
+                      ...current,
+                      dateOfBirth: event.target.value || null,
+                    }))
+                  }
+                  className={inputClass}
+                />
+                <span className="mt-1 block text-xs font-normal text-slate-400">
+                  {text("Optional")}
+                </span>
+              </label>
+              <label className="text-sm font-medium text-slate-700">
+                {text("Gender")}
+                <select
+                  value={form.gender ?? ""}
+                  onChange={(event) =>
+                    setForm((current) => ({
+                      ...current,
+                      gender:
+                        event.target.value === "male" || event.target.value === "female"
+                          ? event.target.value
+                          : null,
+                    }))
+                  }
+                  className={inputClass}
+                >
+                  <option value="">{text("Not provided")}</option>
+                  <option value="female">{text("Female")}</option>
+                  <option value="male">{text("Male")}</option>
+                </select>
+                <span className="mt-1 block text-xs font-normal text-slate-400">
+                  {text("Optional")}
+                </span>
+              </label>
+            </>
+          ) : null}
+
           <label className="text-sm font-medium text-slate-700 sm:col-span-2">
             {text("Internal notes")}
             <textarea

@@ -53,6 +53,7 @@ export function DemoOperationsEnvironment({
   const basePath = `/demo/operations/${vertical}`;
 
   useEffect(() => {
+    transport.syncPublicBookings();
     const uninstall = installApiTransport(transport);
     setReady(true);
     return () => {
