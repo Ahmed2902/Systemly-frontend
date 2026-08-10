@@ -50,7 +50,7 @@ export function ClinicFaq({ faqs }: { faqs?: PublicFaq[] }) {
                   <span
                     className={`grid h-10 w-10 flex-none place-items-center rounded-full border transition ${
                       open
-                        ? "border-[var(--accent-strong)] bg-[var(--accent-strong)] text-white"
+                        ? "border-[var(--accent)] bg-[var(--accent)] text-[var(--accent-contrast)]"
                         : "border-[var(--border)] bg-[var(--surface)] text-[var(--muted)]"
                     }`}
                   >

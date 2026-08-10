@@ -131,8 +131,10 @@ export function SalonTemplate(data: SalonTemplateData) {
   };
 
   const style = createTemplatePalette({
-    accent: data.primaryColor,
-    fallbackAccent: "#6A3048",
+    accent: data.secondaryColor,
+    fallbackAccent: "#482131",
+    secondary: data.primaryColor,
+    fallbackSecondary: "#6A3048",
     background: "#F4F0EA",
     surface: "#FFFDFA",
     soft: "#ECE4DB",

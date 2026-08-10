@@ -130,8 +130,10 @@ export function ClinicTemplate(data: ClinicTemplateData) {
   };
 
   const style = createTemplatePalette({
-    accent: data.primaryColor,
-    fallbackAccent: "#0B6B68",
+    accent: data.secondaryColor,
+    fallbackAccent: "#074947",
+    secondary: data.primaryColor,
+    fallbackSecondary: "#0B6B68",
     background: "#F4F7F5",
     surface: "#FFFFFF",
     soft: "#EAF1EE",

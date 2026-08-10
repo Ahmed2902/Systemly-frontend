@@ -72,7 +72,7 @@ export function Contact({
   return (
     <section id="contact" className="px-6 py-24 md:px-12 lg:px-16 lg:py-32">
       <div className="mx-auto grid max-w-7xl overflow-hidden rounded-[2.25rem] border border-[var(--border)] bg-[var(--surface)] shadow-[0_22px_65px_rgba(20,39,35,0.08)] lg:grid-cols-[0.9fr_1.1fr] lg:rounded-[3rem]">
-        <div className="bg-[var(--accent-strong)] p-8 text-start text-white md:p-12 lg:p-16 xl:p-20">
+        <div className="bg-[var(--secondary-ink)] p-8 text-start text-white md:p-12 lg:p-16 xl:p-20">
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/48">
             Contact and booking
           </p>
@@ -89,7 +89,7 @@ export function Contact({
               previewMode ? (event) => event.preventDefault() : undefined
             }
             scroll={false}
-            className="mt-9 inline-flex min-h-12 items-center gap-2 rounded-full bg-white px-6 text-sm font-semibold text-[var(--accent-deep)] transition hover:-translate-y-0.5 hover:bg-[#f3f7f5]"
+            className="mt-9 inline-flex min-h-12 items-center gap-2 rounded-full bg-[var(--accent)] px-6 text-sm font-semibold text-[var(--accent-contrast)] transition hover:-translate-y-0.5 hover:bg-[var(--accent-strong)]"
           >
             <CalendarDays size={17} /> Book appointment{" "}
             <ArrowUpRight size={15} />

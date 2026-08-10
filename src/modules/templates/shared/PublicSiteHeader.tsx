@@ -49,7 +49,7 @@ export function PublicSiteHeader({
       <div
         className={`relative mx-auto flex max-w-7xl items-center justify-between gap-4 rounded-full border px-4 py-2.5 shadow-[0_14px_38px_rgba(18,22,20,0.10)] backdrop-blur-xl md:px-5 ${
           isSalon
-            ? "border-white/10 bg-[#171513]/94 text-white"
+            ? "border-white/10 bg-[var(--secondary-ink)] text-white"
             : "border-[var(--border)] bg-white/92 text-[var(--text)]"
         }`}
       >
@@ -94,8 +94,8 @@ export function PublicSiteHeader({
             scroll={false}
             className={`hidden min-h-10 items-center justify-center gap-2 rounded-full px-4 text-xs font-semibold sm:inline-flex ${
               isSalon
-                ? "bg-white text-[#171513] hover:bg-[#f3f0eb]"
-                : "bg-[var(--accent-strong)] text-white hover:bg-[var(--accent-deep)]"
+                ? "bg-[var(--accent)] text-[var(--accent-contrast)] hover:bg-[var(--accent-strong)]"
+                : "bg-[var(--accent)] text-[var(--accent-contrast)] hover:bg-[var(--accent-strong)]"
             }`}
           >
             Book appointment <ArrowUpRight size={14} />
@@ -117,7 +117,7 @@ export function PublicSiteHeader({
           <div
             className={`absolute inset-x-0 top-[calc(100%+.65rem)] overflow-hidden rounded-[1.5rem] border p-3 shadow-[0_24px_60px_rgba(18,22,20,0.18)] lg:hidden ${
               isSalon
-                ? "border-white/10 bg-[#171513] text-white"
+                ? "border-white/10 bg-[var(--secondary-ink)] text-white"
                 : "border-[var(--border)] bg-white text-[var(--text)]"
             }`}
           >
@@ -143,7 +143,7 @@ export function PublicSiteHeader({
                 }}
                 scroll={false}
                 className={`mt-2 flex min-h-12 items-center justify-center gap-2 rounded-full px-5 text-sm font-semibold ${
-                  isSalon ? "bg-white text-[#171513]" : "bg-[var(--accent-strong)] text-white"
+                  isSalon ? "bg-[var(--accent)] text-[var(--accent-contrast)]" : "bg-[var(--accent)] text-[var(--accent-contrast)]"
                 }`}
               >
                 Book appointment <ArrowUpRight size={15} />

@@ -41,6 +41,7 @@ export type BaseTemplateData = TemplateRuntime & {
   logoUrl: string | null;
   galleryPhotoUrls: string[];
   primaryColor: string;
+  secondaryColor?: string | null;
   sectionOrder: string[];
   showTeam: boolean;
   showFaq: boolean;

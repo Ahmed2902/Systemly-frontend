@@ -68,7 +68,7 @@ export function StepLaunch({ onBack }: StepProps) {
             <div>
               <h3 className="text-base font-semibold">{text("Review summary")}</h3>
               <div className="onboarding-table mt-3">
-                <SummaryRow label={text("Business URL")} value={`systemly.app/${state.slug || "your-business"}`} />
+                <SummaryRow label={text("Business URL")} value={`systemly.me/${state.slug || "your-business"}`} />
                 <SummaryRow label={text("Industry")} value={state.vertical || "Not selected"} />
                 <SummaryRow label={text("Template")} value={state.template || "Not selected"} />
                 <SummaryRow label={text("Online booking")} value="Enabled" />

@@ -39,7 +39,7 @@ export function Hero({
       id="top"
       className="px-3 pb-24 pt-5 md:px-6 md:pb-32 md:pt-7 lg:px-8"
     >
-      <div className="mx-auto grid max-w-[1440px] overflow-hidden rounded-[2rem] bg-[#171513] text-white shadow-[0_28px_80px_rgba(30,24,20,0.16)] lg:min-h-[720px] lg:grid-cols-[0.88fr_1.12fr] lg:rounded-[2.75rem]">
+      <div className="mx-auto grid max-w-[1440px] overflow-hidden rounded-[2rem] bg-[var(--secondary-ink)] text-white shadow-[0_28px_80px_rgba(30,24,20,0.16)] lg:min-h-[720px] lg:grid-cols-[0.88fr_1.12fr] lg:rounded-[2.75rem]">
         <div className="flex flex-col justify-between gap-16 p-7 text-start md:p-12 lg:p-16 xl:p-20">
           <div>
             <div className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-[0.22em] text-white/48">
@@ -64,7 +64,7 @@ export function Hero({
                   previewMode ? (event) => event.preventDefault() : undefined
                 }
                 scroll={false}
-                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-white px-6 text-sm font-semibold text-[#171513] transition hover:-translate-y-0.5 hover:bg-[#f3f0eb]"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[var(--accent)] px-6 text-sm font-semibold text-[var(--accent-contrast)] transition hover:-translate-y-0.5 hover:bg-[var(--accent-strong)]"
               >
                 Book an appointment <ArrowUpRight size={16} />
               </Link>
@@ -97,7 +97,7 @@ export function Hero({
           </div>
         </div>
 
-        <div className="relative min-h-[520px] overflow-hidden bg-[#2a2521] lg:min-h-full">
+        <div className="relative min-h-[520px] overflow-hidden bg-[var(--secondary-deep)] lg:min-h-full">
           {heroPhotoUrl ? (
             <img
               src={heroPhotoUrl}
@@ -105,7 +105,7 @@ export function Hero({
               className="absolute inset-0 h-full w-full object-cover"
             />
           ) : (
-            <div className="absolute inset-0 bg-gradient-to-br from-[var(--accent-soft)] to-[#cbbfb4]" />
+            <div className="absolute inset-0 bg-gradient-to-br from-[var(--secondary-wash)] to-[var(--secondary-soft)]" />
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/5" />
 

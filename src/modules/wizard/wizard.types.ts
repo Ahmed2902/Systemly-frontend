@@ -63,6 +63,7 @@ export type WizardState = {
   galleryPhotoUrls: string[];
   galleryPhotoObjectPaths: string[];
   primaryColor: string;
+  secondaryColor: string;
   sectionOrder: string[];
   showTeam: boolean;
   showFaq: boolean;

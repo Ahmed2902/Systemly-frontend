@@ -34,8 +34,8 @@ const EMPTY_WEBSITE: WebsiteSettingsInput = {
   tagline: null,
   aboutText: null,
   template: null,
-  primaryColor: "#6d273f",
-  secondaryColor: "#202223",
+  primaryColor: null,
+  secondaryColor: null,
   font: "Inter",
   showTeam: true,
   showFaq: true,
@@ -45,6 +45,18 @@ const EMPTY_WEBSITE: WebsiteSettingsInput = {
   instagramUrl: null,
   whatsappNumber: null,
 };
+
+const SUGGESTED_COLOUR_PAIRS = [
+  { label: "Forest", primary: "#004C3F", secondary: "#00342B" },
+  { label: "Charcoal", primary: "#202223", secondary: "#161718" },
+  { label: "Berry", primary: "#4A1025", secondary: "#320B19" },
+  { label: "Cocoa", primary: "#2B2420", secondary: "#1D1816" },
+  { label: "Stone", primary: "#756B60", secondary: "#504941" },
+  { label: "Sand", primary: "#A3947F", secondary: "#6F6556" },
+] as const;
+
+const PRIMARY_COLOURS = ["#004C3F", "#202223", "#4A1025", "#2B2420", "#756B60", "#A3947F"] as const;
+const SECONDARY_COLOURS = SUGGESTED_COLOUR_PAIRS.map((pair) => pair.secondary);
 
 function textOrNull(value: string) {
   const trimmed = value.trim();
@@ -65,6 +77,9 @@ export function SettingsScreen() {
 
   const canManage =
     user?.role === text("BusinessAdmin") || user?.role === text("SuperAdmin");
+  const colourDefaults = user?.vertical === "clinic"
+    ? { primary: "#0B6B68", secondary: "#074947" }
+    : { primary: "#6A3048", secondary: "#482131" };
 
   const load = useCallback(async () => {
     if (!accessToken || !canManage) return;
@@ -284,7 +299,35 @@ export function SettingsScreen() {
                   <option>Playfair Display</option>
                 </select>
               </Field>
-              <Field label={text("Primary colour")}><input type="color" className="op-input h-11 p-1" value={website.primaryColor ?? "#6d273f"} onChange={(event) => setWebsite({ ...website, primaryColor: event.target.value })} /></Field>
+              <Field label={text("Primary colour — backgrounds")}><input type="color" className="op-input h-11 p-1" value={website.primaryColor ?? colourDefaults.primary} onChange={(event) => setWebsite({ ...website, primaryColor: event.target.value })} /></Field>
+              <Field label={text("Secondary colour — buttons")}><input type="color" className="op-input h-11 p-1" value={website.secondaryColor ?? colourDefaults.secondary} onChange={(event) => setWebsite({ ...website, secondaryColor: event.target.value })} /></Field>
+              <Field label={text("Primary colour presets")} className="md:col-span-2">
+                <div className="flex flex-wrap gap-2">
+                  {PRIMARY_COLOURS.map((colour) => (
+                    <button key={colour} type="button" onClick={() => setWebsite({ ...website, primaryColor: colour })} className={`h-8 w-8 rounded-full border-2 transition hover:scale-105 ${website.primaryColor === colour ? "border-[var(--op-text)]" : "border-transparent"}`} style={{ backgroundColor: colour }} aria-label={`Use ${colour} for website backgrounds`} aria-pressed={website.primaryColor === colour} />
+                  ))}
+                </div>
+              </Field>
+              <Field label={text("Secondary colour presets")} className="md:col-span-2">
+                <div className="flex flex-wrap gap-2">
+                  {SECONDARY_COLOURS.map((colour) => (
+                    <button key={colour} type="button" onClick={() => setWebsite({ ...website, secondaryColor: colour })} className={`h-8 w-8 rounded-full border-2 transition hover:scale-105 ${website.secondaryColor === colour ? "border-[var(--op-text)]" : "border-transparent"}`} style={{ backgroundColor: colour }} aria-label={`Use ${colour} for buttons`} aria-pressed={website.secondaryColor === colour} />
+                  ))}
+                </div>
+              </Field>
+              <Field label={text("Suggested colour pairs")} className="md:col-span-2">
+                <div className="flex flex-wrap gap-2">
+                  {SUGGESTED_COLOUR_PAIRS.map((pair) => (
+                    <button key={pair.label} type="button" onClick={() => setWebsite({ ...website, primaryColor: pair.primary, secondaryColor: pair.secondary })} className="inline-flex items-center gap-2 rounded-lg border border-[var(--op-border)] bg-[var(--op-surface-soft)] px-3 py-2 text-xs font-semibold text-[var(--op-text-secondary)] transition hover:bg-[var(--op-surface-raised)] hover:text-[var(--op-text)]">
+                      <span className="h-4 w-4 rounded-full border border-black/10" style={{ background: `linear-gradient(135deg, ${pair.primary} 0 50%, ${pair.secondary} 50% 100%)` }} />
+                      {text(pair.label)}
+                    </button>
+                  ))}
+                </div>
+                <button type="button" onClick={() => setWebsite({ ...website, primaryColor: colourDefaults.primary, secondaryColor: colourDefaults.secondary })} className="mt-3 text-xs font-semibold text-[var(--op-text)] underline-offset-4 hover:underline">
+                  {text("Reset to default colours")}
+                </button>
+              </Field>
               <Field label={text("Instagram URL")}><input className="op-input" value={website.instagramUrl ?? ""} onChange={(event) => setWebsite({ ...website, instagramUrl: textOrNull(event.target.value) })} /></Field>
               <Field label={text("WhatsApp number")}><input className="op-input" value={website.whatsappNumber ?? ""} onChange={(event) => setWebsite({ ...website, whatsappNumber: textOrNull(event.target.value) })} /></Field>
             </div>

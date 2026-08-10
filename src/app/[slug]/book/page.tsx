@@ -4,6 +4,18 @@ import { BookingProvider } from "@/modules/booking/booking.context";
 import { BookingShell } from "@/modules/booking/components/BookingShell";
 import { getTemplateById } from "@/modules/templates/template-registry";
 
+function contrastText(colour: string) {
+  const hex = colour.replace(/^#/, "");
+  if (!/^[\da-fA-F]{6}$/.test(hex)) return "#171918";
+  const channels = [0, 2, 4].map((start) => Number.parseInt(hex.slice(start, start + 2), 16) / 255);
+  const [red, green, blue] = channels.map((channel) => (
+    channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4
+  ));
+  return 0.2126 * red + 0.7152 * green + 0.0722 * blue > 0.46
+    ? "#171918"
+    : "#FFFFFF";
+}
+
 async function getBusiness(slug: string) {
   const res = await fetch(apiUrl(`/businesses/public/${slug}`), {
     cache: "no-store",
@@ -27,7 +39,9 @@ export default async function BookPage({
     business.websiteContent?.template ?? "aura-wellness",
   );
   const theme = template?.theme;
-  const accent = business.websiteContent?.primaryColor ?? "#2B2420";
+  const accent = business.websiteContent?.secondaryColor ?? (
+    template?.vertical === "clinic" ? "#074947" : "#482131"
+  );
 
   return (
     <div
@@ -39,7 +53,7 @@ export default async function BookPage({
           "--booking-muted": theme?.muted ?? "#666666",
           "--booking-border": theme?.border ?? "#E5E5E5",
           "--accent": accent,
-          "--accent-text": theme?.accentTextOn ?? "#FFFFFF",
+          "--accent-text": contrastText(accent),
         } as React.CSSProperties
       }
     >

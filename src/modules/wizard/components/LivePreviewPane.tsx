@@ -15,7 +15,7 @@ export function LivePreviewPane({ expanded = false }: { expanded?: boolean }) {
   const vertical = state.vertical ?? "salon";
   const options = getTemplatesForVertical(vertical);
   const templateData = wizardStateToTemplateData(state);
-  const previewHost = `systemly.com/${state.slug || "your-business"}`;
+  const previewHost = `systemly.me/${state.slug || "your-business"}`;
 
   return (
     <div className="overflow-hidden rounded-lg border border-[var(--onboarding-border)] bg-[#080a09]">

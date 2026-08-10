@@ -7,7 +7,7 @@ export function About({
 }) {
   return (
     <section id="about" className="px-6 py-24 md:px-12 lg:px-16 lg:py-32">
-      <div className="mx-auto max-w-7xl overflow-hidden rounded-[2.25rem] bg-[var(--accent-soft)] md:rounded-[3rem]">
+      <div className="mx-auto max-w-7xl overflow-hidden rounded-[2.25rem] bg-[var(--secondary-soft)] md:rounded-[3rem]">
         <div className="grid gap-10 p-8 text-start md:p-12 lg:grid-cols-[0.62fr_1.38fr] lg:gap-16 lg:p-16 xl:p-20">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-strong)]">About the studio</p>

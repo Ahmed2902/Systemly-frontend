@@ -44,6 +44,7 @@ type PublicBusinessWebsiteContent = {
   aboutText?: string | null;
   template?: string | null;
   primaryColor?: string | null;
+  secondaryColor?: string | null;
   sectionOrder?: string[] | null;
   showTeam?: boolean | null;
   showFaq?: boolean | null;
@@ -129,6 +130,7 @@ export default async function PublicBusinessPage({
       )
       .map((photo: { url: string }) => photo.url),
     primaryColor: content?.primaryColor ?? template.theme.primary,
+    secondaryColor: content?.secondaryColor,
     sectionOrder: completePublicSectionOrder(content?.sectionOrder ?? []),
     showTeam: content?.showTeam ?? true,
     showFaq: content?.showFaq ?? true,

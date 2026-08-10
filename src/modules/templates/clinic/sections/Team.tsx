@@ -10,7 +10,7 @@ export function Team({ staff }: { staff: ClinicTemplateData["staff"] }) {
   return (
     <section
       id="team"
-      className="bg-[var(--soft)] px-6 py-24 md:px-12 lg:px-16 lg:py-32"
+      className="bg-[var(--secondary-soft)] px-6 py-24 md:px-12 lg:px-16 lg:py-32"
     >
       <div className="mx-auto max-w-7xl">
         <div className="flex flex-col gap-6 text-start md:flex-row md:items-end md:justify-between">
@@ -42,7 +42,7 @@ export function Team({ staff }: { staff: ClinicTemplateData["staff"] }) {
                     className="h-full w-full object-cover"
                   />
                 ) : (
-                  <div className="grid h-full place-items-center bg-gradient-to-br from-[var(--accent-wash)] to-[var(--accent-soft)]">
+                  <div className="grid h-full place-items-center bg-gradient-to-br from-[var(--secondary-wash)] to-[var(--secondary-soft)]">
                     <span className="text-7xl font-semibold text-[var(--accent-strong)]">
                       {firstLetter(member.name)}
                     </span>

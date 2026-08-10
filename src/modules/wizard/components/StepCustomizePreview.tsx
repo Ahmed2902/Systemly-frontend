@@ -20,14 +20,21 @@ import { SectionOrderList } from "./SectionOrderList";
 import { FaqEditor } from "./FaqEditor";
 import { getTemplatesForVertical } from "@/modules/templates/template-registry";
 
-const COLOURS = [
-  "#004C3F",
-  "#202223",
-  "#4A1025",
-  "#2B2420",
-  "#756B60",
-  "#A3947F",
-];
+const COLOUR_PAIRS = [
+  { label: "Forest", primary: "#004C3F", secondary: "#00342B" },
+  { label: "Charcoal", primary: "#202223", secondary: "#161718" },
+  { label: "Berry", primary: "#4A1025", secondary: "#320B19" },
+  { label: "Cocoa", primary: "#2B2420", secondary: "#1D1816" },
+  { label: "Stone", primary: "#756B60", secondary: "#504941" },
+  { label: "Sand", primary: "#A3947F", secondary: "#6F6556" },
+] as const;
+
+const PRIMARY_COLOURS = ["#004C3F", "#202223", "#4A1025", "#2B2420", "#756B60", "#A3947F"] as const;
+const SECONDARY_COLOURS = COLOUR_PAIRS.map((pair) => pair.secondary);
+const DEFAULT_COLOUR_PAIRS = {
+  salon: { primary: "#6A3048", secondary: "#482131" },
+  clinic: { primary: "#0B6B68", secondary: "#074947" },
+} as const;
 
 export function StepCustomizePreview({ onNext, onBack }: StepProps) {
   const text = usePlatformText();
@@ -58,6 +65,9 @@ export function StepCustomizePreview({ onNext, onBack }: StepProps) {
   const templates = getTemplatesForVertical(
     (state.vertical ?? "salon") as "salon" | "clinic",
   );
+  const defaultColours = state.vertical === "clinic"
+    ? DEFAULT_COLOUR_PAIRS.clinic
+    : DEFAULT_COLOUR_PAIRS.salon;
 
   function openPreview() {
     try {
@@ -109,28 +119,47 @@ export function StepCustomizePreview({ onNext, onBack }: StepProps) {
             </div>
 
             <div className="onboarding-field">
-              <label>{text("Primary brand colour")}</label>
-              <div className="flex flex-wrap gap-2.5">
-                {COLOURS.map((colour) => (
+              <div className="flex items-center justify-between gap-3">
+                <label>{text("Primary colour — backgrounds")}</label>
+                <input type="color" value={state.primaryColor} onChange={(event) => patch({ primaryColor: event.target.value })} className="h-9 w-9 cursor-pointer rounded-lg border border-[var(--onboarding-border)] bg-transparent p-1" aria-label={text("Choose a custom primary colour")} />
+              </div>
+              <div className="mt-2 flex flex-wrap gap-2.5">
+                {PRIMARY_COLOURS.map((colour) => (
+                  <button key={colour} type="button" onClick={() => patch({ primaryColor: colour })} className={`h-9 w-9 rounded-full border-2 transition hover:scale-105 ${state.primaryColor === colour ? "border-[var(--onboarding-mint)]" : "border-transparent"}`} style={{ backgroundColor: colour }} aria-label={`Use ${colour} for website backgrounds`} aria-pressed={state.primaryColor === colour} />
+                ))}
+              </div>
+
+              <div className="mt-5 flex items-center justify-between gap-3">
+                <label>{text("Secondary colour — buttons")}</label>
+                <input type="color" value={state.secondaryColor} onChange={(event) => patch({ secondaryColor: event.target.value })} className="h-9 w-9 cursor-pointer rounded-lg border border-[var(--onboarding-border)] bg-transparent p-1" aria-label={text("Choose a custom secondary colour")} />
+              </div>
+              <div className="mt-2 flex flex-wrap gap-2.5">
+                {SECONDARY_COLOURS.map((colour) => (
+                  <button key={colour} type="button" onClick={() => patch({ secondaryColor: colour })} className={`h-9 w-9 rounded-full border-2 transition hover:scale-105 ${state.secondaryColor === colour ? "border-[var(--onboarding-mint)]" : "border-transparent"}`} style={{ backgroundColor: colour }} aria-label={`Use ${colour} for buttons`} aria-pressed={state.secondaryColor === colour} />
+                ))}
+              </div>
+
+              <label className="mt-5 block">{text("Suggested colour pairs")}</label>
+              <p className="mb-3 text-xs text-[var(--onboarding-muted)]">{text("Choose a pair to replace both colours at once.")}</p>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {COLOUR_PAIRS.map((pair) => (
                   <button
-                    key={colour}
+                    key={pair.label}
                     type="button"
-                    onClick={() => patch({ primaryColor: colour })}
-                    className="relative h-10 w-10 rounded-full border border-[#cfd2ce] shadow-sm transition-transform hover:scale-105"
-                    style={{ backgroundColor: colour }}
-                    aria-label={`Use ${colour} as the brand colour`}
-                    aria-pressed={state.primaryColor === colour}
+                    onClick={() => patch({ primaryColor: pair.primary, secondaryColor: pair.secondary })}
+                    className={`flex items-center gap-3 rounded-xl border p-3 text-left transition ${state.primaryColor === pair.primary && state.secondaryColor === pair.secondary ? "border-[var(--onboarding-mint)] bg-[var(--onboarding-mint-soft)]" : "border-[var(--onboarding-border)] hover:border-[var(--onboarding-mint)]"}`}
+                    aria-label={`Use ${pair.label}`}
+                    aria-pressed={state.primaryColor === pair.primary && state.secondaryColor === pair.secondary}
                   >
-                    {state.primaryColor === colour ? (
-                      <Check
-                        size={16}
-                        strokeWidth={3}
-                        className="absolute inset-0 m-auto text-white drop-shadow"
-                      />
-                    ) : null}
+                    <span className="h-9 w-9 shrink-0 rounded-full border border-black/10" style={{ background: `linear-gradient(135deg, ${pair.primary} 0 50%, ${pair.secondary} 50% 100%)` }} />
+                    <span className="min-w-0 flex-1 text-sm font-semibold">{text(pair.label)}</span>
+                    {state.primaryColor === pair.primary && state.secondaryColor === pair.secondary ? <Check size={17} className="text-[var(--onboarding-mint-strong)]" /> : null}
                   </button>
                 ))}
               </div>
+              <button type="button" onClick={() => patch({ primaryColor: defaultColours.primary, secondaryColor: defaultColours.secondary })} className="mt-3 text-sm font-semibold text-[var(--onboarding-mint-strong)] underline-offset-4 hover:underline">
+                {text("Reset to default colours")}
+              </button>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2">

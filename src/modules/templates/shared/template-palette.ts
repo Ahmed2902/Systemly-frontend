@@ -3,6 +3,8 @@ import type { CSSProperties } from "react";
 type PaletteInput = {
   accent?: string | null;
   fallbackAccent: string;
+  secondary?: string | null;
+  fallbackSecondary: string;
   background: string;
   surface: string;
   soft: string;
@@ -56,6 +58,10 @@ export function createTemplatePalette(input: PaletteInput) {
   const parsedAccent = parseHex(input.accent || "");
   const accentRgb = parsedAccent ?? fallback;
   const accent = parsedAccent ? toHex(parsedAccent) : input.fallbackAccent;
+  const fallbackSecondary = parseHex(input.fallbackSecondary) ?? { r: 226, g: 230, b: 228 };
+  const parsedSecondary = parseHex(input.secondary || "");
+  const secondaryRgb = parsedSecondary ?? fallbackSecondary;
+  const secondary = parsedSecondary ? toHex(parsedSecondary) : input.fallbackSecondary;
   const black = { r: 0, g: 0, b: 0 };
   const white = { r: 255, g: 255, b: 255 };
 
@@ -63,9 +69,16 @@ export function createTemplatePalette(input: PaletteInput) {
     "--accent": accent,
     "--accent-strong": mix(accentRgb, black, 0.32),
     "--accent-deep": mix(accentRgb, black, 0.5),
+    "--accent-ink": mix(accentRgb, black, 0.68),
     "--accent-soft": mix(accentRgb, white, 0.88),
     "--accent-wash": mix(accentRgb, white, 0.95),
     "--accent-contrast": luminance(accentRgb) > 0.46 ? "#171918" : "#FFFFFF",
+    "--secondary": secondary,
+    "--secondary-strong": mix(secondaryRgb, black, 0.24),
+    "--secondary-deep": mix(secondaryRgb, black, 0.5),
+    "--secondary-ink": mix(secondaryRgb, black, 0.68),
+    "--secondary-soft": mix(secondaryRgb, white, 0.82),
+    "--secondary-wash": mix(secondaryRgb, white, 0.93),
     "--background": input.background,
     "--surface": input.surface,
     "--soft": input.soft,

@@ -38,7 +38,7 @@ export function SlugInput({
     <div className="onboarding-field">
       <label>{text("Public website address")}</label>
       <div className="onboarding-input flex items-center overflow-hidden p-0">
-        <span className="border-r border-[var(--onboarding-border)] bg-[#f6f6f3] px-3.5 text-sm text-[var(--onboarding-muted)]">systemly.app/</span>
+        <span className="border-r border-[var(--onboarding-border)] bg-[#f6f6f3] px-3.5 text-sm text-[var(--onboarding-muted)]">systemly.me/</span>
         <input
           value={value}
           onChange={(event) => onChange(event.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}

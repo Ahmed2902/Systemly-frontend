@@ -55,7 +55,7 @@ export function Contact({
 
   return (
     <section id="contact" className="px-6 py-24 md:px-12 lg:px-16 lg:py-32">
-      <div className="mx-auto grid max-w-7xl overflow-hidden rounded-[2.25rem] bg-[var(--accent-strong)] text-white shadow-[0_24px_70px_rgba(43,36,32,0.14)] lg:grid-cols-[0.9fr_1.1fr] lg:rounded-[3rem]">
+      <div className="mx-auto grid max-w-7xl overflow-hidden rounded-[2.25rem] bg-[var(--secondary-ink)] text-white shadow-[0_24px_70px_rgba(43,36,32,0.14)] lg:grid-cols-[0.9fr_1.1fr] lg:rounded-[3rem]">
         <div className="p-8 text-start md:p-12 lg:p-16 xl:p-20">
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/48">Your next visit</p>
           <h2 className="font-display mt-5 max-w-xl text-4xl font-normal leading-[1.03] tracking-[-0.045em] md:text-5xl lg:text-6xl">
@@ -69,7 +69,7 @@ export function Contact({
             href={bookingHref}
             onClick={previewMode ? (event) => event.preventDefault() : undefined}
             scroll={false}
-            className="mt-9 inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-white px-6 text-sm font-semibold text-[var(--accent-deep)] transition hover:-translate-y-0.5 hover:bg-[#f7f4ef]"
+            className="mt-9 inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[var(--accent)] px-6 text-sm font-semibold text-[var(--accent-contrast)] transition hover:-translate-y-0.5 hover:bg-[var(--accent-strong)]"
           >
             <CalendarDays size={17} /> Book appointment <ArrowUpRight size={15} />
           </Link>

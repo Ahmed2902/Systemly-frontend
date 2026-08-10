@@ -10,24 +10,40 @@ import {
   getDefaultTemplateId,
   type TemplateVertical,
 } from "@/modules/templates/template-registry";
+import { checkSlugAvailability } from "../wizard.api";
 
 export function StepBusinessInfo({ onNext }: StepProps) {
   const text = usePlatformText();
   const { state, patch } = useWizard();
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [checkingSlug, setCheckingSlug] = useState(false);
 
   function selectVertical(vertical: TemplateVertical) {
     patch({ vertical, template: getDefaultTemplateId(vertical) });
   }
 
-  function validateAndNext() {
+  async function validateAndNext() {
     const nextErrors: Record<string, string> = {};
     if (!state.vertical) nextErrors.vertical = "Choose a business type";
     if (!state.name.trim()) nextErrors.name = "Business name is required";
     if (!/^[a-z0-9-]{3,}$/.test(state.slug)) nextErrors.slug = "Choose a valid website address";
     if (!state.phone.trim()) nextErrors.phone = "Phone number is required";
     setErrors(nextErrors);
-    if (Object.keys(nextErrors).length === 0) onNext();
+    if (Object.keys(nextErrors).length > 0) return;
+
+    setCheckingSlug(true);
+    try {
+      const available = await checkSlugAvailability(state.slug);
+      if (!available) {
+        setErrors({ slug: "That website address is already taken" });
+        return;
+      }
+      onNext();
+    } catch {
+      setErrors({ slug: "Unable to verify this website address. Please try again." });
+    } finally {
+      setCheckingSlug(false);
+    }
   }
 
   return (
@@ -117,7 +133,14 @@ export function StepBusinessInfo({ onNext }: StepProps) {
                   </select>
                 </div>
               </div>
-              <SlugInput value={state.slug} onChange={(value) => patch({ slug: value })} error={errors.slug} />
+              <SlugInput value={state.slug} onChange={(value) => {
+                patch({ slug: value });
+                setErrors((current) => {
+                  if (!current.slug) return current;
+                  const { slug: _slug, ...rest } = current;
+                  return rest;
+                });
+              }} error={errors.slug} />
             </div>
           </div>
         </section>
@@ -125,7 +148,7 @@ export function StepBusinessInfo({ onNext }: StepProps) {
         <footer className="onboarding-footer">
           <p className="onboarding-secure-copy">{text("You can edit these details later from Settings.")}</p>
           <div className="onboarding-footer-actions">
-            <button type="button" onClick={validateAndNext} className="onboarding-primary-button">{text("Save and continue →")}</button>
+            <button type="button" onClick={validateAndNext} disabled={checkingSlug} className="onboarding-primary-button disabled:cursor-not-allowed disabled:opacity-60">{checkingSlug ? text("Checking availability…") : text("Save and continue →")}</button>
           </div>
         </footer>
       </div>

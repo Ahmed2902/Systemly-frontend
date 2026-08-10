@@ -28,28 +28,28 @@ export function ClinicGallery({ photos }: { photos: string[] }) {
   const next = () => setCurrentIndex((index) => (index === photos.length - 1 ? 0 : index + 1));
 
   return (
-    <section id="gallery" className="bg-[var(--background)] px-6 py-24 md:px-12 lg:px-16 lg:py-32">
+    <section id="gallery" className="bg-[var(--secondary-ink)] px-6 py-24 text-white md:px-12 lg:px-16 lg:py-32">
       <div className="mx-auto max-w-7xl">
         <div className="flex flex-col gap-6 text-start md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-strong)]">Our clinic</p>
-            <h2 className="mt-4 max-w-3xl text-4xl font-semibold leading-[1.06] tracking-[-0.045em] text-[var(--text)] md:text-5xl lg:text-6xl">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/42">Our clinic</p>
+            <h2 className="mt-4 max-w-3xl text-4xl font-semibold leading-[1.06] tracking-[-0.045em] text-white md:text-5xl lg:text-6xl">
               A calm, considered space for care.
             </h2>
           </div>
-          <p className="max-w-sm text-sm leading-7 text-[var(--muted)]">
+          <p className="max-w-sm text-sm leading-7 text-white/55">
             See the environment before your visit and know what to expect when you arrive.
           </p>
         </div>
 
         <div
-          className="mt-14 grid overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] shadow-[0_20px_60px_rgba(20,39,35,0.08)] lg:grid-cols-[1.42fr_.58fr] lg:rounded-[2.5rem]"
+          className="mt-14 grid overflow-hidden rounded-[2rem] border border-white/10 bg-[var(--surface)] text-[var(--text)] shadow-[0_24px_70px_rgba(0,0,0,0.22)] lg:grid-cols-[1.42fr_.58fr] lg:rounded-[2.5rem]"
           onMouseEnter={() => setPaused(true)}
           onMouseLeave={() => setPaused(false)}
           onFocusCapture={() => setPaused(true)}
           onBlurCapture={() => setPaused(false)}
         >
-          <div className="relative min-h-[420px] overflow-hidden bg-[var(--soft)] md:min-h-[620px]">
+          <div className="relative min-h-[420px] overflow-hidden bg-[var(--secondary-soft)] md:min-h-[620px]">
             {photos.map((photo, index) => (
               <img
                 key={`${photo}-${index}`}
@@ -103,7 +103,7 @@ export function ClinicGallery({ photos }: { photos: string[] }) {
                   type="button"
                   onClick={next}
                   aria-label="Next clinic image"
-                  className="grid h-12 w-12 place-items-center rounded-full bg-[var(--accent-strong)] text-white transition hover:bg-[var(--accent-deep)]"
+                  className="grid h-12 w-12 place-items-center rounded-full bg-[var(--accent)] text-[var(--accent-contrast)] transition hover:bg-[var(--accent-strong)]"
                 >
                   <ArrowRight size={18} />
                 </button>

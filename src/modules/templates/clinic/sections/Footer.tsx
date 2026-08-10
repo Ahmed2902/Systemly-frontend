@@ -43,7 +43,7 @@ export function Footer({
   const location = [address, city].filter(Boolean).join(", ");
 
   return (
-    <footer className="bg-[var(--dark)] px-6 py-16 text-white md:px-12 lg:px-16 lg:py-20">
+    <footer className="bg-[var(--secondary-ink)] px-6 py-16 text-white md:px-12 lg:px-16 lg:py-20">
       <div className="mx-auto max-w-7xl">
         <div className="grid gap-12 border-b border-white/10 pb-14 lg:grid-cols-[1fr_auto] lg:items-end">
           <div className="text-start">
@@ -61,7 +61,7 @@ export function Footer({
               previewMode ? (event) => event.preventDefault() : undefined
             }
             scroll={false}
-            className="inline-flex min-h-12 items-center justify-center gap-2 justify-self-start rounded-full bg-white px-6 text-sm font-semibold text-[var(--dark)] lg:justify-self-end"
+            className="inline-flex min-h-12 items-center justify-center gap-2 justify-self-start rounded-full bg-[var(--accent)] px-6 text-sm font-semibold text-[var(--accent-contrast)] hover:bg-[var(--accent-strong)] lg:justify-self-end"
           >
             Book appointment <ArrowUpRight size={16} />
           </Link>

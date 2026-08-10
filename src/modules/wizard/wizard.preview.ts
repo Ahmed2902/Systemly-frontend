@@ -19,6 +19,7 @@ export function wizardStateToTemplateData(state: WizardState): TemplateData {
     logoUrl: state.logoUrl ?? null,
     galleryPhotoUrls: state.galleryPhotoUrls,
     primaryColor: state.primaryColor,
+    secondaryColor: state.secondaryColor,
     sectionOrder: state.sectionOrder,
     showTeam: state.showTeam,
     showFaq: state.showFaq,

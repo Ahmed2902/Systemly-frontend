@@ -35,7 +35,7 @@ export function Team({ staff }: { staff: SalonTemplateData["staff"] }) {
                   className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-[1.025] motion-reduce:transition-none"
                 />
               ) : (
-                <div className="absolute inset-0 grid place-items-center bg-gradient-to-br from-[var(--accent-soft)] via-[#eadfd5] to-[#cdbdaf]">
+                <div className="absolute inset-0 grid place-items-center bg-gradient-to-br from-[var(--secondary-wash)] via-[var(--secondary-soft)] to-[var(--secondary-strong)]">
                   <span className="font-display text-8xl text-[var(--accent-strong)]/70">{firstLetter(member.name)}</span>
                 </div>
               )}

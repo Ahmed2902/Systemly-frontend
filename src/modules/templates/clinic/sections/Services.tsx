@@ -57,7 +57,7 @@ export function Services({
               previewMode ? (event) => event.preventDefault() : undefined
             }
             scroll={false}
-            className="mt-9 inline-flex min-h-12 items-center gap-2 rounded-full bg-[var(--accent-strong)] px-6 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-[var(--accent-deep)]"
+            className="mt-9 inline-flex min-h-12 items-center gap-2 rounded-full bg-[var(--accent)] px-6 text-sm font-semibold text-[var(--accent-contrast)] transition hover:-translate-y-0.5 hover:bg-[var(--accent-strong)]"
           >
             Book a visit <ArrowUpRight size={16} />
           </Link>

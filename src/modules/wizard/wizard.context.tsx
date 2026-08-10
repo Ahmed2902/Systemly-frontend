@@ -18,8 +18,8 @@ import type { WizardState } from "./wizard.types";
 
 const DRAFT_STORAGE_KEY = "hgezli:onboarding-draft:v1";
 const VERTICAL_DEFAULT_COLOURS = {
-  salon: "#8C5A3C",
-  clinic: "#1677B8",
+  salon: { primary: "#6A3048", secondary: "#482131" },
+  clinic: { primary: "#0B6B68", secondary: "#074947" },
 } as const;
 
 const initialState: WizardState = {
@@ -44,7 +44,8 @@ const initialState: WizardState = {
   logoObjectPath: null,
   galleryPhotoUrls: [],
   galleryPhotoObjectPaths: [],
-  primaryColor: VERTICAL_DEFAULT_COLOURS.salon,
+  primaryColor: VERTICAL_DEFAULT_COLOURS.salon.primary,
+  secondaryColor: VERTICAL_DEFAULT_COLOURS.salon.secondary,
   sectionOrder: completePublicSectionOrder([]),
   showTeam: true,
   showFaq: true,
@@ -91,7 +92,11 @@ function reducer(state: WizardState, action: Action): WizardState {
               primaryColor:
                 VERTICAL_DEFAULT_COLOURS[
                   action.payload.vertical as "salon" | "clinic"
-                ],
+                ].primary,
+              secondaryColor:
+                VERTICAL_DEFAULT_COLOURS[
+                  action.payload.vertical as "salon" | "clinic"
+                ].secondary,
               heroPhotoUrl: null,
               heroPhotoObjectPath: null,
               heroDescription: "",

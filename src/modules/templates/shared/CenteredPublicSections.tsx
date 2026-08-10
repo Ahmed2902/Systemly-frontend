@@ -92,7 +92,7 @@ export function CenteredBookingProcess({
   return (
     <section
       id="process"
-      className={`px-6 py-24 md:px-12 lg:px-16 lg:py-32 ${isSalon ? "bg-[#171513] text-white" : "bg-[var(--soft)] text-[var(--text)]"}`}
+      className={`px-6 py-24 md:px-12 lg:px-16 lg:py-32 ${isSalon ? "bg-[var(--secondary-ink)] text-white" : "bg-[var(--secondary-soft)] text-[var(--text)]"}`}
     >
       <div className="mx-auto max-w-7xl">
         <div className="flex flex-col gap-7 text-start md:flex-row md:items-end md:justify-between">
@@ -116,7 +116,7 @@ export function CenteredBookingProcess({
               <article
                 key={step.title}
                 className={`relative min-h-72 p-7 text-start md:p-8 ${
-                  isSalon ? "border-white/10 bg-[#1d1b19] text-white" : "border-[var(--border)] bg-[var(--surface)] text-[var(--text)]"
+                  isSalon ? "border-white/10 bg-[var(--secondary-deep)] text-white" : "border-[var(--border)] bg-[var(--surface)] text-[var(--text)]"
                 } ${index > 0 ? "border-t md:border-t-0 md:border-s" : ""}`}
               >
                 <div className="flex items-center justify-between">
@@ -161,7 +161,7 @@ export function MobileBookingBar({
         href={bookingHref}
         onClick={previewMode ? (event) => event.preventDefault() : undefined}
         className={`mx-auto flex max-w-md items-center justify-center gap-2 rounded-full px-5 py-3.5 text-sm font-semibold shadow-lg ${
-          isSalon ? "bg-white text-[#171513]" : "bg-[var(--accent-strong)] text-white"
+          isSalon ? "bg-[var(--accent)] text-[var(--accent-contrast)] hover:bg-[var(--accent-strong)]" : "bg-[var(--accent)] text-[var(--accent-contrast)] hover:bg-[var(--accent-strong)]"
         }`}
       >
         <CheckCircle2 size={17} /> {label} <ArrowUpRight size={15} />
