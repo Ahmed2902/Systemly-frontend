@@ -46,7 +46,7 @@ export function AppointmentDropdown({
         className="flex min-h-11 w-full items-center justify-between rounded-xl border border-transparent bg-[var(--op-surface-soft)] px-3.5 py-2.5 text-left text-sm font-medium text-[var(--op-text)] outline-none transition hover:bg-[var(--op-hover)] focus:border-[var(--op-border-strong)] focus:bg-[var(--op-surface)] disabled:cursor-not-allowed disabled:opacity-55"
       >
         <span className={`min-w-0 truncate ${align === "center" ? "flex-1 text-center" : ""}`}>
-          {selected?.label ?? text("Select...")}
+          {selected?.label ?? "—"}
         </span>
         <ChevronDown
           size={15}
