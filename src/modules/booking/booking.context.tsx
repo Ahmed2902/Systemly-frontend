@@ -21,17 +21,20 @@ const BookingContext = createContext<{
 
 export function BookingProvider({
   businessId,
+  branchId,
   services,
   staff,
   children,
 }: {
   businessId: string;
+  branchId: string;
   services: BookingService[];
   staff: BookingStaff[];
   children: ReactNode;
 }) {
   const initialState: BookingState = {
     businessId,
+    branchId,
     services,
     staff,
     selectedServiceIds: [],
