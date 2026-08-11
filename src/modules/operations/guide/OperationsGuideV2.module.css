@@ -1,0 +1,312 @@
+.page {
+  width: min(1420px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 44px 0 90px;
+  color: var(--op-text);
+}
+
+.hero {
+  display: grid;
+  max-width: 900px;
+  gap: 14px;
+  padding: 14px 0 26px;
+}
+
+.eyebrow {
+  color: var(--op-text-secondary);
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.hero h1 {
+  max-width: 780px;
+  font-size: clamp(38px, 5vw, 68px);
+  font-weight: 770;
+  line-height: 0.98;
+  letter-spacing: -0.055em;
+}
+
+.heroCopy {
+  max-width: 780px;
+  color: var(--op-text-secondary);
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.note {
+  width: fit-content;
+  max-width: 100%;
+  border: 1px solid var(--op-border);
+  border-radius: 999px;
+  padding: 8px 12px;
+  color: var(--op-text-secondary);
+  font-size: 12px;
+  background: var(--op-surface);
+}
+
+.flowCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  margin-top: 18px;
+  border: 1px solid var(--op-border);
+  border-radius: 24px;
+  padding: 24px;
+  background: var(--op-surface);
+}
+
+.flowCard > div:first-child {
+  max-width: 650px;
+}
+
+.flowCard p:last-child {
+  margin-top: 7px;
+  color: var(--op-text-secondary);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.flowPath {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.flowPath span {
+  border: 1px solid var(--op-border);
+  border-radius: 999px;
+  padding: 8px 11px;
+  color: var(--op-text);
+  font-size: 11px;
+  font-weight: 750;
+  background: var(--op-bg);
+}
+
+.flowPath b {
+  color: var(--op-text-secondary);
+  font-weight: 500;
+}
+
+.localNav {
+  position: sticky;
+  z-index: 20;
+  top: 0;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 26px;
+  border: 1px solid var(--op-border);
+  border-radius: 18px;
+  padding: 10px 12px;
+  background: color-mix(in srgb, var(--op-bg) 90%, transparent);
+  backdrop-filter: blur(18px);
+}
+
+.localNavLabel {
+  flex: 0 0 auto;
+  color: var(--op-text-secondary);
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.localNav > div {
+  display: flex;
+  min-width: 0;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.localNav > div::-webkit-scrollbar { display: none; }
+
+.localNav a {
+  display: inline-flex;
+  flex: 0 0 auto;
+  min-height: 34px;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 0 10px;
+  color: var(--op-text-secondary);
+  font-size: 11px;
+  font-weight: 720;
+  text-decoration: none;
+}
+
+.localNav a:hover {
+  color: var(--op-text);
+  background: var(--op-hover);
+}
+
+.sections {
+  display: grid;
+  gap: 84px;
+  margin-top: 46px;
+}
+
+.section {
+  scroll-margin-top: 76px;
+}
+
+.sectionHeading {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.sectionTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sectionIcon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid var(--op-border);
+  border-radius: 14px;
+  color: var(--op-text);
+  background: var(--op-surface);
+}
+
+.sectionTitleRow h2 {
+  margin-top: 3px;
+  font-size: 30px;
+  line-height: 1.05;
+  letter-spacing: -0.045em;
+}
+
+.ownerBadge {
+  margin-inline-start: auto;
+  border: 1px solid var(--op-border);
+  border-radius: 999px;
+  padding: 6px 9px;
+  color: var(--op-text-secondary);
+  font-size: 10px;
+  font-weight: 780;
+  background: var(--op-surface);
+}
+
+.sectionIntro {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.sectionIntro > p {
+  max-width: 840px;
+  color: var(--op-text-secondary);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.openLink {
+  display: inline-flex;
+  flex: 0 0 auto;
+  min-height: 38px;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--op-border);
+  border-radius: 999px;
+  padding: 0 12px;
+  color: var(--op-text);
+  font-size: 11px;
+  font-weight: 750;
+  text-decoration: none;
+  background: var(--op-surface);
+}
+
+.visualStack {
+  display: grid;
+  gap: 16px;
+}
+
+.calloutGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.callout {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 12px;
+  border: 1px solid var(--op-border);
+  border-radius: 17px;
+  padding: 15px;
+  background: var(--op-surface);
+}
+
+.calloutNumber {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 850;
+  background: #008060;
+}
+
+.callout strong {
+  display: block;
+  color: var(--op-text);
+  font-size: 12px;
+}
+
+.callout p {
+  margin-top: 4px;
+  color: var(--op-text-secondary);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.backLink {
+  display: inline-block;
+  margin-top: 16px;
+  color: var(--op-text-secondary);
+  font-size: 11px;
+  font-weight: 720;
+  text-decoration: none;
+}
+
+.backLink:hover { color: var(--op-text); }
+
+@media (max-width: 900px) {
+  .page {
+    width: min(100% - 28px, 760px);
+    padding-top: 28px;
+  }
+
+  .flowCard,
+  .sectionIntro {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .flowPath { justify-content: flex-start; }
+  .calloutGrid { grid-template-columns: 1fr; }
+  .localNav { align-items: flex-start; flex-direction: column; }
+  .sections { gap: 64px; }
+}
+
+@media (max-width: 560px) {
+  .page { width: min(100% - 20px, 620px); }
+  .hero h1 { font-size: 40px; }
+  .flowCard { padding: 18px; }
+  .sectionTitleRow h2 { font-size: 26px; }
+  .ownerBadge { display: none; }
+}
