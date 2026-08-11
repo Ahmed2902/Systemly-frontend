@@ -6,6 +6,7 @@ import {
   ExternalLink,
   Globe2,
   LayoutGrid,
+  MapPin,
   Menu,
   Plus,
   RotateCcw,
@@ -28,7 +29,15 @@ export function OperationsShell({ children }: { children: ReactNode }) {
   const copy = usePlatformCopy().operations.shell;
   const text = usePlatformText();
   const { user, loading } = useAuth();
-  const { openNewAppointment, canMutate } = useOperations();
+  const {
+    openNewAppointment,
+    canMutate,
+    branches,
+    operationalBranchId,
+    branchLoading,
+    canSelectBranch,
+    setOperationalBranch,
+  } = useOperations();
   const runtime = useOperationsRuntime();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -123,7 +132,30 @@ export function OperationsShell({ children }: { children: ReactNode }) {
             </div>
           </div>
         ) : (
-          <SubscriptionAccessNotice access={access} />
+          <>
+            <SubscriptionAccessNotice access={access} />
+            {canSelectBranch ? (
+              <div className="flex flex-none items-center justify-end gap-2 border-b border-black/5 bg-[var(--op-surface,#fff)] px-4 py-2 dark:border-white/10 sm:px-6">
+                <MapPin size={14} aria-hidden="true" className="opacity-60" />
+                <label htmlFor="operational-branch" className="text-xs font-medium opacity-70">
+                  {text("Location")}
+                </label>
+                <select
+                  id="operational-branch"
+                  value={operationalBranchId ?? ""}
+                  disabled={branchLoading}
+                  onChange={(event) => setOperationalBranch(event.target.value)}
+                  className="max-w-56 rounded-lg border border-black/10 bg-transparent px-2.5 py-1.5 text-sm font-semibold outline-none dark:border-white/15"
+                >
+                  {branches.map((branch) => (
+                    <option key={branch.id} value={branch.id}>
+                      {branch.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : null}
+          </>
         )}
 
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
