@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { ArrowLeft, ArrowRight, HelpCircle, X } from "lucide-react";
 import { usePlatformText } from "@/i18n/usePlatformText";
 
@@ -17,6 +18,7 @@ type Rect = {
 
 type TargetKey =
   | "preview"
+  | "preview-hero"
   | "template"
   | "colours"
   | "hero"
@@ -63,10 +65,27 @@ function findField(label: string) {
   );
 }
 
+function findPreviewHero() {
+  const preview = document.querySelector<HTMLElement>(".onboarding-preview-frame");
+  if (!preview) return null;
+
+  const images = Array.from(preview.querySelectorAll<HTMLImageElement>("img"))
+    .map((image) => ({ image, rect: image.getBoundingClientRect() }))
+    .filter(({ rect }) => rect.width > 80 && rect.height > 80);
+
+  if (!images.length) return preview;
+
+  images.sort(
+    (a, b) => b.rect.width * b.rect.height - a.rect.width * a.rect.height,
+  );
+  return images[0].image;
+}
+
 function resolveTarget(key: TargetKey, labels: Record<string, string>) {
   if (key === "preview") {
     return document.querySelector<HTMLElement>(".onboarding-preview-card");
   }
+  if (key === "preview-hero") return findPreviewHero();
   if (key === "template") return findField(labels.template);
   if (key === "colours") {
     const colourInput = document.querySelector<HTMLElement>(
@@ -138,7 +157,7 @@ export function WebsiteBuilderTour({ active }: { active: boolean }) {
       },
       {
         target: "hero",
-        secondaryTarget: "preview",
+        secondaryTarget: "preview-hero",
         tooltipTarget: "secondary",
         kicker: text("Step 4 of 7"),
         title: text("Hero image: the main visual customers see first"),
@@ -194,9 +213,6 @@ export function WebsiteBuilderTour({ active }: { active: boolean }) {
     if (!active || stepIndex === null) return;
     const step = steps[stepIndex];
     const primary = resolveTarget(step.target, labels);
-    const secondary = step.secondaryTarget
-      ? resolveTarget(step.secondaryTarget, labels)
-      : null;
 
     primary?.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
 
@@ -277,7 +293,7 @@ export function WebsiteBuilderTour({ active }: { active: boolean }) {
     ? Math.min(Math.max(86, tooltipRect.top), Math.max(86, viewport.height - 330))
     : 100;
 
-  return (
+  const overlay = (
     <>
       {primaryRect ? (
         <div
@@ -361,4 +377,10 @@ export function WebsiteBuilderTour({ active }: { active: boolean }) {
       </aside>
     </>
   );
+
+  // The onboarding stage is animated with transform. Rendering fixed-position
+  // tour UI inside that transformed ancestor makes viewport coordinates pick up
+  // the stage offset a second time. Portalling to body keeps the coach marks in
+  // the same coordinate system as getBoundingClientRect().
+  return createPortal(overlay, document.body);
 }
