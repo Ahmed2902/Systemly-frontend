@@ -5,17 +5,30 @@ import {
   Suspense,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { CheckCircle2, Loader2, ShieldAlert } from "lucide-react";
+import { CheckCircle2, Loader2, ShieldAlert, UserPlus } from "lucide-react";
 import { getCurrentUser } from "@/modules/auth/auth.api";
 import { useAuth } from "@/modules/auth/useAuth";
-import { acceptStaffInvite } from "@/modules/staff/staff-invites.api";
+import {
+  acceptStaffInvite,
+  resolveStaffInvite,
+  type StaffInviteResolution,
+} from "@/modules/staff/staff-invites.api";
 
 const PENDING_INVITE_KEY = "systemly.pendingStaffInvite";
+
+type InviteState =
+  | "idle"
+  | "resolving"
+  | "existing-account"
+  | "new-account"
+  | "accepting"
+  | "success"
+  | "error";
 
 function InviteAcceptanceContent() {
   const text = usePlatformText();
@@ -23,10 +36,11 @@ function InviteAcceptanceContent() {
   const searchParams = useSearchParams();
   const { user, accessToken, loading, setSession } = useAuth();
   const token = searchParams.get("token") ?? "";
-  const [state, setState] = useState<"idle" | "accepting" | "success" | "error">(
-    "idle",
-  );
+  const resolvingRef = useRef(false);
+  const acceptingRef = useRef(false);
+  const [state, setState] = useState<InviteState>("idle");
   const [error, setError] = useState<string | null>(null);
+  const [resolution, setResolution] = useState<StaffInviteResolution | null>(null);
 
   const returnPath = useMemo(
     () => `/invite?token=${encodeURIComponent(token)}`,
@@ -39,7 +53,79 @@ function InviteAcceptanceContent() {
   }, [token]);
 
   useEffect(() => {
-    if (loading || !user || !accessToken || !token || state !== "idle") return;
+    if (
+      loading ||
+      !token ||
+      user ||
+      accessToken ||
+      resolvingRef.current ||
+      acceptingRef.current
+    ) {
+      return;
+    }
+
+    resolvingRef.current = true;
+    let cancelled = false;
+    let redirectTimer: ReturnType<typeof setTimeout> | undefined;
+    setState("resolving");
+    setError(null);
+
+    resolveStaffInvite(token)
+      .then((resolved) => {
+        if (cancelled) return;
+        setResolution(resolved);
+
+        if (resolved.accountExists) {
+          setState("existing-account");
+          redirectTimer = setTimeout(() => {
+            const params = new URLSearchParams({
+              email: resolved.email,
+              next: returnPath,
+            });
+            router.replace(`/login?${params.toString()}`);
+          }, 900);
+          return;
+        }
+
+        setState("new-account");
+        redirectTimer = setTimeout(() => {
+          const params = new URLSearchParams({
+            email: resolved.email,
+            inviteToken: token,
+            next: returnPath,
+          });
+          router.replace(`/signup?${params.toString()}`);
+        }, 900);
+      })
+      .catch((caught: unknown) => {
+        if (cancelled) return;
+        setError(
+          caught instanceof Error
+            ? caught.message
+            : text("Unable to accept invitation"),
+        );
+        setState("error");
+      });
+
+    return () => {
+      cancelled = true;
+      if (redirectTimer) clearTimeout(redirectTimer);
+    };
+  }, [accessToken, loading, returnPath, router, text, token, user]);
+
+  useEffect(() => {
+    if (
+      loading ||
+      !user ||
+      !accessToken ||
+      !token ||
+      acceptingRef.current ||
+      resolvingRef.current
+    ) {
+      return;
+    }
+
+    acceptingRef.current = true;
     setState("accepting");
     acceptStaffInvite(token, accessToken)
       .then(async (accepted) => {
@@ -57,7 +143,7 @@ function InviteAcceptanceContent() {
         );
         setState("error");
       });
-  }, [accessToken, loading, router, setSession, state, text, token, user]);
+  }, [accessToken, loading, router, setSession, text, token, user]);
 
   if (!token) {
     return (
@@ -67,7 +153,7 @@ function InviteAcceptanceContent() {
     );
   }
 
-  if (loading) {
+  if (loading || state === "idle" || state === "resolving") {
     return (
       <InviteCard
         icon={<Loader2 className="animate-spin" size={24} />}
@@ -78,27 +164,20 @@ function InviteAcceptanceContent() {
     );
   }
 
-  if (!user || !accessToken) {
+  if (state === "existing-account") {
     return (
-      <InviteCard
-        icon={<ShieldAlert size={24} />}
-        title={text("Sign in with the invited email")}
-      >
-        <p>{text("Use the exact email address the owner invited.")}</p>
-        <div className="mt-5 flex justify-center gap-3">
-          <Link
-            href={`/login?next=${encodeURIComponent(returnPath)}`}
-            className="rounded-xl bg-[#202223] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0b0f19] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#008060] focus-visible:ring-offset-2"
-          >
-            {text("Log in")}
-          </Link>
-          <Link
-            href={`/signup?next=${encodeURIComponent(returnPath)}`}
-            className="rounded-xl border border-[#dfe1dd] bg-white px-4 py-2.5 text-sm font-semibold text-[#202223] transition hover:bg-[#f4f4f1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#008060] focus-visible:ring-offset-2"
-          >
-            {text("Create account")}
-          </Link>
-        </div>
+      <InviteCard icon={<CheckCircle2 size={24} />} title={text("Invitation accepted")}>
+        <p>{resolution?.businessName}</p>
+        <p className="mt-1">{text("Sign in with the invited email")}</p>
+      </InviteCard>
+    );
+  }
+
+  if (state === "new-account") {
+    return (
+      <InviteCard icon={<UserPlus size={24} />} title={text("Create account")}>
+        <p>{resolution?.businessName}</p>
+        <p className="mt-1">{text("Use the exact email address the owner invited.")}</p>
       </InviteCard>
     );
   }

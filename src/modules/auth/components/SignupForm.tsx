@@ -20,20 +20,30 @@ export function SignupForm() {
   const searchParams = useSearchParams();
   const { t, locale } = useLocale();
   const [serverError, setServerError] = useState<string | null>(null);
+  const inviteToken = searchParams.get("inviteToken")?.trim() ?? "";
+  const invitedEmail = searchParams.get("email")?.trim() ?? "";
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<SignupInput>({ resolver: zodResolver(signupSchema) });
+  } = useForm<SignupInput>({
+    resolver: zodResolver(signupSchema),
+    defaultValues: { email: invitedEmail },
+  });
 
   async function onSubmit(data: SignupInput) {
     setServerError(null);
     try {
-      await registerUser({ ...data, preferredLanguage: locale });
+      await registerUser({
+        ...data,
+        preferredLanguage: locale,
+        ...(inviteToken ? { inviteToken } : {}),
+      });
       const params = new URLSearchParams({ email: data.email, sent: "1" });
       const nextPath = safeNextPath(searchParams.get("next"));
       if (nextPath) params.set("next", nextPath);
+      if (inviteToken) params.set("inviteToken", inviteToken);
       router.push(`/resend-verification?${params.toString()}`);
     } catch (err) {
       const apiErr = err as ApiError;
@@ -42,14 +52,20 @@ export function SignupForm() {
   }
 
   const nextPath = safeNextPath(searchParams.get("next"));
-  const loginHref = nextPath
-    ? `/login?next=${encodeURIComponent(nextPath)}`
-    : "/login";
+  const loginParams = new URLSearchParams();
+  if (nextPath) loginParams.set("next", nextPath);
+  if (invitedEmail) loginParams.set("email", invitedEmail);
+  const loginHref = loginParams.size ? `/login?${loginParams.toString()}` : "/login";
+  const inviteSignup = Boolean(inviteToken && invitedEmail);
 
   return (
     <div className="auth-stack">
-      <GoogleAuthButton label={t("auth.signup.google")} />
-      <div className="auth-divider">{t("auth.signup.divider")}</div>
+      {!inviteSignup ? (
+        <>
+          <GoogleAuthButton label={t("auth.signup.google")} />
+          <div className="auth-divider">{t("auth.signup.divider")}</div>
+        </>
+      ) : null}
 
       <form onSubmit={handleSubmit(onSubmit)} className="auth-form" noValidate>
         <div className="auth-field">
@@ -79,6 +95,7 @@ export function SignupForm() {
             placeholder="you@business.com"
             className="auth-input"
             dir="ltr"
+            readOnly={inviteSignup}
           />
           {errors.email ? (
             <p className="auth-field-error">

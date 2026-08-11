@@ -12,11 +12,25 @@ import {
   type EmailRequestInput,
 } from "../auth.schema";
 import { ApiError, resendVerification } from "../auth.api";
+import { safeNextPath } from "../auth-redirect";
+
+function inviteTokenFromNext(path: string | null) {
+  if (!path) return "";
+  try {
+    const url = new URL(path, "https://systemly.local");
+    return url.pathname === "/invite" ? url.searchParams.get("token")?.trim() ?? "" : "";
+  } catch {
+    return "";
+  }
+}
 
 export function ResendVerificationForm() {
   const text = usePlatformText();
   const searchParams = useSearchParams();
   const initialEmail = searchParams.get("email") ?? "";
+  const nextPath = safeNextPath(searchParams.get("next"));
+  const inviteToken =
+    searchParams.get("inviteToken")?.trim() || inviteTokenFromNext(nextPath);
   const [sentTo, setSentTo] = useState<string | null>(
     searchParams.get("sent") === "1" && initialEmail ? initialEmail : null,
   );
@@ -33,7 +47,10 @@ export function ResendVerificationForm() {
   async function onSubmit(data: EmailRequestInput) {
     setServerError(null);
     try {
-      await resendVerification(data);
+      await resendVerification({
+        ...data,
+        ...(inviteToken ? { inviteToken } : {}),
+      });
       setSentTo(data.email);
     } catch (error) {
       const apiError = error as ApiError;
@@ -70,6 +87,7 @@ export function ResendVerificationForm() {
               autoComplete="email"
               placeholder="you@business.com"
               className="auth-input"
+              readOnly={Boolean(inviteToken && initialEmail)}
             />
             {errors.email ? (
               <p className="auth-field-error">

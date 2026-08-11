@@ -141,7 +141,10 @@ async function requestWithCsrf<T>(
 }
 
 export async function registerUser(
-  payload: SignupInput & { preferredLanguage?: AppLocale },
+  payload: SignupInput & {
+    preferredLanguage?: AppLocale;
+    inviteToken?: string;
+  },
 ) {
   const response = await publicRequest<RegisterResponse>("/auth/register", {
     method: "POST",
@@ -185,7 +188,9 @@ export function updatePreferredLanguage(
   });
 }
 
-export function resendVerification(payload: EmailRequestInput) {
+export function resendVerification(
+  payload: EmailRequestInput & { inviteToken?: string },
+) {
   return publicRequest<MessageResponse>("/auth/resend-verification", {
     method: "POST",
     body: JSON.stringify(payload),
