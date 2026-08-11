@@ -1,0 +1,252 @@
+.liveShell {
+  overflow: hidden;
+  border: 1px solid var(--op-border);
+  border-radius: 24px;
+  background: var(--op-surface);
+  box-shadow: 0 18px 50px color-mix(in srgb, var(--op-text) 8%, transparent);
+}
+
+.liveStage {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  min-height: 460px;
+  overflow: hidden;
+  background: var(--op-bg);
+}
+
+.liveFrame {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  pointer-events: none;
+  background: var(--op-bg);
+}
+
+.liveBadge {
+  position: absolute;
+  z-index: 3;
+  top: 14px;
+  inset-inline-start: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 30px;
+  border: 1px solid color-mix(in srgb, var(--op-border) 75%, transparent);
+  border-radius: 999px;
+  padding: 0 11px;
+  color: var(--op-text-secondary);
+  font-size: 11px;
+  font-weight: 750;
+  background: color-mix(in srgb, var(--op-surface) 92%, transparent);
+  backdrop-filter: blur(12px);
+}
+
+.marker {
+  position: absolute;
+  z-index: 4;
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  translate: -50% -50%;
+  border: 2px solid #fff;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 850;
+  background: #008060;
+  box-shadow: 0 7px 22px rgba(0, 0, 0, 0.28), 0 0 0 4px rgba(0, 128, 96, 0.22);
+}
+
+.drawerShell {
+  overflow: hidden;
+  border: 1px solid var(--op-border);
+  border-radius: 24px;
+  background: var(--op-surface);
+}
+
+.drawerHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  border-bottom: 1px solid var(--op-border);
+  padding: 24px;
+}
+
+.drawerEyebrow {
+  color: var(--op-text-secondary);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+}
+
+.drawerHeader h3 {
+  margin-top: 6px;
+  color: var(--op-text);
+  font-size: 24px;
+  line-height: 1.1;
+  letter-spacing: -0.035em;
+}
+
+.statusPill {
+  flex: 0 0 auto;
+  border: 1px solid var(--op-border);
+  border-radius: 999px;
+  padding: 7px 11px;
+  color: var(--op-text);
+  font-size: 11px;
+  font-weight: 750;
+  background: var(--op-subtle);
+}
+
+.drawerBody {
+  display: grid;
+  gap: 14px;
+  padding: 22px;
+}
+
+.drawerGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.drawerCard,
+.serviceCard,
+.totalCard {
+  border: 1px solid var(--op-border);
+  border-radius: 18px;
+  padding: 16px;
+  background: var(--op-surface-raised);
+}
+
+.drawerLabel {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--op-text-secondary);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.drawerValue {
+  color: var(--op-text);
+  font-size: 17px;
+  font-weight: 760;
+}
+
+.serviceHeader,
+.totalRow,
+.drawerActions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.serviceHeader strong,
+.totalRow strong {
+  color: var(--op-text);
+}
+
+.serviceHeader span,
+.totalRow span {
+  color: var(--op-text-secondary);
+  font-size: 12px;
+}
+
+.serviceControls {
+  display: grid;
+  grid-template-columns: 1.5fr 0.8fr 0.8fr;
+  gap: 9px;
+  margin-top: 14px;
+}
+
+.fakeInput {
+  min-height: 42px;
+  border: 1px solid var(--op-border);
+  border-radius: 12px;
+  padding: 11px 12px;
+  color: var(--op-text);
+  font-size: 12px;
+  background: var(--op-bg);
+}
+
+.warning {
+  margin-top: 9px;
+  color: #f25f74;
+  font-size: 11px;
+  font-weight: 720;
+  text-align: end;
+}
+
+.totalCard {
+  display: grid;
+  gap: 12px;
+}
+
+.totalRow:last-child {
+  border-top: 1px solid var(--op-border);
+  padding-top: 12px;
+}
+
+.drawerActions {
+  flex-wrap: wrap;
+}
+
+.actionButton {
+  flex: 1 1 180px;
+  min-height: 44px;
+  border: 1px solid var(--op-border);
+  border-radius: 13px;
+  padding: 0 14px;
+  color: var(--op-text);
+  font-size: 12px;
+  font-weight: 750;
+  background: var(--op-bg);
+}
+
+.actionButton.primary {
+  color: var(--op-bg);
+  background: var(--op-text);
+}
+
+.actionButton.danger {
+  color: #f25f74;
+  border-color: color-mix(in srgb, #f25f74 55%, var(--op-border));
+}
+
+.drawerStage {
+  position: relative;
+}
+
+@media (max-width: 900px) {
+  .liveStage {
+    min-height: 360px;
+  }
+
+  .marker {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .liveStage {
+    min-height: 300px;
+  }
+
+  .drawerGrid,
+  .serviceControls {
+    grid-template-columns: 1fr;
+  }
+
+  .drawerHeader {
+    padding: 18px;
+  }
+
+  .drawerBody {
+    padding: 16px;
+  }
+}
