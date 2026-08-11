@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { LucideIcon } from "lucide-react";
 import {
+  Building2,
   CalendarDays,
   CircleHelp,
   ClipboardList,
@@ -119,6 +120,13 @@ export function Sidebar({
           icon: Settings,
           ownerOnly: true,
           exact: true,
+        },
+        {
+          href: "/operations/settings/branches",
+          label: text("Branches"),
+          icon: Building2,
+          ownerOnly: true,
+          hideInDemo: true,
         },
         {
           href: "/operations/staff/invite",

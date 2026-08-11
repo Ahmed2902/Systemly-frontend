@@ -1,4 +1,5 @@
 import { api } from "@/shared/lib/api";
+import { getAnalyticsBranchId } from "./analytics-scope";
 import type {
   AnalyticsPeriodSelection,
   CustomerAnalytics,
@@ -38,8 +39,12 @@ export function analyticsPeriodHref(
   return `${pathname}?${analyticsPeriodQuery(selection)}`;
 }
 
-const path = (domain: string, selection: AnalyticsPeriodSelection) =>
-  `/analytics/${domain}?${analyticsPeriodQuery(selection)}`;
+const path = (domain: string, selection: AnalyticsPeriodSelection) => {
+  const params = analyticsPeriodSearchParams(selection);
+  const branchId = getAnalyticsBranchId();
+  if (branchId) params.set("branchId", branchId);
+  return `/analytics/${domain}?${params.toString()}`;
+};
 
 export const getDashboardAnalytics = (
   selection: AnalyticsPeriodSelection,

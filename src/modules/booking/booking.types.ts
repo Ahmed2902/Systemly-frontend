@@ -32,13 +32,14 @@ export type AvailableSlot = {
 
 export type BookingState = {
   businessId: string;
-  services: BookingService[]; // full catalog, passed in from server
-  staff: BookingStaff[]; // full roster, passed in from server
+  branchId: string;
+  services: BookingService[];
+  staff: BookingStaff[];
 
   selectedServiceIds: string[];
-  staffChoices: Record<string, string | "any">; // serviceId -> staffId | "any"
+  staffChoices: Record<string, string | "any">;
 
-  date: string; // "YYYY-MM-DD"
+  date: string;
   selectedSlot: AvailableSlot | null;
 
   customerName: string;

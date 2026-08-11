@@ -6,6 +6,7 @@ export type AuthUser = {
   name: string;
   email: string;
   businessId: string | null;
+  branchId?: string | null;
   role: string;
   preferredLanguage?: AppLocale;
   vertical?: string | null;
