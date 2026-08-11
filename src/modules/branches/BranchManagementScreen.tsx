@@ -195,6 +195,10 @@ export function BranchManagementScreen() {
     setError(null);
   }
 
+  function closeCompletedWizard() {
+    window.location.reload();
+  }
+
   function addService() {
     setDraft((current) => ({
       ...current,
@@ -342,7 +346,7 @@ export function BranchManagementScreen() {
         await reactivateBranch(accessToken, branch.id);
       }
       await refresh();
-      router.refresh();
+      window.location.reload();
     } catch (caught) {
       setError(
         caught instanceof Error
@@ -480,14 +484,7 @@ export function BranchManagementScreen() {
           branch={editingBranch}
           accessToken={accessToken}
           onClose={() => setEditingBranch(null)}
-          onSaved={(updated) => {
-            setBranches((current) =>
-              current.map((branch) =>
-                branch.id === updated.id ? updated : branch,
-              ),
-            );
-            setEditingBranch(null);
-          }}
+          onSaved={() => window.location.reload()}
         />
       ) : null}
 
@@ -504,7 +501,11 @@ export function BranchManagementScreen() {
                     {createdBranch && step >= steps.length ? createdBranch.name : text(steps[Math.min(step, steps.length - 1)])}
                   </h2>
                 </div>
-                <button type="button" onClick={closeWizard} className="rounded-lg border border-[var(--op-border)] px-3 py-2 text-xs font-semibold">
+                <button
+                  type="button"
+                  onClick={createdBranch ? closeCompletedWizard : closeWizard}
+                  className="rounded-lg border border-[var(--op-border)] px-3 py-2 text-xs font-semibold"
+                >
                   {text("Close")}
                 </button>
               </div>
@@ -599,7 +600,22 @@ export function BranchManagementScreen() {
                   <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600"><Check size={22} /></div>
                   <h3 className="mt-4 text-xl font-bold">{text("Branch created")}</h3>
                   <p className="mx-auto mt-2 max-w-md text-sm text-[var(--op-muted)]">{text("The new branch is now the selected operational location. You can continue refining its services, staff, and schedules from the normal operations pages.")}</p>
-                  <div className="mt-5 flex flex-wrap justify-center gap-2"><button type="button" onClick={() => { closeWizard(); router.push("/operations/services"); router.refresh(); }} className="rounded-lg bg-[var(--op-accent)] px-4 py-2 text-sm font-bold text-white">{text("Open branch services")}</button><button type="button" onClick={closeWizard} className="rounded-lg border border-[var(--op-border)] px-4 py-2 text-sm font-semibold">{text("Done")}</button></div>
+                  <div className="mt-5 flex flex-wrap justify-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => window.location.assign("/operations/services")}
+                      className="rounded-lg bg-[var(--op-accent)] px-4 py-2 text-sm font-bold text-white"
+                    >
+                      {text("Open branch services")}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={closeCompletedWizard}
+                      className="rounded-lg border border-[var(--op-border)] px-4 py-2 text-sm font-semibold"
+                    >
+                      {text("Done")}
+                    </button>
+                  </div>
                 </div>
               ) : null}
 
