@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { ArrowLeft, ArrowRight, HelpCircle, X } from "lucide-react";
 import { usePlatformText } from "@/i18n/usePlatformText";
 
@@ -194,9 +195,6 @@ export function WebsiteBuilderTour({ active }: { active: boolean }) {
     if (!active || stepIndex === null) return;
     const step = steps[stepIndex];
     const primary = resolveTarget(step.target, labels);
-    const secondary = step.secondaryTarget
-      ? resolveTarget(step.secondaryTarget, labels)
-      : null;
 
     primary?.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
 
@@ -277,7 +275,7 @@ export function WebsiteBuilderTour({ active }: { active: boolean }) {
     ? Math.min(Math.max(86, tooltipRect.top), Math.max(86, viewport.height - 330))
     : 100;
 
-  return (
+  const overlay = (
     <>
       {primaryRect ? (
         <div
@@ -361,4 +359,10 @@ export function WebsiteBuilderTour({ active }: { active: boolean }) {
       </aside>
     </>
   );
+
+  // The onboarding stage is animated with transform. Rendering fixed-position
+  // tour UI inside that transformed ancestor makes viewport coordinates pick up
+  // the stage offset a second time. Portalling to body keeps the coach marks in
+  // the same coordinate system as getBoundingClientRect().
+  return createPortal(overlay, document.body);
 }
