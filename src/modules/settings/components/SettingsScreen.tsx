@@ -76,7 +76,7 @@ export function SettingsScreen() {
   const [success, setSuccess] = useState<string | null>(null);
 
   const canManage =
-    user?.role === text("BusinessAdmin") || user?.role === text("SuperAdmin");
+    user?.role === "BusinessAdmin" || user?.role === "SuperAdmin";
   const colourDefaults = user?.vertical === "clinic"
     ? { primary: "#0B6B68", secondary: "#074947" }
     : { primary: "#6A3048", secondary: "#482131" };
