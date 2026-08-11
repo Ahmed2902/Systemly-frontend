@@ -14,6 +14,16 @@ const PENDING_INVITE_KEY = "systemly.pendingStaffInvite";
 
 type VerificationState = "loading" | "success" | "error";
 
+function inviteTokenFromNext(path: string | null) {
+  if (!path) return "";
+  try {
+    const url = new URL(path, "https://systemly.local");
+    return url.pathname === "/invite" ? url.searchParams.get("token")?.trim() ?? "" : "";
+  } catch {
+    return "";
+  }
+}
+
 export function VerifyEmailPanel() {
   const text = usePlatformText();
   const router = useRouter();
@@ -23,6 +33,7 @@ export function VerifyEmailPanel() {
   const [state, setState] = useState<VerificationState>("loading");
   const [message, setMessage] = useState("Verifying your secure link…");
   const token = searchParams.get("token")?.trim() ?? "";
+  const nextPath = safeNextPath(searchParams.get("next"));
 
   useEffect(() => {
     if (startedRef.current) return;
@@ -37,7 +48,10 @@ export function VerifyEmailPanel() {
     void verifyEmail(token)
       .then(async (response) => {
         let { accessToken, user } = response.data;
-        const pendingInvite = window.localStorage.getItem(PENDING_INVITE_KEY);
+        const pendingInvite =
+          inviteTokenFromNext(nextPath) ||
+          window.localStorage.getItem(PENDING_INVITE_KEY) ||
+          "";
 
         if (pendingInvite) {
           const accepted = await acceptStaffInvite(pendingInvite, accessToken);
@@ -51,9 +65,7 @@ export function VerifyEmailPanel() {
         setState("success");
         setMessage("Email verified. Opening your workspace…");
         router.replace(
-          pendingInvite
-            ? "/operations"
-            : safeNextPath(searchParams.get("next")) ?? workspacePathForUser(user),
+          pendingInvite ? "/operations" : nextPath ?? workspacePathForUser(user),
         );
       })
       .catch((error: ApiError) => {
@@ -62,7 +74,7 @@ export function VerifyEmailPanel() {
           error.error ?? error.message ?? "This verification link is invalid or has expired.",
         );
       });
-  }, [router, searchParams, setSession, token]);
+  }, [nextPath, router, setSession, token]);
 
   const icon = state === "loading"
     ? <LoaderCircle size={25} className="animate-spin" />
