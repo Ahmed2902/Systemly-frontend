@@ -5,8 +5,6 @@ import { createPortal } from "react-dom";
 import { ArrowLeft, ArrowRight, HelpCircle, X } from "lucide-react";
 import { usePlatformText } from "@/i18n/usePlatformText";
 
-const TOUR_STORAGE_KEY = "systemly-onboarding-website-tour-seen-v1";
-
 type Rect = {
   top: number;
   left: number;
@@ -199,12 +197,6 @@ export function WebsiteBuilderTour({ active }: { active: boolean }) {
       return;
     }
 
-    let seen = false;
-    try {
-      seen = window.localStorage.getItem(TOUR_STORAGE_KEY) === "1";
-    } catch {}
-    if (seen) return;
-
     const timer = window.setTimeout(() => setStepIndex(0), 450);
     return () => window.clearTimeout(timer);
   }, [active]);
@@ -244,14 +236,7 @@ export function WebsiteBuilderTour({ active }: { active: boolean }) {
     };
   }, [active, labels, stepIndex, steps]);
 
-  function rememberTour() {
-    try {
-      window.localStorage.setItem(TOUR_STORAGE_KEY, "1");
-    } catch {}
-  }
-
   function finishTour() {
-    rememberTour();
     setStepIndex(null);
   }
 

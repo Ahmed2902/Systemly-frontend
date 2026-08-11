@@ -2,7 +2,7 @@
 
 import { usePlatformText } from "@/i18n/usePlatformText";
 import Link from "next/link";
-import { useEffect, useState, type ComponentType } from "react";
+import { useState, type ComponentType } from "react";
 import {
   ArrowRight,
   Building2,
@@ -23,8 +23,6 @@ import { StepLaunch } from "./StepLaunch";
 import { WebsiteBuilderTour } from "./WebsiteBuilderTour";
 import { useWizard } from "../wizard.context";
 import "../onboarding-systerra.css";
-
-const INTRO_STORAGE_KEY = "systemly-onboarding-primer-seen-v1";
 
 const steps = [
   { label: "Business profile", hint: "Tell us about your business", component: StepBusinessInfo },
@@ -76,14 +74,6 @@ export function WizardShell() {
   const StepComponent = currentStep.component;
   const progress = ((stepIndex + 1) / steps.length) * 100;
 
-  useEffect(() => {
-    try {
-      if (window.localStorage.getItem(INTRO_STORAGE_KEY) === "1") {
-        setShowPrimer(false);
-      }
-    } catch {}
-  }, []);
-
   function handleSaveDraft() {
     saveDraft();
     setSaved(true);
@@ -91,9 +81,6 @@ export function WizardShell() {
   }
 
   function startSetup() {
-    try {
-      window.localStorage.setItem(INTRO_STORAGE_KEY, "1");
-    } catch {}
     setShowPrimer(false);
   }
 
