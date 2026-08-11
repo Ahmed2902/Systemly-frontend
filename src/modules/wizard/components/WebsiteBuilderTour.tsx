@@ -18,6 +18,7 @@ type Rect = {
 
 type TargetKey =
   | "preview"
+  | "preview-hero"
   | "template"
   | "colours"
   | "hero"
@@ -64,10 +65,27 @@ function findField(label: string) {
   );
 }
 
+function findPreviewHero() {
+  const preview = document.querySelector<HTMLElement>(".onboarding-preview-frame");
+  if (!preview) return null;
+
+  const images = Array.from(preview.querySelectorAll<HTMLImageElement>("img"))
+    .map((image) => ({ image, rect: image.getBoundingClientRect() }))
+    .filter(({ rect }) => rect.width > 80 && rect.height > 80);
+
+  if (!images.length) return preview;
+
+  images.sort(
+    (a, b) => b.rect.width * b.rect.height - a.rect.width * a.rect.height,
+  );
+  return images[0].image;
+}
+
 function resolveTarget(key: TargetKey, labels: Record<string, string>) {
   if (key === "preview") {
     return document.querySelector<HTMLElement>(".onboarding-preview-card");
   }
+  if (key === "preview-hero") return findPreviewHero();
   if (key === "template") return findField(labels.template);
   if (key === "colours") {
     const colourInput = document.querySelector<HTMLElement>(
@@ -139,7 +157,7 @@ export function WebsiteBuilderTour({ active }: { active: boolean }) {
       },
       {
         target: "hero",
-        secondaryTarget: "preview",
+        secondaryTarget: "preview-hero",
         tooltipTarget: "secondary",
         kicker: text("Step 4 of 7"),
         title: text("Hero image: the main visual customers see first"),
