@@ -1,3 +1,5 @@
+"use client";
+
 import NextImage, {
   type ImageLoaderProps,
   type ImageProps,
