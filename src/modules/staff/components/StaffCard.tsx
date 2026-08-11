@@ -1,6 +1,7 @@
 "use client";
 
 import { usePlatformText } from "@/i18n/usePlatformText";
+import { Image } from "@/shared/components/Image";
 import Link from "next/link";
 import {
   BriefcaseBusiness,
@@ -87,9 +88,11 @@ export function StaffCard({
       >
         <div className="flex items-start gap-4">
           {member.photoUrl ? (
-            <img
+            <Image
               src={member.photoUrl}
               alt=""
+              width={64}
+              height={64}
               className={`h-16 w-16 rounded-2xl border border-[var(--op-border)] object-cover shadow-sm ${inactive ? "grayscale" : ""}`}
             />
           ) : (

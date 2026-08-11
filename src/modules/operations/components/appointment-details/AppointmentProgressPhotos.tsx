@@ -1,6 +1,7 @@
 "use client";
 
 import { usePlatformText } from "@/i18n/usePlatformText";
+import { Image } from "@/shared/components/Image";
 import { ImagePlus, Loader2, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -124,10 +125,12 @@ export function AppointmentProgressPhotos({
                 key={item.id}
                 className="group relative overflow-hidden rounded-xl bg-slate-50"
               >
-                <img
+                <Image
                   src={item.photo.url}
                   alt={`${item.type} appointment photo`}
-                  className="aspect-square w-full object-cover"
+                  fill
+                  sizes="(max-width: 640px) 50vw, 220px"
+                  className="object-cover"
                 />
                 <button
                   type="button"

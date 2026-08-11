@@ -1,4 +1,5 @@
 import type { ClinicTemplateData } from "../clinic.types";
+import { Image } from "@/shared/components/Image";
 
 function firstLetter(name: string) {
   return name.trim().charAt(0).toUpperCase() || "?";
@@ -34,12 +35,14 @@ export function Team({ staff }: { staff: ClinicTemplateData["staff"] }) {
               key={member.id}
               className="overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] text-start shadow-[0_14px_40px_rgba(20,39,35,0.055)]"
             >
-              <div className="aspect-[4/5] overflow-hidden bg-[var(--background)]">
+              <div className="relative aspect-[4/5] overflow-hidden bg-[var(--background)]">
                 {member.photoUrl ? (
-                  <img
+                  <Image
                     src={member.photoUrl}
                     alt={member.name}
-                    className="h-full w-full object-cover"
+                    fill
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                    className="object-cover"
                   />
                 ) : (
                   <div className="grid h-full place-items-center bg-gradient-to-br from-[var(--secondary-wash)] to-[var(--secondary-soft)]">

@@ -42,6 +42,8 @@ type PublicBusinessFaq = {
 type PublicBusinessWebsiteContent = {
   tagline?: string | null;
   aboutText?: string | null;
+  heroDescription?: string | null;
+  heroCardText?: string | null;
   template?: string | null;
   primaryColor?: string | null;
   secondaryColor?: string | null;
@@ -119,8 +121,8 @@ export default async function PublicBusinessPage({
     businessName: business.name,
     tagline: content?.tagline ?? "",
     template: template.id,
-    heroDescription: "",
-    heroCardText: "",
+    heroDescription: content?.heroDescription ?? "",
+    heroCardText: content?.heroCardText ?? "",
     aboutText: content?.aboutText ?? "",
     logoUrl: business.logoUrl ?? null,
     heroPhotoUrl: business.coverUrl ?? legacyHeroUrl ?? null,

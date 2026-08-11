@@ -1,6 +1,7 @@
 "use client";
 
 import { usePlatformText } from "@/i18n/usePlatformText";
+import { Image } from "@/shared/components/Image";
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { ExternalLink, ImagePlus, Save, Trash2 } from "lucide-react";
 import { useAuth } from "@/modules/auth/useAuth";
@@ -239,12 +240,14 @@ export function SettingsScreen() {
                 return (
                   <article key={kind} className="rounded-[11px] border border-[var(--op-border)] bg-[var(--op-surface-soft)] p-4">
                     <p className="text-sm font-bold capitalize text-[var(--op-text)]">{kind}</p>
-                    <div className="mt-3 flex h-44 items-center justify-center overflow-hidden rounded-[10px] border border-[var(--op-border)] bg-[var(--op-surface)]">
+                    <div className="relative mt-3 flex h-44 items-center justify-center overflow-hidden rounded-[10px] border border-[var(--op-border)] bg-[var(--op-surface)]">
                       {url ? (
-                        <img
+                        <Image
                           src={url}
                           alt={`${kind} preview`}
-                          className={kind === "logo" ? "h-28 w-28 object-contain" : "h-full w-full object-cover"}
+                          fill
+                          sizes="320px"
+                          className={kind === "logo" ? "object-contain p-4" : "object-cover"}
                         />
                       ) : (
                         <ImagePlus className="text-[var(--op-text-faint)]" size={34} />

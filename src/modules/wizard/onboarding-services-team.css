@@ -115,6 +115,10 @@
   transition: border-color 150ms ease, box-shadow 150ms ease;
 }
 
+.onboarding-service-description-field {
+  grid-column: 2 / 6;
+}
+
 .onboarding-service-editor:focus-within {
   border-color: #c3c9c5;
   box-shadow: 0 12px 30px rgba(32, 34, 35, 0.055);
@@ -178,6 +182,8 @@
 }
 
 .onboarding-service-remove {
+  grid-column: 6;
+  grid-row: 1;
   margin-top: 25px;
 }
 
@@ -542,7 +548,8 @@
   }
 
   .onboarding-service-name-field,
-  .onboarding-service-category-field {
+  .onboarding-service-category-field,
+  .onboarding-service-description-field {
     grid-column: 1 / -1;
   }
 
@@ -627,7 +634,8 @@
   }
 
   .onboarding-service-name-field,
-  .onboarding-service-category-field {
+  .onboarding-service-category-field,
+  .onboarding-service-description-field {
     grid-column: auto;
   }
 

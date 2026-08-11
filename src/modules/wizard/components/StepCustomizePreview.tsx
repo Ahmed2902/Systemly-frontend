@@ -19,6 +19,7 @@ import { LivePreviewPane } from "./LivePreviewPane";
 import { SectionOrderList } from "./SectionOrderList";
 import { FaqEditor } from "./FaqEditor";
 import { getTemplatesForVertical } from "@/modules/templates/template-registry";
+import { Image } from "@/shared/components/Image";
 
 const COLOUR_PAIRS = [
   { label: "Forest", primary: "#004C3F", secondary: "#00342B" },
@@ -187,10 +188,12 @@ export function StepCustomizePreview({ onNext, onBack }: StepProps) {
                     key={`${url}-${index}`}
                     className="group relative aspect-square overflow-hidden rounded-xl border border-[var(--onboarding-border)]"
                   >
-                    <img
+                    <Image
                       src={url}
                       alt={text("Gallery")}
-                      className="h-full w-full object-cover"
+                      fill
+                      sizes="(max-width: 640px) 20vw, 120px"
+                      className="object-cover"
                     />
                     <button
                       type="button"
@@ -232,7 +235,7 @@ export function StepCustomizePreview({ onNext, onBack }: StepProps) {
               />
             </div>
 
-            <div className="onboarding-field hidden">
+            <div className="onboarding-field">
               <label>{text("Hero introduction")}</label>
               <textarea
                 value={state.heroDescription}
@@ -248,7 +251,7 @@ export function StepCustomizePreview({ onNext, onBack }: StepProps) {
               />
             </div>
 
-            <div className="onboarding-field hidden">
+            <div className="onboarding-field">
               <label>{text("Hero image highlight")}</label>
               <input
                 value={state.heroCardText}
@@ -433,7 +436,7 @@ function UploadTile({
       <label>{label}</label>
       <div className="relative overflow-hidden rounded-2xl border border-dashed border-[var(--onboarding-border-strong)] bg-[#fafaf8]">
         {value ? (
-          <img src={value} alt={label} className="h-24 w-full object-cover" />
+          <Image src={value} alt={label} fill sizes="384px" className="object-cover" />
         ) : null}
         <label
           className={`flex h-24 cursor-pointer items-center justify-center gap-2 text-sm text-[var(--onboarding-muted)] ${

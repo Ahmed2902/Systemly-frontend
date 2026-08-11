@@ -84,6 +84,8 @@ export async function submitOnboarding(state: WizardState) {
     language: state.language,
     tagline: state.tagline,
     aboutText: state.aboutText,
+    heroDescription: state.heroDescription.trim() || undefined,
+    heroCardText: state.heroCardText.trim() || undefined,
     logoUrl: state.logoUrl || undefined,
     heroPhotoUrl: state.heroPhotoUrl || undefined,
     galleryPhotoUrls: state.galleryPhotoUrls,

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import { Image } from "@/shared/components/Image";
 
 export function ClinicGallery({ photos }: { photos: string[] }) {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -51,11 +52,13 @@ export function ClinicGallery({ photos }: { photos: string[] }) {
         >
           <div className="relative min-h-[420px] overflow-hidden bg-[var(--secondary-soft)] md:min-h-[620px]">
             {photos.map((photo, index) => (
-              <img
+              <Image
                 key={`${photo}-${index}`}
                 src={photo}
                 alt={`Inside the clinic ${index + 1}`}
-                className={`absolute inset-0 h-full w-full object-cover transition duration-700 motion-reduce:transition-none ${
+                fill
+                sizes="100vw"
+                className={`object-cover transition duration-700 motion-reduce:transition-none ${
                   currentIndex === index ? "scale-100 opacity-100" : "pointer-events-none scale-[1.02] opacity-0"
                 }`}
               />
@@ -84,7 +87,7 @@ export function ClinicGallery({ photos }: { photos: string[] }) {
                     currentIndex === index ? "border-[var(--accent-strong)] ring-2 ring-[var(--accent-soft)]" : "border-[var(--border)] opacity-60 hover:opacity-100"
                   }`}
                 >
-                  <img src={photo} alt="" className="h-full w-full object-cover" />
+                  <Image src={photo} alt="" fill sizes="96px" className="object-cover" />
                 </button>
               ))}
             </div>

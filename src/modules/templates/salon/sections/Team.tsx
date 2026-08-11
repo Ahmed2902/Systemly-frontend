@@ -1,4 +1,5 @@
 import type { SalonTemplateData } from "../salon.types";
+import { Image } from "@/shared/components/Image";
 
 function firstLetter(name: string) {
   return name.trim().charAt(0).toUpperCase() || "?";
@@ -29,10 +30,12 @@ export function Team({ staff }: { staff: SalonTemplateData["staff"] }) {
               className="group relative min-h-[470px] overflow-hidden rounded-[2rem] bg-[#d9cec2] shadow-[0_16px_48px_rgba(43,36,32,0.09)]"
             >
               {member.photoUrl ? (
-                <img
+                <Image
                   src={member.photoUrl}
                   alt={member.name}
-                  className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-[1.025] motion-reduce:transition-none"
+                  fill
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                  className="object-cover transition duration-700 group-hover:scale-[1.025] motion-reduce:transition-none"
                 />
               ) : (
                 <div className="absolute inset-0 grid place-items-center bg-gradient-to-br from-[var(--secondary-wash)] via-[var(--secondary-soft)] to-[var(--secondary-strong)]">

@@ -1,6 +1,7 @@
 "use client";
 
 import { usePlatformText } from "@/i18n/usePlatformText";
+import { Image } from "@/shared/components/Image";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -161,7 +162,7 @@ export default function StaffProfileScreen({ staffId }: { staffId: string }) {
           <div className="mt-4 flex flex-wrap items-start justify-between gap-5 rounded-3xl border border-white/90 bg-white/90 p-6 shadow-sm">
             <div className="flex items-center gap-4">
               {workspace.staff.photoUrl ? (
-                <img src={workspace.staff.photoUrl} alt="" className="h-20 w-20 rounded-3xl object-cover shadow-sm" />
+                <Image src={workspace.staff.photoUrl} alt="" width={80} height={80} className="h-20 w-20 rounded-3xl object-cover shadow-sm" />
               ) : (
                 <span className="flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-violet-100 to-sky-100 text-2xl font-bold text-violet-700">
                   {workspace.staff.name.slice(0, 2).toUpperCase()}

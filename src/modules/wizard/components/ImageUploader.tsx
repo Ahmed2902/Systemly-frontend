@@ -1,6 +1,7 @@
 "use client";
 
 import { usePlatformText } from "@/i18n/usePlatformText";
+import { Image } from "@/shared/components/Image";
 // src/modules/wizard/components/ImageUploader.tsx
 import imageCompression from "browser-image-compression";
 import { useRef, useState } from "react";
@@ -103,9 +104,11 @@ export function ImageUploader({
         className="mt-1 flex cursor-pointer items-center gap-3 rounded-md border border-dashed border-surfaceBorder bg-background p-3 hover:border-accent/50"
       >
         {currentUrl ? (
-          <img
+          <Image
             src={currentUrl}
             alt={label}
+            width={56}
+            height={56}
             className="h-14 w-14 rounded object-cover"
           />
         ) : (

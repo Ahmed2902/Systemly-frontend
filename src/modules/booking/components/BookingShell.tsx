@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Check } from "lucide-react";
+import { Image } from "@/shared/components/Image";
 import { StepSelectServices } from "./stepSelectServices";
 import { StepSelectStaff } from "./StepSelectStaff";
 import { StepPickSlot } from "./StepPickSlot";
@@ -47,9 +48,11 @@ export function BookingShell({
                   className="flex min-w-0 items-center gap-2.5 text-sm font-bold tracking-[0.1em] text-[var(--booking-text)] transition-opacity hover:opacity-80 sm:text-base sm:tracking-[0.12em]"
                 >
                   {logoUrl && (
-                    <img
+                    <Image
                       src={logoUrl}
                       alt=""
+                      width={32}
+                      height={32}
                       className="h-8 w-8 shrink-0 rounded-md border border-[var(--booking-border)] object-cover"
                     />
                   )}
@@ -142,9 +145,11 @@ export function BookingShell({
           <div className="relative flex min-h-screen flex-col justify-between p-8 xl:p-10">
             <div className="flex min-w-0 items-center gap-3 text-sm font-semibold">
               {logoUrl ? (
-                <img
+                <Image
                   src={logoUrl}
                   alt=""
+                  width={40}
+                  height={40}
                   className="h-10 w-10 shrink-0 rounded-lg border object-cover"
                   style={{
                     borderColor:

@@ -25,10 +25,26 @@ import { useWizard } from "../wizard.context";
 import "../onboarding-systerra.css";
 
 const steps = [
-  { label: "Business profile", hint: "Tell us about your business", component: StepBusinessInfo },
-  { label: "Services & team", hint: "Add services and team", component: StepServicesStaff },
-  { label: "Availability", hint: "Set regular working hours", component: StepAssignments },
-  { label: "Website", hint: "Build your online presence", component: StepCustomizePreview },
+  {
+    label: "Business profile",
+    hint: "Tell us about your business",
+    component: StepBusinessInfo,
+  },
+  {
+    label: "Services & team",
+    hint: "Add services and team",
+    component: StepServicesStaff,
+  },
+  {
+    label: "Availability",
+    hint: "Set regular working hours",
+    component: StepAssignments,
+  },
+  {
+    label: "Website",
+    hint: "Build your online presence",
+    component: StepCustomizePreview,
+  },
   { label: "Launch", hint: "Review and go live", component: StepLaunch },
 ];
 
@@ -88,7 +104,11 @@ export function WizardShell() {
     <main className="onboarding-systerra">
       <header className="onboarding-topbar">
         <div className="onboarding-topbar-left">
-          <Link href="/" className="onboarding-brand sys-focusable" aria-label={text("Systemly home")}>
+          <Link
+            href="/"
+            className="onboarding-brand sys-focusable"
+            aria-label={text("Systemly home")}
+          >
             <SystemlyWordmark showDot dotClassName="onboarding-brand-dot" />
           </Link>
           <span className="onboarding-topbar-divider" aria-hidden="true" />
@@ -147,7 +167,9 @@ export function WizardShell() {
 
             <div className="onboarding-primer-finish">
               <div>
-                <strong>{text("You do not need to know how to design a website.")}</strong>
+                <strong>
+                  {text("You do not need to know how to design a website.")}
+                </strong>
                 <p>
                   {text(
                     "When you reach the Website step, a short guided tour will point to the exact controls and show what each change affects in the live preview.",
@@ -167,7 +189,9 @@ export function WizardShell() {
         ) : (
           <>
             <div className="onboarding-mobile-progress">
-              <span>{text("Step")} {stepIndex + 1} of {steps.length}</span>
+              <span>
+                {text("Step")} {stepIndex + 1} of {steps.length}
+              </span>
               <strong>{text(currentStep.label)}</strong>
               <small>{text(currentStep.hint)}</small>
               <div
@@ -182,9 +206,17 @@ export function WizardShell() {
             </div>
 
             <div className="onboarding-progress-wrap">
-              <nav className="onboarding-progress" aria-label={text("Onboarding progress")}>
+              <nav
+                className="onboarding-progress"
+                aria-label={text("Onboarding progress")}
+              >
                 {steps.map((step, index) => {
-                  const status = index < stepIndex ? "is-complete" : index === stepIndex ? "is-active" : "";
+                  const status =
+                    index < stepIndex
+                      ? "is-complete"
+                      : index === stepIndex
+                        ? "is-active"
+                        : "";
                   return (
                     <button
                       type="button"
@@ -198,8 +230,12 @@ export function WizardShell() {
                       <span className="onboarding-progress-number">
                         {index < stepIndex ? <Check size={13} /> : index + 1}
                       </span>
-                      <span className="onboarding-progress-label">{text(step.label)}</span>
-                      <span className="onboarding-progress-hint">{text(step.hint)}</span>
+                      <span className="onboarding-progress-label">
+                        {text(step.label)}
+                      </span>
+                      <span className="onboarding-progress-hint">
+                        {text(step.hint)}
+                      </span>
                     </button>
                   );
                 })}
@@ -209,7 +245,9 @@ export function WizardShell() {
             <section key={stepIndex} className="onboarding-stage">
               <WebsiteBuilderTour active={stepIndex === 3} />
               <StepComponent
-                onNext={() => setStepIndex((index) => Math.min(index + 1, steps.length - 1))}
+                onNext={() =>
+                  setStepIndex((index) => Math.min(index + 1, steps.length - 1))
+                }
                 onBack={() => setStepIndex((index) => Math.max(index - 1, 0))}
                 isFirst={stepIndex === 0}
                 isLast={stepIndex === steps.length - 1}

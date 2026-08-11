@@ -71,9 +71,8 @@ export function Sidebar({
   const { theme, toggleTheme } = useOperationsTheme();
   const runtime = useOperationsRuntime();
   const ownerView = isOwnerRole(user?.role);
-  const demoLabel = runtime.vertical === "clinic"
-    ? text("Clinic demo")
-    : text("Salon demo");
+  const demoLabel =
+    runtime.vertical === "clinic" ? text("Clinic demo") : text("Salon demo");
 
   const navGroups: NavGroup[] = [
     {
@@ -85,7 +84,11 @@ export function Sidebar({
           icon: LayoutDashboard,
           ownerOnly: true,
         },
-        { href: "/operations/calendar", label: copy.calendar, icon: CalendarDays },
+        {
+          href: "/operations/calendar",
+          label: copy.calendar,
+          icon: CalendarDays,
+        },
         {
           href: "/operations/appointments",
           label: copy.appointments,
@@ -136,7 +139,10 @@ export function Sidebar({
   ];
 
   return (
-    <aside className={`op-sidebar ${open ? "is-open" : ""}`} aria-label={copy.navigation}>
+    <aside
+      className={`op-sidebar ${open ? "is-open" : ""}`}
+      aria-label={copy.navigation}
+    >
       <div className="op-sidebar-header">
         <div className="op-wordmark">
           <div className="min-w-0">
@@ -175,7 +181,8 @@ export function Sidebar({
                   const resolvedHref = resolveOperationsHref(runtime, href);
                   const active = exact
                     ? pathname === resolvedHref
-                    : pathname === resolvedHref || pathname?.startsWith(`${resolvedHref}/`);
+                    : pathname === resolvedHref ||
+                      pathname?.startsWith(`${resolvedHref}/`);
                   return (
                     <Link
                       key={resolvedHref}
@@ -198,7 +205,7 @@ export function Sidebar({
         {runtime.mode === "live" ? (
           <Link
             href={resolveOperationsHref(runtime, "/operations/guide")}
-            className={`op-nav-link ${pathname === "/operations/guide" ? "is-active" : ""}`}
+            className={`op-nav-link mb-4 ${pathname === "/operations/guide" ? "is-active" : ""}`}
           >
             <CircleHelp size={16} strokeWidth={1.8} />
             <span>{text("Help & Guide")}</span>

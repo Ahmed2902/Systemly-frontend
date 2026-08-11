@@ -1,6 +1,7 @@
 "use client";
 
 import { usePlatformText } from "@/i18n/usePlatformText";
+import { Image } from "@/shared/components/Image";
 import { useEffect, useMemo, useState } from "react";
 import {
   Check,
@@ -182,12 +183,14 @@ export function StaffFormModal({
             <div className="sm:col-span-2">
               <p className="text-sm font-medium text-slate-700">{text("Profile photo")}</p>
               <div className="mt-2 flex flex-col gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-center">
-                <div className="flex h-28 w-28 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200">
+                <div className="relative flex h-28 w-28 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200">
                   {previewUrl ? (
-                    <img
+                    <Image
                       src={previewUrl}
                       alt={text("Staff photo preview")}
-                      className="h-full w-full object-cover"
+                      fill
+                      sizes="112px"
+                      className="object-cover"
                     />
                   ) : (
                     <ImagePlus className="text-slate-300" size={32} />

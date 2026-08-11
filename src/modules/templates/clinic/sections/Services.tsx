@@ -87,10 +87,11 @@ export function Services({
                 <h3 className="mt-2 text-2xl font-semibold tracking-[-0.025em] text-[var(--text)]">
                   {service.name}
                 </h3>
-                <p className="mt-3 line-clamp-3 text-sm leading-7 text-[var(--muted)]">
-                  {service.description ||
-                    "Professional treatment delivered with clear guidance and attentive care."}
-                </p>
+                {service.description?.trim() ? (
+                  <p className="mt-3 line-clamp-3 text-sm leading-7 text-[var(--muted)]">
+                    {service.description}
+                  </p>
+                ) : null}
                 <div className="mt-auto flex items-center gap-2 pt-8 text-xs text-[var(--muted)]">
                   <Clock3 size={14} /> {service.durationMin} minutes
                 </div>

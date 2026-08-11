@@ -1,6 +1,7 @@
 "use client";
 
 import { usePlatformText } from "@/i18n/usePlatformText";
+import { Image } from "@/shared/components/Image";
 import { useMemo, useState } from "react";
 import {
   Clock3,
@@ -60,6 +61,7 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
       durationMin: 30,
       priceEgp: 1,
       category: "",
+      description: "",
     };
     patch({ services: [...state.services, next] });
     setError(null);
@@ -199,6 +201,7 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
         ...service,
         name: service.name.trim(),
         category: normalizeCategory(service.category || ""),
+        description: service.description?.trim() || undefined,
       })),
     });
     setError(null);
@@ -224,7 +227,7 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
               <div>
                 <p className="onboarding-section-number">01</p>
                 <h2>{text("Services")}</h2>
-                <p>{text("Set the name, duration, price, and optional category.")}</p>
+                <p>{text("Set the name, duration, price, category, and customer-facing description.")}</p>
               </div>
               <div className="onboarding-services-summary" aria-label={text("Service summary")}>
                 <span><strong>{state.services.length}</strong> services</span>
@@ -335,6 +338,25 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
                     />
                   </label>
 
+                  <label className="onboarding-field onboarding-service-description-field">
+                    <span>{text("Service description")}</span>
+                    <textarea
+                      value={service.description || ""}
+                      onChange={(event) =>
+                        updateService(service.clientId, {
+                          description: event.target.value,
+                        })
+                      }
+                      placeholder={text("Describe what customers can expect from this service.")}
+                      maxLength={280}
+                      rows={3}
+                      className="onboarding-textarea"
+                    />
+                    <small className="text-[var(--onboarding-muted)]">
+                      {text("Shown on your public website.")}
+                    </small>
+                  </label>
+
                   <button
                     type="button"
                     onClick={() => removeService(service.clientId)}
@@ -425,9 +447,11 @@ export function StepServicesStaff({ onNext, onBack }: StepProps) {
                       <span>{text("Photo")}</span>
                       <div className="onboarding-team-photo">
                         {member.photoUrl ? (
-                          <img
+                          <Image
                             src={member.photoUrl}
                             alt={`${member.name || "Team member"} profile`}
+                            fill
+                            sizes="112px"
                           />
                         ) : null}
                         <label

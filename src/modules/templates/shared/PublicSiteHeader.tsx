@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ArrowUpRight, Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Image } from "@/shared/components/Image";
 
 export type PublicSiteNavLink = {
   label: string;
@@ -55,9 +56,11 @@ export function PublicSiteHeader({
       >
         <a href="#top" className="flex min-w-0 items-center gap-3" onClick={() => setOpen(false)}>
           {logoUrl ? (
-            <img
+            <Image
               src={logoUrl}
               alt=""
+              width={36}
+              height={36}
               className={`h-9 w-9 flex-none object-cover ${isSalon ? "rounded-full" : "rounded-xl"}`}
             />
           ) : (

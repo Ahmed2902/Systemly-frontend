@@ -7,6 +7,7 @@ import {
   CalendarCheck2,
   MapPin,
 } from "lucide-react";
+import { Image } from "@/shared/components/Image";
 
 export function Hero({
   businessName,
@@ -99,10 +100,12 @@ export function Hero({
 
         <div className="relative min-h-[520px] overflow-hidden bg-[var(--secondary-deep)] lg:min-h-full">
           {heroPhotoUrl ? (
-            <img
+            <Image
               src={heroPhotoUrl}
               alt=""
-              className="absolute inset-0 h-full w-full object-cover"
+              fill
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              className="object-cover"
             />
           ) : (
             <div className="absolute inset-0 bg-gradient-to-br from-[var(--secondary-wash)] to-[var(--secondary-soft)]" />

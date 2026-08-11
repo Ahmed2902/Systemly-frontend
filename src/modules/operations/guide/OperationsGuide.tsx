@@ -344,6 +344,7 @@ function GuideScreenshot({
           alt={alt}
           width={width}
           height={height}
+          quality={100}
           sizes="(max-width: 900px) 100vw, 1200px"
           className={styles.screenshot}
         />

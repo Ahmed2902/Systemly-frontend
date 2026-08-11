@@ -83,10 +83,11 @@ export function Services({
                 <h3 className="font-display mt-2 text-2xl font-normal leading-tight text-[var(--text)] md:text-3xl">
                   {service.name}
                 </h3>
-                <p className="mt-3 max-w-xl text-sm leading-7 text-[var(--muted)]">
-                  {service.description ||
-                    "A thoughtful service delivered with care, attention, and time for the details."}
-                </p>
+                {service.description?.trim() ? (
+                  <p className="mt-3 max-w-xl text-sm leading-7 text-[var(--muted)]">
+                    {service.description}
+                  </p>
+                ) : null}
               </div>
 
               <div className="flex items-center justify-between gap-5 md:flex-col md:items-end">
