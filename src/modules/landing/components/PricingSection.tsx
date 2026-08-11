@@ -29,7 +29,7 @@ const copy = {
     currency: "EGP",
     perMonth: "/ month",
     coreDescription:
-      "The complete operating system for an appointment-based business.",
+      "The complete operating system for an appointment-based business. Includes your first branch; each additional active branch is +300 EGP/month.",
     included: "Everything in Core",
     features: [
       "Business website & online booking",
@@ -68,7 +68,8 @@ const copy = {
     price: "799",
     currency: "جنيه",
     perMonth: "/ شهرياً",
-    coreDescription: "النظام المتكامل للأنشطة التي تعتمد على المواعيد.",
+    coreDescription:
+      "النظام المتكامل للأنشطة التي تعتمد على المواعيد. يشمل الفرع الأول، وكل فرع نشط إضافي مقابل 300 جنيه شهرياً.",
     included: "كل ما تحتاجه في Core",
     features: [
       "موقع للنشاط وحجز إلكتروني",
