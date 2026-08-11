@@ -25,4 +25,14 @@ export const naturalArabicBranchPairs: ReadonlyArray<readonly [string, string]> 
   ["Branch created", "تم إنشاء الفرع"],
   ["No active branches", "لا توجد فروع نشطة"],
   ["Manage branches", "إدارة الفروع"],
+  [
+    "Set the name, duration, price, category, and customer-facing description.",
+    "حدّد اسم الخدمة ومدتها وسعرها وتصنيفها والوصف الذي سيظهر للعملاء.",
+  ],
+  ["Service description", "وصف الخدمة"],
+  [
+    "Describe what customers can expect from this service.",
+    "اكتب ما يمكن للعميل توقعه من هذه الخدمة.",
+  ],
+  ["Shown on your public website.", "يظهر هذا الوصف على موقعك العام."],
 ];
