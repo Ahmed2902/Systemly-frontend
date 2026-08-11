@@ -6,8 +6,11 @@ import { Building2, Check, MapPin, Plus, Power, RotateCcw } from "lucide-react";
 import { usePlatformText } from "@/i18n/usePlatformText";
 import { useAuth } from "@/modules/auth/useAuth";
 import { createService } from "@/modules/services/services.api";
-import { createStaff, replaceAvailability } from "@/modules/staff/staff.api";
-import { setOperationalBranchId } from "@/modules/operations/branch-scope";
+import { createStaff, replaceStaffAvailability } from "@/modules/staff/staff.api";
+import {
+  getOperationalBranchId,
+  setOperationalBranchId,
+} from "@/modules/operations/branch-scope";
 import {
   createBranch,
   deactivateBranch,
@@ -232,6 +235,7 @@ export function BranchManagementScreen() {
 
     setSaving(true);
     setError(null);
+    let branchCreated: BranchRecord | null = null;
     try {
       const branch = await createBranch(accessToken, {
         name: draft.name.trim(),
@@ -241,18 +245,22 @@ export function BranchManagementScreen() {
         address: draft.address.trim() || null,
         timezone: draft.timezone,
       });
+      branchCreated = branch;
       setCreatedBranch(branch);
       setOperationalBranchId(branch.id);
 
       const serviceIdByClientId = new Map<string, string>();
       for (const service of draft.services.filter((item) => item.name.trim())) {
-        const created = await createService(accessToken, {
-          name: service.name.trim(),
-          durationMin: service.durationMin,
-          priceEgp: service.priceEgp,
-          isActive: true,
-          staffIds: [],
-        });
+        const created = await createService(
+          {
+            name: service.name.trim(),
+            durationMin: service.durationMin,
+            priceEgp: service.priceEgp,
+            isActive: true,
+            staffIds: [],
+          },
+          accessToken,
+        );
         serviceIdByClientId.set(service.clientId, created.id);
       }
 
@@ -267,15 +275,18 @@ export function BranchManagementScreen() {
         const serviceIds = member.serviceClientIds
           .map((clientId) => serviceIdByClientId.get(clientId))
           .filter((value): value is string => Boolean(value));
-        const created = await createStaff(accessToken, {
-          name: member.name.trim(),
-          role: "Staff",
-          jobTitle: member.jobTitle.trim() || undefined,
-          isActive: true,
-          serviceIds,
-        });
+        const created = await createStaff(
+          {
+            name: member.name.trim(),
+            role: "Staff",
+            jobTitle: member.jobTitle.trim() || undefined,
+            isActive: true,
+            serviceIds,
+          },
+          accessToken,
+        );
         if (availability.length > 0) {
-          await replaceAvailability(accessToken, created.id, availability);
+          await replaceStaffAvailability(created.id, availability, accessToken);
         }
       }
 
@@ -295,6 +306,10 @@ export function BranchManagementScreen() {
           ? caught.message
           : text("The branch was created, but some setup could not be completed.");
       setError(message);
+      if (branchCreated) {
+        setCreatedBranch(branchCreated);
+        setStep(steps.length);
+      }
       await refresh().catch(() => undefined);
     } finally {
       setSaving(false);
@@ -305,9 +320,19 @@ export function BranchManagementScreen() {
     if (!accessToken) return;
     setError(null);
     try {
-      if (branch.isActive) await deactivateBranch(accessToken, branch.id);
-      else await reactivateBranch(accessToken, branch.id);
+      if (branch.isActive) {
+        await deactivateBranch(accessToken, branch.id);
+        if (getOperationalBranchId() === branch.id) {
+          const fallback = branches.find(
+            (candidate) => candidate.isActive && candidate.id !== branch.id,
+          );
+          setOperationalBranchId(fallback?.id ?? null);
+        }
+      } else {
+        await reactivateBranch(accessToken, branch.id);
+      }
       await refresh();
+      router.refresh();
     } catch (caught) {
       setError(
         caught instanceof Error
@@ -465,7 +490,7 @@ export function BranchManagementScreen() {
               {step === 1 ? (
                 <div className="space-y-4">
                   <p className="text-sm text-[var(--op-muted)]">{text("Add the services offered at this location. You can also configure them later.")}</p>
-                  {draft.services.map((service, index) => (
+                  {draft.services.map((service) => (
                     <div key={service.clientId} className="grid gap-3 rounded-xl border border-[var(--op-border)] p-4 sm:grid-cols-[1fr_9rem_9rem_auto]">
                       <Field label={text("Service name")} value={service.name} onChange={(value) => setDraft((current) => ({ ...current, services: current.services.map((item) => item.clientId === service.clientId ? { ...item, name: value } : item) }))} />
                       <NumberField label={text("Duration (min)")} value={service.durationMin} onChange={(value) => setDraft((current) => ({ ...current, services: current.services.map((item) => item.clientId === service.clientId ? { ...item, durationMin: value } : item) }))} />
