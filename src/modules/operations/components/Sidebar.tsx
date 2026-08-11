@@ -198,7 +198,7 @@ export function Sidebar({
         {runtime.mode === "live" ? (
           <Link
             href={resolveOperationsHref(runtime, "/operations/guide")}
-            className={`op-nav-link ${pathname === "/operations/guide" ? "is-active" : ""}`}
+            className={`op-nav-link mb-4 ${pathname === "/operations/guide" ? "is-active" : ""}`}
           >
             <CircleHelp size={16} strokeWidth={1.8} />
             <span>{text("Help & Guide")}</span>
