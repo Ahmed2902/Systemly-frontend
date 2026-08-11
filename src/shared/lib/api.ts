@@ -1,5 +1,6 @@
 import { refreshAccessToken } from "@/modules/auth/auth.api";
 import { getAccessToken } from "@/modules/auth/auth.store";
+import { getOperationalBranchId } from "@/modules/operations/branch-scope";
 import { getInstalledApiTransport } from "./api-transport";
 import { apiUrl } from "./api-url";
 
@@ -45,6 +46,10 @@ type ApiEnvelope<T> = {
 function headersFor(init: RequestInit, token: string | null) {
   const headers = new Headers(init.headers);
   if (token) headers.set("Authorization", `Bearer ${token}`);
+  const branchId = getOperationalBranchId();
+  if (token && branchId && !headers.has("X-Branch-Id")) {
+    headers.set("X-Branch-Id", branchId);
+  }
   const isFormData =
     typeof FormData !== "undefined" && init.body instanceof FormData;
   if (init.body && !isFormData && !headers.has("Content-Type")) {
@@ -139,7 +144,8 @@ export function api<T>(
 
   if (!canCoalesceGet(init, effectiveToken)) return execute();
 
-  const key = `${effectiveToken}\n${retryOnUnauthorized ? "1" : "0"}\n${path}`;
+  const branchId = getOperationalBranchId() ?? "";
+  const key = `${effectiveToken}\n${branchId}\n${retryOnUnauthorized ? "1" : "0"}\n${path}`;
   const existing = inFlightGets.get(key) as Promise<T> | undefined;
   if (existing) return existing;
   if (inFlightGets.size >= MAX_IN_FLIGHT_GETS) return execute();
