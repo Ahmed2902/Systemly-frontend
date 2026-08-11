@@ -23,7 +23,7 @@ export function StepPickSlot({ onNext, onBack }: StepProps) {
     let cancelled = false;
     setLoading(true);
     setError(null);
-    getAvailability(state.businessId, services, state.date)
+    getAvailability(state.businessId, state.branchId, services, state.date)
       .then((result) => {
         if (!cancelled) setSlots(result);
       })
@@ -37,7 +37,7 @@ export function StepPickSlot({ onNext, onBack }: StepProps) {
     return () => {
       cancelled = true;
     };
-  }, [state.date]);
+  }, [state.businessId, state.branchId, state.date, state.selectedServiceIds, state.staffChoices]);
 
   return (
     <div className="space-y-5 sm:space-y-6">
