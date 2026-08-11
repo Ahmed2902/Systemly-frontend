@@ -1,0 +1,1 @@
+Replace the screenshot files under `public/operationsguide/` with the high-resolution originals from the prepared `Systemly_operationsguide_HQ.zip` bundle before merging this branch. The bundle keeps the exact filenames used by the guide.
