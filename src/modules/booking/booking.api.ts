@@ -3,20 +3,20 @@ import { ServiceSelection, AvailableSlot } from "./booking.types";
 
 export async function getAvailability(
   businessId: string,
+  branchId: string,
   services: ServiceSelection[],
   date: string,
 ): Promise<AvailableSlot[]> {
   const params = new URLSearchParams({
     businessId,
+    branchId,
     date,
     services: JSON.stringify(services),
   });
 
   const res = await fetch(
     apiUrl(`/bookings/availability?${params.toString()}`),
-    {
-      cache: "no-store",
-    },
+    { cache: "no-store" },
   );
   const json = await res.json();
   if (!res.ok || json.success === false) throw json;
@@ -25,6 +25,7 @@ export async function getAvailability(
 
 export async function submitBooking(payload: {
   businessId: string;
+  branchId: string;
   services: ServiceSelection[];
   startsAt: string;
   customerName: string;

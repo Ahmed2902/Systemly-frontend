@@ -7,17 +7,22 @@ import { getTemplateById } from "@/modules/templates/template-registry";
 function contrastText(colour: string) {
   const hex = colour.replace(/^#/, "");
   if (!/^[\da-fA-F]{6}$/.test(hex)) return "#171918";
-  const channels = [0, 2, 4].map((start) => Number.parseInt(hex.slice(start, start + 2), 16) / 255);
-  const [red, green, blue] = channels.map((channel) => (
-    channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4
-  ));
+  const channels = [0, 2, 4].map(
+    (start) => Number.parseInt(hex.slice(start, start + 2), 16) / 255,
+  );
+  const [red, green, blue] = channels.map((channel) =>
+    channel <= 0.03928
+      ? channel / 12.92
+      : ((channel + 0.055) / 1.055) ** 2.4,
+  );
   return 0.2126 * red + 0.7152 * green + 0.0722 * blue > 0.46
     ? "#171918"
     : "#FFFFFF";
 }
 
-async function getBusiness(slug: string) {
-  const res = await fetch(apiUrl(`/businesses/public/${slug}`), {
+async function getBusiness(slug: string, branchSlug?: string) {
+  const query = branchSlug ? `?branch=${encodeURIComponent(branchSlug)}` : "";
+  const res = await fetch(apiUrl(`/businesses/public/${slug}${query}`), {
     cache: "no-store",
   });
   if (res.status === 404) return null;
@@ -28,23 +33,27 @@ async function getBusiness(slug: string) {
 
 export default async function BookPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ branch?: string }>;
 }) {
   const { slug } = await params;
-  const business = await getBusiness(slug);
-  if (!business) notFound();
+  const { branch: branchSlug } = await searchParams;
+  const business = await getBusiness(slug, branchSlug);
+  if (!business?.selectedBranch?.id) notFound();
 
   const template = getTemplateById(
     business.websiteContent?.template ?? "aura-wellness",
   );
   const theme = template?.theme;
-  const primary = business.websiteContent?.primaryColor ?? theme?.primary ?? (
-    template?.vertical === "clinic" ? "#0B6B68" : "#6A3048"
-  );
-  const accent = business.websiteContent?.secondaryColor ?? (
-    template?.vertical === "clinic" ? "#074947" : "#482131"
-  );
+  const primary =
+    business.websiteContent?.primaryColor ??
+    theme?.primary ??
+    (template?.vertical === "clinic" ? "#0B6B68" : "#6A3048");
+  const accent =
+    business.websiteContent?.secondaryColor ??
+    (template?.vertical === "clinic" ? "#074947" : "#482131");
 
   return (
     <div
@@ -64,6 +73,7 @@ export default async function BookPage({
     >
       <BookingProvider
         businessId={business.id}
+        branchId={business.selectedBranch.id}
         services={business.services}
         staff={business.staff}
       >
