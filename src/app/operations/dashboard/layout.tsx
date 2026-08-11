@@ -31,7 +31,7 @@ export default function OwnerAnalyticsLayout({
   const router = useRouter();
   const { user, accessToken, loading } = useAuth();
   const owner =
-    user?.role === text("BusinessAdmin") || user?.role === text("SuperAdmin");
+    user?.role === "BusinessAdmin" || user?.role === "SuperAdmin";
   const [branches, setBranches] = useState<AnalyticsBranch[]>([]);
   const [analyticsBranchId, setAnalyticsBranchState] = useState<string | null>(
     null,
