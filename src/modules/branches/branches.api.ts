@@ -1,0 +1,75 @@
+import { api } from "@/shared/lib/api";
+
+export type BranchRecord = {
+  id: string;
+  businessId: string;
+  name: string;
+  slug: string;
+  phone?: string | null;
+  address?: string | null;
+  city?: string | null;
+  timezone: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type BranchPricing = {
+  basePriceCents: number;
+  includedBranchCount: number;
+  activeBranchCount: number;
+  additionalBranchCount: number;
+  additionalBranchUnitPriceCents: number;
+  additionalBranchTotalCents: number;
+  nextRenewalAmountCents: number;
+  currency: string;
+};
+
+export function listBranches(token: string | null) {
+  return api<BranchRecord[]>("/branches", token);
+}
+
+export function createBranch(
+  token: string | null,
+  input: {
+    name: string;
+    slug: string;
+    phone?: string | null;
+    address?: string | null;
+    city?: string | null;
+    timezone: string;
+  },
+) {
+  return api<BranchRecord>("/branches", token, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export function deactivateBranch(token: string | null, branchId: string) {
+  return api<BranchRecord>(`/branches/${branchId}/deactivate`, token, {
+    method: "POST",
+  });
+}
+
+export function reactivateBranch(token: string | null, branchId: string) {
+  return api<BranchRecord>(`/branches/${branchId}/reactivate`, token, {
+    method: "POST",
+  });
+}
+
+export async function getBranchPricing(token: string | null) {
+  const result = await api<{ pricing: BranchPricing }>("/billing/pricing", token);
+  return result.pricing;
+}
+
+export function inviteReceptionist(
+  token: string | null,
+  branchId: string,
+  email: string,
+) {
+  return api("/staff/invites", token, {
+    method: "POST",
+    body: JSON.stringify({ branchId, email }),
+  });
+}
