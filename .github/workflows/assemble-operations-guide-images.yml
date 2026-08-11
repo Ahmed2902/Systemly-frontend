@@ -1,0 +1,37 @@
+name: Assemble Operations Guide Images
+
+on:
+  push:
+    branches:
+      - fix/operations-guide-image-quality-final
+
+permissions:
+  contents: write
+
+jobs:
+  assemble:
+    if: github.event.head_commit.message == 'chore: assemble operations guide images'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Decode high-quality screenshots
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p public/operationsguide public/operations-guide
+          for name in dashboard calendar calendar-appointment-top calendar-appointment-actions appointments customers staff services invoices settings; do
+            cat .ops-guide-chunks/$name.webp/*.part | base64 --decode > public/operationsguide/$name.webp
+            cp public/operationsguide/$name.webp public/operations-guide/$name.webp
+          done
+          rm -rf .ops-guide-chunks
+          rm .github/workflows/assemble-operations-guide-images.yml
+      - name: Commit decoded screenshots
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add -A
+          git commit -m "fix: restore high quality operations guide screenshots"
+          git push origin HEAD:fix/operations-guide-image-quality-final
