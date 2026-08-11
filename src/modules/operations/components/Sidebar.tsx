@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import type { LucideIcon } from "lucide-react";
 import {
   CalendarDays,
+  CircleHelp,
   ClipboardList,
   CreditCard,
   LayoutDashboard,
@@ -73,6 +74,8 @@ export function Sidebar({
   const demoLabel = runtime.vertical === "clinic"
     ? text("Clinic demo")
     : text("Salon demo");
+  const guideHref = resolveOperationsHref(runtime, "/operations/guide");
+  const guideActive = pathname === guideHref || pathname?.startsWith(`${guideHref}/`);
 
   const navGroups: NavGroup[] = [
     {
@@ -194,6 +197,18 @@ export function Sidebar({
       </nav>
 
       <div className="op-sidebar-footer">
+        {runtime.mode === "live" ? (
+          <Link
+            href={guideHref}
+            onClick={onClose}
+            aria-current={guideActive ? "page" : undefined}
+            className={`op-nav-link mb-2 ${guideActive ? "is-active" : ""}`}
+          >
+            <CircleHelp size={16} strokeWidth={1.8} />
+            <span>{text("Help & Guide")}</span>
+          </Link>
+        ) : null}
+
         <div className="flex items-stretch gap-2">
           <button
             type="button"
