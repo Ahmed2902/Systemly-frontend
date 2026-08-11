@@ -18,6 +18,7 @@ const ALLOWED = new Set([
   "Salma Tarek", "Salma", "Ahmed Hassan", "Dr. Sarah Jenkins",
   "Aura Wellness — Salon", "Clinic Clarity — Clinic",
   "systemly.app/", "hgezli.com/", "ArrowDown", "Home",
+  "Calendar", "Appointment", "Customer", "Invoice",
   "analytics-chart-point is-active", "analytics-donut-segment is-active",
   "analytics-lollipop-row is-active", "analytics-heatmap-cell is-active",
   "pl-3.5", "mx-auto max-w-md",
@@ -40,6 +41,7 @@ const ARABIC_CATALOGUES = [
     "src/i18n/natural-arabic-analytics-periods.ts",
     "naturalArabicAnalyticsPeriodPairs",
   ],
+  ["src/i18n/natural-arabic-guide.ts", "naturalArabicGuidePairs"],
 ];
 const BANNED_LITERAL_ARABIC = [
   "النظام الذي يدير نشاطك من الخلف",

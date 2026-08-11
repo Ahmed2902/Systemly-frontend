@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import type { LucideIcon } from "lucide-react";
 import {
   CalendarDays,
+  CircleHelp,
   ClipboardList,
   CreditCard,
   LayoutDashboard,
@@ -194,6 +195,16 @@ export function Sidebar({
       </nav>
 
       <div className="op-sidebar-footer">
+        {runtime.mode === "live" ? (
+          <Link
+            href={resolveOperationsHref(runtime, "/operations/guide")}
+            className={`op-nav-link ${pathname === "/operations/guide" ? "is-active" : ""}`}
+          >
+            <CircleHelp size={16} strokeWidth={1.8} />
+            <span>{text("Help & Guide")}</span>
+          </Link>
+        ) : null}
+
         <div className="flex items-stretch gap-2">
           <button
             type="button"
