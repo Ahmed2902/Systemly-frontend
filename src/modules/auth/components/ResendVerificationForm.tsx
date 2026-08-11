@@ -12,12 +12,25 @@ import {
   type EmailRequestInput,
 } from "../auth.schema";
 import { ApiError, resendVerification } from "../auth.api";
+import { safeNextPath } from "../auth-redirect";
+
+function inviteTokenFromNext(path: string | null) {
+  if (!path) return "";
+  try {
+    const url = new URL(path, "https://systemly.local");
+    return url.pathname === "/invite" ? url.searchParams.get("token")?.trim() ?? "" : "";
+  } catch {
+    return "";
+  }
+}
 
 export function ResendVerificationForm() {
   const text = usePlatformText();
   const searchParams = useSearchParams();
   const initialEmail = searchParams.get("email") ?? "";
-  const inviteToken = searchParams.get("inviteToken")?.trim() ?? "";
+  const nextPath = safeNextPath(searchParams.get("next"));
+  const inviteToken =
+    searchParams.get("inviteToken")?.trim() || inviteTokenFromNext(nextPath);
   const [sentTo, setSentTo] = useState<string | null>(
     searchParams.get("sent") === "1" && initialEmail ? initialEmail : null,
   );
