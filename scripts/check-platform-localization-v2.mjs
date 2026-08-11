@@ -42,6 +42,7 @@ const ARABIC_CATALOGUES = [
     "naturalArabicAnalyticsPeriodPairs",
   ],
   ["src/i18n/natural-arabic-guide.ts", "naturalArabicGuidePairs"],
+  ["src/i18n/natural-arabic-branches.ts", "naturalArabicBranchPairs"],
 ];
 const BANNED_LITERAL_ARABIC = [
   "النظام الذي يدير نشاطك من الخلف",

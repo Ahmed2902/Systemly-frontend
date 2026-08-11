@@ -6,6 +6,7 @@ import type {
   ServiceCatalogItem,
   StaffMember,
 } from "./appointment.types";
+import { getOperationalBranchId } from "./branch-scope";
 import { mapBackendAppointment } from "../../shared/lib/Calendar/adapter";
 import type { BackendAppointment } from "../../shared/lib/Calendar/adapter";
 
@@ -38,6 +39,8 @@ export function getAvailability(
     date,
     services: JSON.stringify(services),
   });
+  const branchId = getOperationalBranchId();
+  if (branchId) params.set("branchId", branchId);
   return api<AvailableSlot[]>(
     `/bookings/availability?${params.toString()}`,
     accessToken,

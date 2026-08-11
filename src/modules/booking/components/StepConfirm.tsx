@@ -11,17 +11,15 @@ export function StepConfirm({ onBack }: StepProps) {
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
 
-  const selectedServices = state.services.filter((s) =>
-    state.selectedServiceIds.includes(s.id),
+  const selectedServices = state.services.filter((service) =>
+    state.selectedServiceIds.includes(service.id),
   );
-
-  // FIX: Explicitly parse strings to numbers so they sum up mathematically rather than concatenating text
   const totalDuration = selectedServices.reduce(
-    (acc, s) => acc + (Number(s.durationMin) || 0),
+    (total, service) => total + (Number(service.durationMin) || 0),
     0,
   );
   const totalPrice = selectedServices.reduce(
-    (acc, s) => acc + (Number(s.priceEgp) || 0),
+    (total, service) => total + (Number(service.priceEgp) || 0),
     0,
   );
 
@@ -40,6 +38,7 @@ export function StepConfirm({ onBack }: StepProps) {
 
       await submitBooking({
         businessId: state.businessId,
+        branchId: state.branchId,
         services,
         startsAt: state.selectedSlot.time,
         customerName: state.customerName,
@@ -69,7 +68,7 @@ export function StepConfirm({ onBack }: StepProps) {
         <h2 className="text-2xl font-bold tracking-tight text-[var(--booking-text)]">
           You&apos;re booked!
         </h2>
-        <p className="text-sm text-[var(--booking-muted)] max-w-sm mx-auto">
+        <p className="mx-auto max-w-sm text-sm text-[var(--booking-muted)]">
           We&apos;ve reserved your slot. We look forward to seeing you at your
           appointment.
         </p>
@@ -88,7 +87,6 @@ export function StepConfirm({ onBack }: StepProps) {
         </p>
       </div>
 
-      {/* Summary Panel with working math totals */}
       <div
         className="space-y-4 rounded-lg border p-4 sm:p-5"
         style={{
@@ -98,29 +96,28 @@ export function StepConfirm({ onBack }: StepProps) {
         }}
       >
         <div className="space-y-3 divide-y divide-[var(--booking-border)]/40">
-          {selectedServices.map((s, index) => (
+          {selectedServices.map((service, index) => (
             <div
-              key={s.id}
+              key={service.id}
               className={`flex items-center justify-between gap-3 text-sm ${index > 0 ? "pt-3" : ""}`}
             >
               <div className="min-w-0 flex flex-col">
-                <span className="break-words font-semibold text-[var(--booking-text)] capitalize">
-                  {s.name}
+                <span className="break-words font-semibold capitalize text-[var(--booking-text)]">
+                  {service.name}
                 </span>
                 <span className="text-xs text-[var(--booking-muted)]">
-                  {s.durationMin} min
+                  {service.durationMin} min
                 </span>
               </div>
               <span className="shrink-0 font-mono font-medium text-[var(--booking-text)]">
-                {s.priceEgp} EGP
+                {service.priceEgp} EGP
               </span>
             </div>
           ))}
         </div>
 
-        {/* Grand Totals Display */}
         <div
-          className="pt-3 border-t flex justify-between items-baseline"
+          className="flex items-baseline justify-between border-t pt-3"
           style={{ borderColor: "var(--booking-border)" }}
         >
           <div className="flex items-center gap-2">
@@ -131,15 +128,14 @@ export function StepConfirm({ onBack }: StepProps) {
               ({totalDuration} min)
             </span>
           </div>
-          <span className="text-lg font-bold font-mono text-[var(--booking-text)]">
+          <span className="font-mono text-lg font-bold text-[var(--booking-text)]">
             {totalPrice} EGP
           </span>
         </div>
       </div>
 
-      {/* Date & Time display box */}
       <div
-          className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border px-4 py-3.5 text-sm font-semibold"
+        className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border px-4 py-3.5 text-sm font-semibold"
         style={{
           backgroundColor: "rgba(0, 0, 0, 0.01)",
           borderColor: "var(--booking-border)",
@@ -157,7 +153,6 @@ export function StepConfirm({ onBack }: StepProps) {
         <span>at {state.selectedSlot?.display}</span>
       </div>
 
-      {/* Form Controls - Cleaned up placeholders */}
       <div className="space-y-5">
         <div>
           <label className="text-xs font-bold uppercase tracking-wider text-[var(--booking-text)] opacity-80">
@@ -165,8 +160,7 @@ export function StepConfirm({ onBack }: StepProps) {
           </label>
           <input
             value={state.customerName}
-            onChange={(e) => patch({ customerName: e.target.value })}
-            placeholder="" // FIX: Removed generic placeholders
+            onChange={(event) => patch({ customerName: event.target.value })}
             className="mt-1.5 min-h-12 w-full rounded-lg border px-4 py-3 text-sm transition-colors focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
             style={{
               borderColor: "var(--booking-border)",
@@ -183,8 +177,7 @@ export function StepConfirm({ onBack }: StepProps) {
           <input
             type="tel"
             value={state.customerPhone}
-            onChange={(e) => patch({ customerPhone: e.target.value })}
-            placeholder=""
+            onChange={(event) => patch({ customerPhone: event.target.value })}
             className="mt-1.5 min-h-12 w-full rounded-lg border px-4 py-3 text-sm transition-colors focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
             style={{
               borderColor: "var(--booking-border)",
@@ -203,7 +196,7 @@ export function StepConfirm({ onBack }: StepProps) {
               type="date"
               max={new Date().toISOString().slice(0, 10)}
               value={state.dateOfBirth}
-              onChange={(e) => patch({ dateOfBirth: e.target.value })}
+              onChange={(event) => patch({ dateOfBirth: event.target.value })}
               className="mt-1.5 min-h-12 w-full rounded-lg border px-4 py-3 text-sm transition-colors focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
               style={{
                 borderColor: "var(--booking-border)",
@@ -219,7 +212,9 @@ export function StepConfirm({ onBack }: StepProps) {
             </label>
             <select
               value={state.gender}
-              onChange={(e) => patch({ gender: e.target.value as "" | "male" | "female" })}
+              onChange={(event) =>
+                patch({ gender: event.target.value as "" | "male" | "female" })
+              }
               className="mt-1.5 min-h-12 w-full rounded-lg border px-4 py-3 text-sm transition-colors focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
               style={{
                 borderColor: "var(--booking-border)",
@@ -240,8 +235,7 @@ export function StepConfirm({ onBack }: StepProps) {
           </label>
           <textarea
             value={state.notes}
-            onChange={(e) => patch({ notes: e.target.value })}
-            placeholder=""
+            onChange={(event) => patch({ notes: event.target.value })}
             rows={2}
             className="mt-1.5 w-full resize-none rounded-lg border px-4 py-3 text-sm transition-colors focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
             style={{
@@ -255,7 +249,6 @@ export function StepConfirm({ onBack }: StepProps) {
 
       {error && <p className="text-sm font-medium text-red-500">{error}</p>}
 
-      {/* Action Controls */}
       <div className="grid grid-cols-[minmax(5rem,0.7fr)_minmax(0,1.3fr)] gap-3 pt-2 sm:flex sm:gap-4">
         <button
           onClick={onBack}
