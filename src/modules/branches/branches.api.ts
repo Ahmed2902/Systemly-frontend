@@ -25,20 +25,23 @@ export type BranchPricing = {
   currency: string;
 };
 
+type BranchMutationInput = {
+  name?: string;
+  slug?: string;
+  phone?: string | null;
+  address?: string | null;
+  city?: string | null;
+  timezone?: string;
+};
+
 export function listBranches(token: string | null) {
   return api<BranchRecord[]>("/branches", token);
 }
 
 export function createBranch(
   token: string | null,
-  input: {
-    name: string;
-    slug: string;
-    phone?: string | null;
-    address?: string | null;
-    city?: string | null;
-    timezone: string;
-  },
+  input: Required<Pick<BranchMutationInput, "name" | "slug" | "timezone">> &
+    Omit<BranchMutationInput, "name" | "slug" | "timezone">,
 ) {
   return api<BranchRecord>("/branches", token, {
     method: "POST",
@@ -46,16 +49,31 @@ export function createBranch(
   });
 }
 
-export function deactivateBranch(token: string | null, branchId: string) {
-  return api<BranchRecord>(`/branches/${branchId}/deactivate`, token, {
-    method: "POST",
+export function updateBranch(
+  token: string | null,
+  branchId: string,
+  input: BranchMutationInput,
+) {
+  return api<BranchRecord>(`/branches/${encodeURIComponent(branchId)}`, token, {
+    method: "PATCH",
+    body: JSON.stringify(input),
   });
 }
 
+export function deactivateBranch(token: string | null, branchId: string) {
+  return api<BranchRecord>(
+    `/branches/${encodeURIComponent(branchId)}/deactivate`,
+    token,
+    { method: "POST" },
+  );
+}
+
 export function reactivateBranch(token: string | null, branchId: string) {
-  return api<BranchRecord>(`/branches/${branchId}/reactivate`, token, {
-    method: "POST",
-  });
+  return api<BranchRecord>(
+    `/branches/${encodeURIComponent(branchId)}/reactivate`,
+    token,
+    { method: "POST" },
+  );
 }
 
 export async function getBranchPricing(token: string | null) {
