@@ -6,6 +6,13 @@ export type StaffInviteResult = {
   acceptUrl: string;
 };
 
+export type StaffInviteResolution = {
+  email: string;
+  accountExists: boolean;
+  businessName: string;
+  expiresAt: string;
+};
+
 export type AcceptedStaffInvite = {
   user: {
     id: string;
@@ -23,6 +30,15 @@ export function createStaffInvite(
     method: "POST",
     body: JSON.stringify(input),
   });
+}
+
+export function resolveStaffInvite(token: string) {
+  return api<StaffInviteResolution>(
+    `/staff/invites/resolve?token=${encodeURIComponent(token)}`,
+    null,
+    {},
+    { retryOnUnauthorized: false },
+  );
 }
 
 export function acceptStaffInvite(token: string, accessToken: string) {
