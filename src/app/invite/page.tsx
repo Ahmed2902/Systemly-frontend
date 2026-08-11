@@ -5,6 +5,7 @@ import {
   Suspense,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -35,6 +36,8 @@ function InviteAcceptanceContent() {
   const searchParams = useSearchParams();
   const { user, accessToken, loading, setSession } = useAuth();
   const token = searchParams.get("token") ?? "";
+  const resolvingRef = useRef(false);
+  const acceptingRef = useRef(false);
   const [state, setState] = useState<InviteState>("idle");
   const [error, setError] = useState<string | null>(null);
   const [resolution, setResolution] = useState<StaffInviteResolution | null>(null);
@@ -50,8 +53,18 @@ function InviteAcceptanceContent() {
   }, [token]);
 
   useEffect(() => {
-    if (loading || !token || user || accessToken || state !== "idle") return;
+    if (
+      loading ||
+      !token ||
+      user ||
+      accessToken ||
+      resolvingRef.current ||
+      acceptingRef.current
+    ) {
+      return;
+    }
 
+    resolvingRef.current = true;
     let cancelled = false;
     let redirectTimer: ReturnType<typeof setTimeout> | undefined;
     setState("resolving");
@@ -98,10 +111,21 @@ function InviteAcceptanceContent() {
       cancelled = true;
       if (redirectTimer) clearTimeout(redirectTimer);
     };
-  }, [accessToken, loading, returnPath, router, state, text, token, user]);
+  }, [accessToken, loading, returnPath, router, text, token, user]);
 
   useEffect(() => {
-    if (loading || !user || !accessToken || !token || state !== "idle") return;
+    if (
+      loading ||
+      !user ||
+      !accessToken ||
+      !token ||
+      acceptingRef.current ||
+      resolvingRef.current
+    ) {
+      return;
+    }
+
+    acceptingRef.current = true;
     setState("accepting");
     acceptStaffInvite(token, accessToken)
       .then(async (accepted) => {
@@ -119,7 +143,7 @@ function InviteAcceptanceContent() {
         );
         setState("error");
       });
-  }, [accessToken, loading, router, setSession, state, text, token, user]);
+  }, [accessToken, loading, router, setSession, text, token, user]);
 
   if (!token) {
     return (
