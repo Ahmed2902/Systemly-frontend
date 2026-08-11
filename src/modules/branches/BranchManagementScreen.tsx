@@ -2,7 +2,15 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Building2, Check, MapPin, Plus, Power, RotateCcw } from "lucide-react";
+import {
+  Building2,
+  Check,
+  MapPin,
+  Pencil,
+  Plus,
+  Power,
+  RotateCcw,
+} from "lucide-react";
 import { usePlatformText } from "@/i18n/usePlatformText";
 import { useAuth } from "@/modules/auth/useAuth";
 import { createService } from "@/modules/services/services.api";
@@ -11,6 +19,7 @@ import {
   getOperationalBranchId,
   setOperationalBranchId,
 } from "@/modules/operations/branch-scope";
+import { BranchEditDialog } from "./BranchEditDialog";
 import {
   createBranch,
   deactivateBranch,
@@ -107,6 +116,7 @@ export function BranchManagementScreen() {
   const [pricing, setPricing] = useState<BranchPricing | null>(null);
   const [loadingData, setLoadingData] = useState(true);
   const [wizardOpen, setWizardOpen] = useState(false);
+  const [editingBranch, setEditingBranch] = useState<BranchRecord | null>(null);
   const [step, setStep] = useState(0);
   const [draft, setDraft] = useState<BranchDraft>(blankDraft);
   const [saving, setSaving] = useState(false);
@@ -433,18 +443,27 @@ export function BranchManagementScreen() {
               <div className="flex items-center gap-2"><MapPin size={14} /> {branch.address || branch.city || text("No address yet")}</div>
               <div>{branch.timezone}</div>
             </div>
-            <div className="mt-4 flex items-center justify-between gap-3 border-t border-[var(--op-border)] pt-4">
-              <span className="text-xs text-[var(--op-muted)]">
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--op-border)] pt-4">
+              <span className="min-w-0 flex-1 text-xs text-[var(--op-muted)]">
                 {branch.isActive ? text("Included in operational and public branch selection") : text("History is preserved while this branch is inactive")}
               </span>
-              <button
-                type="button"
-                onClick={() => void toggleBranch(branch)}
-                className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-[var(--op-border)] px-3 py-2 text-xs font-semibold"
-              >
-                {branch.isActive ? <Power size={13} /> : <RotateCcw size={13} />}
-                {branch.isActive ? text("Deactivate") : text("Reactivate")}
-              </button>
+              <div className="flex shrink-0 items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setEditingBranch(branch)}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--op-border)] px-3 py-2 text-xs font-semibold"
+                >
+                  <Pencil size={13} /> {text("Edit branch")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void toggleBranch(branch)}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--op-border)] px-3 py-2 text-xs font-semibold"
+                >
+                  {branch.isActive ? <Power size={13} /> : <RotateCcw size={13} />}
+                  {branch.isActive ? text("Deactivate") : text("Reactivate")}
+                </button>
+              </div>
             </div>
           </article>
         ))}
@@ -454,6 +473,22 @@ export function BranchManagementScreen() {
         <div className="rounded-2xl border border-dashed border-[var(--op-border)] p-10 text-center text-sm text-[var(--op-muted)]">
           {text("No active branches")}
         </div>
+      ) : null}
+
+      {editingBranch ? (
+        <BranchEditDialog
+          branch={editingBranch}
+          accessToken={accessToken}
+          onClose={() => setEditingBranch(null)}
+          onSaved={(updated) => {
+            setBranches((current) =>
+              current.map((branch) =>
+                branch.id === updated.id ? updated : branch,
+              ),
+            );
+            setEditingBranch(null);
+          }}
+        />
       ) : null}
 
       {wizardOpen ? (
