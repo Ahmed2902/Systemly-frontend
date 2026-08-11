@@ -20,6 +20,7 @@ import { StepServicesStaff } from "./StepServiceStaff";
 import { StepAssignments } from "./StepAssignments";
 import { StepCustomizePreview } from "./StepCustomizePreview";
 import { StepLaunch } from "./StepLaunch";
+import { WebsiteBuilderTour } from "./WebsiteBuilderTour";
 import { useWizard } from "../wizard.context";
 import "../onboarding-systerra.css";
 
@@ -219,6 +220,7 @@ export function WizardShell() {
             </div>
 
             <section key={stepIndex} className="onboarding-stage">
+              <WebsiteBuilderTour active={stepIndex === 3} />
               <StepComponent
                 onNext={() => setStepIndex((index) => Math.min(index + 1, steps.length - 1))}
                 onBack={() => setStepIndex((index) => Math.max(index - 1, 0))}
