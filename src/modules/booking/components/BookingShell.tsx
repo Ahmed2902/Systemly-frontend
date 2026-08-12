@@ -24,6 +24,7 @@ const progressCopy = {
     time: "Time",
     confirm: "Confirm",
     booking: "Booking",
+    changeBranch: "Change branch",
   },
   ar: {
     branch: "الفرع",
@@ -32,6 +33,7 @@ const progressCopy = {
     time: "الوقت",
     confirm: "التأكيد",
     booking: "الحجز",
+    changeBranch: "تغيير الفرع",
   },
 } as const;
 
@@ -153,6 +155,16 @@ export function BookingShell({
           </header>
 
           <main className="mx-auto w-full max-w-[600px] px-4 py-6 sm:px-6 sm:py-9 lg:px-8 lg:py-12">
+            {showBranchStep ? (
+              <div className="mb-3 flex justify-end">
+                <Link
+                  href={`/${slug}/book`}
+                  className="text-xs font-semibold text-[var(--accent)] underline-offset-4 hover:underline"
+                >
+                  {labels.changeBranch}
+                </Link>
+              </div>
+            ) : null}
             <div className="rounded-xl border border-[var(--booking-border)] bg-[var(--booking-surface)] p-4 shadow-sm sm:p-6 lg:p-8">
               <StepComponent
                 onNext={() =>
