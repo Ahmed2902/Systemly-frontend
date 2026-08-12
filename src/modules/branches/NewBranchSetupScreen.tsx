@@ -14,21 +14,11 @@ import {
 } from "lucide-react";
 import { usePlatformText } from "@/i18n/usePlatformText";
 import { useAuth } from "@/modules/auth/useAuth";
-import { createService } from "@/modules/services/services.api";
-import {
-  createStaff,
-  replaceStaffAvailability,
-} from "@/modules/staff/staff.api";
-import {
-  getOperationalBranchId,
-  setOperationalBranchId,
-} from "@/modules/operations/branch-scope";
+import { setOperationalBranchId } from "@/modules/operations/branch-scope";
 import { SystemlyWordmark } from "@/shared/components/SystemlyWordmark";
 import {
-  createBranch,
-  deactivateBranch,
   getBranchPricing,
-  inviteReceptionist,
+  setupBranch,
   type BranchPricing,
 } from "./branches.api";
 import "@/modules/wizard/onboarding-systerra.css";
@@ -44,29 +34,19 @@ const DAYS = [
 ] as const;
 
 const STEPS = [
-  {
-    label: "Branch profile",
-    hint: "Location and contact",
-  },
+  { label: "Branch profile", hint: "Location and contact" },
   {
     label: "Services & team",
     hint: "Set up this branch's services and people",
   },
-  {
-    label: "Availability",
-    hint: "Set each team member's working hours",
-  },
-  {
-    label: "Review",
-    hint: "Review and create the branch",
-  },
+  { label: "Availability", hint: "Set each team member's working hours" },
+  { label: "Review", hint: "Review and create the branch" },
 ] as const;
 
 type AvailabilityDraft = {
   dayOfWeek: number;
   startTime: string;
   endTime: string;
-  breakAfterMin: null;
 };
 
 type ServiceDraft = {
@@ -92,7 +72,6 @@ type BranchDraft = {
   phone: string;
   city: string;
   address: string;
-  timezone: string;
   receptionistEmail: string;
   services: ServiceDraft[];
   staff: StaffDraft[];
@@ -116,7 +95,6 @@ function defaultAvailability(): AvailabilityDraft[] {
     dayOfWeek,
     startTime: "09:00",
     endTime: "18:00",
-    breakAfterMin: null,
   }));
 }
 
@@ -128,7 +106,6 @@ function initialDraft(): BranchDraft {
     phone: "",
     city: "",
     address: "",
-    timezone: "Africa/Cairo",
     receptionistEmail: "",
     services: [
       {
@@ -167,6 +144,7 @@ export function NewBranchSetupScreen() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pricing, setPricing] = useState<BranchPricing | null>(null);
+
   const owner = user?.role === "BusinessAdmin" || user?.role === "SuperAdmin";
   const progress = ((stepIndex + 1) / STEPS.length) * 100;
 
@@ -248,6 +226,7 @@ export function NewBranchSetupScreen() {
         ),
       })),
     }));
+    setError(null);
   }
 
   function updateStaff(clientId: string, updates: Partial<StaffDraft>) {
@@ -283,6 +262,7 @@ export function NewBranchSetupScreen() {
       }
       return { ...current, staff };
     });
+    setError(null);
   }
 
   function toggleStaffService(staffId: string, serviceId: string) {
@@ -307,12 +287,7 @@ export function NewBranchSetupScreen() {
           )
         : [
             ...selectedStaff.availability,
-            {
-              dayOfWeek,
-              startTime: "09:00",
-              endTime: "18:00",
-              breakAfterMin: null,
-            },
+            { dayOfWeek, startTime: "09:00", endTime: "18:00" },
           ],
     });
   }
@@ -343,7 +318,10 @@ export function NewBranchSetupScreen() {
       }
       if (
         draft.services.some(
-          (service) => service.durationMin < 1 || service.priceEgp <= 0,
+          (service) =>
+            service.durationMin < 5 ||
+            service.durationMin % 5 !== 0 ||
+            service.priceEgp < 0,
         )
       ) {
         return text("Every service needs a valid duration and price.");
@@ -395,89 +373,47 @@ export function NewBranchSetupScreen() {
 
     setSaving(true);
     setError(null);
-    const previousOperationalBranchId = getOperationalBranchId();
-    let createdBranchId: string | null = null;
-
     try {
-      const branch = await createBranch(accessToken, {
+      const result = await setupBranch(accessToken, {
         name: draft.name.trim(),
         slug: draft.slug.trim(),
         phone: draft.phone.trim() || null,
         city: draft.city.trim() || null,
         address: draft.address.trim() || null,
         timezone: "Africa/Cairo",
-      });
-      createdBranchId = branch.id;
-
-      // All following operational APIs are branch-scoped through X-Branch-Id.
-      setOperationalBranchId(branch.id);
-
-      const serviceIdByClientId = new Map<string, string>();
-      for (const service of draft.services) {
-        const created = await createService(
-          {
-            name: service.name.trim(),
-            category: service.category.trim() || undefined,
-            description: service.description.trim() || undefined,
-            durationMin: service.durationMin,
-            priceEgp: service.priceEgp,
-            isActive: true,
-            staffIds: [],
-          },
-          accessToken,
-        );
-        serviceIdByClientId.set(service.clientId, created.id);
-      }
-
-      for (const member of draft.staff) {
-        const serviceIds = member.serviceClientIds
-          .map((clientId) => serviceIdByClientId.get(clientId))
-          .filter((value): value is string => Boolean(value));
-        const created = await createStaff(
-          {
-            name: member.name.trim(),
-            role: "Staff",
-            jobTitle: member.jobTitle.trim() || undefined,
-            isActive: true,
-            serviceIds,
-          },
-          accessToken,
-        );
-        await replaceStaffAvailability(
-          created.id,
-          member.availability
+        receptionistEmail: draft.receptionistEmail.trim() || undefined,
+        services: draft.services.map((service) => ({
+          clientId: service.clientId,
+          name: service.name.trim(),
+          category: service.category.trim() || undefined,
+          description: service.description.trim() || undefined,
+          durationMin: service.durationMin,
+          priceEgp: service.priceEgp,
+        })),
+        staff: draft.staff.map((member) => ({
+          clientId: member.clientId,
+          name: member.name.trim(),
+          jobTitle: member.jobTitle.trim() || undefined,
+          serviceClientIds: member.serviceClientIds,
+          availability: member.availability
             .slice()
-            .sort((a, b) => a.dayOfWeek - b.dayOfWeek),
-          accessToken,
-        );
-      }
+            .sort((a, b) => a.dayOfWeek - b.dayOfWeek)
+            .map(({ dayOfWeek, startTime, endTime }) => ({
+              dayOfWeek,
+              startTime,
+              endTime,
+            })),
+        })),
+      });
 
-      if (draft.receptionistEmail.trim()) {
-        await inviteReceptionist(
-          accessToken,
-          branch.id,
-          draft.receptionistEmail.trim(),
-        );
-      }
-
+      setOperationalBranchId(result.branch.id);
       window.location.assign("/operations/settings/branches");
     } catch (caught) {
-      if (createdBranchId) {
-        try {
-          await deactivateBranch(accessToken, createdBranchId);
-        } catch {
-          // Preserve the original setup error. Branch management can still
-          // recover the location if deactivation itself fails unexpectedly.
-        }
-        setOperationalBranchId(previousOperationalBranchId);
-      }
-
-      const fallback = createdBranchId
-        ? text(
-            "The branch was created, but some setup could not be completed. Open the branch from Operations to finish its services, team, or availability.",
-          )
-        : text("Couldn't create this branch.");
-      setError(caught instanceof Error ? caught.message : fallback);
+      setError(
+        caught instanceof Error
+          ? caught.message
+          : text("Couldn't create this branch."),
+      );
     } finally {
       setSaving(false);
     }
@@ -495,7 +431,9 @@ export function NewBranchSetupScreen() {
     return (
       <main className="onboarding-systerra fixed inset-0 z-[120] grid place-items-center overflow-y-auto p-6 text-center">
         <div>
-          <h1 className="onboarding-page-title">{text("Owner access required")}</h1>
+          <h1 className="onboarding-page-title">
+            {text("Owner access required")}
+          </h1>
           <p className="onboarding-page-copy">
             {text("Only the business owner can add a branch.")}
           </p>
@@ -524,10 +462,11 @@ export function NewBranchSetupScreen() {
           <span className="onboarding-topbar-divider" aria-hidden="true" />
           <div className="onboarding-topbar-context">
             <strong>{text("Add a branch")}</strong>
-            <small>{text("Set up this location without changing your website")}</small>
+            <small>
+              {text("Set up this location without changing your website")}
+            </small>
           </div>
         </div>
-
         <div className="onboarding-top-actions">
           <Link
             href="/operations/settings/branches"
@@ -539,61 +478,18 @@ export function NewBranchSetupScreen() {
       </header>
 
       <div className="onboarding-shell">
-        <div className="onboarding-mobile-progress">
-          <span>
-            {text("Step")} {stepIndex + 1} of {STEPS.length}
-          </span>
-          <strong>{text(STEPS[stepIndex].label)}</strong>
-          <small>{text(STEPS[stepIndex].hint)}</small>
-          <div
-            role="progressbar"
-            aria-label={text("Branch setup progress")}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-valuenow={Math.round(progress)}
-          >
-            <span style={{ width: `${progress}%` }} />
-          </div>
-        </div>
-
-        <div className="onboarding-progress-wrap">
-          <nav className="onboarding-progress" aria-label={text("Branch setup progress")}>
-            {STEPS.map((step, index) => {
-              const status =
-                index < stepIndex
-                  ? "is-complete"
-                  : index === stepIndex
-                    ? "is-active"
-                    : "";
-              return (
-                <button
-                  type="button"
-                  key={step.label}
-                  disabled={index > stepIndex || saving}
-                  onClick={() => index <= stepIndex && setStepIndex(index)}
-                  className={`onboarding-progress-step ${status}`}
-                  aria-current={index === stepIndex ? "step" : undefined}
-                >
-                  <span className="onboarding-progress-number">
-                    {index < stepIndex ? <Check size={13} /> : index + 1}
-                  </span>
-                  <span className="onboarding-progress-label">
-                    {text(step.label)}
-                  </span>
-                  <span className="onboarding-progress-hint">
-                    {text(step.hint)}
-                  </span>
-                </button>
-              );
-            })}
-          </nav>
-        </div>
+        <MobileProgress stepIndex={stepIndex} progress={progress} text={text} />
+        <DesktopProgress
+          stepIndex={stepIndex}
+          saving={saving}
+          setStepIndex={setStepIndex}
+          text={text}
+        />
 
         <section key={stepIndex} className="onboarding-stage">
           {stepIndex === 0 ? (
             <BranchProfileStep draft={draft} setDraft={setDraft} text={text} />
           ) : null}
-
           {stepIndex === 1 ? (
             <ServicesTeamStep
               draft={draft}
@@ -608,7 +504,6 @@ export function NewBranchSetupScreen() {
               toggleStaffService={toggleStaffService}
             />
           ) : null}
-
           {stepIndex === 2 ? (
             <AvailabilityStep
               draft={draft}
@@ -620,7 +515,6 @@ export function NewBranchSetupScreen() {
               text={text}
             />
           ) : null}
-
           {stepIndex === 3 ? (
             <ReviewStep
               draft={draft}
@@ -676,6 +570,85 @@ export function NewBranchSetupScreen() {
   );
 }
 
+function MobileProgress({
+  stepIndex,
+  progress,
+  text,
+}: {
+  stepIndex: number;
+  progress: number;
+  text: (value: string) => string;
+}) {
+  return (
+    <div className="onboarding-mobile-progress">
+      <span>
+        {text("Step")} {stepIndex + 1} of {STEPS.length}
+      </span>
+      <strong>{text(STEPS[stepIndex].label)}</strong>
+      <small>{text(STEPS[stepIndex].hint)}</small>
+      <div
+        role="progressbar"
+        aria-label={text("Branch setup progress")}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={Math.round(progress)}
+      >
+        <span style={{ width: `${progress}%` }} />
+      </div>
+    </div>
+  );
+}
+
+function DesktopProgress({
+  stepIndex,
+  saving,
+  setStepIndex,
+  text,
+}: {
+  stepIndex: number;
+  saving: boolean;
+  setStepIndex: (value: number) => void;
+  text: (value: string) => string;
+}) {
+  return (
+    <div className="onboarding-progress-wrap">
+      <nav
+        className="onboarding-progress"
+        aria-label={text("Branch setup progress")}
+      >
+        {STEPS.map((step, index) => {
+          const status =
+            index < stepIndex
+              ? "is-complete"
+              : index === stepIndex
+                ? "is-active"
+                : "";
+          return (
+            <button
+              type="button"
+              key={step.label}
+              disabled={index > stepIndex || saving}
+              onClick={() => index <= stepIndex && setStepIndex(index)}
+              className={`onboarding-progress-step ${status}`}
+              aria-current={index === stepIndex ? "step" : undefined}
+            >
+              <span className="onboarding-progress-number">
+                {index < stepIndex ? <Check size={13} /> : index + 1}
+              </span>
+              <span className="onboarding-progress-label">
+                {text(step.label)}
+              </span>
+              <span className="onboarding-progress-hint">
+                {text(step.hint)}
+              </span>
+            </button>
+          );
+        })}
+      </nav>
+    </div>
+  );
+}
+
 function BranchProfileStep({
   draft,
   setDraft,
@@ -687,31 +660,19 @@ function BranchProfileStep({
 }) {
   return (
     <div>
-      <div className="onboarding-page-intro">
-        <p className="onboarding-kicker">{text("Branch profile")}</p>
-        <h1 className="onboarding-page-title">{text("Where does this branch operate?")}</h1>
-        <p className="onboarding-page-copy">
-          {text(
-            "Add the location and contact details customers need for this branch. Your business name, website, customers, and subscription stay shared.",
-          )}
-        </p>
-      </div>
-
+      <PageIntro
+        kicker={text("Branch profile")}
+        title={text("Where does this branch operate?")}
+        description={text(
+          "Add the location and contact details customers need for this branch. Your business name, website, customers, and subscription stay shared.",
+        )}
+      />
       <section className="onboarding-card p-5">
-        <div className="flex items-start gap-3">
-          <div className="onboarding-icon-tile">
-            <Building2 size={20} />
-          </div>
-          <div>
-            <h2 className="text-[23px] font-semibold tracking-[-.03em]">
-              {text("Location and contact")}
-            </h2>
-            <p className="mt-1 text-sm text-[var(--onboarding-muted)]">
-              {text("This information belongs to this branch only.")}
-            </p>
-          </div>
-        </div>
-
+        <SectionHeading
+          icon={<Building2 size={20} />}
+          title={text("Location and contact")}
+          description={text("This information belongs to this branch only.")}
+        />
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
           <Field
             label={text("Branch name")}
@@ -785,32 +746,21 @@ function ServicesTeamStep({
 }) {
   return (
     <div>
-      <div className="onboarding-page-intro">
-        <p className="onboarding-kicker">{text("Services & team")}</p>
-        <h1 className="onboarding-page-title">{text("Build the branch team and menu.")}</h1>
-        <p className="onboarding-page-copy">
-          {text(
-            "Services and staff belong to this location. Assign each provider only the services they can perform here.",
-          )}
-        </p>
-      </div>
-
+      <PageIntro
+        kicker={text("Services & team")}
+        title={text("Build the branch team and menu.")}
+        description={text(
+          "Services and staff belong to this location. Assign each provider only the services they can perform here.",
+        )}
+      />
       <div className="grid gap-5 xl:grid-cols-2">
         <section className="onboarding-card p-5">
           <div className="flex items-center justify-between gap-3">
-            <div className="flex items-start gap-3">
-              <div className="onboarding-icon-tile">
-                <Building2 size={20} />
-              </div>
-              <div>
-                <h2 className="text-[22px] font-semibold tracking-[-.03em]">
-                  {text("Branch services")}
-                </h2>
-                <p className="mt-1 text-sm text-[var(--onboarding-muted)]">
-                  {text("Add what customers can book at this location.")}
-                </p>
-              </div>
-            </div>
+            <SectionHeading
+              icon={<Building2 size={20} />}
+              title={text("Branch services")}
+              description={text("Add what customers can book at this location.")}
+            />
             <button
               type="button"
               onClick={addService}
@@ -819,28 +769,18 @@ function ServicesTeamStep({
               <Plus size={15} /> {text("Add service")}
             </button>
           </div>
-
           <div className="mt-5 space-y-4">
             {draft.services.map((service, index) => (
               <div
                 key={service.clientId}
                 className="rounded-2xl border border-[var(--onboarding-border)] p-4"
               >
-                <div className="flex items-center justify-between gap-3">
-                  <strong className="text-sm">
-                    {text("Service")} {index + 1}
-                  </strong>
-                  {draft.services.length > 1 ? (
-                    <button
-                      type="button"
-                      onClick={() => removeService(service.clientId)}
-                      className="text-[var(--onboarding-muted)] hover:text-red-600"
-                      aria-label={text("Remove service")}
-                    >
-                      <Trash2 size={15} />
-                    </button>
-                  ) : null}
-                </div>
+                <ItemHeading
+                  label={`${text("Service")} ${index + 1}`}
+                  canRemove={draft.services.length > 1}
+                  removeLabel={text("Remove service")}
+                  onRemove={() => removeService(service.clientId)}
+                />
                 <div className="mt-3 grid gap-3 sm:grid-cols-2">
                   <Field
                     label={text("Service name")}
@@ -859,7 +799,8 @@ function ServicesTeamStep({
                   <NumberField
                     label={text("Duration (min)")}
                     value={service.durationMin}
-                    min={1}
+                    min={5}
+                    step={5}
                     onChange={(value) =>
                       updateService(service.clientId, { durationMin: value })
                     }
@@ -867,7 +808,7 @@ function ServicesTeamStep({
                   <NumberField
                     label={text("Price (EGP)")}
                     value={service.priceEgp}
-                    min={1}
+                    min={0}
                     onChange={(value) =>
                       updateService(service.clientId, { priceEgp: value })
                     }
@@ -897,19 +838,11 @@ function ServicesTeamStep({
 
         <section className="onboarding-card p-5">
           <div className="flex items-center justify-between gap-3">
-            <div className="flex items-start gap-3">
-              <div className="onboarding-icon-tile">
-                <Users size={20} />
-              </div>
-              <div>
-                <h2 className="text-[22px] font-semibold tracking-[-.03em]">
-                  {text("Branch team")}
-                </h2>
-                <p className="mt-1 text-sm text-[var(--onboarding-muted)]">
-                  {text("Each provider belongs to this branch.")}
-                </p>
-              </div>
-            </div>
+            <SectionHeading
+              icon={<Users size={20} />}
+              title={text("Branch team")}
+              description={text("Each provider belongs to this branch.")}
+            />
             <button
               type="button"
               onClick={addStaff}
@@ -918,28 +851,18 @@ function ServicesTeamStep({
               <Plus size={15} /> {text("Add staff")}
             </button>
           </div>
-
           <div className="mt-5 space-y-4">
             {draft.staff.map((member, index) => (
               <div
                 key={member.clientId}
                 className="rounded-2xl border border-[var(--onboarding-border)] p-4"
               >
-                <div className="flex items-center justify-between gap-3">
-                  <strong className="text-sm">
-                    {text("Team member")} {index + 1}
-                  </strong>
-                  {draft.staff.length > 1 ? (
-                    <button
-                      type="button"
-                      onClick={() => removeStaff(member.clientId)}
-                      className="text-[var(--onboarding-muted)] hover:text-red-600"
-                      aria-label={text("Remove staff")}
-                    >
-                      <Trash2 size={15} />
-                    </button>
-                  ) : null}
-                </div>
+                <ItemHeading
+                  label={`${text("Team member")} ${index + 1}`}
+                  canRemove={draft.staff.length > 1}
+                  removeLabel={text("Remove staff")}
+                  onRemove={() => removeStaff(member.clientId)}
+                />
                 <div className="mt-3 grid gap-3 sm:grid-cols-2">
                   <Field
                     label={text("Staff name")}
@@ -956,7 +879,6 @@ function ServicesTeamStep({
                     }
                   />
                 </div>
-
                 <div className="mt-4">
                   <div className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--onboarding-muted)]">
                     {text("Services this person can perform")}
@@ -976,9 +898,7 @@ function ServicesTeamStep({
                               service.clientId,
                             )
                           }
-                          className={`onboarding-choice px-3 py-2 text-xs ${
-                            selected ? "is-selected" : ""
-                          }`}
+                          className={`onboarding-choice px-3 py-2 text-xs ${selected ? "is-selected" : ""}`}
                         >
                           {service.name || text("Unnamed service")}
                         </button>
@@ -989,7 +909,6 @@ function ServicesTeamStep({
               </div>
             ))}
           </div>
-
           <div className="mt-5 border-t border-[var(--onboarding-border)] pt-5">
             <Field
               label={text("Receptionist email (optional)")}
@@ -1004,9 +923,7 @@ function ServicesTeamStep({
               placeholder="reception@example.com"
             />
             <p className="mt-2 text-xs text-[var(--onboarding-muted)]">
-              {text(
-                "The receptionist account will be locked to this branch.",
-              )}
+              {text("The receptionist account will be locked to this branch.")}
             </p>
           </div>
         </section>
@@ -1051,46 +968,30 @@ function AvailabilityStep({
 
   return (
     <div>
-      <div className="onboarding-page-intro">
-        <p className="onboarding-kicker">{text("Availability")}</p>
-        <h1 className="onboarding-page-title">
-          {text("Set each person's working week.")}
-        </h1>
-        <p className="onboarding-page-copy">
-          {text(
-            "Availability belongs to the provider, not the branch. Choose each team member and configure their own days and hours.",
-          )}
-        </p>
-      </div>
-
+      <PageIntro
+        kicker={text("Availability")}
+        title={text("Set each person's working week.")}
+        description={text(
+          "Availability belongs to the provider, not the branch. Choose each team member and configure their own days and hours.",
+        )}
+      />
       <div
         className="onboarding-grid-two"
         style={{ gridTemplateColumns: "minmax(0,1.15fr) minmax(330px,.85fr)" }}
       >
         <section className="onboarding-card p-5">
-          <div className="flex items-start gap-3">
-            <div className="onboarding-icon-tile">
-              <CalendarDays size={20} />
-            </div>
-            <div>
-              <h2 className="text-[23px] font-semibold tracking-[-.03em]">
-                {text("Regular working hours")}
-              </h2>
-              <p className="mt-1 text-sm text-[var(--onboarding-muted)]">
-                {text("Choose a team member, then configure their week.")}
-              </p>
-            </div>
-          </div>
-
+          <SectionHeading
+            icon={<CalendarDays size={20} />}
+            title={text("Regular working hours")}
+            description={text("Choose a team member, then configure their week.")}
+          />
           <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
             {draft.staff.map((member) => (
               <button
                 type="button"
                 key={member.clientId}
                 onClick={() => setSelectedStaffId(member.clientId)}
-                className={`onboarding-choice flex min-w-40 items-center gap-2.5 p-2.5 text-left ${
-                  selectedStaffId === member.clientId ? "is-selected" : ""
-                }`}
+                className={`onboarding-choice flex min-w-40 items-center gap-2.5 p-2.5 text-left ${selectedStaffId === member.clientId ? "is-selected" : ""}`}
               >
                 <span className="grid h-8 w-8 place-items-center rounded-full bg-[var(--onboarding-mint-soft)] text-xs font-semibold text-[var(--onboarding-mint-strong)]">
                   {member.name?.slice(0, 1).toUpperCase() || "?"}
@@ -1106,7 +1007,6 @@ function AvailabilityStep({
               </button>
             ))}
           </div>
-
           <div className="onboarding-table mt-4">
             <div className="onboarding-table-row onboarding-table-head grid-cols-[1fr_90px_1.8fr]">
               <span>{text("Day")}</span>
@@ -1126,18 +1026,12 @@ function AvailabilityStep({
                   <button
                     type="button"
                     onClick={() => toggleDay(dayOfWeek)}
-                    className={`relative h-7 w-12 rounded-full transition-colors ${
-                      slot
-                        ? "bg-[var(--onboarding-mint-strong)]"
-                        : "bg-[#d7d9d5]"
-                    }`}
+                    className={`relative h-7 w-12 rounded-full transition-colors ${slot ? "bg-[var(--onboarding-mint-strong)]" : "bg-[#d7d9d5]"}`}
                     aria-label={`${slot ? text("Disable") : text("Enable")} ${text(day)}`}
                     aria-pressed={Boolean(slot)}
                   >
                     <span
-                      className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${
-                        slot ? "translate-x-6" : "translate-x-1"
-                      }`}
+                      className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${slot ? "translate-x-6" : "translate-x-1"}`}
                     />
                   </button>
                   {slot ? (
@@ -1146,11 +1040,7 @@ function AvailabilityStep({
                         type="time"
                         value={slot.startTime}
                         onChange={(event) =>
-                          updateHours(
-                            dayOfWeek,
-                            "startTime",
-                            event.target.value,
-                          )
+                          updateHours(dayOfWeek, "startTime", event.target.value)
                         }
                         className="onboarding-input"
                         aria-label={`${text(day)} ${text("Opening time")}`}
@@ -1162,11 +1052,7 @@ function AvailabilityStep({
                         type="time"
                         value={slot.endTime}
                         onChange={(event) =>
-                          updateHours(
-                            dayOfWeek,
-                            "endTime",
-                            event.target.value,
-                          )
+                          updateHours(dayOfWeek, "endTime", event.target.value)
                         }
                         className="onboarding-input"
                         aria-label={`${text(day)} ${text("Closing time")}`}
@@ -1190,31 +1076,18 @@ function AvailabilityStep({
           <p className="mt-1 text-sm text-[var(--onboarding-muted)]">
             {text("A live summary for the selected team member.")}
           </p>
-
           <div className="mt-5 grid grid-cols-2 gap-3">
-            <div className="rounded-2xl border border-[var(--onboarding-border)] bg-[#fafaf8] p-4">
-              <CalendarDays
-                className="text-[var(--onboarding-mint)]"
-                size={20}
-              />
-              <strong className="mt-3 block text-2xl">
-                {selectedStaff?.availability.length ?? 0}
-              </strong>
-              <span className="mt-1 block text-xs text-[var(--onboarding-muted)]">
-                {text("Working days")}
-              </span>
-            </div>
-            <div className="rounded-2xl border border-[var(--onboarding-border)] bg-[#fafaf8] p-4">
-              <Clock3 className="text-[var(--onboarding-mint)]" size={20} />
-              <strong className="mt-3 block text-2xl">
-                {(weeklyMinutes / 60).toFixed(1)}
-              </strong>
-              <span className="mt-1 block text-xs text-[var(--onboarding-muted)]">
-                {text("Weekly hours")}
-              </span>
-            </div>
+            <SummaryCard
+              icon={<CalendarDays size={20} />}
+              value={String(selectedStaff?.availability.length ?? 0)}
+              label={text("Working days")}
+            />
+            <SummaryCard
+              icon={<Clock3 size={20} />}
+              value={(weeklyMinutes / 60).toFixed(1)}
+              label={text("Weekly hours")}
+            />
           </div>
-
           <div className="mt-4 rounded-2xl border border-[var(--onboarding-border)] p-4">
             <h3 className="font-semibold">{text("Configured schedule")}</h3>
             <div className="mt-3 space-y-2 text-sm">
@@ -1257,39 +1130,32 @@ function ReviewStep({
 }) {
   return (
     <div>
-      <div className="onboarding-page-intro">
-        <p className="onboarding-kicker">{text("Review branch")}</p>
-        <h1 className="onboarding-page-title">{text("Ready to create this branch?")}</h1>
-        <p className="onboarding-page-copy">
-          {text(
-            "Review the location, services, team, and each provider's availability before creating it.",
-          )}
-        </p>
-      </div>
-
+      <PageIntro
+        kicker={text("Review branch")}
+        title={text("Ready to create this branch?")}
+        description={text(
+          "Review the location, services, team, and each provider's availability before creating it.",
+        )}
+      />
       <div className="grid gap-5 lg:grid-cols-2">
         <section className="onboarding-card p-5">
-          <div className="flex items-start gap-3">
-            <div className="onboarding-icon-tile">
-              <MapPin size={20} />
-            </div>
-            <div>
-              <h2 className="text-xl font-semibold">{draft.name}</h2>
-              <p className="mt-1 text-sm text-[var(--onboarding-muted)]">
-                {draft.address || draft.city || text("No address yet")}
-              </p>
-            </div>
-          </div>
+          <SectionHeading
+            icon={<MapPin size={20} />}
+            title={draft.name}
+            description={draft.address || draft.city || text("No address yet")}
+          />
           <dl className="mt-5 grid gap-3 text-sm sm:grid-cols-2">
             <ReviewValue label={text("Services")} value={String(draft.services.length)} />
-            <ReviewValue label={text("Team members")} value={String(draft.staff.length)} />
+            <ReviewValue
+              label={text("Team members")}
+              value={String(draft.staff.length)}
+            />
             <ReviewValue
               label={text("Receptionist")}
               value={draft.receptionistEmail || text("Not added")}
             />
           </dl>
         </section>
-
         <section className="onboarding-card p-5">
           <h2 className="text-xl font-semibold">{text("Team availability")}</h2>
           <div className="mt-4 space-y-3">
@@ -1326,7 +1192,9 @@ function ReviewStep({
             <div>
               <h2 className="font-semibold">{text("Subscription impact")}</h2>
               <p className="mt-1 text-sm text-[var(--onboarding-muted)]">
-                {text("The first branch is included. Each additional active branch is billed on the next renewal.")}
+                {text(
+                  "The first branch is included. Each additional active branch is billed on the next renewal.",
+                )}
               </p>
             </div>
             <div className="text-right">
@@ -1343,6 +1211,94 @@ function ReviewStep({
           </div>
         </section>
       ) : null}
+    </div>
+  );
+}
+
+function PageIntro({
+  kicker,
+  title,
+  description,
+}: {
+  kicker: string;
+  title: string;
+  description: string;
+}) {
+  return (
+    <div className="onboarding-page-intro">
+      <p className="onboarding-kicker">{kicker}</p>
+      <h1 className="onboarding-page-title">{title}</h1>
+      <p className="onboarding-page-copy">{description}</p>
+    </div>
+  );
+}
+
+function SectionHeading({
+  icon,
+  title,
+  description,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+}) {
+  return (
+    <div className="flex items-start gap-3">
+      <div className="onboarding-icon-tile">{icon}</div>
+      <div>
+        <h2 className="text-[22px] font-semibold tracking-[-.03em]">{title}</h2>
+        <p className="mt-1 text-sm text-[var(--onboarding-muted)]">
+          {description}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function ItemHeading({
+  label,
+  canRemove,
+  removeLabel,
+  onRemove,
+}: {
+  label: string;
+  canRemove: boolean;
+  removeLabel: string;
+  onRemove: () => void;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <strong className="text-sm">{label}</strong>
+      {canRemove ? (
+        <button
+          type="button"
+          onClick={onRemove}
+          className="text-[var(--onboarding-muted)] hover:text-red-600"
+          aria-label={removeLabel}
+        >
+          <Trash2 size={15} />
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
+function SummaryCard({
+  icon,
+  value,
+  label,
+}: {
+  icon: React.ReactNode;
+  value: string;
+  label: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-[var(--onboarding-border)] bg-[#fafaf8] p-4">
+      <span className="text-[var(--onboarding-mint)]">{icon}</span>
+      <strong className="mt-3 block text-2xl">{value}</strong>
+      <span className="mt-1 block text-xs text-[var(--onboarding-muted)]">
+        {label}
+      </span>
     </div>
   );
 }
@@ -1378,11 +1334,13 @@ function NumberField({
   label,
   value,
   min,
+  step = 1,
   onChange,
 }: {
   label: string;
   value: number;
   min: number;
+  step?: number;
   onChange: (value: number) => void;
 }) {
   return (
@@ -1391,6 +1349,7 @@ function NumberField({
       <input
         type="number"
         min={min}
+        step={step}
         value={value}
         onChange={(event) => onChange(Number(event.target.value))}
         className="onboarding-input mt-1"
