@@ -14,7 +14,7 @@
 
 ## Public website
 
-There is one website per Business. Branding/content remain shared. Branch selection controls location/contact, services, team and booking availability. For multiple active branches, use a stable branch slug in the URL query (`?branch=<slug>`) so selection is shareable. One branch auto-selects.
+There is one website per Business. Branding/content remain shared. Branch selection controls location/contact, services, team and booking availability. For multiple active branches, use a stable branch slug in the URL query (`?branch=<slug>`) so selection is shareable. One branch auto-selects. Once a Branch is selected, public address/phone/location data comes from that Branch only; never substitute legacy Business location data.
 
 ## Public booking
 
@@ -34,13 +34,14 @@ Dashboard scope is independent from operations and supports `All branches` or on
 
 Add Branch is a dedicated onboarding-style page rather than a modal. Steps: location/contact -> services & team/receptionist -> per-staff availability -> review/create. Do not ask for business identity or website branding again. Availability is configured independently for each provider; never copy one branch-wide schedule to every staff member. The first branch is included in Core; each additional active branch adds 350 EGP/month on the next renewal, with no V1 proration.
 
-If the branch record is created but service/staff/availability/invitation setup later fails, attempt to deactivate the incomplete branch and restore the previously selected operational branch. An incomplete branch must not remain intentionally exposed or billable.
+The frontend holds the entire draft locally until Review/Create. It then sends exactly one `POST /branches/setup` request containing location, services, team assignments, per-staff availability and the optional receptionist email. The backend validates the complete payload and commits all branch-owned data in one transaction. If the request fails, no Branch exists and there is no frontend cleanup/deactivation sequence.
 
 ## Billing and timezone
 
 - Billing screens use the backend branch-pricing breakdown for the displayed monthly/next-renewal amount instead of showing only the 799 EGP base plan.
 - V1 is Egypt-only. Branch setup does not expose a timezone selector; branch scheduling uses `Africa/Cairo`.
 - A branch cannot be deactivated while it still has active/upcoming appointments; surface the backend conflict rather than hiding those visits.
+- New subscription payments keep the server pricing snapshot that explains the charged amount even if branch pricing changes later.
 
 ## PR sequence
 
