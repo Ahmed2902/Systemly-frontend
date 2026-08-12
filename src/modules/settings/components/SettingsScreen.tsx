@@ -90,10 +90,6 @@ export function SettingsScreen() {
       setWorkspace(data);
       setBusiness({
         name: data.name,
-        phone: data.phone,
-        address: data.address,
-        city: data.city,
-        timezone: data.timezone,
         language: data.language,
       });
       setWebsite({ ...EMPTY_WEBSITE, ...(data.websiteContent ?? {}) });
@@ -212,15 +208,6 @@ export function SettingsScreen() {
           >
             <div className="grid gap-4 md:grid-cols-2">
               <Field label={text("Business name")}><input className="op-input" value={business.name} onChange={(event) => setBusiness({ ...business, name: event.target.value })} /></Field>
-              <Field label={text("Phone")}><input className="op-input" value={business.phone} onChange={(event) => setBusiness({ ...business, phone: event.target.value })} /></Field>
-              <Field label={text("Address")}><input className="op-input" value={business.address ?? ""} onChange={(event) => setBusiness({ ...business, address: textOrNull(event.target.value) })} /></Field>
-              <Field label={text("City")}><input className="op-input" value={business.city ?? ""} onChange={(event) => setBusiness({ ...business, city: textOrNull(event.target.value) })} /></Field>
-              <Field label={text("Timezone")}>
-                <select className="op-select" value={business.timezone} onChange={(event) => setBusiness({ ...business, timezone: event.target.value })}>
-                  <option value="Africa/Cairo">Africa/Cairo</option>
-                  <option value="UTC">UTC</option>
-                </select>
-              </Field>
               <Field label={text("Default language")}>
                 <select className="op-select" value={business.language} onChange={(event) => setBusiness({ ...business, language: event.target.value as "en" | "ar" })}>
                   <option value="en">{text("English")}</option>
