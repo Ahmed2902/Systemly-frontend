@@ -81,17 +81,6 @@ export function listBranches(
   return api<BranchRecord[]>(`/branches${query}`, token);
 }
 
-export function createBranch(
-  token: string | null,
-  input: Required<Pick<BranchMutationInput, "name" | "slug" | "timezone">> &
-    Omit<BranchMutationInput, "name" | "slug" | "timezone">,
-) {
-  return api<BranchRecord>("/branches", token, {
-    method: "POST",
-    body: JSON.stringify(input),
-  });
-}
-
 export function setupBranch(token: string | null, input: BranchSetupInput) {
   return api<BranchSetupResult>("/branches/setup", token, {
     method: "POST",
