@@ -31,6 +31,7 @@ export const naturalArabicBranchPairs: ReadonlyArray<readonly [string, string]> 
   ["No active branches", "لا توجد فروع نشطة"],
   ["No branches found", "لا توجد فروع"],
   ["Active branches", "الفروع النشطة"],
+  ["Loading branches…", "جارٍ تحميل الفروع…"],
   ["Manage branches", "إدارة الفروع"],
   ["Back to branches", "العودة إلى الفروع"],
   ["Exit setup", "الخروج من الإعداد"],
