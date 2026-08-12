@@ -53,20 +53,12 @@ function PaymentStatusIcon({ payment }: { payment: BillingPayment }) {
     return <CheckCircle2 size={16} className="text-emerald-500" />;
   }
   if (isFailedPayment(payment.status)) {
-    return <XCircle2 size={16} className="text-rose-500" />;
+    return <XCircle size={16} className="text-rose-500" />;
   }
   return <Clock3 size={16} className="text-amber-500" />;
 }
 
-function XCircle2(props: React.ComponentProps<typeof XCircle>) {
-  return <XCircle {...props} />;
-}
-
-function PaymentHistory({
-  payments,
-}: {
-  payments: BillingPayment[];
-}) {
+function PaymentHistory({ payments }: { payments: BillingPayment[] }) {
   const copy = useSubscriptionCopy();
 
   return (
@@ -369,15 +361,16 @@ export function BillingWorkspace() {
             <div className="mt-4 space-y-3">
               {plans.map((plan) => {
                 const usesBranchPricing =
-                  Boolean(branchPricing && plan.price) &&
-                  plan.price!.amountCents === branchPricing!.basePriceCents &&
-                  plan.price!.currency.toUpperCase() ===
-                    branchPricing!.currency.toUpperCase();
+                  branchPricing !== null &&
+                  plan.price !== null &&
+                  plan.price.amountCents === branchPricing.basePriceCents &&
+                  plan.price.currency.toUpperCase() ===
+                    branchPricing.currency.toUpperCase();
                 const displayedAmount = usesBranchPricing
-                  ? branchPricing!.nextRenewalAmountCents
+                  ? branchPricing.nextRenewalAmountCents
                   : plan.price?.amountCents;
                 const displayedCurrency = usesBranchPricing
-                  ? branchPricing!.currency
+                  ? branchPricing.currency
                   : plan.price?.currency;
 
                 return (
