@@ -250,7 +250,11 @@ function createAppointments(
 ): BackendAppointment[] {
   const statuses = ["confirmed", "confirmed", "in_progress", "completed", "completed", "completed", "pending", "no_show", "cancelled_by_customer", "completed", "confirmed", "completed"];
   const times = ["09:00", "09:30", "10:15", "11:00", "12:00", "14:00", "15:00", "16:00", "17:00", "10:00", "13:30", "18:00"];
-  return customers.map((customer, index) => {
+  return customers.flatMap((customer, index) => {
+    if (customer.name === "Nada Hany" || customer.name === "Habiba Samir") {
+      return [];
+    }
+
     const dayOffset = index < 9 ? 0 : index - 10;
     const serviceIndexes = index === 1 ? [1, 2] : [index % services.length];
     let cursor = cairoIso(now, dayOffset, times[index]);

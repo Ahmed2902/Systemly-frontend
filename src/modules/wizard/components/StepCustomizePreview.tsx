@@ -450,7 +450,7 @@ function UploadTile({
             ? text("Uploading…")
             : value
               ? text("Replace image")
-              : `Upload ${label.toLowerCase()}`}
+              : text("Upload image")}
           <input
             type="file"
             accept="image/*"
@@ -464,7 +464,7 @@ function UploadTile({
             type="button"
             onClick={onClear}
             className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full bg-black/70 text-white"
-            aria-label={`Remove ${label.toLowerCase()}`}
+            aria-label={text("Remove image")}
           >
             <X size={13} />
           </button>

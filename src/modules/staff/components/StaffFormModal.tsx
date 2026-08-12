@@ -22,10 +22,10 @@ import type {
 
 const inputClass =
   "mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-violet-300 focus:ring-4 focus:ring-violet-100";
+const RECEPTIONIST_ROLE: StaffRole = "Receptionist";
 
 const roleOptions = [
   { value: "Staff", label: "Staff" },
-  { value: "Receptionist", label: "Receptionist" },
   { value: "BusinessAdmin", label: "Business admin" },
 ];
 
@@ -329,17 +329,23 @@ export function StaffFormModal({
                   {text("This classifies the profile only; no login account is created in V1.")}
                 </p>
                 <div className="mt-3">
-                  <OperationsDropdown
-                    value={form.role}
-                    options={roleOptions}
-                    onChange={(value) =>
-                      setForm((current) => ({
-                        ...current,
-                        role: value as StaffRole,
-                      }))
-                    }
-                    aria-label={text("Staff role")}
-                  />
+                  {member?.role === RECEPTIONIST_ROLE ? (
+                    <div className="flex h-11 items-center rounded-xl border border-slate-200 bg-slate-50 px-3.5 text-sm font-medium text-slate-600">
+                      {text("Receptionist")}
+                    </div>
+                  ) : (
+                    <OperationsDropdown
+                      value={form.role}
+                      options={roleOptions}
+                      onChange={(value) =>
+                        setForm((current) => ({
+                          ...current,
+                          role: value as StaffRole,
+                        }))
+                      }
+                      aria-label={text("Staff role")}
+                    />
+                  )}
                 </div>
               </div>
 

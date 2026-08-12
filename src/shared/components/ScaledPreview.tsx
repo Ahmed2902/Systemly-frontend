@@ -46,11 +46,13 @@ export function ScaledPreview({
   return (
     <div
       ref={containerRef}
+      dir="ltr"
       style={{ height: contentHeight * scale, overflow: "hidden" }}
       className="relative w-full"
     >
       <div
         ref={contentRef}
+        dir="ltr"
         style={{
           width: baseWidth,
           transform: `scale(${scale})`,

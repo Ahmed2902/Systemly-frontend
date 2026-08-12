@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   renderTemplate,
@@ -137,7 +136,6 @@ export default async function PublicBusinessPage({
     (photo: { kind: string; url: string }) => photo.kind === "hero",
   )?.url;
 
-  const branchQuery = `?branch=${encodeURIComponent(business.selectedBranch.slug)}`;
   const commonData = {
     businessName: business.name,
     tagline: content?.tagline ?? "",
@@ -185,7 +183,7 @@ export default async function PublicBusinessPage({
     whatsapp: content?.whatsappNumber ?? undefined,
     timezone: business.timezone || "Africa/Cairo",
     language,
-    bookingHref: `/${slug}/book${branchQuery}`,
+    bookingHref: `/${slug}/book`,
     previewMode: false,
   };
 
@@ -196,31 +194,6 @@ export default async function PublicBusinessPage({
 
   return (
     <>
-      {business.branches.length > 1 ? (
-        <nav
-          aria-label="Choose branch"
-          className="sticky top-0 z-50 flex flex-wrap items-center justify-center gap-2 border-b border-black/10 bg-white/95 px-4 py-3 text-sm shadow-sm backdrop-blur dark:border-white/10 dark:bg-black/90"
-        >
-          <span className="mr-1 font-medium">Location:</span>
-          {business.branches.map((branch) => {
-            const selected = branch.id === business.selectedBranch.id;
-            return (
-              <Link
-                key={branch.id}
-                href={`/${slug}?branch=${encodeURIComponent(branch.slug)}`}
-                aria-current={selected ? "page" : undefined}
-                className={`rounded-full border px-3 py-1.5 transition ${
-                  selected
-                    ? "border-current bg-black text-white dark:bg-white dark:text-black"
-                    : "border-black/15 hover:border-black/40 dark:border-white/20 dark:hover:border-white/50"
-                }`}
-              >
-                {branch.name}
-              </Link>
-            );
-          })}
-        </nav>
-      ) : null}
       {renderTemplate(templateData)}
     </>
   );

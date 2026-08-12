@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { ArrowLeft, ArrowRight, HelpCircle, X } from "lucide-react";
+import { useLocale } from "@/i18n/LocaleProvider";
 import { usePlatformText } from "@/i18n/usePlatformText";
 
 type Rect = {
@@ -111,6 +112,7 @@ function resolveTarget(key: TargetKey, labels: Record<string, string>) {
 
 export function WebsiteBuilderTour({ active }: { active: boolean }) {
   const text = usePlatformText();
+  const { direction } = useLocale();
   const [stepIndex, setStepIndex] = useState<number | null>(null);
   const [primaryRect, setPrimaryRect] = useState<Rect | null>(null);
   const [secondaryRect, setSecondaryRect] = useState<Rect | null>(null);
@@ -260,6 +262,8 @@ export function WebsiteBuilderTour({ active }: { active: boolean }) {
   }
 
   const step = steps[stepIndex];
+  const PreviousIcon = direction === "rtl" ? ArrowRight : ArrowLeft;
+  const NextIcon = direction === "rtl" ? ArrowLeft : ArrowRight;
   const tooltipRect =
     step.tooltipTarget === "secondary" && secondaryRect
       ? secondaryRect
@@ -308,6 +312,7 @@ export function WebsiteBuilderTour({ active }: { active: boolean }) {
 
       <aside
         className={`onboarding-tour-card ${narrow ? "is-mobile" : ""}`}
+        dir={direction}
         style={
           narrow
             ? { left: 16, right: 16, bottom: 16 }
@@ -344,7 +349,7 @@ export function WebsiteBuilderTour({ active }: { active: boolean }) {
               onClick={() => setStepIndex((index) => Math.max(0, (index ?? 0) - 1))}
               aria-label={text("Previous tour step")}
             >
-              <ArrowLeft size={15} />
+              <PreviousIcon size={15} />
             </button>
             <button
               type="button"
@@ -355,7 +360,7 @@ export function WebsiteBuilderTour({ active }: { active: boolean }) {
               }}
             >
               {stepIndex === steps.length - 1 ? text("Done") : text("Next")}
-              {stepIndex === steps.length - 1 ? null : <ArrowRight size={15} />}
+              {stepIndex === steps.length - 1 ? null : <NextIcon size={15} />}
             </button>
           </div>
         </div>
