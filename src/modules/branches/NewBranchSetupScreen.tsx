@@ -19,10 +19,14 @@ import {
   createStaff,
   replaceStaffAvailability,
 } from "@/modules/staff/staff.api";
-import { setOperationalBranchId } from "@/modules/operations/branch-scope";
+import {
+  getOperationalBranchId,
+  setOperationalBranchId,
+} from "@/modules/operations/branch-scope";
 import { SystemlyWordmark } from "@/shared/components/SystemlyWordmark";
 import {
   createBranch,
+  deactivateBranch,
   getBranchPricing,
   inviteReceptionist,
   type BranchPricing,
@@ -330,7 +334,6 @@ export function NewBranchSetupScreen() {
     if (index === 0) {
       if (!draft.name.trim()) return text("Branch name is required.");
       if (!draft.slug.trim()) return text("Branch slug is required.");
-      if (!draft.timezone.trim()) return text("Branch timezone is required.");
     }
 
     if (index === 1) {
@@ -392,7 +395,8 @@ export function NewBranchSetupScreen() {
 
     setSaving(true);
     setError(null);
-    let branchWasCreated = false;
+    const previousOperationalBranchId = getOperationalBranchId();
+    let createdBranchId: string | null = null;
 
     try {
       const branch = await createBranch(accessToken, {
@@ -401,9 +405,9 @@ export function NewBranchSetupScreen() {
         phone: draft.phone.trim() || null,
         city: draft.city.trim() || null,
         address: draft.address.trim() || null,
-        timezone: draft.timezone.trim(),
+        timezone: "Africa/Cairo",
       });
-      branchWasCreated = true;
+      createdBranchId = branch.id;
 
       // All following operational APIs are branch-scoped through X-Branch-Id.
       setOperationalBranchId(branch.id);
@@ -458,7 +462,17 @@ export function NewBranchSetupScreen() {
 
       window.location.assign("/operations/settings/branches");
     } catch (caught) {
-      const fallback = branchWasCreated
+      if (createdBranchId) {
+        try {
+          await deactivateBranch(accessToken, createdBranchId);
+        } catch {
+          // Preserve the original setup error. Branch management can still
+          // recover the location if deactivation itself fails unexpectedly.
+        }
+        setOperationalBranchId(previousOperationalBranchId);
+      }
+
+      const fallback = createdBranchId
         ? text(
             "The branch was created, but some setup could not be completed. Open the branch from Operations to finish its services, team, or availability.",
           )
@@ -740,13 +754,6 @@ function BranchProfileStep({
               }
             />
           </div>
-          <Field
-            label={text("Branch timezone")}
-            value={draft.timezone}
-            onChange={(value) =>
-              setDraft((current) => ({ ...current, timezone: value }))
-            }
-          />
         </div>
       </section>
     </div>
@@ -1280,7 +1287,6 @@ function ReviewStep({
               label={text("Receptionist")}
               value={draft.receptionistEmail || text("Not added")}
             />
-            <ReviewValue label={text("Timezone")} value={draft.timezone} />
           </dl>
         </section>
 
