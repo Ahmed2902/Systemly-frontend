@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { apiUrl } from "@/shared/lib/api-url";
 import { BookingProvider } from "@/modules/booking/booking.context";
 import { BookingShell } from "@/modules/booking/components/BookingShell";
+import { BookingBranchPicker } from "@/modules/booking/components/BookingBranchPicker";
 import { getTemplateById } from "@/modules/templates/template-registry";
 
 function contrastText(colour: string) {
@@ -54,6 +55,9 @@ export default async function BookPage({
   const accent =
     business.websiteContent?.secondaryColor ??
     (template?.vertical === "clinic" ? "#074947" : "#482131");
+  const language: "en" | "ar" = business.language === "ar" ? "ar" : "en";
+  const hasMultipleBranches = business.branches.length > 1;
+  const needsBranchSelection = hasMultipleBranches && !branchSlug;
 
   return (
     <div
@@ -71,20 +75,32 @@ export default async function BookPage({
         } as React.CSSProperties
       }
     >
-      <BookingProvider
-        businessId={business.id}
-        branchId={business.selectedBranch.id}
-        services={business.services}
-        staff={business.staff}
-      >
-        <BookingShell
+      {needsBranchSelection ? (
+        <BookingBranchPicker
           businessName={business.name}
           logoUrl={business.logoUrl}
           tagline={business.websiteContent?.tagline ?? null}
-          language={business.language === "ar" ? "ar" : "en"}
           slug={slug}
+          language={language}
+          branches={business.branches}
         />
-      </BookingProvider>
+      ) : (
+        <BookingProvider
+          businessId={business.id}
+          branchId={business.selectedBranch.id}
+          services={business.services}
+          staff={business.staff}
+        >
+          <BookingShell
+            businessName={business.name}
+            logoUrl={business.logoUrl}
+            tagline={business.websiteContent?.tagline ?? null}
+            language={language}
+            slug={slug}
+            showBranchStep={hasMultipleBranches}
+          />
+        </BookingProvider>
+      )}
     </div>
   );
 }

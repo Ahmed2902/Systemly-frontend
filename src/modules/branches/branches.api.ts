@@ -34,8 +34,12 @@ type BranchMutationInput = {
   timezone?: string;
 };
 
-export function listBranches(token: string | null) {
-  return api<BranchRecord[]>("/branches", token);
+export function listBranches(
+  token: string | null,
+  includeInactive = false,
+) {
+  const query = includeInactive ? "?includeInactive=true" : "";
+  return api<BranchRecord[]>(`/branches${query}`, token);
 }
 
 export function createBranch(

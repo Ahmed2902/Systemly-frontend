@@ -9,12 +9,31 @@ import { StepSelectStaff } from "./StepSelectStaff";
 import { StepPickSlot } from "./StepPickSlot";
 import { StepConfirm } from "./StepConfirm";
 
-const steps = [
-  { label: "Services", component: StepSelectServices },
-  { label: "Staff", component: StepSelectStaff },
-  { label: "Time", component: StepPickSlot },
-  { label: "Confirm", component: StepConfirm },
-];
+const flowSteps = [
+  { key: "services", component: StepSelectServices },
+  { key: "staff", component: StepSelectStaff },
+  { key: "time", component: StepPickSlot },
+  { key: "confirm", component: StepConfirm },
+] as const;
+
+const progressCopy = {
+  en: {
+    branch: "Branch",
+    services: "Services",
+    staff: "Staff",
+    time: "Time",
+    confirm: "Confirm",
+    booking: "Booking",
+  },
+  ar: {
+    branch: "الفرع",
+    services: "الخدمات",
+    staff: "الفريق",
+    time: "الوقت",
+    confirm: "التأكيد",
+    booking: "الحجز",
+  },
+} as const;
 
 export function BookingShell({
   businessName,
@@ -22,16 +41,29 @@ export function BookingShell({
   tagline,
   slug,
   language = "en",
+  showBranchStep = false,
 }: {
   businessName: string;
   logoUrl?: string | null;
   tagline?: string | null;
   slug: string;
   language?: "en" | "ar";
+  showBranchStep?: boolean;
 }) {
   const [stepIndex, setStepIndex] = useState(0);
-  const StepComponent = steps[stepIndex].component;
+  const StepComponent = flowSteps[stepIndex].component;
   const hasTagline = Boolean(tagline?.trim());
+  const labels = progressCopy[language];
+  const progressSteps = showBranchStep
+    ? [
+        labels.branch,
+        labels.services,
+        labels.staff,
+        labels.time,
+        labels.confirm,
+      ]
+    : [labels.services, labels.staff, labels.time, labels.confirm];
+  const activeProgressIndex = stepIndex + (showBranchStep ? 1 : 0);
 
   return (
     <div
@@ -59,7 +91,7 @@ export function BookingShell({
                   <span className="truncate">{businessName.toUpperCase()}</span>
                 </Link>
                 <span className="shrink-0 text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--booking-text)] opacity-45 sm:text-[11px]">
-                  Booking
+                  {labels.booking}
                 </span>
               </div>
 
@@ -70,13 +102,15 @@ export function BookingShell({
               </p>
 
               <div className="relative mt-5 sm:mt-6 lg:mt-8">
-                <div className="grid grid-cols-4 gap-1">
-                  {steps.map((step, i) => {
-                    const isPast = i < stepIndex;
-                    const isActive = i === stepIndex;
+                <div
+                  className={`grid gap-1 ${showBranchStep ? "grid-cols-5" : "grid-cols-4"}`}
+                >
+                  {progressSteps.map((label, i) => {
+                    const isPast = i < activeProgressIndex;
+                    const isActive = i === activeProgressIndex;
                     return (
                       <div
-                        key={step.label}
+                        key={`${label}-${i}`}
                         className="z-10 flex min-w-0 flex-col items-center text-center"
                       >
                         <div
@@ -105,13 +139,15 @@ export function BookingShell({
                         <span
                           className={`mt-1.5 max-w-full truncate px-1 text-[10px] font-medium leading-4 sm:mt-2 sm:text-[11px] ${isActive ? "font-semibold text-[var(--booking-text)]" : "text-[var(--booking-muted)]"}`}
                         >
-                          {step.label}
+                          {label}
                         </span>
                       </div>
                     );
                   })}
                 </div>
-                <div className="absolute inset-x-[12.5%] top-4 -z-0 h-px bg-[var(--booking-border)] sm:top-[18px]" />
+                <div
+                  className={`${showBranchStep ? "inset-x-[10%]" : "inset-x-[12.5%]"} absolute top-4 -z-0 h-px bg-[var(--booking-border)] sm:top-[18px]`}
+                />
               </div>
             </div>
           </header>
@@ -120,7 +156,7 @@ export function BookingShell({
             <div className="rounded-xl border border-[var(--booking-border)] bg-[var(--booking-surface)] p-4 shadow-sm sm:p-6 lg:p-8">
               <StepComponent
                 onNext={() =>
-                  setStepIndex((i) => Math.min(i + 1, steps.length - 1))
+                  setStepIndex((i) => Math.min(i + 1, flowSteps.length - 1))
                 }
                 onBack={() => setStepIndex((i) => Math.max(i - 1, 0))}
               />
