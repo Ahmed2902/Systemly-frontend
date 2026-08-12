@@ -12,6 +12,10 @@ import {
   XCircle,
 } from "lucide-react";
 import { useAuth } from "@/modules/auth/useAuth";
+import {
+  getBranchPricing,
+  type BranchPricing,
+} from "@/modules/branches/branches.api";
 import { isOwnerRole } from "@/modules/subscriptions/subscription-access";
 import { useSubscriptionCopy } from "@/modules/subscriptions/subscription-copy";
 import {
@@ -54,11 +58,7 @@ function PaymentStatusIcon({ payment }: { payment: BillingPayment }) {
   return <Clock3 size={16} className="text-amber-500" />;
 }
 
-function PaymentHistory({
-  payments,
-}: {
-  payments: BillingPayment[];
-}) {
+function PaymentHistory({ payments }: { payments: BillingPayment[] }) {
   const copy = useSubscriptionCopy();
 
   return (
@@ -131,6 +131,7 @@ export function BillingWorkspace() {
     useState<BillingSubscriptionResponse | null>(null);
   const [plans, setPlans] = useState<BillingPlan[]>([]);
   const [payments, setPayments] = useState<BillingPayment[]>([]);
+  const [branchPricing, setBranchPricing] = useState<BranchPricing | null>(null);
   const [loading, setLoading] = useState(true);
   const [action, setAction] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -144,14 +145,17 @@ export function BillingWorkspace() {
 
     setLoading(true);
     try {
-      const [subscription, availablePlans, paymentHistory] = await Promise.all([
-        getBillingSubscription(accessToken),
-        getBillingPlans(accessToken),
-        getBillingPayments(accessToken),
-      ]);
+      const [subscription, availablePlans, paymentHistory, pricing] =
+        await Promise.all([
+          getBillingSubscription(accessToken),
+          getBillingPlans(accessToken),
+          getBillingPayments(accessToken),
+          getBranchPricing(accessToken).catch(() => null),
+        ]);
       setSubscriptionData(subscription);
       setPlans(availablePlans);
       setPayments(paymentHistory.items);
+      setBranchPricing(pricing);
       setError(null);
     } catch (caught) {
       setError(errorMessage(caught, copy.unableToLoad));
@@ -222,6 +226,9 @@ export function BillingWorkspace() {
     access?.effectiveStatus === "TRIALING"
       ? access.trialEndsAt
       : access?.graceEndsAt ?? access?.currentPeriodEnd;
+  const currentAmountCents =
+    branchPricing?.nextRenewalAmountCents ?? subscription?.price?.amountCents;
+  const currentCurrency = branchPricing?.currency ?? subscription?.price?.currency;
 
   return (
     <OperationsPage>
@@ -282,10 +289,10 @@ export function BillingWorkspace() {
                   {copy.price}
                 </dt>
                 <dd className="mt-2 font-semibold text-[var(--op-text)]">
-                  {subscription?.price
+                  {currentAmountCents !== undefined && currentCurrency
                     ? `${formatBillingMoney(
-                        subscription.price.amountCents,
-                        subscription.price.currency,
+                        currentAmountCents,
+                        currentCurrency,
                         copy.dateLocale,
                       )} / ${copy.perMonth}`
                     : copy.freeTrial}
@@ -352,45 +359,60 @@ export function BillingWorkspace() {
               {copy.availablePlan}
             </h2>
             <div className="mt-4 space-y-3">
-              {plans.map((plan) => (
-                <article
-                  key={plan.id}
-                  className="rounded-xl border border-[var(--op-border)] bg-[var(--op-surface-soft)] p-4"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <h3 className="font-semibold text-[var(--op-text)]">
-                        {plan.name}
-                      </h3>
-                      {plan.description ? (
-                        <p className="mt-1 text-sm text-[var(--op-text-muted)]">
-                          {plan.description}
-                        </p>
-                      ) : null}
-                    </div>
-                    <p className="shrink-0 font-semibold text-[var(--op-text)]">
-                      {plan.price
-                        ? formatBillingMoney(
-                            plan.price.amountCents,
-                            plan.price.currency,
-                            copy.dateLocale,
-                          )
-                        : "—"}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    className="op-button op-button-primary mt-4 w-full"
-                    disabled={Boolean(action) || !plan.price}
-                    onClick={() => void beginCheckout(plan.id)}
+              {plans.map((plan) => {
+                const usesBranchPricing =
+                  branchPricing !== null &&
+                  plan.price !== null &&
+                  plan.price.amountCents === branchPricing.basePriceCents &&
+                  plan.price.currency.toUpperCase() ===
+                    branchPricing.currency.toUpperCase();
+                const displayedAmount = usesBranchPricing
+                  ? branchPricing.nextRenewalAmountCents
+                  : plan.price?.amountCents;
+                const displayedCurrency = usesBranchPricing
+                  ? branchPricing.currency
+                  : plan.price?.currency;
+
+                return (
+                  <article
+                    key={plan.id}
+                    className="rounded-xl border border-[var(--op-border)] bg-[var(--op-surface-soft)] p-4"
                   >
-                    {action ||
-                      (access?.effectiveStatus === "TRIALING"
-                        ? copy.subscribeNow
-                        : copy.renewPlan)}
-                  </button>
-                </article>
-              ))}
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <h3 className="font-semibold text-[var(--op-text)]">
+                          {plan.name}
+                        </h3>
+                        {plan.description ? (
+                          <p className="mt-1 text-sm text-[var(--op-text-muted)]">
+                            {plan.description}
+                          </p>
+                        ) : null}
+                      </div>
+                      <p className="shrink-0 font-semibold text-[var(--op-text)]">
+                        {displayedAmount !== undefined && displayedCurrency
+                          ? formatBillingMoney(
+                              displayedAmount,
+                              displayedCurrency,
+                              copy.dateLocale,
+                            )
+                          : "—"}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      className="op-button op-button-primary mt-4 w-full"
+                      disabled={Boolean(action) || !plan.price}
+                      onClick={() => void beginCheckout(plan.id)}
+                    >
+                      {action ||
+                        (access?.effectiveStatus === "TRIALING"
+                          ? copy.subscribeNow
+                          : copy.renewPlan)}
+                    </button>
+                  </article>
+                );
+              })}
             </div>
           </section>
         </div>

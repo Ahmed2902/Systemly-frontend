@@ -32,10 +32,6 @@ export type SettingsWorkspace = {
 
 export type BusinessSettingsInput = {
   name: string;
-  phone: string;
-  address: string | null;
-  city: string | null;
-  timezone: string;
   language: "en" | "ar";
 };
 

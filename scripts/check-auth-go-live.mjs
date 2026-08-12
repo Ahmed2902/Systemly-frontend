@@ -82,7 +82,7 @@ assert(
   `${authApiPath} must preserve nested auth error codes such as EMAIL_NOT_VERIFIED and CSRF_INVALID`,
 );
 
-// Scheduling timezone is owned by the business on backend main, never the browser.
+// Scheduling timezone is owned by the business/selected branch on the backend, never the browser.
 for (const [file, source] of [
   [bookingApiPath, bookingApi],
   [manualBookingApiPath, manualBookingApi],
@@ -111,25 +111,40 @@ assert(
   `${wizardApiPath} must not use post-onboarding /photos routes before a business exists`,
 );
 
-// Backend main does not persist these future website controls yet. Do not present or submit them.
-for (const unsupportedField of ["heroDescription:", "heroCardText:", "showServicePrices:"]) {
+// Current backend main persists heroDescription and heroCardText. Keep the
+// frontend payload/preview controls aligned with that supported contract.
+for (const supportedField of ["heroDescription:", "heroCardText:"]) {
   assert(
-    !wizardApi.includes(unsupportedField),
-    `${wizardApiPath} must not submit unsupported field ${unsupportedField}`,
+    wizardApi.includes(supportedField),
+    `${wizardApiPath} must submit supported field ${supportedField}`,
   );
 }
 assert(
-  wizardPreview.includes('heroDescription: ""') &&
-    wizardPreview.includes('heroCardText: ""') &&
-    wizardPreview.includes("showServicePrices: true"),
-  `${wizardPreviewPath} must mirror the defaults returned by the current backend`,
+  wizardPreview.includes("heroDescription: state.heroDescription") &&
+    wizardPreview.includes("heroCardText: state.heroCardText"),
+  `${wizardPreviewPath} must preview the persisted hero copy`,
 );
 assert(
-  customize.includes('className="onboarding-field hidden">\n              <label>{text("Hero introduction")}</label>') &&
-    customize.includes('className="onboarding-field hidden">\n              <label>{text("Hero image highlight")}</label>') &&
-    customize.includes('className="hidden items-center justify-between') &&
+  customize.includes('text("Hero introduction")') &&
+    customize.includes('text("Hero image highlight")') &&
+    !customize.includes('className="onboarding-field hidden">\n              <label>{text("Hero introduction")}</label>') &&
+    !customize.includes('className="onboarding-field hidden">\n              <label>{text("Hero image highlight")}</label>'),
+  `${customizePath} must expose website controls that backend main can persist`,
+);
+
+// showServicePrices is still preview-only and is not persisted by backend main.
+assert(
+  !wizardApi.includes("showServicePrices:"),
+  `${wizardApiPath} must not submit unsupported field showServicePrices:`,
+);
+assert(
+  wizardPreview.includes("showServicePrices: true"),
+  `${wizardPreviewPath} must retain the public-site default for service prices`,
+);
+assert(
+  customize.includes('className="hidden items-center justify-between') &&
     customize.includes('text("Show service prices")'),
-  `${customizePath} must hide website controls that backend main cannot persist`,
+  `${customizePath} must keep the unsupported service-price control hidden`,
 );
 
 // Onboarding must respect backend service/role validation independent of UI language.

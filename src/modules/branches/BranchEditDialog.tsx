@@ -21,7 +21,6 @@ export function BranchEditDialog({
   const [phone, setPhone] = useState(branch.phone ?? "");
   const [city, setCity] = useState(branch.city ?? "");
   const [address, setAddress] = useState(branch.address ?? "");
-  const [timezone, setTimezone] = useState(branch.timezone);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -39,7 +38,6 @@ export function BranchEditDialog({
         phone: phone.trim() || null,
         city: city.trim() || null,
         address: address.trim() || null,
-        timezone: timezone.trim(),
       });
       onSaved(updated);
       onClose();
@@ -84,11 +82,6 @@ export function BranchEditDialog({
               onChange={setAddress}
             />
           </div>
-          <Field
-            label={text("Branch timezone")}
-            value={timezone}
-            onChange={setTimezone}
-          />
         </div>
         {error ? (
           <div className="mx-5 mb-4 rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-600">

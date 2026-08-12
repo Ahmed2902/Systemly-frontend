@@ -54,6 +54,10 @@ export function OperationsShell({ children }: { children: ReactNode }) {
       : text("Interactive salon demo");
   const demoHubHref = `/demo/${runtime.vertical}`;
   const publicWebsiteHref = `/demo/websites/${runtime.vertical}`;
+  const showOperationalBranchSelector =
+    canSelectBranch &&
+    !pathname.startsWith("/operations/dashboard") &&
+    pathname !== "/operations/settings/branches/new";
 
   return (
     <div className="op-shell">
@@ -134,10 +138,13 @@ export function OperationsShell({ children }: { children: ReactNode }) {
         ) : (
           <>
             <SubscriptionAccessNotice access={access} />
-            {canSelectBranch ? (
+            {showOperationalBranchSelector ? (
               <div className="flex flex-none items-center justify-end gap-2 border-b border-black/5 bg-[var(--op-surface,#fff)] px-4 py-2 dark:border-white/10 sm:px-6">
                 <MapPin size={14} aria-hidden="true" className="opacity-60" />
-                <label htmlFor="operational-branch" className="text-xs font-medium opacity-70">
+                <label
+                  htmlFor="operational-branch"
+                  className="text-xs font-medium opacity-70"
+                >
                   {text("Location")}
                 </label>
                 <select
@@ -158,7 +165,10 @@ export function OperationsShell({ children }: { children: ReactNode }) {
           </>
         )}
 
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+        <div
+          key={operationalBranchId ?? "unscoped"}
+          className="min-h-0 flex-1 overflow-y-auto overscroll-contain"
+        >
           {children}
         </div>
       </main>

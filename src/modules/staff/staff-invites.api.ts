@@ -2,6 +2,7 @@ import { api } from "@/shared/lib/api";
 
 export type StaffInviteResult = {
   id: string;
+  branch?: { id: string; name: string };
   expiresAt: string;
   acceptUrl: string;
 };
@@ -10,6 +11,7 @@ export type StaffInviteResolution = {
   email: string;
   accountExists: boolean;
   businessName: string;
+  branch?: { id: string; name: string };
   expiresAt: string;
 };
 
@@ -17,13 +19,14 @@ export type AcceptedStaffInvite = {
   user: {
     id: string;
     businessId: string | null;
+    branchId?: string | null;
     role: string;
   };
   accessToken: string;
 };
 
 export function createStaffInvite(
-  input: { email: string; expiresInDays?: number },
+  input: { email: string; branchId: string; expiresInDays?: number },
   accessToken: string,
 ) {
   return api<StaffInviteResult>("/staff/invites", accessToken, {

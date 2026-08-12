@@ -5,6 +5,7 @@ import { naturalArabicFinalPairs } from "./natural-arabic-final";
 import { naturalArabicDemoPairs } from "./natural-arabic-demo";
 import { naturalArabicAnalyticsPeriodPairs } from "./natural-arabic-analytics-periods";
 import { naturalArabicGuidePairs } from "./natural-arabic-guide";
+import { naturalArabicBranchPairs } from "./natural-arabic-branches";
 import { getPlatformLiteralMap } from "./platform-copy";
 
 export type TranslationValues = Record<string, string | number>;
@@ -16,6 +17,7 @@ const naturalPairs = [
   ...naturalArabicDemoPairs,
   ...naturalArabicAnalyticsPeriodPairs,
   ...naturalArabicGuidePairs,
+  ...naturalArabicBranchPairs,
 ] as const;
 
 // These are persisted backend enum values, not user-facing copy. Keeping them
