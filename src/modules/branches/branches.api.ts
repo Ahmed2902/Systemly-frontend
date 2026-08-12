@@ -34,6 +34,45 @@ type BranchMutationInput = {
   timezone?: string;
 };
 
+export type BranchSetupInput = {
+  name: string;
+  slug: string;
+  phone?: string | null;
+  address?: string | null;
+  city?: string | null;
+  timezone: "Africa/Cairo";
+  receptionistEmail?: string;
+  services: Array<{
+    clientId: string;
+    name: string;
+    category?: string;
+    description?: string;
+    durationMin: number;
+    priceEgp: number;
+  }>;
+  staff: Array<{
+    clientId: string;
+    name: string;
+    jobTitle?: string;
+    serviceClientIds: string[];
+    availability: Array<{
+      dayOfWeek: number;
+      startTime: string;
+      endTime: string;
+    }>;
+  }>;
+};
+
+export type BranchSetupResult = {
+  branch: BranchRecord;
+  invitation: {
+    id: string;
+    expiresAt: string;
+    acceptUrl: string;
+    delivery: "queued" | "not_queued";
+  } | null;
+};
+
 export function listBranches(
   token: string | null,
   includeInactive = false,
@@ -48,6 +87,13 @@ export function createBranch(
     Omit<BranchMutationInput, "name" | "slug" | "timezone">,
 ) {
   return api<BranchRecord>("/branches", token, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export function setupBranch(token: string | null, input: BranchSetupInput) {
+  return api<BranchSetupResult>("/branches/setup", token, {
     method: "POST",
     body: JSON.stringify(input),
   });
