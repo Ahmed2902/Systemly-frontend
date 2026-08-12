@@ -70,6 +70,7 @@ export const naturalArabicBranchPairs: ReadonlyArray<readonly [string, string]> 
   ["Only the business owner can add a branch.", "يمكن لمالك النشاط فقط إضافة فرع."],
   ["Couldn't create this branch.", "تعذر إنشاء هذا الفرع."],
   ["The branch was created, but some setup could not be completed. Open the branch from Operations to finish its services, team, or availability.", "تم إنشاء الفرع، لكن تعذر إكمال جزء من الإعداد. افتح الفرع من إدارة العمل لإكمال الخدمات أو الفريق أو مواعيد التوفر."],
+  ["Branch created, but the receptionist invitation email could not be queued. Open Staff and resend the receptionist invitation.", "تم إنشاء الفرع، لكن تعذر إرسال دعوة موظف الاستقبال. افتح قسم فريق العمل وأعد إرسال الدعوة."],
   ["Receptionist accounts are assigned to one branch and cannot switch locations.", "حساب موظف الاستقبال مرتبط بفرع واحد ولا يمكنه التبديل بين الفروع."],
   ["Choose a branch before creating the invitation.", "اختر الفرع قبل إنشاء الدعوة."],
   ["Assigned branch", "الفرع المخصص"],
