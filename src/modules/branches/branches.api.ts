@@ -1,5 +1,7 @@
 import { api } from "@/shared/lib/api";
 
+const BRANCH_INVITE_WARNING_KEY = "systemly:branch-invite-not-queued";
+
 export type BranchRecord = {
   id: string;
   businessId: string;
@@ -73,6 +75,14 @@ export type BranchSetupResult = {
   } | null;
 };
 
+export function consumeBranchInviteWarning() {
+  if (typeof window === "undefined") return false;
+  const shouldWarn =
+    window.sessionStorage.getItem(BRANCH_INVITE_WARNING_KEY) === "true";
+  window.sessionStorage.removeItem(BRANCH_INVITE_WARNING_KEY);
+  return shouldWarn;
+}
+
 export function listBranches(
   token: string | null,
   includeInactive = false,
@@ -81,11 +91,20 @@ export function listBranches(
   return api<BranchRecord[]>(`/branches${query}`, token);
 }
 
-export function setupBranch(token: string | null, input: BranchSetupInput) {
-  return api<BranchSetupResult>("/branches/setup", token, {
+export async function setupBranch(token: string | null, input: BranchSetupInput) {
+  const result = await api<BranchSetupResult>("/branches/setup", token, {
     method: "POST",
     body: JSON.stringify(input),
   });
+
+  if (
+    typeof window !== "undefined" &&
+    result.invitation?.delivery === "not_queued"
+  ) {
+    window.sessionStorage.setItem(BRANCH_INVITE_WARNING_KEY, "true");
+  }
+
+  return result;
 }
 
 export function updateBranch(
