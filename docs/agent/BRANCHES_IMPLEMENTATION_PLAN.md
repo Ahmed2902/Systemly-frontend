@@ -16,17 +16,21 @@
 
 There is one website per Business. Branding/content remain shared. Branch selection controls location/contact, services, team and booking availability. For multiple active branches, use a stable branch slug in the URL query (`?branch=<slug>`) so selection is shareable. One branch auto-selects.
 
+## Public booking
+
+For a multi-branch business, booking starts with branch/location selection before service, staff and time selection. A branch already selected on the public website may be carried into booking through the stable branch query. One-branch businesses skip the extra selection step.
+
 ## Owner operations
 
-Calendar, Appointments, Staff, Services, Availability and invoice operations use exactly one active operational branch. Owners can change it. Receptionists are fixed to their assigned branch and do not see the selector. Customers remain business-wide.
+Calendar, Appointments, Staff, Services, Availability and invoice operations use exactly one active operational branch. Owners can change it. Changing the operational branch remounts the operational page so branch-scoped screens immediately reload from the newly selected location. Receptionists are fixed to their assigned branch and do not see the selector. Customers remain business-wide.
 
 ## Analytics
 
-Dashboard scope is independent from operations and supports `All branches` or one branch. Changing dashboard scope must not change Calendar/Appointments/Staff/Services scope.
+Dashboard scope is independent from operations and supports `All branches` or one branch. Changing dashboard scope must not change Calendar/Appointments/Staff/Services scope. The global operational branch selector is hidden on Dashboard so analytics does not present two competing branch selectors.
 
 ## Add Branch
 
-Wizard steps: location/contact -> services -> team/receptionist -> availability -> review/create. Do not ask for business identity or website branding again. The first branch is included in Core; each additional active branch adds 300 EGP/month on the next renewal, with no V1 proration.
+Add Branch is a dedicated onboarding-style page rather than a modal. Steps: location/contact -> services & team/receptionist -> per-staff availability -> review/create. Do not ask for business identity or website branding again. Availability is configured independently for each provider; never copy one branch-wide schedule to every staff member. The first branch is included in Core; each additional active branch adds 350 EGP/month on the next renewal, with no V1 proration.
 
 ## PR sequence
 
@@ -34,7 +38,7 @@ Wizard steps: location/contact -> services -> team/receptionist -> availability 
 2. Branch-aware public booking.
 3. Owner operational branch selector.
 4. Dashboard branch analytics scope.
-5. Add Branch wizard, pricing UI and final activation/cleanup.
+5. Add Branch page, pricing UI and final activation/cleanup.
 
 ## Engineering constraints
 
