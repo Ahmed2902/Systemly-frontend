@@ -19,6 +19,7 @@ import {
 } from "@/modules/operations/branch-scope";
 import { BranchEditDialog } from "./BranchEditDialog";
 import {
+  consumeBranchInviteWarning,
   deactivateBranch,
   getBranchPricing,
   listBranches,
@@ -40,6 +41,7 @@ export function BranchManagementScreen() {
   const [loadingData, setLoadingData] = useState(true);
   const [editingBranch, setEditingBranch] = useState<BranchRecord | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [inviteWarning, setInviteWarning] = useState(false);
 
   const isOwner =
     user?.role === "BusinessAdmin" || user?.role === "SuperAdmin";
@@ -59,6 +61,10 @@ export function BranchManagementScreen() {
       setPricing(null);
     }
   }
+
+  useEffect(() => {
+    setInviteWarning(consumeBranchInviteWarning());
+  }, []);
 
   useEffect(() => {
     if (loading) return;
@@ -206,6 +212,14 @@ export function BranchManagementScreen() {
               )}
             </div>
           </div>
+        </div>
+      ) : null}
+
+      {inviteWarning ? (
+        <div className="rounded-xl border border-amber-300/60 bg-amber-500/10 px-4 py-3 text-sm text-amber-800 dark:text-amber-200">
+          {text(
+            "Branch created, but the receptionist invitation email could not be queued. Open Staff and resend the receptionist invitation.",
+          )}
         </div>
       ) : null}
 
