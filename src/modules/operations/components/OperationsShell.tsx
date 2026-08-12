@@ -56,7 +56,7 @@ export function OperationsShell({ children }: { children: ReactNode }) {
   const publicWebsiteHref = `/demo/websites/${runtime.vertical}`;
   const showOperationalBranchSelector =
     canSelectBranch &&
-    pathname !== "/operations/dashboard" &&
+    !pathname.startsWith("/operations/dashboard") &&
     pathname !== "/operations/settings/branches/new";
 
   return (
